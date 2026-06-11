@@ -1,0 +1,163 @@
+/* ═══════════════════════════════════════════════════════════
+   RTL & FARSI LANGUAGE STYLES
+   Handles Persian font, direction, and layout adjustments
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── FARSI FONT IMPORT ──────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+
+/* ── FARSI MODE ─────────────────────────────────────────── */
+[lang="fa"], .lang-fa {
+  font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+}
+
+[lang="fa"] h1,
+[lang="fa"] h2,
+[lang="fa"] h3,
+[lang="fa"] h4,
+.lang-fa h1,
+.lang-fa h2,
+.lang-fa h3,
+.lang-fa h4 {
+  font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+[lang="fa"] .name-prefix,
+[lang="fa"] .name-main,
+.lang-fa .name-prefix,
+.lang-fa .name-main {
+  font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+  letter-spacing: 0;
+}
+
+[lang="fa"] .name-main,
+.lang-fa .name-main {
+  font-size: clamp(2.2rem, 5.5vw, 4.5rem);
+}
+
+[lang="fa"] .logo-mark,
+.lang-fa .logo-mark {
+  /* Keep AHG monogram in English always */
+  font-family: 'Cinzel', serif;
+}
+
+[lang="fa"] .logo-ring,
+.lang-fa .logo-ring {
+  font-family: 'Cinzel', serif;
+}
+
+/* ── RTL LAYOUT ADJUSTMENTS ─────────────────────────────── */
+[dir="rtl"] .menu-close {
+  left: auto;
+  right: 1.5rem;
+}
+
+[dir="rtl"] .side-menu {
+  right: auto;
+  left: -420px;
+  border-left: none;
+  border-right: 1px solid var(--navy-border);
+}
+
+[dir="rtl"] .side-menu.open {
+  left: 0;
+}
+
+[dir="rtl"] .side-menu-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+[dir="rtl"] .menu-links a::before {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .eyebrow-line:first-child {
+  background: linear-gradient(270deg, transparent, var(--gold-dim));
+}
+
+[dir="rtl"] .eyebrow-line:last-child {
+  background: linear-gradient(270deg, var(--gold-dim), transparent);
+}
+
+[dir="rtl"] .platform-btn:hover {
+  transform: translateX(4px);
+}
+
+[dir="rtl"] .btn-text-link {
+  flex-direction: row-reverse;
+}
+
+/* ── LANGUAGE SWITCHER VISIBILITY ───────────────────────── */
+/* In FA mode: show EN button, hide FA button */
+.lang-fa [data-show-when="fa"] { display: none; }
+.lang-fa [data-show-when="en"] { display: block; }
+
+/* In EN mode: show FA button, hide EN button */
+.lang-en [data-show-when="en"] { display: none; }
+.lang-en [data-show-when="fa"] { display: block; }
+
+/* ── ENGLISH MODE — LTR RESET ───────────────────────────── */
+.lang-en {
+  font-family: 'Inter', sans-serif;
+  direction: ltr;
+}
+
+.lang-en h1,
+.lang-en h2,
+.lang-en h3,
+.lang-en h4 {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  line-height: 1.2;
+}
+
+.lang-en .name-main {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 6vw, 5rem);
+}
+
+.lang-en [dir="rtl"] {
+  direction: ltr;
+}
+
+/* ── FARSI NUMBER STYLE ──────────────────────────────────── */
+.lang-fa .stat-num {
+  font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+  font-size: 2.4rem;
+}
+
+/* ── SECTION LABEL — RTL ────────────────────────────────── */
+[dir="rtl"] .section-header { text-align: right; }
+[dir="rtl"] .services-cta,
+[dir="rtl"] .hero-content { text-align: center; }
+
+/* ── FOOTER RTL ─────────────────────────────────────────── */
+[dir="rtl"] .footer-links ul { align-items: flex-start; }
+
+/* ── SPECIALTIES STRIP RTL ──────────────────────────────── */
+.lang-fa .specialty-tag {
+  letter-spacing: 0;
+  font-size: 0.82rem;
+}
+
+/* ── BOOKING PLATFORM RTL ───────────────────────────────── */
+[dir="rtl"] .platform-badge {
+  font-family: 'Vazirmatn', sans-serif;
+  letter-spacing: 0;
+}
+
+/* ── HERO TAGLINE FARSI ──────────────────────────────────── */
+.lang-fa .hero-tagline {
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+/* ── EYEBROW TEXT FARSI ──────────────────────────────────── */
+.lang-fa .eyebrow-text,
+.lang-fa .section-label {
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+}
