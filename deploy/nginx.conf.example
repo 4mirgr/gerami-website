@@ -1,0 +1,80 @@
+# TEMPLATE ONLY. Do not load until placeholders are replaced and nginx -t passes.
+# Include in Nginx's http context (e.g. a sites-enabled file), not inside a server.
+# Apps MUST support /intmed/ and /aus/ respectively. Prefixes are preserved.
+# Bind the application processes to loopback; do not expose their ports publicly.
+
+map $http_upgrade $gerami_connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+upstream gerami_intmed {
+    server 127.0.0.1:__INTMED_PORT__;
+}
+
+upstream gerami_aus {
+    server 127.0.0.1:__AUS_PORT__;
+}
+
+server {
+    listen 80;
+    server_name drgerami-md.ir;
+    return 308 https://drgerami-md.ir$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name drgerami-md.ir;
+
+    ssl_certificate __FULLCHAIN_PEM_PATH__;
+    ssl_certificate_key __PRIVATE_KEY_PEM_PATH__;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    # Publish only index.html, pages/, css/, js/ and favicon.svg here.
+    # Do not use a Git checkout containing .git or private files as the web root.
+    root /var/www/gerami-website;
+    index index.html;
+
+    location = /intmed {
+        return 308 /intmed/$is_args$args;
+    }
+
+    location = /aus {
+        return 308 /aus/$is_args$args;
+    }
+
+    location /intmed/ {
+        # No trailing slash: pass /intmed/... to the app unchanged.
+        proxy_pass http://gerami_intmed;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Prefix /intmed;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $gerami_connection_upgrade;
+        proxy_read_timeout 300s;
+    }
+
+    location /aus/ {
+        proxy_pass http://gerami_aus;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Prefix /aus;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $gerami_connection_upgrade;
+        proxy_read_timeout 300s;
+    }
+
+    location ~ /\.(?!well-known(?:/|$)) {
+        deny all;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}

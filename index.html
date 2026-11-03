@@ -1,296 +1,126 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-lang="fa">
+<html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dr. Amir Houshang Gerami | دکتر امیرهوشنگ گرامی</title>
-  <meta name="description" content="Internal Medicine Physician | Shahid Beheshti Medical University | دکتر امیرهوشنگ گرامی، متخصص طب داخلی" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700;900&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/rtl.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#fafbf7">
+  <title data-fa="پزشکی، آموزش و مسیر من | دکتر امیرهوشنگ گرامی" data-en="Medicine, education &amp; my journey | Dr. Amir Houshang Gerami">پزشکی، آموزش و مسیر من | دکتر امیرهوشنگ گرامی</title>
+  <meta name="description" content="وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای، آموزش پزشکی و آشنایی با پروژه‌های intmed و AUS." data-fa="وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای، آموزش پزشکی و آشنایی با پروژه‌های intmed و AUS." data-en="The personal website of Dr. Amir Houshang Gerami: professional profile, medical education, and the intmed and AUS projects.">
+  <link rel="canonical" href="https://drgerami-md.ir/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/links.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
-<body class="lang-fa">
-
-  <!-- ─── CURSOR GLOW ─── -->
-  <div class="cursor-glow" id="cursorGlow"></div>
-
-  <!-- ─── SIDE MENU ─── -->
-  <div class="side-menu-overlay" id="menuOverlay"></div>
-  <nav class="side-menu" id="sideMenu" aria-label="Main navigation">
-    <button class="menu-close" id="menuClose" aria-label="Close menu">✕</button>
-
-    <div class="menu-logo">
-      <div class="logo-mark">AHG</div>
-      <div class="logo-sub" data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</div>
-    </div>
-
-    <ul class="menu-links">
-      <li><a href="index.html" class="active" data-fa="خانه" data-en="Home">خانه</a></li>
-      <li><a href="pages/about.html" data-fa="درباره من" data-en="About Me">درباره من</a></li>
-      <li><a href="pages/services.html" data-fa="خدمات درمانی" data-en="Medical Services">خدمات درمانی</a></li>
-      <li><a href="pages/appointments.html" data-fa="رزرو نوبت" data-en="Appointments">رزرو نوبت</a></li>
-      <li><a href="pages/blog.html" data-fa="اخبار و مقالات" data-en="Medical Tips">اخبار و مقالات</a></li>
-      <li><a href="pages/beyond.html" data-fa="آن سوی مطب" data-en="Beyond the Clinic">آن سوی مطب</a></li>
-      <li><a href="pages/contact.html" data-fa="تماس" data-en="Contact">تماس</a></li>
-    </ul>
-
-    <div class="menu-footer">
-      <div class="menu-social">
-        <a href="#" aria-label="Instagram">IG</a>
-        <a href="#" aria-label="Telegram">TG</a>
-        <a href="#" aria-label="YouTube">YT</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ─── HEADER ─── -->
-  <header class="site-header" id="siteHeader">
-    <div class="header-inner">
-      <a href="index.html" class="header-logo">
-        <span class="logo-ring">AHG</span>
+<body>
+  <a href="#main" class="skip-link" ><span data-fa="رفتن به محتوای اصلی" data-en="Skip to content">رفتن به محتوای اصلی</span></a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">AG</span>
+        <span><span class="brand-name" data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</span><span class="brand-caption" data-fa="پزشکی · آموزش · ارتباط" data-en="Medicine · Education · Connection">پزشکی · آموزش · ارتباط</span></span>
       </a>
-      <div class="header-actions">
-        <button class="lang-toggle" id="langToggle" aria-label="Toggle language">
-          <span class="lang-option" data-show-when="fa">EN</span>
-          <span class="lang-option" data-show-when="en">فا</span>
-        </button>
-        <button class="menu-trigger" id="menuTrigger" aria-label="Open menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
+      <nav class="desktop-nav" aria-label="منوی اصلی" data-label-fa="منوی اصلی" data-label-en="Main navigation"><a href="index.html" aria-current="page"><span data-fa="خانه" data-en="Home">خانه</span></a>
+<a href="pages/about.html"><span data-fa="دربارهٔ من" data-en="About">دربارهٔ من</span></a>
+<a href="pages/services.html"><span data-fa="حوزه‌های فعالیت" data-en="Focus areas">حوزه‌های فعالیت</span></a>
+<a href="pages/blog.html"><span data-fa="آموزش" data-en="Education">آموزش</span></a>
+<a href="pages/projects.html"><span data-fa="پروژه‌ها" data-en="Projects">پروژه‌ها</span></a>
+<a href="pages/contact.html"><span data-fa="ارتباط" data-en="Contact">ارتباط</span></a></nav>
+      <details class="mobile-menu"><summary><span data-fa="فهرست" data-en="Menu">فهرست</span></summary><nav aria-label="منوی موبایل" data-label-fa="منوی موبایل" data-label-en="Mobile navigation"><a href="index.html" aria-current="page"><span data-fa="خانه" data-en="Home">خانه</span></a>
+<a href="pages/about.html"><span data-fa="دربارهٔ من" data-en="About">دربارهٔ من</span></a>
+<a href="pages/services.html"><span data-fa="حوزه‌های فعالیت" data-en="Focus areas">حوزه‌های فعالیت</span></a>
+<a href="pages/blog.html"><span data-fa="آموزش" data-en="Education">آموزش</span></a>
+<a href="pages/projects.html"><span data-fa="پروژه‌ها" data-en="Projects">پروژه‌ها</span></a>
+<a href="pages/contact.html"><span data-fa="ارتباط" data-en="Contact">ارتباط</span></a></nav></details>
+      <button type="button" class="language-button" data-language-toggle aria-label="Switch to English" hidden>EN</button>
     </div>
   </header>
+  <main id="main" tabindex="-1">
 
-  <!-- ─── HERO ─── -->
-  <section class="hero" id="hero">
-    <div class="hero-bg">
-      <div class="hero-gradient"></div>
-      <div class="hero-particles" id="heroParticles"></div>
+    <section class="container hero">
+      <div class="animate-in">
+        <div class="eyebrow" data-fa="وب‌سایت شخصی و حرفه‌ای" data-en="A personal &amp; professional space">وب‌سایت شخصی و حرفه‌ای</div>
+        <h1 data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</h1>
+        <p class="hero-subtitle" data-fa="پزشکی، با نگاهی انسانی." data-en="Medicine, with a human perspective.">پزشکی، با نگاهی انسانی.</p>
+        <p class="lead" data-fa="اینجا از مسیر حرفه‌ای من می‌خوانید، به مطالب آموزشی دسترسی پیدا می‌کنید و با پروژه‌هایی که روی آن‌ها کار می‌کنم آشنا می‌شوید." data-en="Explore my professional journey, discover educational writing, and get to know the projects I work on.">اینجا از مسیر حرفه‌ای من می‌خوانید، به مطالب آموزشی دسترسی پیدا می‌کنید و با پروژه‌هایی که روی آن‌ها کار می‌کنم آشنا می‌شوید.</p>
+        <div class="actions"><a href="pages/about.html" class="button button-primary" ><span data-fa="آشنایی با من" data-en="Get to know me">آشنایی با من</span></a><a href="pages/blog.html" class="button button-secondary" ><span data-fa="مطالب آموزشی" data-en="Explore education">مطالب آموزشی</span></a></div>
+        <p class="hero-note" data-fa="برای بیماران، علاقه‌مندان به سلامت و همکاران پزشکی" data-en="For patients, people interested in health, and medical colleagues">برای بیماران، علاقه‌مندان به سلامت و همکاران پزشکی</p>
+      </div>
+      <div class="identity-art" aria-hidden="true">
+        <span class="identity-monogram" dir="ltr">AG</span>
+        <span class="identity-label" dir="ltr">MEDICINE &amp; HUMAN CONNECTION</span>
+        <svg class="identity-line" viewBox="0 0 300 45" fill="none"><path d="M0 24h65l12-9 13 17 19-30 23 40 14-24 10 6h144" stroke="currentColor" stroke-width="1.4"/></svg>
+        <span class="identity-domain" dir="ltr">drgerami-md.ir</span>
+      </div>
+    </section>
+    <div class="container intro-strip">
+      <span><i class="dot" aria-hidden="true"></i><span data-fa="معرفی و سوابق حرفه‌ای" data-en="Professional profile">معرفی و سوابق حرفه‌ای</span></span>
+      <span><i class="dot" aria-hidden="true"></i><span data-fa="آموزش قابل‌فهم" data-en="Accessible education">آموزش قابل‌فهم</span></span>
+      <span><i class="dot" aria-hidden="true"></i><span data-fa="پروژه‌های مستقل" data-en="Independent projects">پروژه‌های مستقل</span></span>
     </div>
-
-    <div class="hero-content">
-      <div class="hero-eyebrow">
-        <span class="eyebrow-line"></span>
-        <span class="eyebrow-text" data-fa="طب داخلی · دانشگاه شهید بهشتی" data-en="Internal Medicine · Shahid Beheshti University">طب داخلی · دانشگاه شهید بهشتی</span>
-        <span class="eyebrow-line"></span>
-      </div>
-
-      <h1 class="hero-name">
-        <span class="name-prefix" data-fa="دکتر" data-en="Dr.">دکتر</span>
-        <span class="name-main" data-fa="امیرهوشنگ گرامی" data-en="Amir Houshang Gerami">امیرهوشنگ گرامی</span>
-      </h1>
-
-      <p class="hero-tagline" data-fa="جایی که دانش با دلسوزی پیوند می‌خورد" data-en="Where Precision Meets Compassion">جایی که دانش با دلسوزی پیوند می‌خورد</p>
-
-      <div class="hero-cta">
-        <a href="pages/appointments.html" class="btn-primary" data-fa="رزرو نوبت" data-en="Book Appointment">رزرو نوبت</a>
-        <a href="pages/about.html" class="btn-ghost" data-fa="بیشتر بدانید" data-en="Learn More">بیشتر بدانید</a>
-      </div>
+    <section class="container section" id="projects">
+  <div class="project-entry">
+    <div class="app-buttons">
+      <a class="button button-primary" href="https://drgerami-md.ir/intmed/" data-app-entry="intmed" aria-describedby="project-entry-status">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h7a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3zM21 4h-5a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h4z"/></svg>
+        <span data-fa="ورود به" data-en="Open">ورود به</span><bdi>intmed</bdi>
+      </a>
+      <a class="button button-secondary" href="https://drgerami-md.ir/aus/" data-app-entry="aus" aria-describedby="project-entry-status">
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5z"/></svg>
+        <span data-fa="ورود به" data-en="Open">ورود به</span><bdi>AUS 🇦🇺 Arash &amp; Amir</bdi>
+      </a>
     </div>
-
-    <div class="hero-scroll-hint">
-      <div class="scroll-dot"></div>
-    </div>
-  </section>
-
-  <!-- ─── SPECIALTIES STRIP ─── -->
-  <section class="specialties-strip">
-    <div class="strip-inner">
-      <div class="specialty-tag" data-fa="نفرولوژی" data-en="Nephrology">نفرولوژی</div>
-      <div class="strip-divider">·</div>
-      <div class="specialty-tag" data-fa="هماتولوژی" data-en="Hematology">هماتولوژی</div>
-      <div class="strip-divider">·</div>
-      <div class="specialty-tag" data-fa="روماتولوژی" data-en="Rheumatology">روماتولوژی</div>
-      <div class="strip-divider">·</div>
-      <div class="specialty-tag" data-fa="گوارش" data-en="Gastroenterology">گوارش</div>
-      <div class="strip-divider">·</div>
-      <div class="specialty-tag" data-fa="غدد و متابولیسم" data-en="Endocrinology">غدد و متابولیسم</div>
-      <div class="strip-divider">·</div>
-      <div class="specialty-tag" data-fa="ریه‌پزشکی" data-en="Pulmonology">ریه‌پزشکی</div>
-      <div class="strip-divider">·</div>
-      <div class="specialty-tag" data-fa="قلب و عروق" data-en="Cardiology">قلب و عروق</div>
-    </div>
-  </section>
-
-  <!-- ─── ABOUT SNAPSHOT ─── -->
-  <section class="about-snapshot">
-    <div class="container">
-      <div class="snapshot-grid">
-        <div class="snapshot-text">
-          <span class="section-label" data-fa="درباره من" data-en="About Me">درباره من</span>
-          <h2 data-fa="پزشک طب داخلی، متعهد به مراقبت جامع" data-en="Internal Medicine Physician, Committed to Comprehensive Care">پزشک طب داخلی، متعهد به مراقبت جامع</h2>
-          <p data-fa="دستیار طب داخلی در دانشگاه علوم پزشکی شهید بهشتی، با تجربه بالینی در بیمارستان‌های تخصصی تهران. رویکرد درمانی من بر پایه شواهد علمی، توجه به فرد و ارتباط صادقانه با بیمار است." data-en="Internal Medicine Resident at Shahid Beheshti University of Medical Sciences, with clinical experience across Tehran's specialized hospitals. My approach is built on evidence-based medicine, patient individuality, and honest communication.">دستیار طب داخلی در دانشگاه علوم پزشکی شهید بهشتی، با تجربه بالینی در بیمارستان‌های تخصصی تهران. رویکرد درمانی من بر پایه شواهد علمی، توجه به فرد و ارتباط صادقانه با بیمار است.</p>
-          <a href="pages/about.html" class="btn-text-link" data-fa="مشاهده بیوگرافی کامل ←" data-en="View Full Biography →">مشاهده بیوگرافی کامل ←</a>
+    <p class="link-status" id="project-entry-status" data-fa="این نشانی‌ها برای دسترسی از دامنهٔ شخصی در نظر گرفته شده‌اند؛ اتصال سرویس‌ها به آن‌ها هنوز تکمیل نشده است." data-en="These addresses are reserved for access through this domain; the services have not been connected yet.">این نشانی‌ها برای دسترسی از دامنهٔ شخصی در نظر گرفته شده‌اند؛ اتصال سرویس‌ها به آن‌ها هنوز تکمیل نشده است.</p>
+  </div>
+      <div class="section-heading"><div><div class="eyebrow" data-fa="پروژه‌های من" data-en="My projects">پروژه‌های من</div><h2 data-fa="دو مسیر، با ورودی مستقل" data-en="Two projects, their own space">دو مسیر، با ورودی مستقل</h2></div><p data-fa="هر پروژه هویت و ساختار مستقل خود را دارد." data-en="Each project retains its own identity and structure.">هر پروژه هویت و ساختار مستقل خود را دارد.</p></div>
+      <div class="grid-two">
+<a class="project-card" href="pages/projects.html#intmed" data-destination="intmed">
+  <div class="project-topline"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h7a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3z"/><path d="M21 4h-5a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h4z"/></svg></span><span class="badge" data-fa="آموزش پزشکی" data-en="Medical education">آموزش پزشکی</span></div>
+  <h3 dir="ltr">intmed</h3>
+  <p data-fa="پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت." data-en="My medical project, informing the educational content selected for this website.">پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت.</p>
+  <div class="project-bottom"><span data-link-status data-fa="دربارهٔ پروژه" data-en="About the project">دربارهٔ پروژه</span><code dir="ltr">/intmed/</code></div>
+</a>
+<a class="project-card" href="pages/projects.html#aus" data-destination="aus">
+  <div class="project-topline"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5z"/></svg></span><span class="badge" data-fa="پروژهٔ شخصی" data-en="Personal project">پروژهٔ شخصی</span></div>
+  <h3 dir="ltr">AUS 🇦🇺 Arash &amp; Amir</h3>
+  <p data-fa="پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند." data-en="An independent project, with selected public information contributing to my personal and professional profile.">پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند.</p>
+  <div class="project-bottom"><span data-link-status data-fa="دربارهٔ پروژه" data-en="About the project">دربارهٔ پروژه</span><code dir="ltr">/aus/</code></div>
+</a>
+</div>
+    </section>
+    <section class="section section-wash">
+      <div class="container about-block">
+        <div>
+          <div class="eyebrow" data-fa="شناخت بیشتر" data-en="Get to know me">شناخت بیشتر</div>
+          <h2 data-fa="پیش از مراجعه، بیشتر آشنا شویم." data-en="A little context, before we meet.">پیش از مراجعه، بیشتر آشنا شویم.</h2>
+          <p data-fa="آشنایی با سوابق و حوزهٔ فعالیت پزشک، بخشی از انتخاب آگاهانه است. بخش معرفی برای مرور مسیر حرفه‌ای، تجربه‌ها و فعالیت‌های من در نظر گرفته شده است." data-en="Understanding a physician’s background and focus helps people make informed choices. My profile brings together my professional journey, experience, and activities.">آشنایی با سوابق و حوزهٔ فعالیت پزشک، بخشی از انتخاب آگاهانه است. بخش معرفی برای مرور مسیر حرفه‌ای، تجربه‌ها و فعالیت‌های من در نظر گرفته شده است.</p>
+          <div class="actions"><a href="pages/about.html" class="button button-secondary" ><span data-fa="معرفی و سوابق" data-en="Profile &amp; background">معرفی و سوابق</span></a><a href="pages/contact.html#linkedin" class="text-link" data-destination="linkedin"><span data-fa="لینکدین" data-en="LinkedIn">لینکدین</span></a></div>
         </div>
-        <div class="snapshot-stats">
-          <div class="stat-card">
-            <div class="stat-num">۷+</div>
-            <div class="stat-label" data-fa="سال تحصیل پزشکی" data-en="Years of Medical Training">سال تحصیل پزشکی</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-num">۷</div>
-            <div class="stat-label" data-fa="زیرتخصص مرتبط" data-en="Related Subspecialties">زیرتخصص مرتبط</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-num">۳</div>
-            <div class="stat-label" data-fa="بیمارستان دانشگاهی" data-en="University Hospitals">بیمارستان دانشگاهی</div>
-          </div>
-        </div>
+        <ul class="topic-list">
+          <li><span class="number" aria-hidden="true">01</span><div><h3 data-fa="حوزه‌های فعالیت" data-en="Focus areas">حوزه‌های فعالیت</h3><p data-fa="شناخت موضوعات بالینی و آموزشیِ مورد توجه" data-en="Explore clinical and educational areas of interest">شناخت موضوعات بالینی و آموزشیِ مورد توجه</p><a href="pages/services.html" class="text-link" ><span data-fa="مشاهدهٔ حوزه‌ها" data-en="View focus areas">مشاهدهٔ حوزه‌ها</span></a></div></li>
+          <li><span class="number" aria-hidden="true">02</span><div><h3 data-fa="آموزش برای مخاطبان متفاوت" data-en="Education for different readers">آموزش برای مخاطبان متفاوت</h3><p data-fa="تفکیک مطالب عمومی از آموزش تخصصی پزشکی" data-en="Clear separation of public health education and professional learning">تفکیک مطالب عمومی از آموزش تخصصی پزشکی</p><a href="pages/blog.html" class="text-link" ><span data-fa="بخش آموزش" data-en="Explore education">بخش آموزش</span></a></div></li>
+          <li><span class="number" aria-hidden="true">03</span><div><h3 data-fa="ارتباط و مراجعه" data-en="Contact &amp; visits">ارتباط و مراجعه</h3><p data-fa="دسترسی به راه‌های ارتباطیِ تأییدشده" data-en="Find confirmed contact and visit information">دسترسی به راه‌های ارتباطیِ تأییدشده</p><a href="pages/contact.html" class="text-link" ><span data-fa="اطلاعات ارتباط" data-en="Contact information">اطلاعات ارتباط</span></a></div></li>
+        </ul>
       </div>
-    </div>
-  </section>
-
-  <!-- ─── SERVICES PREVIEW ─── -->
-  <section class="services-preview">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-label" data-fa="خدمات" data-en="Services">خدمات</span>
-        <h2 data-fa="حوزه‌های تخصصی" data-en="Areas of Expertise">حوزه‌های تخصصی</h2>
+    </section>
+    <section class="container section">
+      <div class="section-heading"><div><div class="eyebrow" data-fa="آموزش پزشکی" data-en="Medical education">آموزش پزشکی</div><h2 data-fa="دانش، با زبان روشن" data-en="Knowledge, clearly shared">دانش، با زبان روشن</h2></div><p data-fa="مطالب منتخب برگرفته از intmed، پس از آماده‌سازی و بازبینی در این بخش منتشر می‌شوند." data-en="Selected intmed-based articles will appear here after preparation and review.">مطالب منتخب برگرفته از intmed، پس از آماده‌سازی و بازبینی در این بخش منتشر می‌شوند.</p></div>
+      <div class="grid-two">
+        <article class="card"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></span><h3 data-fa="برای بیماران و عموم" data-en="For patients &amp; the public">برای بیماران و عموم</h3><p data-fa="مطالب قابل‌فهم دربارهٔ سلامت و بیماری‌ها، با تمرکز بر آگاهی و شناخت بهتر." data-en="Clear writing about health and illness, focused on understanding and awareness.">مطالب قابل‌فهم دربارهٔ سلامت و بیماری‌ها، با تمرکز بر آگاهی و شناخت بهتر.</p><a href="pages/blog.html#public" class="text-link" ><span data-fa="آموزش عمومی سلامت" data-en="Public health education">آموزش عمومی سلامت</span></a></article>
+        <article class="card"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h7a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3z"/><path d="M21 4h-5a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h4z"/></svg></span><h3 data-fa="برای دانشجویان و پزشکان" data-en="For students &amp; clinicians">برای دانشجویان و پزشکان</h3><p data-fa="محتوای تخصصی با مخاطب مشخص، منابع و تاریخ بازبینی." data-en="Professional learning with a defined audience, references, and review dates.">محتوای تخصصی با مخاطب مشخص، منابع و تاریخ بازبینی.</p><a href="pages/blog.html#professional" class="text-link" ><span data-fa="آموزش پزشکی" data-en="Professional education">آموزش پزشکی</span></a></article>
       </div>
-      <div class="services-grid">
-        <a href="pages/services.html" class="service-card">
-          <div class="service-icon">◈</div>
-          <h3 data-fa="فشار خون و قلب" data-en="Hypertension & Cardio">فشار خون و قلب</h3>
-          <p data-fa="تشخیص، کنترل و درمان فشار خون بالا" data-en="Diagnosis, control and management of hypertension">تشخیص، کنترل و درمان فشار خون بالا</p>
-        </a>
-        <a href="pages/services.html" class="service-card">
-          <div class="service-icon">◈</div>
-          <h3 data-fa="دیابت و متابولیسم" data-en="Diabetes & Metabolism">دیابت و متابولیسم</h3>
-          <p data-fa="مدیریت جامع دیابت، چاقی و سندرم متابولیک" data-en="Comprehensive management of diabetes, obesity and metabolic syndrome">مدیریت جامع دیابت، چاقی و سندرم متابولیک</p>
-        </a>
-        <a href="pages/services.html" class="service-card">
-          <div class="service-icon">◈</div>
-          <h3 data-fa="بیماری‌های کلیوی" data-en="Kidney Disease">بیماری‌های کلیوی</h3>
-          <p data-fa="ارزیابی و درمان اختلالات کلیوی" data-en="Assessment and treatment of renal disorders">ارزیابی و درمان اختلالات کلیوی</p>
-        </a>
-        <a href="pages/services.html" class="service-card">
-          <div class="service-icon">◈</div>
-          <h3 data-fa="بیماری‌های تیروئید" data-en="Thyroid Diseases">بیماری‌های تیروئید</h3>
-          <p data-fa="تشخیص و درمان کم‌کاری و پرکاری تیروئید" data-en="Diagnosis and treatment of thyroid disorders">تشخیص و درمان کم‌کاری و پرکاری تیروئید</p>
-        </a>
-        <a href="pages/services.html" class="service-card">
-          <div class="service-icon">◈</div>
-          <h3 data-fa="گوارش و کبد" data-en="GI & Liver">گوارش و کبد</h3>
-          <p data-fa="کبد چرب، بیماری‌های معده و دستگاه گوارش" data-en="Fatty liver, gastric and gastrointestinal diseases">کبد چرب، بیماری‌های معده و دستگاه گوارش</p>
-        </a>
-        <a href="pages/services.html" class="service-card">
-          <div class="service-icon">◈</div>
-          <h3 data-fa="ریه و آسم" data-en="Pulmonary & Asthma">ریه و آسم</h3>
-          <p data-fa="آسم، COPD و بیماری‌های مزمن ریوی" data-en="Asthma, COPD and chronic pulmonary conditions">آسم، COPD و بیماری‌های مزمن ریوی</p>
-        </a>
-      </div>
-      <div class="services-cta">
-        <a href="pages/services.html" class="btn-ghost" data-fa="مشاهده همه خدمات" data-en="View All Services">مشاهده همه خدمات</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── WHERE TO FIND ME ─── -->
-  <section class="locations-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-label" data-fa="مراجعه حضوری" data-en="In-Person">مراجعه حضوری</span>
-        <h2 data-fa="کجا می‌توانید من را بیابید" data-en="Where You Can Find Me">کجا می‌توانید من را بیابید</h2>
-      </div>
-      <div class="locations-grid">
-        <div class="location-card hospital">
-          <div class="location-icon">🏥</div>
-          <h3 data-fa="بیمارستان طالقانی" data-en="Taleghani Hospital">بیمارستان طالقانی</h3>
-          <p data-fa="وابسته به دانشگاه شهید بهشتی" data-en="Affiliated with Shahid Beheshti University">وابسته به دانشگاه شهید بهشتی</p>
-        </div>
-        <div class="location-card hospital">
-          <div class="location-icon">🏥</div>
-          <h3 data-fa="بیمارستان لبافی‌نژاد" data-en="Labbafinejad Hospital">بیمارستان لبافی‌نژاد</h3>
-          <p data-fa="وابسته به دانشگاه شهید بهشتی" data-en="Affiliated with Shahid Beheshti University">وابسته به دانشگاه شهید بهشتی</p>
-        </div>
-        <div class="location-card hospital">
-          <div class="location-icon">🏥</div>
-          <h3 data-fa="بیمارستان شهدای تجریش" data-en="Shohada Tajrish Hospital">بیمارستان شهدای تجریش</h3>
-          <p data-fa="وابسته به دانشگاه شهید بهشتی" data-en="Affiliated with Shahid Beheshti University">وابسته به دانشگاه شهید بهشتی</p>
-        </div>
-        <div class="location-card clinic coming-soon">
-          <div class="location-icon">🔮</div>
-          <h3 data-fa="مطب خصوصی" data-en="Private Clinic">مطب خصوصی</h3>
-          <p data-fa="به زودی — اطلاعیه بیشتر در آینده" data-en="Coming soon — announcement forthcoming">به زودی — اطلاعیه بیشتر در آینده</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── ONLINE BOOKING SECTION ─── -->
-  <section class="booking-section">
-    <div class="container">
-      <div class="booking-inner">
-        <div class="booking-text">
-          <span class="section-label" data-fa="ویزیت آنلاین" data-en="Online Visit">ویزیت آنلاین</span>
-          <h2 data-fa="نوبت بگیرید، هرجا که هستید" data-en="Book an Appointment, Wherever You Are">نوبت بگیرید، هرجا که هستید</h2>
-          <p data-fa="از طریق پلتفرم‌های معتبر پزشکی آنلاین ایران می‌توانید نوبت ویزیت آنلاین یا حضوری دریافت کنید." data-en="Book your online or in-person consultation through Iran's trusted medical platforms.">از طریق پلتفرم‌های معتبر پزشکی آنلاین ایران می‌توانید نوبت ویزیت آنلاین یا حضوری دریافت کنید.</p>
-        </div>
-        <div class="booking-platforms">
-          <a href="https://www.paziresh24.com" target="_blank" rel="noopener" class="platform-btn primary-platform">
-            <span class="platform-badge" data-fa="پیشنهادی" data-en="Recommended">پیشنهادی</span>
-            <span>پذیرش ۲۴</span>
-          </a>
-          <a href="https://www.doctornext.ir" target="_blank" rel="noopener" class="platform-btn">دکتر نکست</a>
-          <a href="https://www.snappdoctor.ir" target="_blank" rel="noopener" class="platform-btn">اسنپ دکتر</a>
-          <a href="https://www.doctoreto.com" target="_blank" rel="noopener" class="platform-btn">دکترتو</a>
-          <a href="https://www.doctordoctor.ir" target="_blank" rel="noopener" class="platform-btn">دکتر دکتر</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── BEYOND THE CLINIC TEASER ─── -->
-  <section class="beyond-teaser">
-    <div class="container">
-      <div class="beyond-inner">
-        <div class="beyond-visual">
-          <div class="guitar-icon">♩</div>
-          <div class="beyond-glow"></div>
-        </div>
-        <div class="beyond-text">
-          <span class="section-label" data-fa="آن سوی مطب" data-en="Beyond the Clinic">آن سوی مطب</span>
-          <h2 data-fa="گیتاریستی که پزشکی می‌کند" data-en="A Guitarist Who Practices Medicine">گیتاریستی که پزشکی می‌کند</h2>
-          <p data-fa="فراتر از پزشکی، موسیقی زبان دیگری است که با آن حرف می‌زنم — بلوز، راک، و محیطی روی PRS Custom 24." data-en="Beyond medicine, music is another language I speak — blues, rock, and ambient textures on a PRS Custom 24.">فراتر از پزشکی، موسیقی زبان دیگری است که با آن حرف می‌زنم — بلوز، راک، و محیطی روی PRS Custom 24.</p>
-          <a href="pages/beyond.html" class="btn-text-link" data-fa="کشف کنید ←" data-en="Explore ←">کشف کنید ←</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── FOOTER ─── -->
+    </section>
+  </main>
   <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
-        <div class="footer-brand">
-          <div class="logo-mark large">AHG</div>
-          <p data-fa="دکتر امیرهوشنگ گرامی — متخصص طب داخلی" data-en="Dr. Amir Houshang Gerami — Internal Medicine">دکتر امیرهوشنگ گرامی — متخصص طب داخلی</p>
-        </div>
-        <div class="footer-links">
-          <h4 data-fa="صفحات" data-en="Pages">صفحات</h4>
-          <ul>
-            <li><a href="pages/about.html" data-fa="درباره من" data-en="About">درباره من</a></li>
-            <li><a href="pages/services.html" data-fa="خدمات" data-en="Services">خدمات</a></li>
-            <li><a href="pages/appointments.html" data-fa="رزرو نوبت" data-en="Appointments">رزرو نوبت</a></li>
-            <li><a href="pages/blog.html" data-fa="مقالات" data-en="Blog">مقالات</a></li>
-            <li><a href="pages/beyond.html" data-fa="آن سوی مطب" data-en="Beyond">آن سوی مطب</a></li>
-            <li><a href="pages/contact.html" data-fa="تماس" data-en="Contact">تماس</a></li>
-          </ul>
-        </div>
-        <div class="footer-contact">
-          <h4 data-fa="تماس" data-en="Contact">تماس</h4>
-          <p data-fa="برای سوالات و همکاری:" data-en="For inquiries and collaborations:">برای سوالات و همکاری:</p>
-          <a href="pages/contact.html" class="btn-ghost small" data-fa="ارسال پیام" data-en="Send Message">ارسال پیام</a>
-        </div>
+        <div><h2 data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</h2><p data-fa="فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من." data-en="A place to explore my professional journey, educational writing, and projects.">فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من.</p></div>
+        <div><h2 data-fa="دسترسی سریع" data-en="Explore">دسترسی سریع</h2><nav aria-label="پیوندهای پایین صفحه" data-label-fa="پیوندهای پایین صفحه" data-label-en="Footer links"><a href="pages/about.html" class="text-link" ><span data-fa="دربارهٔ من" data-en="About">دربارهٔ من</span></a><a href="pages/blog.html" class="text-link" ><span data-fa="مطالب آموزشی" data-en="Education">مطالب آموزشی</span></a><a href="pages/projects.html" class="text-link" ><span data-fa="پروژه‌ها" data-en="Projects">پروژه‌ها</span></a></nav></div>
+        <div><h2 data-fa="در ارتباط بمانیم" data-en="Stay connected">در ارتباط بمانیم</h2><nav aria-label="ارتباط" data-label-fa="ارتباط" data-label-en="Contact"><a href="pages/contact.html#linkedin" class="" data-destination="linkedin"><span data-fa="لینکدین" data-en="LinkedIn">لینکدین</span></a><a href="pages/appointments.html" class="text-link" ><span data-fa="اطلاعات مراجعه" data-en="Visit information">اطلاعات مراجعه</span></a></nav><p data-fa="مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند." data-en="Educational content does not replace individual medical assessment or advice.">مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند.</p></div>
       </div>
-      <div class="footer-bottom">
-        <p data-fa="© ۱۴۰۴ دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است." data-en="© 2025 Dr. Amir Houshang Gerami. All rights reserved.">© ۱۴۰۴ دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.</p>
-      </div>
+      <div class="footer-bottom"><span data-fa="© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است." data-en="© Dr. Amir Houshang Gerami. All rights reserved.">© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.</span><span dir="ltr">drgerami-md.ir</span></div>
     </div>
   </footer>
-
-  <script src="js/main.js"></script>
 </body>
 </html>
