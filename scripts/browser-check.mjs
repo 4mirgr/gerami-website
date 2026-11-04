@@ -31,8 +31,14 @@ try {
   const responses = [];
   const requests = [];
   let loadResolve;
+  let ausConfigMode = 'ready';
   socket.addEventListener('message', event => {
     const message = JSON.parse(event.data);
+    if (message.method === 'Fetch.requestPaused') {
+      const unavailable = ausConfigMode === 'unavailable';
+      const body = unavailable ? {error:'AUS_APP binding missing (synthetic test)'} : {mode:'cloud',authRequired:true,supabaseUrl:'https://example.supabase.co',publishableKey:'sb_publishable_synthetic_test'};
+      send('Fetch.fulfillRequest',{requestId:message.params.requestId,responseCode:unavailable?503:200,responseHeaders:[{name:'Content-Type',value:'application/json'},{name:'Cache-Control',value:'no-store'}],body:Buffer.from(JSON.stringify(body)).toString('base64')},message.sessionId).catch(error=>errors.push(String(error)));
+    }
     if (message.id && pending.has(message.id)) {
       const {resolve, reject, timer} = pending.get(message.id);
       pending.delete(message.id); clearTimeout(timer);
@@ -146,23 +152,22 @@ try {
   assert.equal(await evaluate("document.querySelector('.mobile-menu').open"),true);
   await call('Emulation.setScriptExecutionDisabled',{value:false});
   if (combined) {
+    await call('Fetch.enable',{patterns:[{urlPattern:baseURL+'/aus/api/public-config*',requestStage:'Request'}]});
     await navigate('aus/');
     for (let i=0;i<100;i++) {
-      if (await evaluate("document.querySelector('#stats').children.length>0")) break;
+      if (await evaluate("!!document.querySelector('#login-email')")) break;
       await new Promise(resolve=>setTimeout(resolve,25));
     }
-    assert.equal(await evaluate("document.querySelector('#load-error').hidden"),true);
-    assert.equal(await evaluate("document.querySelector('#stats').children.length>0"),true,'AUS data loads under /aus/');
-    await evaluate("document.querySelector('a[data-section=tracker]').click(); document.querySelector('#task-title').value='Synthetic subpath smoke test'; document.querySelector('#task-form').requestSubmit()");
-    assert.equal(await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')"),true);
-    assert.equal(await evaluate("localStorage.getItem('medpath.v2.tasks').includes('Synthetic subpath smoke test')"),true,'AUS task storage preserved');
-    // Change the query too: an identical hash-only navigation has no load event.
-    await navigate('aus/?smoke=reload#tracker');
+    assert.equal(await evaluate("!!document.querySelector('#login-email') && !!document.querySelector('#login-password')"),true,'Real AUS login must show before private workspaces');
+    assert.equal(await evaluate("document.querySelector('#stats') === null && document.querySelector('#task-form') === null"),true,'Legacy personal dashboard must not be published');
+    ausConfigMode='unavailable';
+    await navigate('aus/?smoke=missing-binding');
     for (let i=0;i<100;i++) {
-      if (await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')")) break;
+      if (await evaluate("!!document.querySelector('[role=alert]')")) break;
       await new Promise(resolve=>setTimeout(resolve,25));
     }
-    assert.equal(await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')"),true,'AUS task survives a fresh navigation under its own subpath');
+    assert.equal(await evaluate("!!document.querySelector('[role=alert]') && document.querySelector('#login-email') === null"),true,'Missing gateway must fail closed');
+    await call('Fetch.disable');
     await navigate('intmed/');
     assert.equal(await evaluate("getComputedStyle(document.querySelector('#loginGate')).display!=='none'"),true,'IntMed login gate loads');
     assert.equal(await evaluate("typeof window.IntMedBackend"),'object','IntMed backend adapter is present');
@@ -171,7 +176,7 @@ try {
     assert.equal(scope,'/intmed/','IntMed worker must not control the personal site or AUS');
     await navigate('');
     assert.equal(await evaluate("navigator.serviceWorker.controller === null"),true,'Personal homepage stays outside the IntMed worker scope');
-    console.log('PASS: AUS loads all data under /aus/ and persists a synthetic local task; IntMed login, assets and backend adapter load under /intmed/; installed worker is scoped to /intmed/. No real user or API writes were made.');
+    console.log('PASS: Real AUS login loads under /aus/ with synthetic public config, no private dashboard before login, and missing gateway fails closed; IntMed login, assets and backend adapter load under /intmed/; installed worker is scoped to /intmed/. No real user or API writes were made.');
   }
   await navigate('');
   await evaluate("document.documentElement.lang === 'en' && document.querySelector('[data-language-toggle]').click()");
@@ -181,7 +186,7 @@ try {
   await call('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
   await writeFile('/tmp/gerami-desktop.png',Buffer.from((await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false})).data,'base64'));
   assert.deepEqual(errors,[],'Runtime errors');
-  assert.deepEqual(responses.filter(response=>response.status>=400),[],'HTTP failures');
+  assert.deepEqual(responses.filter(response=>response.status>=400 && !(combined && response.status===503 && response.url===baseURL+'/aus/api/public-config')),[],'HTTP failures');
   assert.deepEqual(requests.filter(url=>/^https?:/.test(url)&&!url.startsWith(baseURL+'/')),[],'Unexpected external network dependency');
   console.log('PASS: '+checks+' page/viewport/language combinations; native menu & Escape; reduced motion; blocked storage; configured and unsafe links; no JavaScript; no runtime or HTTP errors; no external requests.');
   console.log('Screenshots: /tmp/gerami-desktop.png /tmp/gerami-mobile.png');

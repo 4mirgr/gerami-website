@@ -6,9 +6,9 @@
     "mount": "intmed"
   },
   "aus": {
-    "repository": "https://github.com/4mirgr/immi_AUS.git",
-    "commit": "459aecd4679a500c68ebe487d8cb17df57e55813",
-    "public_directory": ".",
+    "repository": "https://github.com/4mirgr/immi-arash-amir.git",
+    "commit": "89100218ba9c2f3143b2379e550013337377df43",
+    "public_directory": "dist",
     "mount": "aus"
   }
 }

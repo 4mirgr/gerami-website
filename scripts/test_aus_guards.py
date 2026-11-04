@@ -1,4 +1,4 @@
-"""AUS releases with invalid data or broken JavaScript must never be assembled."""
+"""Authenticated AUS releases must reject broken authorization before assembly."""
 import importlib.util
 import json
 import shutil
@@ -16,7 +16,7 @@ spec.loader.exec_module(build)
 class AUSReleaseRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.original = Path('/workspace/immi_AUS')
+        cls.original = Path('/workspace/immi-arash-amir')
         cls.intmed = Path('/workspace/intMed-study-plan')
         if not cls.original.is_dir() or not (cls.intmed / 'content/taxonomy.json').is_file():
             raise unittest.SkipTest('Requires the inspected upstream checkouts')
@@ -24,10 +24,8 @@ class AUSReleaseRulesTest(unittest.TestCase):
         cls.base = Path(cls.temporary.name)
         cls.source = cls.base / 'aus'
         cls.source.mkdir()
-        for name in ('data', 'scripts'):
+        for name in ('cloud', 'tests', 'library'):
             shutil.copytree(cls.original / name, cls.source / name)
-        for name in ('index.html', 'app.js', 'styles.css', 'dashboard.css', 'README.md'):
-            shutil.copy2(cls.original / name, cls.source / name)
         subprocess.run(['git','init','-q',str(cls.source)],check=True)
         cls.git('config','user.name','Fixture')
         cls.git('config','user.email','fixture@example.invalid')
@@ -63,25 +61,29 @@ class AUSReleaseRulesTest(unittest.TestCase):
         path.write_text(json.dumps(pins))
         build.PINS = path
 
-    def test_invalid_upstream_task_data_blocks_release(self):
-        path = self.source / 'data/tasks.json'
-        data = json.loads(path.read_text())
-        data[0]['prio'] = 'invalid-priority'
-        path.write_text(json.dumps(data,ensure_ascii=False))
+    def test_disabled_login_requirement_blocks_release(self):
+        worker = self.source / 'cloud/worker.mjs'
+        text = worker.read_text()
+        self.assertIn('authRequired:true', text)
+        worker.write_text(text.replace('authRequired:true', 'authRequired:false', 1))
         self.commit()
         self.pin_fixture()
-        output = self.base / 'bad-data-output'
+        output = self.base / 'no-login-output'
         with self.assertRaisesRegex(RuntimeError, 'AUS validation failed'):
-            build.assemble({'intmed':self.intmed,'aus':self.source},output)
+            build.assemble({'intmed': self.intmed, 'aus': self.source}, output)
         self.assertFalse(output.exists())
 
-    def test_broken_application_javascript_blocks_release(self):
-        (self.source / 'app.js').write_text('function broken( {\n')
+    def test_unauthenticated_private_access_blocks_release(self):
+        worker = self.source / 'cloud/worker.mjs'
+        text = worker.read_text()
+        needle = "if (!authorization || !/^Bearer [^\\s]+$/.test(authorization)) throw new ApiError(401, 'Sign in required');"
+        self.assertIn(needle, text)
+        worker.write_text(text.replace(needle, "if (!authorization) return json({profiles:[]});", 1))
         self.commit()
         self.pin_fixture()
-        output = self.base / 'bad-code-output'
+        output = self.base / 'no-authorization-output'
         with self.assertRaisesRegex(RuntimeError, 'AUS validation failed'):
-            build.assemble({'intmed':self.intmed,'aus':self.source},output)
+            build.assemble({'intmed': self.intmed, 'aus': self.source}, output)
         self.assertFalse(output.exists())
 
 

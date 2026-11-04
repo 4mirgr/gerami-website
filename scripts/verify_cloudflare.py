@@ -51,13 +51,22 @@ for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/inde
     if path in ('index.html', 'pages/projects.html') and assets.entries != ['/intmed/', '/aus/']:
         errors.append(f'{path}: project buttons must stay on the preview/production origin')
 
-for name, source in (('aus', args.aus_source), ('intmed', args.intmed_source / 'docs')):
-    for target in (site / name).rglob('*'):
-        adapted = (name == 'intmed' and target == site / 'intmed/sw.js') or (name == 'aus' and target == site / 'aus/styles.css')
-        if target.is_file() and not adapted:
-            original = source / target.relative_to(site / name)
-            if not original.is_file() or digest(original) != digest(target):
-                errors.append(f'Imported app file changed: {target.relative_to(site)}')
+# IntMed retains the upstream bytes except its documented service-worker scope.
+for target in (site / 'intmed').rglob('*'):
+    if target.is_file() and target != site / 'intmed/sw.js':
+        original = args.intmed_source / 'docs' / target.relative_to(site / 'intmed')
+        if not original.is_file() or digest(original) != digest(target):
+            errors.append(f'Imported IntMed file changed: {target.relative_to(site)}')
+
+# AUS is compiled from its pinned React source; only dist assets belong here.
+aus = site / 'aus'
+if 'id="root"' not in (aus / 'index.html').read_text():
+    errors.append('AUS must contain the authenticated React entry point')
+if not (aus / 'assets').is_dir() or (aus / 'app.js').exists() or (aus / 'data/tasks.json').exists():
+    errors.append('AUS must publish the authenticated build, never the old static dashboard')
+for forbidden in ('cloud', 'src', 'tests', 'private', 'node_modules', 'wrangler.jsonc', 'package.json'):
+    if (aus / forbidden).exists():
+        errors.append(f'Nonpublic AUS source published: {forbidden}')
 
 manifest = json.loads((site / 'intmed/manifest.webmanifest').read_text())
 if manifest['start_url'] != './' or manifest['scope'] != './':
@@ -68,13 +77,13 @@ if report['projects'] != json.loads((ROOT / 'deploy/projects.json').read_text())
 redirects = (site / '_redirects').read_text()
 if not (site / '404.html').is_file() or '/intmed /intmed/ 308' not in redirects or '/aus /aus/ 308' not in redirects:
     errors.append('Missing routing configuration')
-if report.get('aus_checks') != ['scripts/validate-data.mjs', '--check app.js']:
-    errors.append('AUS data and JavaScript release checks were not recorded')
-aus_css = (site / 'aus/styles.css').read_text()
-if 'fonts.googleapis.com' in aus_css or "/intmed/fonts/Vazirmatn-Regular.woff2" not in aus_css:
-    errors.append('AUS must use the local font instead of the Google import')
+if report.get('aus_checks') != ['--test tests/cloud_auth.mjs']:
+    errors.append('AUS authentication and owner-isolation release checks were not recorded')
+routes = json.loads((site / '_routes.json').read_text())
+if routes != {'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*'], 'exclude': []}:
+    errors.append('Functions must handle only the AUS API and auth gateway paths')
 if any(path.name == '.git' for path in site.rglob('*')):
     errors.append('Git metadata must not be published')
 if errors:
     raise SystemExit('\n'.join(errors))
-print('PASS: 3 site entry points, local assets/fonts, same-origin project buttons, release pins, PWA manifest, routing, and unchanged upstream app files (except the documented worker/font adapters).')
+print('PASS: local entry assets, same-origin project buttons, pinned authenticated AUS build, restricted API routes, IntMed manifest and unchanged IntMed app files except the scoped worker.')

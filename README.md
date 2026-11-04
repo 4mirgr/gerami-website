@@ -4,6 +4,8 @@
 
 برای **نسخهٔ ترکیبیِ Cloudflare** شامل intmed و AUS، فرمان ساخت `python3 -m pip install -r requirements-cloudflare.txt && python3 scripts/build_cloudflare.py` با خروجی `_site` است. تنظیمات دقیق Cloudflare Pages و انتقال دامنه در [راهنمای Cloudflare](docs/cloudflare.md) آمده است. این دستور برنامه‌ها را از نسخه‌های قفل‌شده دریافت می‌کند، کنترل‌های رسمی محتوا و آزمون‌های اصلی intmed را قبل از تولید خروجی اجرا می‌کند و چیزی منتشر نمی‌کند؛ مخازن اصلی را هم تغییر نمی‌دهد.
 
+منبع AUS واقعی، `4mirgr/immi-arash-amir` است؛ داشبورد بدون ورودِ `immi_AUS` دیگر استفاده نمی‌شود. رابط ورود در `/aus/` به همان Worker موجود متصل می‌شود. اتصال `AUS_APP` و محدودیت موقت OAuth در [راهنمای درگاه AUS](docs/aus-gateway.md) توضیح داده شده‌اند. هیچ کاربر، دیتابیس یا کلید جدیدی ایجاد نمی‌شود.
+
 ## اجرای محلی
 
 ```sh
@@ -42,6 +44,6 @@ node scripts/browser-check.mjs
 
 `index.html`، `pages/about.html`، `pages/services.html`، `pages/blog.html`، `pages/projects.html`، `pages/contact.html`، `pages/appointments.html` و مسیر قدیمی `pages/beyond.html`.
 
-مسیرهای فعلی صفحات حفظ شده‌اند. پیوندهای `/intmed/` و `/aus/` برای نسخهٔ منتقل‌شدهٔ پروژه‌های واقعی در نظر گرفته شده‌اند، ولی در این مخزن پیاده نشده‌اند. برای طرح انتقال، [راهنمای استقرار](docs/deployment.md) را بخوانید.
+مسیرهای فعلی صفحات حفظ شده‌اند. خروجی ترکیبی، `/intmed/` و رابط دارای ورود `/aus/` را می‌سازد. برای فعال‌شدن API واقعی AUS، اتصال به Worker موجود لازم است. پیش از انتقال دامنه، راهنمای Cloudflare و آزمون‌های واقعی هر دو حساب را کامل کنید.
 
 انیمیشن فقط ورود کوتاه صفحه و تغییر رنگ دکمه‌هاست و با `prefers-reduced-motion` خاموش می‌شود. هیچ محتوا یا لینک اصلی برای نمایش به پایان انیمیشن یا بارگذاری JavaScript وابسته نیست.

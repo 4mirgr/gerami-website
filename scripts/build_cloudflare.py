@@ -1,4 +1,4 @@
-"""Assemble three pinned static sites for Cloudflare Pages; never deploy or edit upstreams."""
+"""Assemble pinned sites and the authenticated AUS frontend for Cloudflare Pages; never deploy or edit upstreams."""
 from __future__ import annotations
 
 import argparse
@@ -86,17 +86,6 @@ def validate_config(source):
             raise ValueError('Privileged keys must never enter a public site build')
 
 
-def local_aus_styles(source):
-    pattern = r"^@import url\('https://fonts\.googleapis\.com/[^']+'\);\s*"
-    css, count = re.subn(pattern, '', source, count=1)
-    if count != 1:
-        raise ValueError('AUS font import changed; review the local-font adapter')
-    return (
-        "@font-face{font-family:Vazirmatn;src:url('/intmed/fonts/Vazirmatn-Regular.woff2') format('woff2');font-weight:400;font-display:swap;}\n"
-        "@font-face{font-family:Vazirmatn;src:url('/intmed/fonts/Vazirmatn-Bold.woff2') format('woff2');font-weight:700;font-display:swap;}\n"
-    ) + css
-
-
 def validate_intmed(source):
     """Run upstream's read-only gates; never migrate/build into its source tree."""
     commands = [
@@ -126,7 +115,7 @@ def validate_intmed(source):
 
 
 def validate_aus(source):
-    commands = [['node', 'scripts/validate-data.mjs'], ['node', '--check', 'app.js']]
+    commands = [['node', '--test', 'tests/cloud_auth.mjs']]
     warnings = []
     for command in commands:
         result = subprocess.run(command, cwd=source, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -168,13 +157,16 @@ def assemble(sources, output):
             shutil.copy2(ROOT / name, stage / name)
         for name in SITE_DIRS:
             copy_public(ROOT / name, stage / name)
-        for name, spec in pins.items():
-            copy_public(sources[name] / spec['public_directory'], stage / spec['mount'])
+        # AUS is a compiled authenticated application. Never copy its repository
+        # root (which includes backend/private-data tooling) into public assets.
+        copy_public(sources['intmed'] / pins['intmed']['public_directory'], stage / 'intmed')
+        from aus_frontend_adapter import prepare_and_build
+        prepare_and_build(sources['aus'], stage / 'aus')
+        if git(sources['aus'], 'status', '--porcelain', '--untracked-files=all'):
+            raise RuntimeError('AUS build modified the checkout; refusing to publish')
         worker = stage / 'intmed/sw.js'
         worker.write_text(scoped_worker(worker.read_text()), encoding='utf-8')
-        aus_styles = stage / 'aus/styles.css'
-        aus_styles.write_text(local_aus_styles(aus_styles.read_text()), encoding='utf-8')
-        # Browsers request /favicon.ico for AUS, whose original HTML has no icon.
+        # Supply a local fallback favicon for browser requests.
         # Wrap its medical project's existing PNG in a standard ICO container;
         # no image pixels or imported app files are changed.
         icon = (stage / 'intmed/assets/pwa-192.png').read_bytes()
@@ -201,12 +193,13 @@ def assemble(sources, output):
                 html = html.replace('</head>', '<script src="/legacy-intmed-links.js" defer></script>\n</head>', 1)
             page.write_text(html, encoding='utf-8')
         (stage / '_redirects').write_text('/intmed /intmed/ 308\n/aus /aus/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
+        (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*'], 'exclude': []}) + '\n', encoding='utf-8')
         (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحهٔ اصلی</a></html>\n', encoding='utf-8')
         (stage / '_headers').write_text('/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
         files = [file for file in stage.rglob('*') if file.is_file()]
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
-        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'aus_checks': aus_checks, 'aus_warnings': aus_warnings, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS local font in output CSS', 'root legacy worker retirement', 'same-origin project entries']}
+        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'aus_checks': aus_checks, 'aus_warnings': aus_warnings, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS authenticated frontend with same-origin API and auth gateway', 'root legacy worker retirement', 'same-origin project entries']}
         (stage / 'build-info.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         stage.rename(output)
     return report

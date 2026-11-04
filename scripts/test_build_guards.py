@@ -17,7 +17,7 @@ class IntMedRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.original = Path('/workspace/intMed-study-plan')
-        cls.aus = Path('/workspace/immi_AUS')
+        cls.aus = Path('/workspace/immi-arash-amir')
         if not (cls.original / 'content/taxonomy.json').is_file() or not cls.aus.is_dir():
             raise unittest.SkipTest('Integration fixtures require the inspected upstream checkouts')
         cls.temporary = tempfile.TemporaryDirectory(prefix='gerami-guard-tests-')
