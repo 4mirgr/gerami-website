@@ -12,6 +12,8 @@ body{font:16px/1.9 Tahoma,system-ui,sans-serif;background:#0c1520;color:#edf4fa;
 <h1>بررسی اتصال سایت و پنل‌ها</h1>
 <p>این بررسی فقط فایل‌های عمومی و وضعیت درگاه‌ها را دریافت می‌کند؛ وارد حساب نمی‌شود و اطلاعات حساب یا مطالعه را نمی‌خواند و تغییر نمی‌دهد. نتیجه روی همین دستگاه می‌ماند.</p>
 <p>ابتدا VPN را خاموش کنید و بررسی را اجرا کنید. سپس با VPN روشن دوباره اجرا کنید و هر دو گزارش را بفرستید. پاسخ سالم این بررسی، ورود واقعی حساب را تأیید نمی‌کند.</p>
+<label for="mode">روش بررسی:</label>
+<select id="mode"><option value="sequential">تکی، پشت سر هم</option><option value="parallel">هم‌زمان</option></select>
 <button id="run" type="button">شروع بررسی</button>
 <p id="status" role="status" aria-live="polite"></p>
 <table><thead><tr><th>بخش</th><th>نتیجه</th><th>زمان</th></tr></thead><tbody id="results"></tbody></table>
@@ -20,5 +22,5 @@ body{font:16px/1.9 Tahoma,system-ui,sans-serif;background:#0c1520;color:#edf4fa;
 <p>خطای شبکه می‌تواند از DNS، TLS، محدودیت اپراتور یا CORS باشد؛ به‌تنهایی اثبات فیلترینگ نیست.</p>
 <a href="/">بازگشت به سایت</a>
 </main>
-<script type="module" src="/connection-check.js"></script>
+<script type="module" src="/connection-check.js?v=2"></script>
 </html>

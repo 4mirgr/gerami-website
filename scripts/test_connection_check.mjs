@@ -22,6 +22,15 @@ assert.equal(missing.detail, 'aus_service_binding_required');
 assert.ok(!JSON.stringify(missing).includes('private'));
 const timeout = await probe('hang', 'https://example.org/', 'asset', ()=>new Promise(()=>{}), 10);
 assert.equal(timeout.outcome, 'timeout');
+assert.equal(timeout.phase, 'waiting_headers');
+const stalledBody = await probe('body', 'https://example.org/', 'asset', async()=>new Response(new ReadableStream({
+  start(controller) { controller.enqueue(new TextEncoder().encode('hello')); },
+})), 15);
+assert.equal(stalledBody.outcome, 'timeout');
+assert.equal(stalledBody.status, 200);
+assert.equal(stalledBody.phase, 'reading_body');
+assert.equal(stalledBody.receivedBytes, 5);
+assert.equal(typeof stalledBody.firstByteMs, 'number');
 const cors = await probe('cors', 'https://example.org/', 'asset', async()=>{throw Error('private network detail');});
 assert.equal(cors.outcome, 'network_or_cors_error');
 assert.ok(!JSON.stringify(cors).includes('private network detail'));
@@ -35,4 +44,12 @@ for (const {url, options} of requests) {
   assert.ok(!options.headers && !options.body);
   assert.ok(!/token|rest\/v1|functions\/v1|logout/.test(url));
 }
+let active = 0, maxActive = 0;
+await runChecks('https://example.org', async()=>{
+  active++; maxActive = Math.max(maxActive, active);
+  await new Promise(resolve=>setTimeout(resolve, 2));
+  active--;
+  return new Response('{}');
+}, 'sequential');
+assert.equal(maxActive, 1, 'Sequential checks must isolate requests rather than multiplex them');
 console.log('PASS: read-only public probes; bounded timeout; redacted reports; fail-closed config detection.');
