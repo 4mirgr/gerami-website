@@ -1,0 +1,2 @@
+# Used by IntMed's own canonical-content validator; not by the website runtime.
+jsonschema==4.26.0

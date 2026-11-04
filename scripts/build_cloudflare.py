@@ -4,10 +4,12 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -27,8 +29,9 @@ def fetch_source(spec, directory):
     subprocess.run(['git', 'init', '-q', str(directory)], check=True)
     subprocess.run(['git', '-C', str(directory), 'remote', 'add', 'origin', spec['repository']], check=True)
     subprocess.run(['git', '-C', str(directory), 'fetch', '--quiet', '--depth=1', '--filter=blob:none', 'origin', spec['commit']], check=True)
-    if spec['public_directory'] != '.':
-        subprocess.run(['git', '-C', str(directory), 'sparse-checkout', 'set', '--no-cone', '/' + spec['public_directory'] + '/'], check=True)
+    if spec['mount'] == 'intmed':
+        # The canonical content and the upstream validators are release inputs too.
+        subprocess.run(['git', '-C', str(directory), 'sparse-checkout', 'set', '--cone', 'docs', 'content', 'scripts', 'backend'], check=True)
     subprocess.run(['git', '-C', str(directory), 'checkout', '--quiet', '--detach', 'FETCH_HEAD'], check=True)
     return directory
 
@@ -90,6 +93,34 @@ def local_aus_styles(source):
     ) + css
 
 
+def validate_intmed(source):
+    """Run upstream's read-only gates; never migrate/build into its source tree."""
+    commands = [
+        [sys.executable, 'scripts/content_pipeline.py', 'validate'],
+        [sys.executable, 'scripts/content_pipeline.py', 'check'],
+        ['node', 'scripts/check_inline_js.mjs'],
+        ['node', 'scripts/backend_unit_test.mjs'],
+        ['node', 'scripts/backend_state_test.mjs'],
+        ['node', 'scripts/exams_unit_test.mjs'],
+        ['node', 'scripts/username_login_test.mjs'],
+        ['node', 'scripts/entitlements_test.mjs'],
+        ['node', 'scripts/pwa_test.mjs'],
+        ['node', 'scripts/cloudflare_proxy_test.mjs'],
+        [sys.executable, 'scripts/runtime_config_test.py'],
+        [sys.executable, 'scripts/release_preflight.py'],
+    ]
+    environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
+    for command in commands:
+        result = subprocess.run(command, cwd=source, env=environment, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        label = ' '.join(command[1:])
+        if result.returncode:
+            raise RuntimeError('IntMed validation failed: '+label+'\n'+result.stdout[-4000:])
+        print('PASS IntMed: '+label, flush=True)
+    if git(source, 'status', '--porcelain', '--untracked-files=all'):
+        raise RuntimeError('IntMed validation modified the checkout; refusing to publish')
+    return [' '.join(command[1:]) for command in commands]
+
+
 def assemble(sources, output):
     pins = json.loads(PINS.read_text())
     output = output.resolve()
@@ -99,12 +130,12 @@ def assemble(sources, output):
         source = source.resolve()
         if git(source, 'rev-parse', 'HEAD') != pins[name]['commit']:
             raise ValueError(f'{name}: checkout differs from the pinned release')
-        public = pins[name]['public_directory']
-        if git(source, 'status', '--porcelain', '--untracked-files=all', '--', public):
-            raise ValueError(f'{name}: public source has local changes; refusing an unreproducible build')
+        if git(source, 'status', '--porcelain', '--untracked-files=all'):
+            raise ValueError(f'{name}: source has local changes; refusing an unreproducible build')
         if output == source or source.is_relative_to(output) or output.is_relative_to(source):
             raise ValueError('Output must be separate from source checkouts')
     validate_config((sources['intmed'] / 'docs/config.js').read_text())
+    intmed_checks = validate_intmed(sources['intmed'])
     output.parent.mkdir(parents=True, exist_ok=True)
     # Build in a temporary sibling; failure never leaves a half-built _site.
     with tempfile.TemporaryDirectory(prefix='gerami-stage-', dir=output.parent) as temporary:
@@ -152,7 +183,7 @@ def assemble(sources, output):
         files = [file for file in stage.rglob('*') if file.is_file()]
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
-        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS local font in output CSS', 'root legacy worker retirement', 'same-origin project entries']}
+        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS local font in output CSS', 'root legacy worker retirement', 'same-origin project entries']}
         (stage / 'build-info.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         stage.rename(output)
     return report
