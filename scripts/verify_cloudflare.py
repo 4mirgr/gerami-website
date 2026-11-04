@@ -65,8 +65,11 @@ if manifest['start_url'] != './' or manifest['scope'] != './':
 report = json.loads((site / 'build-info.json').read_text())
 if report['projects'] != json.loads((ROOT / 'deploy/projects.json').read_text()):
     errors.append('Build pins differ from deployment manifest')
-if not (site / '404.html').is_file() or '/intmed /intmed/ 308' not in (site / '_redirects').read_text():
+redirects = (site / '_redirects').read_text()
+if not (site / '404.html').is_file() or '/intmed /intmed/ 308' not in redirects or '/aus /aus/ 308' not in redirects:
     errors.append('Missing routing configuration')
+if report.get('aus_checks') != ['scripts/validate-data.mjs', '--check app.js']:
+    errors.append('AUS data and JavaScript release checks were not recorded')
 aus_css = (site / 'aus/styles.css').read_text()
 if 'fonts.googleapis.com' in aus_css or "/intmed/fonts/Vazirmatn-Regular.woff2" not in aus_css:
     errors.append('AUS must use the local font instead of the Google import')

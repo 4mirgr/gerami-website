@@ -156,6 +156,13 @@ try {
     await evaluate("document.querySelector('a[data-section=tracker]').click(); document.querySelector('#task-title').value='Synthetic subpath smoke test'; document.querySelector('#task-form').requestSubmit()");
     assert.equal(await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')"),true);
     assert.equal(await evaluate("localStorage.getItem('medpath.v2.tasks').includes('Synthetic subpath smoke test')"),true,'AUS task storage preserved');
+    // Change the query too: an identical hash-only navigation has no load event.
+    await navigate('aus/?smoke=reload#tracker');
+    for (let i=0;i<100;i++) {
+      if (await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')")) break;
+      await new Promise(resolve=>setTimeout(resolve,25));
+    }
+    assert.equal(await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')"),true,'AUS task survives a fresh navigation under its own subpath');
     await navigate('intmed/');
     assert.equal(await evaluate("getComputedStyle(document.querySelector('#loginGate')).display!=='none'"),true,'IntMed login gate loads');
     assert.equal(await evaluate("typeof window.IntMedBackend"),'object','IntMed backend adapter is present');

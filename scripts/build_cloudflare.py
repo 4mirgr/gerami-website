@@ -121,6 +121,24 @@ def validate_intmed(source):
     return [' '.join(command[1:]) for command in commands]
 
 
+def validate_aus(source):
+    commands = [['node', 'scripts/validate-data.mjs'], ['node', '--check', 'app.js']]
+    warnings = []
+    for command in commands:
+        result = subprocess.run(command, cwd=source, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        label = ' '.join(command[1:])
+        if result.returncode:
+            raise RuntimeError('AUS validation failed: '+label+'\n'+result.stdout[-4000:])
+        notes = [line for line in result.stdout.splitlines() if line.startswith('! ')]
+        warnings.extend(notes)
+        for note in notes:
+            print('AUS warning: '+note[2:], flush=True)
+        print('PASS AUS: '+label, flush=True)
+    if git(source, 'status', '--porcelain', '--untracked-files=all'):
+        raise RuntimeError('AUS validation modified the checkout; refusing to publish')
+    return [' '.join(command[1:]) for command in commands], warnings
+
+
 def assemble(sources, output):
     pins = json.loads(PINS.read_text())
     output = output.resolve()
@@ -135,6 +153,7 @@ def assemble(sources, output):
         if output == source or source.is_relative_to(output) or output.is_relative_to(source):
             raise ValueError('Output must be separate from source checkouts')
     validate_config((sources['intmed'] / 'docs/config.js').read_text())
+    aus_checks, aus_warnings = validate_aus(sources['aus'])
     intmed_checks = validate_intmed(sources['intmed'])
     output.parent.mkdir(parents=True, exist_ok=True)
     # Build in a temporary sibling; failure never leaves a half-built _site.
@@ -183,7 +202,7 @@ def assemble(sources, output):
         files = [file for file in stage.rglob('*') if file.is_file()]
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
-        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS local font in output CSS', 'root legacy worker retirement', 'same-origin project entries']}
+        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'aus_checks': aus_checks, 'aus_warnings': aus_warnings, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS local font in output CSS', 'root legacy worker retirement', 'same-origin project entries']}
         (stage / 'build-info.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         stage.rename(output)
     return report
