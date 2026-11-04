@@ -4,6 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
 
+const combined = process.env.COMBINED_SITE === '1';
+const baseURL = (process.env.GERAMI_PREVIEW_URL || 'http://127.0.0.1:4173').replace(/\/$/,'');
+const projectOrigin = combined ? baseURL : 'https://drgerami-md.ir';
+
 const dir = await mkdtemp(join(tmpdir(), 'gerami-browser-'));
 const proc = spawn('chromium', ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--remote-debugging-port=0', '--user-data-dir=' + dir, 'about:blank'], {stdio: ['ignore', 'ignore', 'pipe']});
 let socket;
@@ -63,8 +67,8 @@ try {
       timer = setTimeout(() => reject(Error('Navigation timeout: '+path)),15000);
     });
     try {
-      const navigation = await call('Page.navigate',{url:'http://127.0.0.1:4173/'+path});
-      if (navigation.errorText) throw Error('Cannot load '+path+': '+navigation.errorText+'; start the local server on port 4173.');
+      const navigation = await call('Page.navigate',{url:baseURL+'/'+path});
+      if (navigation.errorText) throw Error('Cannot load '+path+': '+navigation.errorText+'; start the local server at '+baseURL+'.');
       await loaded;
     }
     finally {clearTimeout(timer);loadResolve=null;}
@@ -85,7 +89,7 @@ try {
         assert.equal(state.headings,1,page); assert.equal(state.untranslated,0,page);
         if (page === '' || page === 'pages/projects.html') {
           assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>[link.dataset.appEntry,link.href])"), [
-            ['intmed','https://drgerami-md.ir/intmed/'], ['aus','https://drgerami-md.ir/aus/']
+            ['intmed',projectOrigin+'/intmed/'], ['aus',projectOrigin+'/aus/']
           ], 'Project entries must stay on the .ir domain');
         }
         if(language==='en') assert.notEqual(state.title,faTitle,'Localized title '+page);
@@ -128,19 +132,40 @@ try {
   const remoteConfig = await call('Page.addScriptToEvaluateOnNewDocument',{source:"addEventListener('DOMContentLoaded',()=>{window.SITE_LINKS={intmed:'https://external.example/intmed/',aus:'https://external.example/aus/'};const s=document.createElement('script');s.src='/js/main.js';document.head.append(s)},{once:true})"});
   await navigate('pages/projects.html');
   await evaluate("new Promise(resolve=>setTimeout(resolve,100))");
-  assert.equal(await evaluate("document.querySelector('[data-destination=intmed]').hash"),'#intmed');
-  assert.equal(await evaluate("document.querySelector('[data-destination=aus]').hash"),'#aus');
-  assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),false);
+  assert.equal(await evaluate("document.querySelector('[data-destination=intmed]')."+(combined?'pathname':'hash')),combined?'/intmed/':'#intmed');
+  assert.equal(await evaluate("document.querySelector('[data-destination=aus]')."+(combined?'pathname':'hash')),combined?'/aus/':'#aus');
+  assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),combined);
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:remoteConfig.identifier});
   // JavaScript disabled: content and native mobile menu still work.
   await call('Emulation.setScriptExecutionDisabled',{value:true});
   await navigate('');
   assert.equal(await evaluate("document.querySelector('h1').textContent"),'دکتر امیرهوشنگ گرامی');
   assert.equal(await evaluate("document.querySelector('[data-language-toggle]').hidden"),true);
-  assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),['https://drgerami-md.ir/intmed/','https://drgerami-md.ir/aus/']);
+  assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/',projectOrigin+'/aus/']);
   await evaluate("document.querySelector('.mobile-menu summary').click()");
   assert.equal(await evaluate("document.querySelector('.mobile-menu').open"),true);
   await call('Emulation.setScriptExecutionDisabled',{value:false});
+  if (combined) {
+    await navigate('aus/');
+    for (let i=0;i<100;i++) {
+      if (await evaluate("document.querySelector('#stats').children.length>0")) break;
+      await new Promise(resolve=>setTimeout(resolve,25));
+    }
+    assert.equal(await evaluate("document.querySelector('#load-error').hidden"),true);
+    assert.equal(await evaluate("document.querySelector('#stats').children.length>0"),true,'AUS data loads under /aus/');
+    await evaluate("document.querySelector('a[data-section=tracker]').click(); document.querySelector('#task-title').value='Synthetic subpath smoke test'; document.querySelector('#task-form').requestSubmit()");
+    assert.equal(await evaluate("[...document.querySelectorAll('#task-list input[data-field=title]')].some(input=>input.value==='Synthetic subpath smoke test')"),true);
+    assert.equal(await evaluate("localStorage.getItem('medpath.v2.tasks').includes('Synthetic subpath smoke test')"),true,'AUS task storage preserved');
+    await navigate('intmed/');
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#loginGate')).display!=='none'"),true,'IntMed login gate loads');
+    assert.equal(await evaluate("typeof window.IntMedBackend"),'object','IntMed backend adapter is present');
+    assert.equal(await evaluate("new URL(document.querySelector('link[rel=manifest]').getAttribute('href'),location.href).pathname"),'/intmed/manifest.webmanifest');
+    const scope = await evaluate("Promise.race([navigator.serviceWorker.ready.then(registration=>new URL(registration.scope).pathname),new Promise(resolve=>setTimeout(()=>resolve('timeout'),7000))])");
+    assert.equal(scope,'/intmed/','IntMed worker must not control the personal site or AUS');
+    await navigate('');
+    assert.equal(await evaluate("navigator.serviceWorker.controller === null"),true,'Personal homepage stays outside the IntMed worker scope');
+    console.log('PASS: AUS loads all data under /aus/ and persists a synthetic local task; IntMed login, assets and backend adapter load under /intmed/; installed worker is scoped to /intmed/. No real user or API writes were made.');
+  }
   await navigate('');
   await evaluate("document.documentElement.lang === 'en' && document.querySelector('[data-language-toggle]').click()");
   await evaluate("Promise.all(document.getAnimations().map(animation=>animation.finished.catch(()=>{})))");
@@ -150,7 +175,7 @@ try {
   await writeFile('/tmp/gerami-desktop.png',Buffer.from((await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false})).data,'base64'));
   assert.deepEqual(errors,[],'Runtime errors');
   assert.deepEqual(responses.filter(response=>response.status>=400),[],'HTTP failures');
-  assert.deepEqual(requests.filter(url=>!url.startsWith('http://127.0.0.1:4173/')),[],'Unexpected external network dependency');
+  assert.deepEqual(requests.filter(url=>/^https?:/.test(url)&&!url.startsWith(baseURL+'/')),[],'Unexpected external network dependency');
   console.log('PASS: '+checks+' page/viewport/language combinations; native menu & Escape; reduced motion; blocked storage; configured and unsafe links; no JavaScript; no runtime or HTTP errors; no external requests.');
   console.log('Screenshots: /tmp/gerami-desktop.png /tmp/gerami-mobile.png');
 } finally {

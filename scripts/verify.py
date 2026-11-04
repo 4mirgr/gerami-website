@@ -42,7 +42,7 @@ class Page(HTMLParser):
 
 
 pages = {}
-for file in sorted(ROOT.rglob('*.html')):
+for file in [ROOT / 'index.html', *sorted((ROOT / 'pages').glob('*.html'))]:
     page = Page()
     page.feed(file.read_text(encoding='utf-8'))
     pages[file.resolve()] = page

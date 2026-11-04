@@ -1,0 +1,14 @@
+{
+  "intmed": {
+    "repository": "https://github.com/4mirgr/intMed-study-plan.git",
+    "commit": "dd88139ab38c77889f6e1fdb00d55832189187e2",
+    "public_directory": "docs",
+    "mount": "intmed"
+  },
+  "aus": {
+    "repository": "https://github.com/4mirgr/immi_AUS.git",
+    "commit": "459aecd4679a500c68ebe487d8cb17df57e55813",
+    "public_directory": ".",
+    "mount": "aus"
+  }
+}
