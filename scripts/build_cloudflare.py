@@ -29,10 +29,14 @@ def fetch_source(spec, directory):
     subprocess.run(['git', 'init', '-q', str(directory)], check=True)
     subprocess.run(['git', '-C', str(directory), 'remote', 'add', 'origin', spec['repository']], check=True)
     subprocess.run(['git', '-C', str(directory), 'fetch', '--quiet', '--depth=1', '--filter=blob:none', 'origin', spec['commit']], check=True)
+    # Upstream validators may read root configuration and files outside the public
+    # folders. Always materialize the complete pinned tree, including in CI where
+    # sparse-checkout settings may be inherited from the build environment.
+    subprocess.run(['git', '-C', str(directory), '-c', 'core.sparseCheckout=false', 'checkout', '--quiet', '--detach', 'FETCH_HEAD'], check=True)
     if spec['mount'] == 'intmed':
-        # The canonical content and the upstream validators are release inputs too.
-        subprocess.run(['git', '-C', str(directory), 'sparse-checkout', 'set', '--cone', 'docs', 'content', 'scripts', 'backend'], check=True)
-    subprocess.run(['git', '-C', str(directory), 'checkout', '--quiet', '--detach', 'FETCH_HEAD'], check=True)
+        # Restore the actual upstream config, never a generated substitute. This
+        # file is needed only by tests; it is not published in the site's assets.
+        subprocess.run(['git', '-C', str(directory), 'restore', '--source=FETCH_HEAD', '--ignore-skip-worktree-bits', '--worktree', '--', 'wrangler.jsonc'], check=True)
     return directory
 
 
