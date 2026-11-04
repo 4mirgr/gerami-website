@@ -36,7 +36,7 @@ class Assets(HTMLParser):
             self.entries.append(attributes.get('href'))
 
 
-for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html'):
+for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html', 'connection-check.html'):
     file = site / path
     assets = Assets()
     assets.feed(file.read_text())

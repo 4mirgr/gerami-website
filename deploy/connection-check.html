@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>بررسی اتصال سایت</title>
+<style>
+body{font:16px/1.9 Tahoma,system-ui,sans-serif;background:#0c1520;color:#edf4fa;max-width:950px;margin:3rem auto;padding:0 1rem}button{font:inherit;padding:.5rem 1rem;cursor:pointer}table{border-collapse:collapse;width:100%;margin:1rem 0}td,th{text-align:right;border-bottom:1px solid #435260;padding:.5rem}pre{direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;background:#172331;padding:1rem}a{color:#8de0d0}#status{min-height:2em}
+</style>
+<main>
+<h1>بررسی اتصال سایت و پنل‌ها</h1>
+<p>این بررسی فقط فایل‌های عمومی و وضعیت درگاه‌ها را دریافت می‌کند؛ وارد حساب نمی‌شود و اطلاعات حساب یا مطالعه را نمی‌خواند و تغییر نمی‌دهد. نتیجه روی همین دستگاه می‌ماند.</p>
+<p>ابتدا VPN را خاموش کنید و بررسی را اجرا کنید. سپس با VPN روشن دوباره اجرا کنید و هر دو گزارش را بفرستید. پاسخ سالم این بررسی، ورود واقعی حساب را تأیید نمی‌کند.</p>
+<button id="run" type="button">شروع بررسی</button>
+<p id="status" role="status" aria-live="polite"></p>
+<table><thead><tr><th>بخش</th><th>نتیجه</th><th>زمان</th></tr></thead><tbody id="results"></tbody></table>
+<button id="copy" type="button" disabled>کپی گزارش</button>
+<pre id="report"></pre>
+<p>خطای شبکه می‌تواند از DNS، TLS، محدودیت اپراتور یا CORS باشد؛ به‌تنهایی اثبات فیلترینگ نیست.</p>
+<a href="/">بازگشت به سایت</a>
+</main>
+<script type="module" src="/connection-check.js"></script>
+</html>

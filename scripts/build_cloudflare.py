@@ -177,6 +177,8 @@ def assemble(sources, output):
         (stage / 'favicon.ico').write_bytes(struct.pack('<HHH', 0, 1, 1) + entry + icon)
         shutil.copy2(ROOT / 'deploy/retire-legacy-sw.js', stage / 'sw.js')
         shutil.copy2(ROOT / 'deploy/legacy-intmed-links.js', stage / 'legacy-intmed-links.js')
+        for name in ('connection-check.html', 'connection-check.js'):
+            shutil.copy2(ROOT / 'deploy' / name, stage / name)
         # Enable cards in the assembled artifact, where the actual apps now exist.
         with (stage / 'js/links.js').open('a', encoding='utf-8') as handle:
             handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/',aus:'/aus/'}));\n")
