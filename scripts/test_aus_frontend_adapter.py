@@ -86,6 +86,20 @@ class AdapterTests(unittest.TestCase):
         for private in ["private", ".env", "cloud/worker.mjs"]:
             self.assertFalse((work / private).exists())
 
+    def test_recovery_redirect_is_bound_to_mount_and_unknown_helpers_fail_closed(self):
+        auth = "import { recoveryRedirect } from './auth-recovery.mjs';\n" + AUTH.replace('encodeURIComponent(location.origin)', 'encodeURIComponent(recoveryRedirect(location.href))')
+        auth += '\nconst recover = encodeURIComponent(recoveryRedirect(location.href));\n'
+        (self.source / 'src/auth.jsx').write_text(auth)
+        helper = self.source / 'src/auth-recovery.mjs'
+        helper.write_text("export function recoveryRedirect(href) { const url = new URL(href); return url.origin + (url.pathname === '/aus' || url.pathname.startsWith('/aus/') ? '/aus/' : '/'); }")
+        work = self.root / 'recovery-work'
+        prepare_source(self.source, work)
+        self.assertIn('return url.origin + import.meta.env.BASE_URL;', (work / 'src/auth-recovery.mjs').read_text())
+        self.assertNotIn('local_demo', (work / 'src/auth.jsx').read_text())
+        helper.write_text("export function recoveryRedirect() { return 'https://unreviewed.invalid/'; }")
+        with self.assertRaisesRegex(RuntimeError, 'contract changed'):
+            prepare_source(self.source, self.root / 'unreviewed-work')
+
     def test_cloud_gate_rejects_demo_incomplete_and_http_configuration(self):
         work = self.root / "work"
         prepare_source(self.source, work)

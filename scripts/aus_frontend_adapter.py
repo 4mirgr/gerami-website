@@ -62,8 +62,17 @@ def prepare_source(source: Path, destination: Path) -> None:
     if config_count != 1 or demo_count != 1:
         raise RuntimeError("AUS auth gate contract changed; review before publishing")
     auth.write_text(text, encoding="utf-8")
-    _replace_required(auth, "encodeURIComponent(location.origin)",
-                      "encodeURIComponent(location.origin + import.meta.env.BASE_URL)")
+    if 'encodeURIComponent(location.origin)' in text:
+        _replace_required(auth, "encodeURIComponent(location.origin)",
+                          "encodeURIComponent(location.origin + import.meta.env.BASE_URL)")
+    elif text.count('encodeURIComponent(recoveryRedirect(location.href))') == 2 and "'./auth-recovery.mjs'" in text:
+        # Signup and password recovery share the reviewed URL helper. Bind its
+        # disposable build copy to Vite's mount; never silently skip the check.
+        _replace_required(destination / 'src/auth-recovery.mjs',
+                          "return url.origin + (url.pathname === '/aus' || url.pathname.startsWith('/aus/') ? '/aus/' : '/');",
+                          'return url.origin + import.meta.env.BASE_URL;')
+    else:
+        raise RuntimeError('AUS recovery redirect contract changed; review before publishing')
 
     # JSX public image attributes and the image fetch used by LinkedIn cards.
     for path in (destination / "src").rglob("*"):
