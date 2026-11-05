@@ -3,7 +3,7 @@
 const WORKER_ORIGIN = 'https://immi-arash-amir.dr-gerami-md.workers.dev';
 const SUPABASE_ORIGIN = 'https://waxpjylnvwqdlktayyww.supabase.co';
 const BLOCKED_OAUTH = new Set([
-  '/api/google/start', '/api/google/callback',
+  '/api/google/launch', '/api/google/callback',
   '/api/linkedin/connect', '/api/linkedin/callback',
 ]);
 
@@ -85,9 +85,27 @@ export async function onRequest({request, env, next}) {
     const target = WORKER_ORIGIN + path + url.search;
     try {
       const upstream = new Request(new Request(target, request), {
-        headers: forwardedHeaders(request, WORKER_ORIGIN), redirect: 'manual',
+        headers: forwardedHeaders(request, path === '/api/google/start' ? url.origin : WORKER_ORIGIN), redirect: 'manual',
       });
       const response = await env.AUS_APP.fetch(upstream);
+      if (path === '/api/google/start' && request.method === 'POST' && response.ok) {
+        // New consent is launched by a top-level form POST on the existing
+        // canonical OAuth host. Never transplant host cookies across domains.
+        const launch = JSON.parse(await boundedText(response, 16384));
+        let authorization;
+        try { authorization = new URL(launch.authorizationUrl); } catch {}
+        if (launch.launchUrl !== WORKER_ORIGIN + '/api/google/launch'
+          || launch.oauthOrigin !== WORKER_ORIGIN
+          || !/^[A-Za-z0-9_-]{43}\.[A-Za-z0-9_-]{43}$/.test(launch.launchTicket)
+          || !/^[A-Za-z0-9_-]{43}$/.test(launch.callbackNonce)
+          || authorization?.origin !== 'https://accounts.google.com'
+          || authorization.searchParams.get('redirect_uri') !== WORKER_ORIGIN + '/api/google/callback') {
+          return json({error: 'oauth_domain_setup_required'}, 503);
+        }
+        return json({authorizationUrl: launch.authorizationUrl, launchUrl: launch.launchUrl,
+          launchTicket: launch.launchTicket, callbackNonce: launch.callbackNonce,
+          oauthOrigin: WORKER_ORIGIN});
+      }
       if (path === '/api/public-config' && request.method === 'GET' && response.ok) {
         const config = JSON.parse(await boundedText(response, 65536));
         if (config.mode !== 'cloud' || config.authRequired !== true || config.supabaseUrl !== SUPABASE_ORIGIN

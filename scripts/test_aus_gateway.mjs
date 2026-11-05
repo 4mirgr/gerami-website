@@ -67,13 +67,33 @@ test('public config is bound to the dedicated project and rewritten to same orig
 });
 
 test('new OAuth flows fail closed while existing connection status still forwards', async () => {
-  for (const path of ['/google/start', '/google/callback', '/linkedin/connect', '/linkedin/callback']) {
+  for (const path of ['/google/launch', '/google/callback', '/linkedin/connect', '/linkedin/callback']) {
     const response = await invoke('/aus/api' + path, {headers: {Origin: PUBLIC}, binding: () => assert.fail('OAuth must not forward')});
     assert.equal(response.status, 503);
     assert.equal((await response.json()).error, 'oauth_domain_setup_required');
   }
   for (const path of ['/google/status', '/linkedin/connection']) {
     assert.equal((await invoke('/aus/api' + path, {binding: async () => reply({connected: true})})).status, 200);
+  }
+});
+
+test('Google start keeps the actual app Origin and requires canonical one-use POST launch', async () => {
+  const launch = {authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=' + encodeURIComponent(WORKER + '/api/google/callback'), launchUrl: WORKER + '/api/google/launch', launchTicket: 'a'.repeat(43) + '.' + 'b'.repeat(43), callbackNonce: 'c'.repeat(43), oauthOrigin: WORKER};
+  const response = await invoke('/aus/api/google/start?profile=amir&mailbox=secondary', {
+    method: 'POST', headers: {Origin: PUBLIC, Authorization: 'Bearer synthetic-owner', Cookie: 'unrelated=value', 'Content-Type': 'application/json'}, body: '{}',
+    binding: async request => {
+      assert.equal(request.url, WORKER + '/api/google/start?profile=amir&mailbox=secondary');
+      assert.equal(request.headers.get('Origin'), PUBLIC);
+      assert.equal(request.headers.get('Authorization'), 'Bearer synthetic-owner');
+      assert.equal(request.headers.get('Cookie'), null);
+      return reply(launch, 200, {'Set-Cookie': '__Host-immi_google_oauth=must-stay-canonical'});
+    },
+  });
+  assert.equal(response.status, 200); assert.deepEqual(await response.json(), launch);
+  assert.equal(response.headers.get('Set-Cookie'), null);
+  for (const invalid of [{authorizationUrl: launch.authorizationUrl}, {...launch, launchUrl: 'https://evil.invalid/api/google/launch'}, {...launch, launchTicket: 'bad'}]) {
+    const result = await invoke('/aus/api/google/start', {method: 'POST', headers: {Origin: PUBLIC}, body: '{}', binding: async () => reply(invalid)});
+    assert.equal(result.status, 503);
   }
 });
 
