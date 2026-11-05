@@ -62,7 +62,7 @@ function validAuthQuery(url, endpoint) {
   const entries = [...url.searchParams];
   if (endpoint === 'token') return entries.length === 1 && entries[0][0] === 'grant_type'
     && ['password', 'refresh_token'].includes(entries[0][1]);
-  if (endpoint === 'signup') return entries.length === 1 && entries[0][0] === 'redirect_to'
+  if (endpoint === 'signup' || endpoint === 'recover') return entries.length === 1 && entries[0][0] === 'redirect_to'
     && entries[0][1] === url.origin + '/aus/';
   return entries.length === 0;
 }
@@ -119,16 +119,33 @@ export async function onRequest({request, env, next}) {
   }
 
   const endpoint = url.pathname.slice('/aus/supabase/auth/v1/'.length);
-  if (!url.pathname.startsWith('/aus/supabase/auth/v1/') || !['token', 'signup', 'logout'].includes(endpoint)) return json({error: 'auth_endpoint_not_allowed'}, 404);
-  if (request.method !== 'POST') return json({error: 'method_not_allowed'}, 405);
+  if (!url.pathname.startsWith('/aus/supabase/auth/v1/') || !['token', 'signup', 'logout', 'recover', 'user'].includes(endpoint)) return json({error: 'auth_endpoint_not_allowed'}, 404);
+  const allowedMethods = endpoint === 'user' ? ['GET', 'PUT'] : ['POST'];
+  if (!allowedMethods.includes(request.method)) return json({error: 'method_not_allowed'}, 405);
+  if (endpoint === 'user' && !/^Bearer [^\s]+$/i.test(request.headers.get('Authorization') || '')) return json({error: 'auth_required'}, 401);
+  if (endpoint === 'user' && request.headers.has('Origin') && request.headers.get('Origin') !== url.origin) return json({error: 'origin_rejected'}, 403);
   if (!validAuthQuery(url, endpoint)) return json({error: 'auth_query_not_allowed'}, 400);
   let body;
-  try { body = await boundedText(request, 65536); }
+  try { body = await boundedText(request, ['recover', 'user'].includes(endpoint) ? 16384 : 65536); }
   catch { return json({error: 'payload_too_large'}, 413); }
+  // Password recovery cannot mutate identities, email addresses or metadata.
+  // The bearer is validated by Supabase, never trusted by this relay itself.
+  if (endpoint === 'recover' || (endpoint === 'user' && request.method === 'PUT')) {
+    let payload;
+    try { payload = JSON.parse(body); } catch { return json({error: 'invalid_auth_payload'}, 400); }
+    const key = endpoint === 'recover' ? 'email' : 'password';
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)
+      || Object.keys(payload).length !== 1 || typeof payload[key] !== 'string'
+      || (key === 'email' && (payload.email.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)))
+      || (key === 'password' && (payload.password.length < 12 || payload.password.length > 4096))) {
+      return json({error: 'invalid_auth_payload'}, 400);
+    }
+    body = JSON.stringify(payload);
+  }
   try {
     const response = await fetch(SUPABASE_ORIGIN + '/auth/v1/' + endpoint + url.search, {
-      method: 'POST', headers: forwardedHeaders(request, SUPABASE_ORIGIN),
-      body: body || undefined, redirect: 'manual', signal: AbortSignal.timeout(20000),
+      method: request.method, headers: forwardedHeaders(request, SUPABASE_ORIGIN),
+      body: request.method === 'GET' ? undefined : body || undefined, redirect: 'manual', signal: AbortSignal.timeout(20000),
     });
     return privateResponse(response);
   } catch {

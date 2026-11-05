@@ -146,3 +146,66 @@ test('auth proxy rejects admin/REST, provider flows, unsafe redirects and cross-
     assert.equal((await invoke('/aus/supabase/auth/v1/logout', {method: 'POST', headers: {Origin: PUBLIC}, body: 'x'.repeat(65537), binding: () => {}})).status, 413);
   } finally { globalThis.fetch = originalFetch; }
 });
+
+test('password recovery forwards only an email and an exact app redirect', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async (target, options) => {
+    calls++;
+    assert.equal(target, SUPABASE + '/auth/v1/recover?redirect_to=' + encodeURIComponent(PUBLIC + '/aus/'));
+    assert.equal(options.method, 'POST');
+    assert.equal(options.headers.get('Origin'), SUPABASE);
+    assert.equal(options.headers.get('Cookie'), null);
+    assert.equal(options.redirect, 'manual');
+    assert.deepEqual(JSON.parse(options.body), {email: 'owner@example.invalid'});
+    return reply({});
+  };
+  const invokeRecover = (query, body, origin = PUBLIC) => invoke('/aus/supabase/auth/v1/recover' + query,
+    {method: 'POST', headers: {Origin: origin, apikey: 'public-key', Cookie: 'private=bad'}, body: JSON.stringify(body), binding: () => assert.fail()});
+  try {
+    const query = '?redirect_to=' + encodeURIComponent(PUBLIC + '/aus/');
+    assert.equal((await invokeRecover(query, {email: 'owner@example.invalid'})).status, 200);
+    for (const invalidQuery of ['', '?redirect_to=https://evil.invalid', '?redirect_to=' + encodeURIComponent(PUBLIC + '/intmed/'), query + '&extra=1', query + '&redirect_to=https://evil.invalid']) {
+      assert.equal((await invokeRecover(invalidQuery, {email: 'owner@example.invalid'})).status, 400);
+    }
+    for (const payload of [{}, {email: 'bad'}, {email: 'owner@example.invalid', data: {role: 'admin'}}, {email: 'owner@example.invalid', password: 'unwanted'}]) {
+      assert.equal((await invokeRecover(query, payload)).status, 400);
+    }
+    assert.equal((await invokeRecover(query, {email: 'owner@example.invalid'}, 'https://evil.invalid')).status, 403);
+    assert.equal(calls, 1);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('recovery user lookup and password update preserve bearer, deny unrelated mutations and provider redirects', async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  let redirect = false;
+  globalThis.fetch = async (target, options) => {
+    calls++;
+    assert.equal(target, SUPABASE + '/auth/v1/user');
+    assert.equal(options.headers.get('Authorization'), 'Bearer synthetic-recovery');
+    assert.equal(options.headers.get('Cookie'), null);
+    assert.equal(options.redirect, 'manual');
+    if (redirect) return new Response(null, {status: 302, headers: {Location: 'https://evil.invalid'}});
+    if (options.method === 'GET') { assert.equal(options.body, undefined); return reply({id: 'synthetic-user', email: 'owner@example.invalid'}); }
+    assert.equal(options.method, 'PUT');
+    assert.deepEqual(JSON.parse(options.body), {password: 'synthetic-new-password'});
+    return reply({id: 'synthetic-user'});
+  };
+  const user = (method, body, headers = {Origin: PUBLIC, Authorization: 'Bearer synthetic-recovery', Cookie: 'never=forward'}) => invoke('/aus/supabase/auth/v1/user',
+    {method, headers, body: body === undefined ? undefined : JSON.stringify(body), binding: () => assert.fail()});
+  try {
+    const read = await user('GET'); assert.equal(read.status, 200); assert.equal(read.headers.get('Cache-Control'), 'no-store');
+    assert.equal((await user('PUT', {password: 'synthetic-new-password'})).status, 200);
+    for (const payload of [{password: 'short'}, {email: 'new@example.invalid'}, {password: 'synthetic-new-password', email: 'new@example.invalid'}, {password: 'synthetic-new-password', data: {role: 'admin'}}, [], null]) {
+      assert.equal((await user('PUT', payload)).status, 400);
+    }
+    assert.equal((await user('GET', undefined, {})).status, 401);
+    assert.equal((await user('GET', undefined, {Authorization: 'Bearer synthetic-recovery', Origin: 'https://evil.invalid'})).status, 403);
+    assert.equal((await user('POST', {})).status, 405);
+    assert.equal((await invoke('/aus/supabase/auth/v1/user?email=other', {headers: {Authorization: 'Bearer synthetic-recovery'}, binding: () => assert.fail()})).status, 400);
+    assert.equal(calls, 2);
+    redirect = true;
+    const result = await user('GET'); assert.equal(result.status, 502); assert.equal(result.headers.get('Location'), null);
+  } finally { globalThis.fetch = originalFetch; }
+});
