@@ -1,7 +1,7 @@
 {
   "intmed": {
     "repository": "https://github.com/4mirgr/intMed-study-plan.git",
-    "commit": "d092cca654cd7d76d697b2d8993a4e51f3f73bb4",
+    "commit": "a335ab8607aa7d2cf3b9f56f457a8eaa5dce534e",
     "public_directory": "docs",
     "mount": "intmed"
   },
