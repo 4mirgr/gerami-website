@@ -7,6 +7,10 @@ try {
  const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'dark'});
  await page.goto('http://127.0.0.1:4173/');
  assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
+ await page.locator('[data-deck-next]').click();
+ assert.equal(await page.locator('[data-feature="2"]').getAttribute('data-position'),'active');
+ await page.locator('[data-deck-prev]').click();
+ assert.equal(await page.locator('[data-feature="1"]').getAttribute('data-position'),'active');
  await page.screenshot({path:'/tmp/gerami-night.png',fullPage:true});
  await page.locator('[data-theme-toggle]').click();
  assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
