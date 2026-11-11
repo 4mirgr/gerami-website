@@ -112,7 +112,7 @@ try {
   assert.equal(await evaluate("document.querySelector('.mobile-menu').open"),false);
   assert.equal(await evaluate("document.activeElement.tagName"),'SUMMARY');
   await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
-  assert.equal(await evaluate("getComputedStyle(document.querySelector('.animate-in')).animationName"),'none');
+  assert.equal(await evaluate("getComputedStyle(document.querySelector('.signature-copy')).animationName"),'none');
   await call('Emulation.setEmulatedMedia',{features:[]});
   // Blocked storage must not prevent language switching or link hydration.
   const {identifier} = await call('Page.addScriptToEvaluateOnNewDocument',{source:"Object.defineProperty(window,'localStorage',{get(){throw new Error('Storage blocked')}})"});
@@ -145,7 +145,7 @@ try {
   // JavaScript disabled: content and native mobile menu still work.
   await call('Emulation.setScriptExecutionDisabled',{value:true});
   await navigate('');
-  assert.equal(await evaluate("document.querySelector('h1').textContent"),'دکتر امیرهوشنگ گرامی');
+  assert.equal(await evaluate("document.querySelector('.hero-introduction').textContent"),'دکتر امیرهوشنگ گرامی');
   assert.equal(await evaluate("document.querySelector('[data-language-toggle]').hidden"),true);
   assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/',projectOrigin+'/aus/']);
   await evaluate("document.querySelector('.mobile-menu summary').click()");
