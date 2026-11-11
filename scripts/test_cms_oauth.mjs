@@ -1,0 +1,17 @@
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const load=async file => import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL('../functions/api/cms/'+file,import.meta.url),'utf8')).toString('base64'));
+const auth=await load('auth.js');const callback=await load('callback.js');
+const origin='https://drgerami-md.ir';const env={CMS_GITHUB_CLIENT_ID:'id',CMS_GITHUB_CLIENT_SECRET:'secret'};
+assert.equal((await auth.onRequestGet({request:new Request(origin+'/api/cms/auth'),env:{}})).status,503);
+assert.equal((await auth.onRequestGet({request:new Request('https://evil.test/api/cms/auth'),env})).status,403);
+const start=await auth.onRequestGet({request:new Request(origin+'/api/cms/auth'),env});
+assert.equal(start.status,302);const state=new URL(start.headers.get('location')).searchParams.get('state');assert.equal(state.length,64);assert.match(start.headers.get('set-cookie'),/HttpOnly; Secure; SameSite=Lax/);
+const req=s=>new Request(origin+'/api/cms/callback?code=test&state='+s,{headers:{cookie:'__Host-cms-state='+state}});
+assert.equal((await callback.onRequestGet({request:req('wrong'),env})).status,403);
+const realFetch=globalThis.fetch;
+globalThis.fetch=async url=>new Response(JSON.stringify(String(url).includes('access_token')?{access_token:'mock-token'}:{login:'4mirgr'}),{headers:{'content-type':'application/json'}});
+const success=await callback.onRequestGet({request:req(state),env});assert.equal(success.status,200);const html=await success.text();assert.match(html,/authorization:github:success/);assert.match(html,/event.origin!==origin/);assert.match(success.headers.get('content-security-policy'),/frame-ancestors 'none'/);
+globalThis.fetch=async url=>new Response(JSON.stringify(String(url).includes('access_token')?{access_token:'mock-token'}:{login:'other'}));
+assert.equal((await callback.onRequestGet({request:req(state),env})).status,403);
+globalThis.fetch=realFetch;console.log('PASS CMS OAuth: config, origin, state, owner restriction, success, CSP');

@@ -1,0 +1,31 @@
+import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url);
+const {chromium}=require('playwright');
+const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+try {
+ const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'dark'});
+ await page.goto('http://127.0.0.1:4173/');
+ assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
+ await page.screenshot({path:'/tmp/gerami-night.png',fullPage:true});
+ await page.locator('[data-theme-toggle]').click();
+ assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
+ await page.reload();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
+ await page.screenshot({path:'/tmp/gerami-day.png',fullPage:true});
+ await page.setViewportSize({width:360,height:800});
+ await page.locator('[data-theme-toggle]').click();
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.screenshot({path:'/tmp/gerami-night-mobile.png',fullPage:true});
+ const article={slug:'first-article',status:'published',audience:'patients',category:'General',title_fa:'مقالهٔ آزمایشی',title_en:'Test article',body_fa:'<img src=x onerror=alert(1)>',body_en:'Education',author:'Test author',published_at:'2026-11-11',reviewed_at:'2026-11-11',sources:[{title:'Unsafe',url:'javascript:alert(1)'},{title:'Safe',url:'https://example.org'}]};
+ await page.route('**/content/articles.json',route=>route.fulfill({json:{articles:[article,{...article,slug:'secret-draft',status:'draft',title_fa:'پیش‌نویس'}]}}));
+ await page.goto('http://127.0.0.1:4173/pages/blog.html');
+ await page.waitForSelector('.cms-article');assert.equal(await page.locator('.cms-article').count(),1);
+ await page.locator('.cms-article summary').click();
+ assert.equal(await page.locator('.article-body img').count(),0);
+ assert.equal(await page.locator('.cms-article a').count(),1);
+ await page.locator('input[type=search]').fill('ناموجود');assert.equal(await page.locator('.cms-article').count(),0);
+ await page.locator('input[type=search]').fill('');
+ await page.locator('[data-language-toggle]').click();assert.equal(await page.locator('.cms-article summary').textContent(),'Test article');
+ await page.locator('select').selectOption('professional');assert.equal(await page.locator('.cms-article').count(),0);
+ console.log('PASS: system/manual/persistent themes, mobile overflow, published-only articles, safe text/sources, search, language, audience filter.');
+} finally {await browser.close();}

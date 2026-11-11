@@ -1,0 +1,60 @@
+backend:
+  name: github
+  repo: 4mirgr/gerami-website
+  branch: main
+  base_url: https://drgerami-md.ir
+  auth_endpoint: api/cms/auth
+publish_mode: editorial_workflow
+locale: fa
+site_url: https://drgerami-md.ir
+media_folder: assets/uploads
+public_folder: /assets/uploads
+collections:
+  - name: website
+    label: محتوای سایت
+    files:
+      - name: profile
+        label: رزومه و اطلاعات تماس
+        file: content/site.json
+        fields:
+          - {name: bio_fa, label: معرفی فارسی, widget: text, required: false}
+          - {name: bio_en, label: معرفی انگلیسی, widget: text, required: false}
+          - name: cv
+            label: سوابق تأییدشده
+            widget: list
+            fields:
+              - {name: title_fa, label: عنوان فارسی, widget: string}
+              - {name: title_en, label: عنوان انگلیسی, widget: string}
+              - {name: detail_fa, label: شرح فارسی, widget: text}
+              - {name: detail_en, label: شرح انگلیسی, widget: text}
+          - {name: email, label: ایمیل عمومی, widget: string, required: false}
+          - {name: phone, label: تلفن عمومی با کد کشور, widget: string, required: false}
+          - {name: linkedin, label: لینکدین, widget: string, required: false}
+          - {name: appointment, label: لینک اختصاصی نوبت, widget: string, required: false}
+      - name: articles
+        label: مقالات
+        file: content/articles.json
+        fields:
+          - name: articles
+            label: مقالات
+            widget: list
+            summary: '{{fields.title_fa}} — {{fields.status}}'
+            fields:
+              - {name: slug, label: شناسه یکتا (حروف انگلیسی و خط تیره), widget: string, pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'از حروف کوچک انگلیسی و خط تیره استفاده کنید']}
+              - {name: status, label: وضعیت نمایش, widget: select, options: [draft, published], default: draft}
+              - {name: audience, label: مخاطب, widget: select, options: [patients, professional]}
+              - {name: category, label: دسته‌بندی, widget: string}
+              - {name: title_fa, label: عنوان فارسی, widget: string}
+              - {name: title_en, label: عنوان انگلیسی, widget: string}
+              - {name: body_fa, label: متن فارسی (متن ساده), widget: text}
+              - {name: body_en, label: متن انگلیسی (متن ساده), widget: text}
+              - {name: author, label: نویسنده, widget: string}
+              - {name: published_at, label: تاریخ انتشار, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
+              - {name: reviewed_at, label: تاریخ بازبینی, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
+              - {name: image, label: تصویر, widget: image, required: false}
+              - name: sources
+                label: منابع
+                widget: list
+                fields:
+                  - {name: title, label: نام منبع, widget: string}
+                  - {name: url, label: پیوند HTTPS, widget: string, pattern: ['^https://', 'پیوند باید HTTPS باشد']}

@@ -73,10 +73,10 @@ for file, page in pages.items():
         elif url.fragment and target in pages and unquote(url.fragment) not in pages[target].ids:
             errors.append(f'{file.relative_to(ROOT)}: missing anchor {reference}')
 
-entry = sum((ROOT / path).stat().st_size for path in ('index.html', 'css/style.css', 'js/main.js', 'js/links.js', 'favicon.svg'))
+entry = sum((ROOT / path).stat().st_size for path in ('index.html', 'css/style.css', 'js/main.js', 'js/links.js', 'js/theme.js', 'js/content.js', 'assets/favicon.ico'))
 if entry > 60 * 1024:
     errors.append(f'initial resource budget exceeded: {entry} bytes')
 if errors:
     raise SystemExit('\n'.join(errors))
 print(f'PASS: {len(pages)} pages; local links and anchors; one h1/main; translation pairs; no external assets.')
-print(f'Initial resources: {entry:,} bytes uncompressed (budget: 61,440).')
+print(f'Initial HTML/CSS/JS/icon (images excluded): {entry:,} bytes uncompressed (budget: 61,440).')
