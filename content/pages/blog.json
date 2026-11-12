@@ -1,0 +1,115 @@
+{
+  "blocks": {
+    "text-001": {
+      "fa": "مطالب آموزشی | دکتر امیرهوشنگ گرامی",
+      "en": "Education | Dr. Amir Houshang Gerami"
+    },
+    "text-002": {
+      "fa": "آموزش سلامت برای عموم و آموزش پزشکی برای دانشجویان و پزشکان؛ مطالب منتخب پروژهٔ intmed.",
+      "en": "Public health and professional medical education, informed by selected intmed content."
+    },
+    "text-003": {
+      "fa": "رفتن به محتوای اصلی",
+      "en": "Skip to content"
+    },
+    "text-004": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-005": {
+      "fa": "پزشکی · آموزش · ارتباط",
+      "en": "Medicine · Education · Connection"
+    },
+    "text-012": {
+      "fa": "فهرست",
+      "en": "Menu"
+    },
+    "text-019": {
+      "fa": "خانه",
+      "en": "Home"
+    },
+    "text-020": {
+      "fa": "مطالب آموزشی",
+      "en": "Education"
+    },
+    "text-021": {
+      "fa": "مطالب آموزشی",
+      "en": "Education"
+    },
+    "text-022": {
+      "fa": "پزشکی، با توجه به نیاز و دانش مخاطب",
+      "en": "Medical writing shaped around the reader"
+    },
+    "text-023": {
+      "fa": "برای عموم",
+      "en": "For the public"
+    },
+    "text-024": {
+      "fa": "سلامت به زبان ساده",
+      "en": "Health in plain language"
+    },
+    "text-025": {
+      "fa": "مطالب این بخش برای بیماران، خانواده‌ها و علاقه‌مندان به سلامت آماده می‌شوند؛ با توضیح اصطلاحات، منابع و تاریخ بازبینی.",
+      "en": "This section is for patients, families, and people interested in health, with terminology explained, references provided, and review dates shown."
+    },
+    "text-026": {
+      "fa": "هنوز مقاله‌ای در این بخش منتشر نشده است.",
+      "en": "No articles have been published in this section yet."
+    },
+    "text-027": {
+      "fa": "برای دانشجویان و پزشکان",
+      "en": "For students & clinicians"
+    },
+    "text-028": {
+      "fa": "آموزش پزشکی",
+      "en": "Professional learning"
+    },
+    "text-029": {
+      "fa": "مطالب تخصصی منتخب از intmed پس از آماده‌سازی، تعیین سطح مخاطب و بازبینی منابع در این بخش منتشر می‌شوند.",
+      "en": "Selected professional content from intmed will be published after preparation, audience definition, and source review."
+    },
+    "text-030": {
+      "fa": "هنوز مقاله‌ای در این بخش منتشر نشده است.",
+      "en": "No articles have been published in this section yet."
+    },
+    "text-031": {
+      "fa": "دربارهٔ محتوای آموزشی",
+      "en": "About educational content"
+    },
+    "text-032": {
+      "fa": "مطالب سایت برای آموزش هستند و جایگزین تشخیص، نسخه یا مشاورهٔ پزشکی فردی نیستند. تصمیم درمانی باید با توجه به شرایط هر فرد و ارزیابی پزشک گرفته شود.",
+      "en": "The content is educational and does not replace individual diagnosis, prescriptions, or medical advice. Treatment decisions require an individual assessment."
+    },
+    "text-033": {
+      "fa": "آشنایی با intmed",
+      "en": "About intmed"
+    },
+    "text-034": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-035": {
+      "fa": "فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من.",
+      "en": "A place to explore my professional journey, educational writing, and projects."
+    },
+    "text-036": {
+      "fa": "دسترسی سریع",
+      "en": "Explore"
+    },
+    "text-040": {
+      "fa": "در ارتباط بمانیم",
+      "en": "Stay connected"
+    },
+    "text-043": {
+      "fa": "مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند.",
+      "en": "Educational content does not replace individual medical assessment or advice."
+    },
+    "text-044": {
+      "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
+      "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    }
+  },
+  "links": {
+    "link-001": "/index.html"
+  }
+}

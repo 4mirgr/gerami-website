@@ -1,0 +1,62 @@
+{
+  "font": "Vazirmatn",
+  "fontSize": 16,
+  "lineHeight": 1.9,
+  "headingWeight": 700,
+  "radius": 14,
+  "width": 1320,
+  "light": {
+    "paper": "#f8fafc",
+    "white": "#ffffff",
+    "ink": "#050023",
+    "muted": "#626a85",
+    "wash": "#eef1fc",
+    "line": "#e5e6f2",
+    "teal": "#3772ff",
+    "button": "#3772ff",
+    "buttonText": "#ffffff",
+    "logo": "/assets/identity/logo-day.webp",
+    "wallpaper": "/assets/identity/wallpaper-day.webp",
+    "background": ""
+  },
+  "dark": {
+    "paper": "#080326",
+    "white": "#110d2b",
+    "ink": "#ffffff",
+    "muted": "#b6b2cb",
+    "wash": "#100a32",
+    "line": "#2c254c",
+    "teal": "#8daeff",
+    "button": "#3772ff",
+    "buttonText": "#ffffff",
+    "logo": "/assets/identity/logo-night.webp",
+    "wallpaper": "/assets/identity/wallpaper-night.webp",
+    "background": ""
+  },
+  "sections": [
+    {
+      "id": "hero",
+      "visible": true
+    },
+    {
+      "id": "explore",
+      "visible": true
+    },
+    {
+      "id": "projects",
+      "visible": true
+    },
+    {
+      "id": "about",
+      "visible": true
+    },
+    {
+      "id": "education",
+      "visible": true
+    },
+    {
+      "id": "articles",
+      "visible": true
+    }
+  ]
+}

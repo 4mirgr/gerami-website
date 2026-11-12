@@ -2,7 +2,8 @@
 <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>مدیریت سایت دکتر گرامی</title><link rel="icon" href="../assets/favicon.ico?v=20261112"><style>@font-face{font-family:Vazirmatn;src:url(../assets/fonts/Vazirmatn.woff2?v=20261112-font-logo-2)}html,body,body *{font-family:Vazirmatn,Tahoma,sans-serif!important}textarea{direction:rtl}</style></head><body><noscript>برای ویرایش محتوا JavaScript را فعال کنید.</noscript><script src="https://cdn.jsdelivr.net/npm/decap-cms@3.10.0/dist/decap-cms.js" integrity="sha384-Yw42/AXF834YFNra0g9Mm3CluXF/L7H12eabT/fRPqq56Gp3mFYdFR24hgGi5iAQ" crossorigin="anonymous"></script><script>CMS.registerPreviewStyle('/css/style.css');</script><script>
 // Recover login when a browser isolates the OAuth popup from its opener.
 window.addEventListener('storage', event => {
- if(event.key !== 'decap-cms-user' || !event.newValue)return;
+ if(event.key !== 'decap-cms-user')return;
+ if(!event.newValue){location.reload();return;}
  try{const next=JSON.parse(event.newValue),previous=JSON.parse(event.oldValue || 'null');
  if(next.backendName==='github' && typeof next.token==='string' && next.token && previous?.token!==next.token)location.reload();
  }catch(_){}

@@ -1,0 +1,60 @@
+{
+  "header": [
+    {
+      "fa": "خانه",
+      "en": "Home",
+      "url": "/index.html",
+      "children": []
+    },
+    {
+      "fa": "دربارهٔ من",
+      "en": "About",
+      "url": "/pages/about.html",
+      "children": []
+    },
+    {
+      "fa": "حوزه‌های فعالیت",
+      "en": "Focus areas",
+      "url": "/pages/services.html",
+      "children": []
+    },
+    {
+      "fa": "آموزش",
+      "en": "Education",
+      "url": "/pages/blog.html",
+      "children": []
+    },
+    {
+      "fa": "پروژه‌ها",
+      "en": "Projects",
+      "url": "/pages/projects.html",
+      "children": []
+    },
+    {
+      "fa": "ارتباط",
+      "en": "Contact",
+      "url": "/pages/contact.html",
+      "children": []
+    }
+  ],
+  "footer": [
+    {
+      "fa": "دربارهٔ من",
+      "en": "About",
+      "url": "/pages/about.html",
+      "children": []
+    },
+    {
+      "fa": "آموزش",
+      "en": "Education",
+      "url": "/pages/blog.html",
+      "children": []
+    },
+    {
+      "fa": "پروژه‌ها",
+      "en": "Projects",
+      "url": "/pages/projects.html",
+      "children": []
+    }
+  ]
+}

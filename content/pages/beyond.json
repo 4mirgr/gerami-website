@@ -1,0 +1,108 @@
+{
+  "blocks": {
+    "text-001": {
+      "fa": "آن سوی پزشکی | دکتر امیرهوشنگ گرامی",
+      "en": "Beyond medicine | Dr. Amir Houshang Gerami"
+    },
+    "text-002": {
+      "fa": "آشنایی با پروژه‌های شخصی و فعالیت‌های خارج از بخش آموزش پزشکی.",
+      "en": "Explore personal projects and activities beyond medical education."
+    },
+    "text-003": {
+      "fa": "رفتن به محتوای اصلی",
+      "en": "Skip to content"
+    },
+    "text-004": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-005": {
+      "fa": "پزشکی · آموزش · ارتباط",
+      "en": "Medicine · Education · Connection"
+    },
+    "text-012": {
+      "fa": "فهرست",
+      "en": "Menu"
+    },
+    "text-019": {
+      "fa": "خانه",
+      "en": "Home"
+    },
+    "text-020": {
+      "fa": "آن سوی پزشکی",
+      "en": "Beyond medicine"
+    },
+    "text-021": {
+      "fa": "آن سوی پزشکی",
+      "en": "Beyond medicine"
+    },
+    "text-022": {
+      "fa": "پروژه‌ها و جنبه‌های دیگر مسیر من",
+      "en": "Projects and other parts of my journey"
+    },
+    "text-023": {
+      "fa": "پروژه‌ها",
+      "en": "Projects"
+    },
+    "text-024": {
+      "fa": "مسیرهای دیگر را ببینید",
+      "en": "Explore other paths"
+    },
+    "text-025": {
+      "fa": "آموزش پزشکی",
+      "en": "Medical education"
+    },
+    "text-026": {
+      "fa": "پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت.",
+      "en": "My medical project, informing the educational content selected for this website."
+    },
+    "text-027": {
+      "fa": "دربارهٔ پروژه",
+      "en": "About the project"
+    },
+    "text-028": {
+      "fa": "پروژهٔ شخصی",
+      "en": "Personal project"
+    },
+    "text-029": {
+      "fa": "پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند.",
+      "en": "An independent project, with selected public information contributing to my personal and professional profile."
+    },
+    "text-030": {
+      "fa": "دربارهٔ پروژه",
+      "en": "About the project"
+    },
+    "text-031": {
+      "fa": "بازگشت به معرفی",
+      "en": "Back to my profile"
+    },
+    "text-032": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-033": {
+      "fa": "فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من.",
+      "en": "A place to explore my professional journey, educational writing, and projects."
+    },
+    "text-034": {
+      "fa": "دسترسی سریع",
+      "en": "Explore"
+    },
+    "text-038": {
+      "fa": "در ارتباط بمانیم",
+      "en": "Stay connected"
+    },
+    "text-041": {
+      "fa": "مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند.",
+      "en": "Educational content does not replace individual medical assessment or advice."
+    },
+    "text-042": {
+      "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
+      "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    }
+  },
+  "links": {
+    "link-001": "/index.html",
+    "link-002": "/pages/about.html"
+  }
+}

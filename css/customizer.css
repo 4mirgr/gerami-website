@@ -1,0 +1,19 @@
+/* Owner settings override theme tokens without replacing the chosen template. */
+html,body,body *{font-family:var(--site-font,Vazirmatn,Tahoma,sans-serif)!important}
+html{font-size:var(--site-font-size,16px)}
+body{font-size:var(--site-font-size,16px);line-height:var(--site-line-height,1.95);background-image:var(--site-background,none);background-size:cover;background-attachment:fixed}
+body h1,body h2,body h3,body h4{font-weight:var(--heading-weight,700)!important}
+.container{max-width:var(--site-width,1180px)}
+.button-primary,.deck-dots i.active{background:var(--button,#3772ff);color:var(--buttonText,#fff)}
+.card,.explore-section>a,.signature-copy{border-radius:var(--radius,14px)}
+.nav-group{position:relative}.nav-group>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}.nav-group>summary::after{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-bottom:4px}.nav-group>summary::-webkit-details-marker{display:none}
+.nav-submenu{position:absolute;inset-inline-start:0;top:100%;min-width:210px;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 12px 30px #0002;z-index:40;display:grid;gap:8px}.nav-submenu .nav-submenu{inset-inline-start:90%;top:0}.nav-submenu a{white-space:normal}
+.mobile-menu .nav-submenu,.site-footer .nav-submenu{position:static;box-shadow:none;min-width:0;margin:8px 0;padding-inline-start:20px}.mobile-menu>nav{max-height:75vh;overflow:auto}
+.studio-preview [data-content-key]:hover{outline:2px dashed var(--teal);outline-offset:5px;cursor:text}
+.article-body img,[data-extra-body] img{max-width:100%;height:auto;border-radius:var(--radius,14px)}.article-body pre,[data-extra-body] pre{overflow:auto;direction:ltr;text-align:left}.article-body blockquote,[data-extra-body] blockquote{border-inline-start:3px solid var(--teal);padding-inline-start:18px}
+.ui-arrow{display:inline-block;width:1.2em;height:1.2em;vertical-align:middle;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+[dir=ltr] .ui-arrow.flow{transform:scaleX(-1)}
+.deck-controls{direction:ltr}.deck-controls .ui-arrow{width:20px;height:20px}
+@media(max-width:1000px){.desktop-nav .nav-submenu{min-width:170px}.nav-submenu .nav-submenu{inset-inline-start:0;position:static;box-shadow:none}}
+
+[data-custom-background=true] .signature-hero{background-image:var(--site-background);background-position:center;background-size:cover}
