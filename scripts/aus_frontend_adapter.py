@@ -15,7 +15,7 @@ from pathlib import Path
 BASE = "/aus/"
 PUBLIC_INPUTS = (
     "src", "public", "index.html", "package.json", "package-lock.json",
-    "vite.config.js", "cloud/gp-discovery-sources.json", "library/sources.json",
+    "vite.config.js", "cloud/gp-discovery-sources.json", "cloud/evidence-deadline.mjs", "library/sources.json",
 )
 
 
