@@ -6,6 +6,10 @@
   try { const stored = localStorage.getItem('ahg-theme'); if (['light','dark'].includes(stored)) explicit = stored; } catch (_) {}
   function apply(theme) {
     root.dataset.theme = theme;
+    document.querySelectorAll('img[data-theme-light][data-theme-dark]').forEach(img => {
+      const source = theme === 'dark' ? img.dataset.themeDark : img.dataset.themeLight;
+      if (img.getAttribute('src') !== source) img.setAttribute('src', source);
+    });
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = theme === 'dark' ? '#07121f' : '#f5f8fc';
     const button = document.querySelector('[data-theme-toggle]');

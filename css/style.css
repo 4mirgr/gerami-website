@@ -149,5 +149,8 @@ nav a[aria-current="page"] { color: var(--teal); text-decoration: underline; }
 .theme-button{min-width:44px;min-height:44px;border:1px solid var(--line);color:var(--ink);font-size:1.25rem}.language-button{color:var(--ink);flex-shrink:0}.brand-logo{border:0;border-radius:0;object-fit:contain;mix-blend-mode:multiply}[data-theme=dark] .brand-logo{filter:invert(1);mix-blend-mode:screen}
 .badge{color:var(--teal);background:var(--wash)}.site-footer{background:#091929;color:#edf6ff}.button-primary,.button-primary:hover{color:white}
 .article-toolbar{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}.article-toolbar input,.article-toolbar select{padding:12px;border:1px solid var(--line);border-radius:5px;background:var(--white);color:var(--ink);font:inherit;max-width:100%}.article-toolbar input{flex:1;min-width:180px}.cms-article{margin-bottom:20px}.cms-article summary{cursor:pointer;font-weight:bold;font-size:1.1rem}.cms-article .article-body{white-space:pre-wrap;margin-block:20px;overflow-wrap:anywhere}.cms-profile{margin-block:24px}
-@font-face{font-family:Vazirmatn;src:url('../assets/fonts/Vazirmatn.woff2') format('woff2');font-weight:100 900;font-display:swap}
+@font-face{font-family:Vazirmatn;src:url('../assets/fonts/Vazirmatn.woff2?v=20261112-font-logo-2') format('woff2');font-weight:100 900;font-display:swap}
 body,button,:lang(fa){font-family:Vazirmatn,Tahoma,sans-serif}
+
+/* All interface text uses the locally hosted Vazirmatn family. */
+html,body,body *{font-family:Vazirmatn,Tahoma,sans-serif!important}

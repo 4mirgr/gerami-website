@@ -6,7 +6,7 @@
  const number=n=>locale.format(n);
  let theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
  try{const value=localStorage.getItem('ahg-admin-theme');if(['light','dark'].includes(value))theme=value;}catch(_){}
- function setTheme(){root.dataset.theme=theme;$('theme').textContent=theme==='dark'?'☀':'☾';$('theme').setAttribute('aria-pressed',String(theme==='dark'));}
+ function setTheme(){root.dataset.theme=theme;document.querySelectorAll('img[data-theme-light][data-theme-dark]').forEach(img=>{img.src=theme==='dark'?img.dataset.themeDark:img.dataset.themeLight;});$('theme').textContent=theme==='dark'?'☀':'☾';$('theme').setAttribute('aria-pressed',String(theme==='dark'));}
  setTheme();$('theme').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';setTheme();try{localStorage.setItem('ahg-admin-theme',theme);}catch(_){}});
  $('today').textContent=new Intl.DateTimeFormat('fa-IR',{dateStyle:'long'}).format(new Date());
  const sidebar=$('sidebar');
