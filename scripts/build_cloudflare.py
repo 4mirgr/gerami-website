@@ -40,14 +40,14 @@ def fetch_source(spec, directory):
     return directory
 
 
-def copy_public(source, target):
+def copy_public(source, target, extra_extensions=()):
     for file in sorted(source.rglob('*')):
         relative = file.relative_to(source)
         if any(part.startswith('.') for part in relative.parts):
             continue
         if file.is_symlink():
             raise ValueError(f'Public source contains a symlink: {relative}')
-        if file.is_file() and file.suffix.lower() in PUBLIC_EXTENSIONS:
+        if file.is_file() and file.suffix.lower() in PUBLIC_EXTENSIONS.union(extra_extensions):
             destination = target / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(file, destination)
@@ -156,8 +156,10 @@ def assemble(sources, output):
         for name in SITE_FILES:
             shutil.copy2(ROOT / name, stage / name)
         for name in SITE_DIRS:
-            copy_public(ROOT / name, stage / name)
+            copy_public(ROOT / name, stage / name, {'.mjs'} if name in ('js', 'admin') else ())
         shutil.copy2(ROOT / 'admin/config.yml', stage / 'admin/config.yml')
+        from site_studio import generate
+        generate(ROOT, stage)
         # AUS is a compiled authenticated application. Never copy its repository
         # root (which includes backend/private-data tooling) into public assets.
         copy_public(sources['intmed'] / pins['intmed']['public_directory'], stage / 'intmed')

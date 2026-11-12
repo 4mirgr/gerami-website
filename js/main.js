@@ -50,11 +50,23 @@
     } catch (_) { return null; }
   }
 
+  const originalLinks = new WeakMap();
   function applyLinks(values) {
   Object.entries(values).forEach(([kind, value]) => {
     const destination = safeDestination(value, kind);
-    if (!destination) return;
+    if (!destination) {
+      document.querySelectorAll('[data-destination="' + kind + '"]').forEach(link => {
+        const original=originalLinks.get(link);if(!original)return;
+        for(const key of ['href','target','rel','dir']){if(original[key]===null)link.removeAttribute(key);else link.setAttribute(key,original[key]);}
+        link.replaceChildren(...original.children.map(child=>child.cloneNode(true)));
+        link.querySelectorAll('[data-fa][data-en]').forEach(node=>{node.textContent=node.dataset[root.lang==='en'?'en':'fa'];});
+      });
+      document.querySelectorAll('[data-pending="' + kind + '"]').forEach(node=>{node.hidden=false;});
+      document.querySelectorAll('[data-ready="' + kind + '"]').forEach(node=>{node.hidden=true;});
+      return;
+    }
     document.querySelectorAll('[data-destination="' + kind + '"]').forEach(link => {
+      if(!originalLinks.has(link))originalLinks.set(link,{...Object.fromEntries(['href','target','rel','dir'].map(key=>[key,link.getAttribute(key)])),children:[...link.childNodes].map(child=>child.cloneNode(true))});
       link.href = destination;
       if (kind === 'linkedin') {
         link.target = '_blank';
@@ -82,7 +94,7 @@
 
   if (toggle) {
     toggle.hidden = false;
-    toggle.addEventListener('click', () => applyLanguage(language === 'fa' ? 'en' : 'fa'));
+    toggle.addEventListener('click', () => applyLanguage(root.lang === 'fa' ? 'en' : 'fa'));
   }
   applyLanguage(language);
   document.querySelectorAll('.mobile-menu').forEach(menu => {

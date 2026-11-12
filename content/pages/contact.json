@@ -1,0 +1,112 @@
+{
+  "blocks": {
+    "text-001": {
+      "fa": "ارتباط | دکتر امیرهوشنگ گرامی",
+      "en": "Contact | Dr. Amir Houshang Gerami"
+    },
+    "text-002": {
+      "fa": "راه‌های ارتباط با دکتر امیرهوشنگ گرامی، پروفایل لینکدین و اطلاعات مراجعه.",
+      "en": "Contact information, LinkedIn profile, and visit details for Dr. Amir Houshang Gerami."
+    },
+    "text-003": {
+      "fa": "رفتن به محتوای اصلی",
+      "en": "Skip to content"
+    },
+    "text-004": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-005": {
+      "fa": "پزشکی · آموزش · ارتباط",
+      "en": "Medicine · Education · Connection"
+    },
+    "text-012": {
+      "fa": "فهرست",
+      "en": "Menu"
+    },
+    "text-019": {
+      "fa": "خانه",
+      "en": "Home"
+    },
+    "text-020": {
+      "fa": "در ارتباط باشیم",
+      "en": "Get in touch"
+    },
+    "text-021": {
+      "fa": "در ارتباط باشیم",
+      "en": "Get in touch"
+    },
+    "text-022": {
+      "fa": "راه‌های ارتباط و اطلاعات مراجعه",
+      "en": "Contact channels and visit information"
+    },
+    "text-023": {
+      "fa": "لینکدین",
+      "en": "LinkedIn"
+    },
+    "text-024": {
+      "fa": "برای آشنایی با مسیر حرفه‌ای و فعالیت‌ها.",
+      "en": "For professional background and activities."
+    },
+    "text-025": {
+      "fa": "نشانی پروفایل هنوز اضافه نشده است.",
+      "en": "The profile address has not been added yet."
+    },
+    "text-026": {
+      "fa": "مشاهدهٔ پروفایل لینکدین",
+      "en": "View LinkedIn profile"
+    },
+    "text-027": {
+      "fa": "ارتباط مستقیم",
+      "en": "Direct contact"
+    },
+    "text-028": {
+      "fa": "ایمیل عمومی هنوز اعلام نشده است.",
+      "en": "A public email address has not been announced yet."
+    },
+    "text-029": {
+      "fa": "شمارهٔ تماس عمومی هنوز اعلام نشده است.",
+      "en": "A public phone number has not been announced yet."
+    },
+    "text-030": {
+      "fa": "ارسال پیام",
+      "en": "Messaging"
+    },
+    "text-031": {
+      "fa": "در این نسخه فرم ارسال پیام فعال نیست. پس از اعلام راه ارتباطی، از همان مسیر استفاده کنید؛ لطفاً اطلاعات پزشکی شخصی را در کانال‌های عمومی ارسال نکنید.",
+      "en": "There is no active message form in this version. Please use the contact channel once announced, and avoid sharing personal medical information in public channels."
+    },
+    "text-032": {
+      "fa": "اطلاعات مراجعه و نوبت",
+      "en": "Visit & appointment information"
+    },
+    "text-033": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-034": {
+      "fa": "فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من.",
+      "en": "A place to explore my professional journey, educational writing, and projects."
+    },
+    "text-035": {
+      "fa": "دسترسی سریع",
+      "en": "Explore"
+    },
+    "text-039": {
+      "fa": "در ارتباط بمانیم",
+      "en": "Stay connected"
+    },
+    "text-042": {
+      "fa": "مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند.",
+      "en": "Educational content does not replace individual medical assessment or advice."
+    },
+    "text-043": {
+      "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
+      "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    }
+  },
+  "links": {
+    "link-001": "/index.html",
+    "link-002": "/pages/appointments.html"
+  }
+}

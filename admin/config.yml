@@ -46,8 +46,8 @@ collections:
               - {name: category, label: دسته‌بندی, widget: string}
               - {name: title_fa, label: عنوان فارسی, widget: string}
               - {name: title_en, label: عنوان انگلیسی, widget: string}
-              - {name: body_fa, label: متن فارسی (متن ساده), widget: text}
-              - {name: body_en, label: متن انگلیسی (متن ساده), widget: text}
+              - {name: body_fa, label: متن فارسی, widget: markdown}
+              - {name: body_en, label: متن انگلیسی, widget: markdown}
               - {name: author, label: نویسنده, widget: string}
               - {name: published_at, label: تاریخ انتشار, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
               - {name: reviewed_at, label: تاریخ بازبینی, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}

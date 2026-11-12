@@ -13,17 +13,17 @@
  function menu(open){sidebar.classList.toggle('open',open);$('menu').setAttribute('aria-expanded',String(open));$('scrim').hidden=!open;}
  $('menu').addEventListener('click',()=>menu(!sidebar.classList.contains('open')));$('scrim').addEventListener('click',()=>menu(false));
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebar.classList.contains('open')){menu(false);$('menu').focus();}});
- const routes={dashboard:'داشبورد',articles:'مقالات و پیش‌نویس‌ها',media:'تصاویر و رسانه',profile:'رزومه و سوابق',contact:'اطلاعات تماس',editor:'ویرایشگر محتوا'};
- let frame;
+ const routes={dashboard:'داشبورد',articles:'مقالات و پیش‌نویس‌ها',media:'تصاویر و رسانه',profile:'رزومه و سوابق',contact:'اطلاعات تماس',editor:'ویرایشگر پیشرفته',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',history:'تاریخچه و بازیابی'};
+ let frame;window.addEventListener('cms-editor-reset',()=>{frame=undefined;route();});
  function route(){
   const selected=location.hash.slice(1);const page=Object.hasOwn(routes,selected)?selected:'dashboard';
   $('page-title').textContent=routes[page];document.title=routes[page]+' | مدیریت سایت دکتر گرامی';
   document.querySelectorAll('[data-nav]').forEach(link=>{link.classList.toggle('active',link.dataset.nav===page);if(link.dataset.nav===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
-  $('dashboard-view').hidden=page!=='dashboard';$('media-view').hidden=page!=='media';const editing=!['dashboard','media'].includes(page);$('editor-view').hidden=!editing;
+  $('dashboard-view').hidden=page!=='dashboard';$('media-view').hidden=true;const editing=page==='editor';$('editor-view').hidden=!editing;
   if(editing){
    const fragment=page==='articles'?'#/collections/website/entries/articles':['profile','contact'].includes(page)?'#/collections/website/entries/profile':'#/';
    $('direct-editor').href='editor.html'+fragment;
-   $('editor-description').textContent=page==='contact'?'اطلاعات تماس و نوبت‌دهی در فرم رزومه و اطلاعات تماس قرار دارند. برای ذخیره وارد شوید.':'برای ذخیرهٔ تغییرات، با حساب مجاز GitHub وارد شوید.';
+   $('editor-description').textContent=page==='contact'?'ویرایش ایمیل، تلفن، لینکدین و راه مراجعه در فرم اطلاعات تماس.':'ویرایشگر پیشرفتهٔ مقاله، منابع، رزومه و پیش‌نویس‌ها؛ اتصال از کنترل سراسری بالای پنل انجام می‌شود.';
    if(!frame){frame=document.createElement('iframe');frame.className='editor-frame';frame.title='ویرایشگر امن محتوای سایت';frame.src='editor.html'+fragment;$('editor-slot').append(frame);}
    else {try{frame.contentWindow.location.hash=fragment;}catch(_){/* The independent editor link remains available. */}}
   }
@@ -48,9 +48,4 @@
   if(!images.size){const empty=text('p','هنوز تصویری در مقاله‌ها استفاده نشده است.');empty.className='empty';$('media-grid').append(empty);}
   images.forEach((title,src)=>{const card=document.createElement('div');const image=document.createElement('img');image.src=src;image.alt=title;image.loading='lazy';card.append(image,text('p',title));$('media-grid').append(card);});
  }).catch(()=>{$('content-message').textContent='دریافت محتوای سایت موفق نبود. صفحه را دوباره بارگذاری کنید؛ ویرایشگر از منو در دسترس است.';$('recent-list').append(text('p','محتوا دریافت نشد.'));});
- json('/api/cms/status').then(status=>{
-  if(typeof status.configured!=='boolean')throw Error('Invalid status');
-  $('connection-title').textContent=status.configured?'ورود مدیر پیکربندی شده است':'راه‌اندازی ورود مدیر';
-  $('connection-message').textContent=status.configured?'برای ذخیره و انتشار، وارد حساب مجاز GitHub شوید. این پیام به معنی ورود به حساب نیست.':'کلیدهای CMS_GITHUB_CLIENT_ID و CMS_GITHUB_CLIENT_SECRET باید در تنظیمات Cloudflare ذخیره شوند.';
- }).catch(()=>{$('connection-message').textContent='وضعیت پیکربندی ورود قابل بررسی نیست. ورود و ذخیرهٔ محتوا از ویرایشگر انجام می‌شود.';});
 })();

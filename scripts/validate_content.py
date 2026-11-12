@@ -80,6 +80,9 @@ def validate(root=ROOT):
         for source in item.get('sources', []):
             if not isinstance(source, dict) or not isinstance(source.get('url'), str) or not https(source['url']) or not isinstance(source.get('title'), str):
                 raise ValueError('Article sources require title and safe HTTPS URLs')
+    from site_studio import validate as validate_studio
+    if (root / 'content/appearance.json').exists():
+        validate_studio(root)
     return len(seen)
 
 

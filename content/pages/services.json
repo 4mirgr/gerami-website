@@ -1,0 +1,121 @@
+{
+  "blocks": {
+    "text-001": {
+      "fa": "حوزه‌های فعالیت | دکتر امیرهوشنگ گرامی",
+      "en": "Focus areas | Dr. Amir Houshang Gerami"
+    },
+    "text-002": {
+      "fa": "حوزه‌های آموزشی و مسیر تکمیل اطلاعات فعالیت‌های حرفه‌ای دکتر گرامی.",
+      "en": "Educational focus areas and professional activity information for Dr. Gerami."
+    },
+    "text-003": {
+      "fa": "رفتن به محتوای اصلی",
+      "en": "Skip to content"
+    },
+    "text-004": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-005": {
+      "fa": "پزشکی · آموزش · ارتباط",
+      "en": "Medicine · Education · Connection"
+    },
+    "text-012": {
+      "fa": "فهرست",
+      "en": "Menu"
+    },
+    "text-019": {
+      "fa": "خانه",
+      "en": "Home"
+    },
+    "text-020": {
+      "fa": "حوزه‌های فعالیت",
+      "en": "Focus areas"
+    },
+    "text-021": {
+      "fa": "حوزه‌های فعالیت",
+      "en": "Focus areas"
+    },
+    "text-022": {
+      "fa": "موضوعات آموزشی و اطلاعات فعالیت‌های حرفه‌ای",
+      "en": "Educational interests and professional activity information"
+    },
+    "text-023": {
+      "fa": "محورهای محتوایی",
+      "en": "Content focus"
+    },
+    "text-024": {
+      "fa": "پزشکی و آموزش سلامت",
+      "en": "Medicine & health education"
+    },
+    "text-025": {
+      "fa": "طب داخلی",
+      "en": "Internal medicine"
+    },
+    "text-026": {
+      "fa": "محور محتوای آموزشی پروژهٔ intmed و مطالب منتخب این وب‌سایت.",
+      "en": "The focus of the intmed educational project and selected writing on this website."
+    },
+    "text-027": {
+      "fa": "آگاهی بیماران",
+      "en": "Patient education"
+    },
+    "text-028": {
+      "fa": "توضیح مفاهیم پزشکی به زبان قابل‌فهم برای بیماران و خانواده‌ها.",
+      "en": "Explaining medical concepts in accessible language for patients and families."
+    },
+    "text-029": {
+      "fa": "یادگیری پزشکی",
+      "en": "Medical learning"
+    },
+    "text-030": {
+      "fa": "تفکیک مطالب تخصصی از آموزش عمومی و معرفی منابع هر مطلب.",
+      "en": "Separating professional learning from public education and identifying sources."
+    },
+    "text-031": {
+      "fa": "خدمات و مهارت‌های بالینی",
+      "en": "Clinical services & skills"
+    },
+    "text-032": {
+      "fa": "اطلاعات خدمات قابل ارائه، عنوان حرفه‌ای و مهارت‌های بالینی پس از تکمیل پروفایل منتشر می‌شود. موضوعات آموزشی این صفحه به‌معنای اعلام تخصص یا ارائهٔ همهٔ خدمات مرتبط نیست.",
+      "en": "Available services, professional title, and clinical skills will be listed after the profile is completed. Educational topics on this page do not imply specialist qualifications or availability of all related services."
+    },
+    "text-033": {
+      "fa": "معرفی و سوابق",
+      "en": "Profile & background"
+    },
+    "text-034": {
+      "fa": "اطلاعات مراجعه",
+      "en": "Visit information"
+    },
+    "text-035": {
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
+    },
+    "text-036": {
+      "fa": "فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من.",
+      "en": "A place to explore my professional journey, educational writing, and projects."
+    },
+    "text-037": {
+      "fa": "دسترسی سریع",
+      "en": "Explore"
+    },
+    "text-041": {
+      "fa": "در ارتباط بمانیم",
+      "en": "Stay connected"
+    },
+    "text-044": {
+      "fa": "مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند.",
+      "en": "Educational content does not replace individual medical assessment or advice."
+    },
+    "text-045": {
+      "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
+      "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    }
+  },
+  "links": {
+    "link-001": "/index.html",
+    "link-002": "/pages/about.html",
+    "link-003": "/pages/appointments.html"
+  }
+}
