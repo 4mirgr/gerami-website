@@ -39,9 +39,10 @@
   const audience=select.options.length?select.value:location.hash==='#professional'?'professional':location.hash==='#public'?'patients':'';
   select.replaceChildren(...[['',text('همهٔ مخاطبان','All audiences')],['patients',text('برای بیماران','For patients')],['professional',text('برای پزشکان','For clinicians')]].map(([value,label])=>{const option=el('option',label);option.value=value;return option;}));select.value=audience;
   let matching=published.filter(a=>(!audience||a.audience===audience)&&((a['title_'+lang()]||'')+' '+(a['body_'+lang()]||'')+' '+(a.category||'')).toLocaleLowerCase().includes(search.value.toLocaleLowerCase()));if(isHome)matching=matching.slice(0,3);
+  const open=new Set([...list.querySelectorAll('details[open]')].map(node=>node.id));
   heading.textContent=text('تازه‌ترین مطالب','Latest writing');count.textContent=matching.length?text(matching.length+' مقاله',matching.length+' articles'):text('مقاله‌ای پیدا نشد.','No articles found.');list.replaceChildren();
   for(const item of matching){
-   const card=el('details','','card cms-article');card.id='article-'+item.slug;card.append(el('summary',item['title_'+lang()]),el('p',[item.author,item.category,item.published_at,text('بازبینی: ','Reviewed: ')+(item.reviewed_at||'')].filter(Boolean).join(' · ')));
+   const card=el('details','','card cms-article');card.id='article-'+item.slug;card.open=open.has(card.id);card.append(el('summary',item['title_'+lang()]),el('p',[item.author,item.category,item.published_at,text('بازبینی: ','Reviewed: ')+(item.reviewed_at||'')].filter(Boolean).join(' · ')));
    if(typeof item.image==='string'&&/^\/assets\/uploads\/[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif)$/i.test(item.image)&&!item.image.includes('..')){const img=el('img');img.src=imageSource(item.image);img.alt=item['title_'+lang()];img.loading='lazy';img.style.maxWidth='100%';card.append(img);}
    const body=el('div',item['body_'+lang()],'article-body');card.append(body);rich.then(({richText})=>richText(body,item['body_'+lang()],imageSource));
    const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);list.append(card);
