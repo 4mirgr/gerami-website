@@ -14,7 +14,7 @@
     try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.href : null; } catch (_) { return null; }
   }
   async function json(file) {
-    const res = await fetch(new URL('content/' + file, base), {signal: AbortSignal.timeout(10000)});
+    const res = await fetch(new URL('content/' + file, base), {cache:'no-store', signal: AbortSignal.timeout(10000)});
     if (!res.ok) throw new Error('Content unavailable');
     return res.json();
   }
