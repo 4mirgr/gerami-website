@@ -50,7 +50,8 @@
     } catch (_) { return null; }
   }
 
-  Object.entries(links).forEach(([kind, value]) => {
+  function applyLinks(values) {
+  Object.entries(values).forEach(([kind, value]) => {
     const destination = safeDestination(value, kind);
     if (!destination) return;
     document.querySelectorAll('[data-destination="' + kind + '"]').forEach(link => {
@@ -71,6 +72,12 @@
     });
     document.querySelectorAll('[data-pending="' + kind + '"]').forEach(element => { element.hidden = true; });
     document.querySelectorAll('[data-ready="' + kind + '"]').forEach(element => { element.hidden = false; });
+  });
+  }
+  applyLinks(links);
+  window.addEventListener('site-profile', event => {
+    const profile=event.detail;
+    applyLinks({linkedin:profile.linkedin, appointment:profile.appointment, email:profile.email ? 'mailto:'+profile.email : null, phone:profile.phone ? 'tel:'+profile.phone : null});
   });
 
   if (toggle) {

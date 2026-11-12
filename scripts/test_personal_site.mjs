@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url);
 const {chromium}=require('playwright');
-const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',headless:true,args:['--no-sandbox']});
 try {
  const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'dark'});
  await page.goto('http://127.0.0.1:4173/');

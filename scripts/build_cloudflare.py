@@ -198,7 +198,9 @@ def assemble(sources, output):
         (stage / '_redirects').write_text('/intmed /intmed/ 308\n/aus /aus/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
         (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*', '/api/cms/*'], 'exclude': []}) + '\n', encoding='utf-8')
         (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحهٔ اصلی</a></html>\n', encoding='utf-8')
-        (stage / '_headers').write_text('/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
+        (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
+        from version_assets import version_assets
+        version_assets(stage)
         files = [file for file in stage.rglob('*') if file.is_file()]
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
@@ -216,6 +218,8 @@ def main():
     args = parser.parse_args()
     if bool(args.intmed_source) != bool(args.aus_source):
         parser.error('Provide both local sources, or neither to fetch the pinned releases')
+    for check in ('check_site.py',):
+        subprocess.run([sys.executable, str(ROOT / 'scripts' / check)], check=True, timeout=60)
     pins = json.loads(PINS.read_text())
     with tempfile.TemporaryDirectory(prefix='gerami-sources-') as temporary:
         if args.intmed_source:
@@ -223,6 +227,7 @@ def main():
         else:
             sources = {name: fetch_source(spec, Path(temporary) / name) for name, spec in pins.items()}
         result = assemble(sources, args.output)
+        subprocess.run([sys.executable, str(ROOT / 'scripts/verify_cloudflare.py'), '--site', str(args.output), '--intmed-source', str(sources['intmed']), '--aus-source', str(sources['aus'])], check=True, timeout=120)
     print(f"Built {result['files']} public files ({result['bytes']:,} bytes) in {args.output}; nothing deployed.")
 
 

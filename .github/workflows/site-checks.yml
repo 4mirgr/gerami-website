@@ -1,0 +1,45 @@
+name: Website verification
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 3 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: website-checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    name: Website checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-checks
+      - name: Verify public site, admin, login and browser regressions
+        run: python scripts/check_site.py --browser
+      - name: Build and verify the pinned independent applications
+        run: python scripts/build_cloudflare.py
+      - name: Keep visual evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: website-browser-evidence
+          path: /tmp/gerami-*.png
+          if-no-files-found: ignore
+          retention-days: 7
+  production-health:
+    name: Read-only production health
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: python3 scripts/live_health.py
