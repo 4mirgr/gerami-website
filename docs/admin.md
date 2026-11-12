@@ -30,3 +30,9 @@ Production OAuth/login and Decap's external script require real deployment crede
 The existing Decap editor is retained at `/admin/editor.html`, embedded when editing articles/profile/contacts and available separately. It is loaded lazily and retained when navigating to the dashboard so editing state is not destroyed. Authentication and saving remain GitHub-backed; the static dashboard only reads already-public content. Referenced article media is displayed in the dashboard; the complete upload library is managed in the editor's Media dialog. `/api/cms/status` returns only a configuration boolean with `Cache-Control: no-store`, never secret values or session information.
 
 Validation: `node scripts/test_admin.mjs` tests real/empty counts, safe text, theme persistence, navigation, iframe preservation, mobile overflow and menu controls, and non-disclosure of OAuth configuration values.
+
+## OAuth popup recovery
+
+After GitHub validates the state and owner, the callback writes the same `decap-cms-user` GitHub session used by the pinned Decap client. The normal exact-origin/source handshake remains supported. If the browser loses the opener or its reply, the callback opens the standalone editor after 1.2 seconds; existing editors recover through a same-origin storage event. Token storage is the existing Decap browser credential model; nothing is placed in URLs or sent to another origin. Blocked storage with no usable handshake produces an actionable message instead of an endless completion screen.
+
+Regression checks: `node scripts/test_cms_completion.mjs` tests completion without an opener. `node scripts/test_cms_session.cjs` verifies the real pinned Decap bundle restores the session against mocked GitHub responses (optional `DECAP_BUNDLE` selects a local copy of that same bundle). Real GitHub consent and the user's browser login still require user interaction.

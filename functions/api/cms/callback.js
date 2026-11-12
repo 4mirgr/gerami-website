@@ -21,7 +21,24 @@ export async function onRequestGet({request, env}) {
     headers['Content-Type']='text/html; charset=utf-8';
     headers['Content-Security-Policy']=`default-src 'none'; script-src 'nonce-${nonce}'; frame-ancestors 'none'; base-uri 'none'`;
     const safe = value => JSON.stringify(value).replace(/</g,'\\u003c');
+    const session = {backendName:'github', token:token.access_token};
     const payload = 'authorization:github:success:'+JSON.stringify({token:token.access_token,provider:'github'});
-    return new Response(`<!doctype html><meta charset="utf-8"><title>CMS login</title><p>Completing login…</p><script nonce="${nonce}">const origin=${safe(origin)};const message=${safe(payload)};if(window.opener){window.addEventListener('message',function receive(event){if(event.origin!==origin||event.source!==window.opener)return;window.opener.postMessage(message,origin);window.removeEventListener('message',receive);window.close();});window.opener.postMessage('authorizing:github',origin);}</script>`,{headers});
+    return new Response(`<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>تکمیل ورود</title><p id="status">در حال تکمیل ورود…</p><script data-cfasync="false" nonce="${nonce}">
+const origin=${safe(origin)};const message=${safe(payload)};
+let stored=false,delivered=false;
+try{localStorage.setItem('decap-cms-user',${safe(JSON.stringify(session))});stored=true;}catch(_){}
+try{if(window.opener){
+ window.addEventListener('message',function receive(event){
+  if(event.origin!==origin||event.source!==window.opener||event.data!=='authorizing:github')return;
+  delivered=true;window.opener.postMessage(message,origin);window.removeEventListener('message',receive);window.close();
+ });
+ window.opener.postMessage('authorizing:github',origin);
+}}catch(_){}
+setTimeout(()=>{
+ if(delivered)return;
+ if(stored){location.replace(origin+'/admin/editor.html');}
+ else{document.getElementById('status').textContent='مرورگر ذخیره‌سازی ورود را مسدود کرده است. ویرایشگر را در یک صفحهٔ مستقل باز کنید و دوباره وارد شوید.';}
+},1200);
+</script></html>`,{headers});
   } catch (_) { return fail('Login provider unavailable. Please retry.',502); }
 }
