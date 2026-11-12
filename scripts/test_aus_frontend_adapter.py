@@ -51,7 +51,7 @@ class AdapterTests(unittest.TestCase):
             "package-lock.json": '{}',
             "vite.config.js": 'export default {};',
             "cloud/gp-discovery-sources.json": '[]',
-            "cloud/evidence-deadline.mjs": 'export const evidenceClosed = () => false;',
+            "cloud/evidence-deadline.mjs": 'export const evidenceClosed=()=>false;',
             "library/sources.json": '[]',
             "private/personal.json": 'DO NOT PUBLISH',
             ".env": 'SECRET=DO_NOT_READ',
