@@ -3,22 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#fafbf7">
   <title data-fa="پزشکی، آموزش و مسیر من | دکتر امیرهوشنگ گرامی" data-en="Medicine, education &amp; my journey | Dr. Amir Houshang Gerami">پزشکی، آموزش و مسیر من | دکتر امیرهوشنگ گرامی</title>
   <meta name="description" content="وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای، آموزش پزشکی و آشنایی با پروژه‌های intmed و AUS." data-fa="وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای، آموزش پزشکی و آشنایی با پروژه‌های intmed و AUS." data-en="The personal website of Dr. Amir Houshang Gerami: professional profile, medical education, and the intmed and AUS projects.">
   <link rel="canonical" href="https://drgerami-md.ir/">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="css/style.css">
   <script src="js/links.js" defer></script>
   <script src="js/main.js" defer></script>
+  <script src="js/theme.js"></script>
+  <script src="js/content.js" defer></script>
+<link rel="stylesheet" href="css/enfhess.css">
 </head>
-<body>
+<body class="signature-home">
   <a href="#main" class="skip-link" ><span data-fa="رفتن به محتوای اصلی" data-en="Skip to content">رفتن به محتوای اصلی</span></a>
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="index.html">
-        <span class="brand-mark" aria-hidden="true">AG</span>
+        <img class="brand-mark brand-logo" src="assets/logo.jpg" width="46" height="46" alt="" aria-hidden="true">
         <span><span class="brand-name" data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</span><span class="brand-caption" data-fa="پزشکی · آموزش · ارتباط" data-en="Medicine · Education · Connection">پزشکی · آموزش · ارتباط</span></span>
       </a>
       <nav class="desktop-nav" aria-label="منوی اصلی" data-label-fa="منوی اصلی" data-label-en="Main navigation"><a href="index.html" aria-current="page"><span data-fa="خانه" data-en="Home">خانه</span></a>
@@ -33,33 +36,39 @@
 <a href="pages/blog.html"><span data-fa="آموزش" data-en="Education">آموزش</span></a>
 <a href="pages/projects.html"><span data-fa="پروژه‌ها" data-en="Projects">پروژه‌ها</span></a>
 <a href="pages/contact.html"><span data-fa="ارتباط" data-en="Contact">ارتباط</span></a></nav></details>
+      <button type="button" class="theme-button" data-theme-toggle aria-label="تغییر حالت روز و شب" hidden>☾</button>
       <button type="button" class="language-button" data-language-toggle aria-label="Switch to English" hidden>EN</button>
     </div>
   </header>
   <main id="main" tabindex="-1">
 
-    <section class="container hero">
-      <div class="animate-in">
-        <div class="eyebrow" data-fa="وب‌سایت شخصی و حرفه‌ای" data-en="A personal &amp; professional space">وب‌سایت شخصی و حرفه‌ای</div>
-        <h1 data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</h1>
-        <p class="hero-subtitle" data-fa="پزشکی، با نگاهی انسانی." data-en="Medicine, with a human perspective.">پزشکی، با نگاهی انسانی.</p>
-        <p class="lead" data-fa="اینجا از مسیر حرفه‌ای من می‌خوانید، به مطالب آموزشی دسترسی پیدا می‌کنید و با پروژه‌هایی که روی آن‌ها کار می‌کنم آشنا می‌شوید." data-en="Explore my professional journey, discover educational writing, and get to know the projects I work on.">اینجا از مسیر حرفه‌ای من می‌خوانید، به مطالب آموزشی دسترسی پیدا می‌کنید و با پروژه‌هایی که روی آن‌ها کار می‌کنم آشنا می‌شوید.</p>
-        <div class="actions"><a href="pages/about.html" class="button button-primary" ><span data-fa="آشنایی با من" data-en="Get to know me">آشنایی با من</span></a><a href="pages/blog.html" class="button button-secondary" ><span data-fa="مطالب آموزشی" data-en="Explore education">مطالب آموزشی</span></a></div>
-        <p class="hero-note" data-fa="برای بیماران، علاقه‌مندان به سلامت و همکاران پزشکی" data-en="For patients, people interested in health, and medical colleagues">برای بیماران، علاقه‌مندان به سلامت و همکاران پزشکی</p>
+    <section class="signature-hero" aria-labelledby="hero-title">
+      <div class="hero-grid container">
+        <div class="signature-copy">
+          <div class="eyebrow" data-fa="پزشکی داخلی / آموزش / تجربه" data-en="INTERNAL MEDICINE / EDUCATION / EXPERIENCE">پزشکی داخلی / آموزش / تجربه</div>
+          <p class="hero-introduction" data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</p>
+          <h1 id="hero-title"><span data-fa="دنیایی از دانش پزشکی،" data-en="A world of medical knowledge,">دنیایی از دانش پزشکی،</span><br><span class="hero-emphasis" data-fa="با نگاهی انسانی." data-en="with a human perspective.">با نگاهی انسانی.</span></h1>
+          <p class="signature-description" data-fa="پزشکی برای من از شنیدن شروع می‌شود؛ از توجه به انسان، فراتر از نشانه‌ها. اینجا، نقطهٔ پیوند مسیر حرفه‌ای من، آموزش پزشکی و ایده‌های تازه است." data-en="For me, medicine begins with listening; with seeing the person beyond the symptoms. This is where my professional journey, medical education, and new ideas meet.">پزشکی برای من از شنیدن شروع می‌شود؛ از توجه به انسان، فراتر از نشانه‌ها. اینجا، نقطهٔ پیوند مسیر حرفه‌ای من، آموزش پزشکی و ایده‌های تازه است.</p>
+          <div class="actions"><a href="pages/appointments.html" class="button button-primary"><span data-fa="اطلاعات مراجعه" data-en="Plan your visit">اطلاعات مراجعه</span><span aria-hidden="true">↗</span></a><a href="pages/about.html" class="hero-profile-link"><span data-fa="آشنایی با من" data-en="Meet the physician">آشنایی با من</span><span aria-hidden="true">←</span></a></div>
+          <div class="hero-signature" dir="ltr"><span>AMIR HOUSHANG</span><strong>GERAMI</strong><span class="signature-rule"></span><small>PERSONAL & PROFESSIONAL SPACE</small></div>
+        </div>
+        <div class="feature-deck" aria-label="بخش‌های منتخب سایت">
+          <div class="deck-cards">
+            <article class="feature-card" data-feature="0" data-position="previous"><a class="feature-image" href="pages/projects.html#intmed"><span class="project-art project-art-med" aria-hidden="true">iM<span>INTERNAL MEDICINE</span></span></a><div class="feature-body"><span class="feature-author">IntMed</span><h2 data-fa="دانش پزشکی، ساختارمند" data-en="Medical knowledge, organized">دانش پزشکی، ساختارمند</h2><p data-fa="پروژهٔ آموزش پزشکی" data-en="A medical education project">پروژهٔ آموزش پزشکی</p><a href="pages/projects.html#intmed" class="feature-link"><span data-fa="کشف پروژه" data-en="Explore project">کشف پروژه</span> ↗</a></div></article>
+            <article class="feature-card" data-feature="1" data-position="active"><a class="feature-image" href="pages/about.html"><img src="assets/brand-night.jpg" width="592" height="1280" alt="نشان اختصاصی دکتر گرامی" fetchpriority="high"></a><div class="feature-body"><span class="feature-author"><img src="assets/logo.jpg" width="24" height="24" alt=""> <span data-fa="دکتر امیرهوشنگ گرامی" data-en="Dr. Amir Houshang Gerami">دکتر امیرهوشنگ گرامی</span></span><h2 data-fa="پزشکی با نگاهی انسانی" data-en="Medicine with a human perspective">پزشکی با نگاهی انسانی</h2><p data-fa="معرفی، سوابق و مسیر حرفه‌ای" data-en="Profile, background and professional journey">معرفی، سوابق و مسیر حرفه‌ای</p><a href="pages/about.html" class="feature-link"><span data-fa="آشنایی بیشتر" data-en="Discover more">آشنایی بیشتر</span> ↗</a></div></article>
+            <article class="feature-card" data-feature="2" data-position="next"><a class="feature-image" href="pages/projects.html#aus"><span class="project-art project-art-aus" aria-hidden="true">AUS<span>ARASH & AMIR</span></span></a><div class="feature-body"><span class="feature-author">Arash & Amir</span><h2 data-fa="ایده‌هایی فراتر از پزشکی" data-en="Ideas beyond medicine">ایده‌هایی فراتر از پزشکی</h2><p data-fa="پروژهٔ مستقل و تجربه‌های تازه" data-en="An independent project and new experiences">پروژهٔ مستقل و تجربه‌های تازه</p><a href="pages/projects.html#aus" class="feature-link"><span data-fa="کشف پروژه" data-en="Explore project">کشف پروژه</span> ↗</a></div></article>
+          </div>
+          <div class="deck-controls" hidden><button type="button" data-deck-prev aria-label="کارت قبلی / Previous card">←</button><div class="deck-dots" aria-hidden="true"><i></i><i class="active"></i><i></i></div><button type="button" data-deck-next aria-label="کارت بعدی / Next card">→</button></div>
+        </div>
       </div>
-      <div class="identity-art" aria-hidden="true">
-        <span class="identity-monogram" dir="ltr">AG</span>
-        <span class="identity-label" dir="ltr">MEDICINE &amp; HUMAN CONNECTION</span>
-        <svg class="identity-line" viewBox="0 0 300 45" fill="none"><path d="M0 24h65l12-9 13 17 19-30 23 40 14-24 10 6h144" stroke="currentColor" stroke-width="1.4"/></svg>
-        <span class="identity-domain" dir="ltr">drgerami-md.ir</span>
-      </div>
+
     </section>
-    <div class="container intro-strip">
-      <span><i class="dot" aria-hidden="true"></i><span data-fa="معرفی و سوابق حرفه‌ای" data-en="Professional profile">معرفی و سوابق حرفه‌ای</span></span>
-      <span><i class="dot" aria-hidden="true"></i><span data-fa="آموزش قابل‌فهم" data-en="Accessible education">آموزش قابل‌فهم</span></span>
-      <span><i class="dot" aria-hidden="true"></i><span data-fa="پروژه‌های مستقل" data-en="Independent projects">پروژه‌های مستقل</span></span>
-    </div>
-    <section class="container section" id="projects">
+    <section class="explore-section container" id="explore" aria-label="دسترسی به بخش‌های سایت">
+      <a href="pages/about.html"><span class="explore-number">01 /</span><h2 data-fa="پشتِ نام، یک مسیر" data-en="The journey behind the name">پشتِ نام، یک مسیر</h2><p data-fa="دربارهٔ من و سوابق حرفه‌ای" data-en="Profile and professional background">دربارهٔ من و سوابق حرفه‌ای</p><span class="explore-arrow" aria-hidden="true">↖</span></a>
+      <a href="pages/blog.html"><span class="explore-number">02 /</span><h2 data-fa="دانش، برای اشتراک" data-en="Knowledge worth sharing">دانش، برای اشتراک</h2><p data-fa="آموزش برای بیماران و همکاران" data-en="Education for patients and colleagues">آموزش برای بیماران و همکاران</p><span class="explore-arrow" aria-hidden="true">↖</span></a>
+      <a href="pages/projects.html"><span class="explore-number">03 /</span><h2 data-fa="فراتر از یک مطب" data-en="Beyond the consulting room">فراتر از یک مطب</h2><p data-fa="پروژه‌ها، تجربه‌ها و ایده‌ها" data-en="Projects, experiences and ideas">پروژه‌ها، تجربه‌ها و ایده‌ها</p><span class="explore-arrow" aria-hidden="true">↖</span></a>
+    </section>
+    <section class="container section projects-showcase" id="projects">
   <div class="project-entry">
     <div class="app-buttons">
       <a class="button button-primary" href="https://drgerami-md.ir/intmed/" data-app-entry="intmed" aria-describedby="project-entry-status">
@@ -73,17 +82,17 @@
     </div>
     <p class="link-status" id="project-entry-status" data-fa="این نشانی‌ها برای دسترسی از دامنهٔ شخصی در نظر گرفته شده‌اند؛ اتصال سرویس‌ها به آن‌ها هنوز تکمیل نشده است." data-en="These addresses are reserved for access through this domain; the services have not been connected yet.">این نشانی‌ها برای دسترسی از دامنهٔ شخصی در نظر گرفته شده‌اند؛ اتصال سرویس‌ها به آن‌ها هنوز تکمیل نشده است.</p>
   </div>
-      <div class="section-heading"><div><div class="eyebrow" data-fa="پروژه‌های من" data-en="My projects">پروژه‌های من</div><h2 data-fa="دو مسیر، با ورودی مستقل" data-en="Two projects, their own space">دو مسیر، با ورودی مستقل</h2></div><p data-fa="هر پروژه هویت و ساختار مستقل خود را دارد." data-en="Each project retains its own identity and structure.">هر پروژه هویت و ساختار مستقل خود را دارد.</p></div>
+      <div class="section-heading"><div><div class="eyebrow" data-fa="پروژه‌های من" data-en="My projects">پروژه‌های من</div><h2 data-fa="ایده‌هایی که به عمل می‌رسند" data-en="Two projects, their own space">ایده‌هایی که به عمل می‌رسند</h2></div><p data-fa="هر پروژه هویت و ساختار مستقل خود را دارد." data-en="Each project retains its own identity and structure.">هر پروژه هویت و ساختار مستقل خود را دارد.</p></div>
       <div class="grid-two">
 <a class="project-card" href="pages/projects.html#intmed" data-destination="intmed">
   <div class="project-topline"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h7a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3z"/><path d="M21 4h-5a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h4z"/></svg></span><span class="badge" data-fa="آموزش پزشکی" data-en="Medical education">آموزش پزشکی</span></div>
-  <h3 dir="ltr">intmed</h3>
+  <span class="project-watermark" aria-hidden="true">iM</span><h3 dir="ltr">IntMed</h3>
   <p data-fa="پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت." data-en="My medical project, informing the educational content selected for this website.">پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت.</p>
   <div class="project-bottom"><span data-link-status data-fa="دربارهٔ پروژه" data-en="About the project">دربارهٔ پروژه</span><code dir="ltr">/intmed/</code></div>
 </a>
 <a class="project-card" href="pages/projects.html#aus" data-destination="aus">
   <div class="project-topline"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5z"/></svg></span><span class="badge" data-fa="پروژهٔ شخصی" data-en="Personal project">پروژهٔ شخصی</span></div>
-  <h3 dir="ltr">AUS 🇦🇺 Arash &amp; Amir</h3>
+  <span class="project-watermark" aria-hidden="true">AUS</span><h3 dir="ltr">AUS / Arash &amp; Amir</h3>
   <p data-fa="پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند." data-en="An independent project, with selected public information contributing to my personal and professional profile.">پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند.</p>
   <div class="project-bottom"><span data-link-status data-fa="دربارهٔ پروژه" data-en="About the project">دربارهٔ پروژه</span><code dir="ltr">/aus/</code></div>
 </a>
@@ -122,5 +131,6 @@
       <div class="footer-bottom"><span data-fa="© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است." data-en="© Dr. Amir Houshang Gerami. All rights reserved.">© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.</span><span dir="ltr">drgerami-md.ir</span></div>
     </div>
   </footer>
+<script src="js/deck.js" defer></script>
 </body>
 </html>

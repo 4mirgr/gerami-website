@@ -80,7 +80,7 @@ if not (site / '404.html').is_file() or '/intmed /intmed/ 308' not in redirects 
 if report.get('aus_checks') != ['--test tests/cloud_auth.mjs']:
     errors.append('AUS authentication and owner-isolation release checks were not recorded')
 routes = json.loads((site / '_routes.json').read_text())
-if routes != {'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*'], 'exclude': []}:
+if routes != {'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*', '/api/cms/*'], 'exclude': []}:
     errors.append('Functions must handle only the AUS API and auth gateway paths')
 if any(path.name == '.git' for path in site.rglob('*')):
     errors.append('Git metadata must not be published')
