@@ -5,3 +5,20 @@
 @media(max-width:900px){.sidebar{transform:translateX(120%);transition:transform .2s;width:260px}.sidebar.open{transform:none}.app{margin:0;padding:20px}.topbar{gap:12px}#menu{display:block;flex-shrink:0}h1{font-size:21px}.top-actions{gap:10px}.top-actions .primary{padding:11px 14px}.stats{gap:16px}.stat{min-height:130px}.bottom-grid{grid-template-columns:1fr}.welcome{font-size:10px}}
 @media(max-width:520px){.app{padding:16px}.topbar{flex-wrap:wrap;margin-bottom:16px}.top-actions{gap:8px}.top-actions .primary{font-size:10px;padding:10px 12px;border-radius:12px}.top-actions .primary span{display:none}h1{font-size:18px}#menu,#theme{width:35px;height:35px;font-size:20px}.stats{gap:12px}.stat{display:block;border-radius:20px;padding:20px;min-height:150px}.stat-icon{width:36px;height:36px;font-size:23px;margin-bottom:10px}.stat strong{font-size:28px}.stat div>span{font-size:10px}.overview{grid-template-columns:1fr;padding:20px;gap:24px}.website-card{min-height:220px}.panel{border-radius:20px;padding:20px}.connection{flex-direction:column;align-items:stretch;gap:15px}.connection .primary{align-self:flex-start}footer{flex-direction:column;gap:5px}.welcome{align-items:flex-start;gap:15px}.welcome>p{max-width:170px}.editor-info{flex-direction:column;gap:8px}.editor-frame{min-height:700px}.panel-heading{flex-wrap:wrap}.sidebar{inset-block:12px;right:12px}.profile{margin-block:28px 15px}.sidebar nav{gap:3px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* User-supplied originals for each theme; no CSS inversion of the artwork. */
+.identity-night{display:none!important}
+[data-theme=dark] .identity-day{display:none!important}
+[data-theme=dark] .identity-night{display:block!important}
+.brand-identity{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-identity .brand-logo,[data-theme=dark] .brand-identity .brand-logo{filter:none;mix-blend-mode:normal;object-fit:contain}
+
+.brand .brand-identity img,[data-theme=dark] .brand .brand-identity img{filter:none;mix-blend-mode:normal;object-fit:contain}
+.avatar img{object-fit:contain}
+.website-card{background:var(--soft);color:var(--text);padding:20px}
+.website-card:after{display:none}
+.website-visual{margin-top:12px;border-radius:15px;overflow:hidden}
+.website-visual img{display:block;width:100%;height:140px;object-fit:cover;object-position:center}
+.website-card h2{font-size:18px;margin-top:12px}
+.website-card p{margin-top:8px;color:var(--muted)}
+.website-card>a{margin-top:10px;color:var(--text)}

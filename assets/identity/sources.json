@@ -1,0 +1,42 @@
+{
+  "folder": "1fyoUZlBbHa73hZBFcUgRrNJjQggI_s-P",
+  "exports": [
+    {
+      "asset": "logo-day.webp",
+      "drive_id": "1gmXEUDS-0Ir9gib_opX5_K1vDVo-RmYq",
+      "source_sha256": "d77965e1138f8b4ba4ccbab51cac4d9c099cec609de81b5b32dac24d1ec9acac",
+      "dimensions": [
+        192,
+        133
+      ]
+    },
+    {
+      "asset": "logo-night.webp",
+      "drive_id": "1DoNo95111rG7xIarO_IuPPznJXZ0v2SY",
+      "source_sha256": "391de11b8685b2853c30898808c76f47a14a1d0814d9ebfebf878a1e1b9f6e5e",
+      "dimensions": [
+        192,
+        192
+      ]
+    },
+    {
+      "asset": "wallpaper-day.webp",
+      "drive_id": "1qMJ7ulOOgZcXFDniFrW0qvmJJttpnxs2",
+      "source_sha256": "24dfe9e313dace9f46b9082847c7ec65c582cd98f0fd4d6f0db46d092a34f36c",
+      "dimensions": [
+        960,
+        600
+      ]
+    },
+    {
+      "asset": "wallpaper-night.webp",
+      "drive_id": "1ke1XBtzirJusqKa9TaeQU7mRWGDcY-e7",
+      "source_sha256": "8d9d4f4b4f43c6d63ad9e40a0681c503128c986a3238d54af752f0defb1cebc7",
+      "dimensions": [
+        960,
+        600
+      ]
+    }
+  ],
+  "notes": "Supplied original artwork, exported to responsive WebP. No recoloring or generated replacement."
+}

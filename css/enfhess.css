@@ -13,3 +13,10 @@
 [dir=ltr] .feature-card{direction:ltr}[dir=ltr] .signature-copy h1{font-size:clamp(2rem,3.1vw,3.2rem);line-height:1.4}[dir=ltr] .explore-arrow{left:auto;right:22px}
 @media(max-width:1050px){.header-inner{gap:10px}.desktop-nav{gap:12px}.brand-caption{display:none}.signature-copy{padding:32px 24px}.hero-grid{gap:0}.feature-card{width:250px}.feature-image{height:200px}.signature-copy h1{font-size:2.6rem}}
 @media(max-width:760px){.container{width:calc(100% - 32px)}.header-inner{min-height:78px;gap:7px;flex-wrap:wrap;padding-block:10px}.brand{flex:1}.brand-name{font-size:.72rem}.brand-mark{width:36px}.language-button,.theme-button{width:36px;min-width:36px;min-height:36px}.hero-grid{grid-template-columns:1fr;padding-block:34px 30px;gap:4px;min-height:0}.signature-copy{padding:26px 20px}.signature-copy h1{font-size:2.35rem;line-height:1.65}.signature-description{font-size:.85rem;margin-top:18px}.signature-copy .actions{gap:12px}.hero-profile-link,.button{font-size:.76rem;padding-inline:20px}.feature-deck{padding-block:18px 0}.deck-cards{height:410px}.feature-card{width:246px;top:25px}.feature-card[data-position=previous]{transform:translateX(-84%) scale(.83)}.feature-card[data-position=next]{transform:translateX(-16%) scale(.83)}.feature-card h2{font-size:1rem}.feature-image{height:200px}.explore-section{grid-template-columns:1fr;gap:14px;padding-block:30px}.explore-section>a{padding:20px}.explore-section h2{font-size:1.1rem}.section{padding-block:40px}.section-heading h2{font-size:1.6rem}.project-card{padding:25px;min-height:260px}.feature-card[data-position=active]{transform:translateX(-50%)}.deck-controls{margin-top:10px}.signature-copy .eyebrow{font-size:.62rem}}
+
+/* User-supplied originals for each theme; no CSS inversion of the artwork. */
+.identity-night{display:none!important}
+[data-theme=dark] .identity-day{display:none!important}
+[data-theme=dark] .identity-night{display:block!important}
+.brand-identity{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-identity .brand-logo,[data-theme=dark] .brand-identity .brand-logo{filter:none;mix-blend-mode:normal;object-fit:contain}
