@@ -1,5 +1,10 @@
 name: Tested automatic maintenance
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/maintenance.yml
+      - scripts/update_projects.py
   workflow_dispatch:
   schedule:
     - cron: '47 3 * * 1'
