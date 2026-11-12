@@ -57,6 +57,7 @@ $('undo').addEventListener('click',()=>{const value=undo.pop();if(!value)return;
 for(const dialog of document.querySelectorAll('dialog')){dialog.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dialog.close()));dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});}
 function previewURL(){const extra=previewPage.startsWith('extra:');if(extra){const slug=previewPage.slice(6);return '/pages/studio-preview.html?studio-preview=1&slug='+encodeURIComponent(slug);}return (previewPage==='home'?'/index.html':'/pages/'+previewPage+'.html')+'?studio-preview=1';}
 function setPreview(page=currentPage){previewPage=page;preview.src=previewURL();}
+function focusBlock(){if(!selectedBlock)return;requestAnimationFrame(()=>{const input=view.querySelector(`[data-block="${selectedBlock}"]`);input?.scrollIntoView({block:'center',behavior:'smooth'});input?.focus();});}
 function fitPreview(){const stage=$('preview-stage');const scale=Math.min(1,stage.clientWidth/previewSize);preview.style.width=previewSize+'px';preview.style.height=Math.round(780/scale)+'px';preview.style.transform=`scale(${scale})`;stage.style.height='780px';}
 new ResizeObserver(fitPreview).observe($('preview-stage'));
 $('preview-device').addEventListener('change',event=>{previewSize=Number(event.target.value);fitPreview();});
@@ -66,7 +67,7 @@ $('preview-expand').addEventListener('click',()=>{$('studio-view').classList.tog
 window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==preview.contentWindow)return;
  if(event.data?.type==='studio-ready')sendPreview();
- if(event.data?.type==='studio-select'&&Object.hasOwn(pages,event.data.page)){currentPage=event.data.page;selectedBlock=event.data.key;location.hash='pages';render();const input=view.querySelector(`[data-block="${selectedBlock}"]`);input?.scrollIntoView({block:'center',behavior:'smooth'});input?.focus();}
+ if(event.data?.type==='studio-select'&&Object.hasOwn(pages,event.data.page)){currentPage=event.data.page;selectedBlock=event.data.key;if(location.hash==='#pages'){render();focusBlock();}else location.hash='pages';}
 });
 function pageEditor(){
  const top=group('ویرایش صفحه','متن‌ها را از این فهرست یا با کلیک روی متن در پیش‌نمایش انتخاب کنید. عنوان مرورگر و توضیح جست‌وجو نیز قابل ویرایش‌اند.');
@@ -194,7 +195,7 @@ async function historyEditor(){const section=group('تاریخچه و بازیا
 function render(){if(!loaded)return;view.replaceChildren();const route=location.hash.slice(1);if(!Object.hasOwn(routes,route))return;
  if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
 }
-function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Object.hasOwn(routes,route);$('publish-bar').hidden=!loaded;if(Object.hasOwn(routes,route))render();}
+function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Object.hasOwn(routes,route);$('publish-bar').hidden=!loaded;if(loaded&&Object.hasOwn(routes,route)){render();const target=({articles:'blog',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[route]||previewPage;if(target!==previewPage||!preview.getAttribute('src'))setPreview(target);if(route==='pages')focusBlock();}}
 window.addEventListener('hashchange',route);
 window.addEventListener('beforeunload',event=>{if(store.storageError&&store.count||store.busy){event.preventDefault();event.returnValue='';}});
-try{await store.load();loaded=true;route();setPreview();status();if(session.state==='connected')await synchronize();}catch(error){notice(error.message,true);}
+try{await store.load();loaded=true;route();status();if(session.state==='connected')await synchronize();}catch(error){notice(error.message,true);}
