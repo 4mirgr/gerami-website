@@ -9,7 +9,7 @@ const baseURL = (process.env.GERAMI_PREVIEW_URL || 'http://127.0.0.1:4173').repl
 const projectOrigin = combined ? baseURL : 'https://drgerami-md.ir';
 
 const dir = await mkdtemp(join(tmpdir(), 'gerami-browser-'));
-const proc = spawn('chromium', ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--remote-debugging-port=0', '--user-data-dir=' + dir, 'about:blank'], {stdio: ['ignore', 'ignore', 'pipe']});
+const proc = spawn(process.env.CHROMIUM_PATH || 'chromium', ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--remote-debugging-port=0', '--user-data-dir=' + dir, 'about:blank'], {stdio: ['ignore', 'ignore', 'pipe']});
 let socket;
 try {
   const endpoint = await new Promise((resolve, reject) => {

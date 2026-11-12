@@ -1,6 +1,6 @@
 import {createRequire} from 'node:module';import assert from 'node:assert/strict';
 const {chromium}=createRequire(import.meta.url)('playwright');
-const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
+const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',args:['--no-sandbox']});
 try{
  const page=await browser.newPage({viewport:{width:390,height:844},colorScheme:'light'});
  for(const path of ['','admin/']){

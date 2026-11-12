@@ -7,14 +7,14 @@ export async function onRequestGet({request, env}) {
   if (url.origin !== origin || !state || !/^[a-f0-9]{64}$/.test(state) || state !== url.searchParams.get('state') || !url.searchParams.get('code')) return fail('Invalid or expired login. Please start again.');
   if (!env.CMS_GITHUB_CLIENT_ID || !env.CMS_GITHUB_CLIENT_SECRET) return fail('CMS login is not configured.',503);
   try {
-    const response = await fetch('https://github.com/login/oauth/access_token',{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({client_id:env.CMS_GITHUB_CLIENT_ID,client_secret:env.CMS_GITHUB_CLIENT_SECRET,code:url.searchParams.get('code'),redirect_uri:origin+'/api/cms/callback'})});
+    const response = await fetch('https://github.com/login/oauth/access_token',{method:'POST',signal:AbortSignal.timeout(15000),headers:{Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({client_id:env.CMS_GITHUB_CLIENT_ID,client_secret:env.CMS_GITHUB_CLIENT_SECRET,code:url.searchParams.get('code'),redirect_uri:origin+'/api/cms/callback'})});
     const token = await response.json();
     if (!response.ok || typeof token.access_token !== 'string') return fail('GitHub login failed.');
-    const userResponse = await fetch('https://api.github.com/user',{headers:{Authorization:'Bearer '+token.access_token,'User-Agent':'Gerami-CMS',Accept:'application/vnd.github+json'}});
+    const userResponse = await fetch('https://api.github.com/user',{signal:AbortSignal.timeout(15000),headers:{Authorization:'Bearer '+token.access_token,'User-Agent':'Gerami-CMS',Accept:'application/vnd.github+json'}});
     const user = await userResponse.json();
     if (!userResponse.ok || String(user.login).toLowerCase() !== (env.CMS_ADMIN_LOGIN || '4mirgr').toLowerCase()) {
       // Revoke rejected tokens rather than leaving a new authorization active.
-      await fetch('https://api.github.com/applications/'+env.CMS_GITHUB_CLIENT_ID+'/token',{method:'DELETE',headers:{Authorization:'Basic '+btoa(env.CMS_GITHUB_CLIENT_ID+':'+env.CMS_GITHUB_CLIENT_SECRET),'User-Agent':'Gerami-CMS','Content-Type':'application/json'},body:JSON.stringify({access_token:token.access_token})});
+      await fetch('https://api.github.com/applications/'+env.CMS_GITHUB_CLIENT_ID+'/token',{method:'DELETE',signal:AbortSignal.timeout(15000),headers:{Authorization:'Basic '+btoa(env.CMS_GITHUB_CLIENT_ID+':'+env.CMS_GITHUB_CLIENT_SECRET),'User-Agent':'Gerami-CMS','Content-Type':'application/json'},body:JSON.stringify({access_token:token.access_token})});
       return fail('This GitHub account is not authorized to manage this website.');
     }
     const nonce = crypto.randomUUID();

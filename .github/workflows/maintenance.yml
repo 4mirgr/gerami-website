@@ -1,0 +1,58 @@
+name: Tested automatic maintenance
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '47 3 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: website-maintenance
+  cancel-in-progress: false
+jobs:
+  update:
+    name: Validate updates before applying
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: ./.github/actions/setup-checks
+      - name: Prepare same-repository integration pins and development patch updates
+        run: |
+          set -euo pipefail
+          python scripts/update_projects.py --write
+          npm update --ignore-scripts
+          npx playwright install --with-deps chromium
+          node -e 'console.log("CHROMIUM_PATH=" + require("playwright").chromium.executablePath())' >> "$GITHUB_ENV"
+      - name: Record whether a candidate changed
+        id: changes
+        shell: bash
+        run: |
+          if git diff --quiet -- deploy/projects.json package.json package-lock.json; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check every candidate without deploying
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          python scripts/check_site.py --browser
+          python scripts/build_cloudflare.py
+      - name: Apply only tested updates; Cloudflare performs the production build
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add deploy/projects.json package.json package-lock.json
+          git commit -m 'chore: apply verified integration and development patch updates'
+          gh auth setup-git
+          git push origin HEAD:main

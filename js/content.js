@@ -14,13 +14,15 @@
     try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.href : null; } catch (_) { return null; }
   }
   async function json(file) {
-    const res = await fetch(new URL('content/' + file, base));
+    const res = await fetch(new URL('content/' + file, base), {cache:'no-store', signal: AbortSignal.timeout(10000)});
     if (!res.ok) throw new Error('Content unavailable');
     return res.json();
   }
+  const profileRequest=json('site.json').then(data => { window.dispatchEvent(new CustomEvent('site-profile', {detail:data})); return data; }).catch(() => null);
   const path = location.pathname;
   if (path.endsWith('/about.html') || path.endsWith('/contact.html') || path.endsWith('/appointments.html')) {
-    json('site.json').then(data => {
+    profileRequest.then(data => {
+      if (!data) return;
       const host = el('section', '', 'cms-profile container');
       document.querySelector('main').append(host);
       function render() {
@@ -28,6 +30,7 @@
         if (path.endsWith('/about.html')) {
           if (data['bio_' + lang()]) host.append(el('p', data['bio_' + lang()]));
           const entries = Array.isArray(data.cv) ? data.cv : [];
+          document.querySelectorAll('[data-cv-placeholder]').forEach(node => {node.hidden=entries.length>0;});
           if (entries.length) host.append(el('h2', text('رزومه و سوابق', 'CV and experience')));
           entries.forEach(item => { const card = el('article', '', 'card'); card.append(el('h3', item['title_' + lang()]), el('p', item['detail_' + lang()])); host.append(card); });
         } else {
@@ -47,7 +50,7 @@
   const isHome = path === '/' || path.endsWith('/index.html');
   if (!isBlog && !isHome) return;
   json('articles.json').then(data => {
-    const articles = (Array.isArray(data.articles) ? data.articles : []).filter(a => a.status === 'published' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(a.slug) && a.title_fa && a.title_en);
+    const articles = (Array.isArray(data.articles) ? data.articles : []).filter(a => a.status === 'published' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(a.slug) && a.title_fa && a.title_en).sort((a,b) => String(b.published_at || '').localeCompare(String(a.published_at || '')) || a.slug.localeCompare(b.slug));
     if (!articles.length) return;
     const host=el('section','','container section');
     const toolbar=el('div','','article-toolbar');
@@ -64,12 +67,12 @@
     function render() {
       search.placeholder=text('جست‌وجوی مقاله…','Search articles…'); search.setAttribute('aria-label',search.placeholder);
       select.setAttribute('aria-label',text('مخاطب مقاله','Article audience'));
-      const value=select.value;
+      const value=select.options.length ? select.value : (location.hash === '#professional' ? 'professional' : location.hash === '#public' ? 'patients' : '');
       select.replaceChildren(...[['',text('همهٔ مخاطبان','All audiences')],['patients',text('برای بیماران','For patients')],['professional',text('برای پزشکان','For clinicians')]].map(([v,t]) => {const o=el('option',t);o.value=v;return o;}));
       select.value=value;
       list.replaceChildren();
       let matching=articles.filter(a => (!select.value || a.audience === select.value) && ((a['title_'+lang()] || '')+' '+(a['body_'+lang()] || '')+' '+(a.category || '')).toLocaleLowerCase().includes(search.value.toLocaleLowerCase()));
-      if (!isBlog) matching=matching.slice(-3).reverse();
+      if (!isBlog) matching=matching.slice(0,3);
       heading.textContent=text('تازه‌ترین مطالب','Latest writing');
       count.textContent=matching.length ? text(matching.length+' مقاله',matching.length+' articles') : text('مقاله‌ای پیدا نشد.','No articles found.');
       matching.forEach(a => {
@@ -85,6 +88,7 @@
       });
     }
     search.addEventListener('input',render);select.addEventListener('change',render);
+    window.addEventListener('hashchange', () => { select.value=location.hash === '#professional' ? 'professional' : location.hash === '#public' ? 'patients' : ''; render(); });
     render();new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   }).catch(() => {});
 })();

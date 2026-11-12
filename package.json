@@ -1,0 +1,7 @@
+{
+  "name": "gerami-website-checks",
+  "private": true,
+  "description": "Development-only browser checks; public website has no npm runtime",
+  "scripts": {"test": "python3 scripts/check_site.py --browser"},
+  "devDependencies": {"playwright": "~1.62.1"}
+}

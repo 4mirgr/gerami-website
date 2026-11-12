@@ -84,6 +84,7 @@ class AdapterTests(unittest.TestCase):
         self.assertIn("location.origin + import.meta.env.BASE_URL", auth)
         for relative in ["src/main.jsx", "src/auth.jsx", "src/linkedin-panel.jsx"]:
             self.assertIn('import.meta.env.BASE_URL + "brand-aa-', (work / relative).read_text())
+        self.assertEqual((work / 'cloud/evidence-deadline.mjs').read_text(), (self.source / 'cloud/evidence-deadline.mjs').read_text())
         self.assertNotIn("fonts.googleapis.com", (work / "src/style.css").read_text())
         manifest = json.loads((work / "public/site.webmanifest").read_text())
         self.assertEqual(manifest["start_url"], BASE)

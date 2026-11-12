@@ -1,5 +1,5 @@
 import {createRequire} from 'node:module';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
-const require=createRequire(import.meta.url);const {chromium}=require('playwright');const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
+const require=createRequire(import.meta.url);const {chromium}=require('playwright');const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',args:['--no-sandbox']});
 try{
 const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'light'});
 await page.route('**/api/cms/status',r=>r.fulfill({json:{configured:false}}));
