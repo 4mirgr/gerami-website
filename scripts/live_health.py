@@ -8,8 +8,8 @@ CHECKS = {
     '/admin/': b'dompet.css',
     '/admin/editor.html': b'decap-cms@3.10.0',
     '/api/cms/status': b'"configured":true',
-    '/intmed/': b'<html',
-    '/aus/': b'<html',
+    '/intmed/': b'<title>IntMed</title>',
+    '/aus/': b'/aus/assets/',
     '/assets/fonts/Vazirmatn.woff2': b'wOF2',
 }
 

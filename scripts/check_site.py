@@ -29,6 +29,7 @@ def main():
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_content_validation.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_update_projects.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_asset_versions.py'])
+    run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_live_health.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_aus_frontend_adapter.py'])
     for script in UNITS:
         run(['node', 'scripts/' + script])
