@@ -1,13 +1,13 @@
 {
   "intmed": {
     "repository": "https://github.com/4mirgr/intMed-study-plan.git",
-    "commit": "e759a0ab72ac80ce78f80647da07932d5f82c895",
+    "commit": "330109818c29fb43a607a6736f14ff905630e1ab",
     "public_directory": "docs",
     "mount": "intmed"
   },
   "aus": {
     "repository": "https://github.com/4mirgr/immi-arash-amir.git",
-    "commit": "a369e5352f0c3036c1ea5b4746958c0577bdaf38",
+    "commit": "d4045d66ae795b80c2a3c51e479783961c4e42d5",
     "public_directory": "dist",
     "mount": "aus"
   }
