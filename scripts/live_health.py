@@ -7,6 +7,7 @@ CHECKS = {
     '/': b'css/enfhess.css',
     '/admin/': b'dompet.css',
     '/admin/editor.html': b'decap-cms@3.10.0',
+    '/api/cms/status': b'"configured":true',
     '/intmed/': b'<html',
     '/aus/': b'<html',
     '/assets/fonts/Vazirmatn.woff2': b'wOF2',

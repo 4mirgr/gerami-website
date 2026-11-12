@@ -43,6 +43,17 @@ class ContentValidation(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(self.root)
 
+    def test_publication_dates_use_sortable_iso_format(self):
+        item={'slug':'dated', 'status':'published', 'audience':'patients',
+              **{key:'Verified' for key in ('title_fa','title_en','body_fa','body_en','author','category')},
+              'published_at':'2026-11-12','reviewed_at':'2026-11-12','sources':[]}
+        self.write('content/articles.json', {'articles':[item]})
+        self.assertEqual(validate(self.root), 1)
+        item['published_at']='20261112'
+        self.write('content/articles.json', {'articles':[item]})
+        with self.assertRaises(ValueError):
+            validate(self.root)
+
     def test_automatic_updates_cannot_change_repository_or_mount(self):
         pins = json.loads((self.root / 'deploy/projects.json').read_text())
         pins['aus']['mount'] = 'intmed'

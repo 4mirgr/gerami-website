@@ -35,7 +35,7 @@ jobs:
           retention-days: 7
   production-health:
     name: Read-only production health
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:

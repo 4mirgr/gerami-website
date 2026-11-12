@@ -64,6 +64,8 @@ def validate(root=ROOT):
         for key in ('published_at', 'reviewed_at'):
             value = item.get(key, '')
             if value or item['status'] == 'published':
+                if not isinstance(value, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', value):
+                    raise ValueError('Article dates must use YYYY-MM-DD')
                 date.fromisoformat(value)
         if item.get('published_at') and item.get('reviewed_at') and item['reviewed_at'] < item['published_at']:
             raise ValueError('Article review cannot precede publication')
