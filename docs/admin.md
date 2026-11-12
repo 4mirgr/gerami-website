@@ -22,3 +22,11 @@ Public pages read `content/site.json` and `content/articles.json`. The home page
 `node scripts/browser-check.mjs`
 
 Production OAuth/login and Decap's external script require real deployment credentials and network access; mocked tests do not establish live authentication.
+
+## Dompet dashboard
+
+`/admin/` is the Persian RTL Dompet dashboard adapted from the user-supplied `dompet-10.rar` reference (Drive file `12uHRUcvT5rqWEA_gVOAzTni4YHdhP7Rz`). It supports day/night themes, a mobile sidebar, real public-file article/CV counts, recent entries, used-image gallery and setup readiness. Empty data stays empty; no finance/demo metrics are carried over.
+
+The existing Decap editor is retained at `/admin/editor.html`, embedded when editing articles/profile/contacts and available separately. It is loaded lazily and retained when navigating to the dashboard so editing state is not destroyed. Authentication and saving remain GitHub-backed; the static dashboard only reads already-public content. Referenced article media is displayed in the dashboard; the complete upload library is managed in the editor's Media dialog. `/api/cms/status` returns only a configuration boolean with `Cache-Control: no-store`, never secret values or session information.
+
+Validation: `node scripts/test_admin.mjs` tests real/empty counts, safe text, theme persistence, navigation, iframe preservation, mobile overflow and menu controls, and non-disclosure of OAuth configuration values.
