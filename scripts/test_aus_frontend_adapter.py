@@ -62,6 +62,12 @@ class AdapterTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content, encoding="utf-8")
 
+    def test_public_deadline_helper_is_included_without_backend(self):
+        destination = self.root / "deadline"
+        prepare_source(self.source, destination)
+        self.assertEqual((destination / "cloud/evidence-deadline.mjs").read_text(), "export const evidenceClosed=()=>false;")
+        self.assertFalse((destination / "cloud/worker.mjs").exists())
+
     def test_paths_auth_and_public_inputs_preserve_original(self):
         before = {str(p.relative_to(self.source)): p.read_bytes()
                   for p in self.source.rglob("*") if p.is_file()}
