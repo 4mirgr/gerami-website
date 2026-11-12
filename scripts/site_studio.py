@@ -123,9 +123,11 @@ def bake_settings(root, text, ident):
         return match[0]
 
     text = re.sub(r'(<nav\b[^>]*>).*?</nav>', nav, text, flags=re.S)
-    for key, marker in [('logo', 'brand-identity'), ('wallpaper', 'feature-image')]:
-        pattern = r'(<(?:span|a)\b[^>]*class="[^"]*' + marker + r'[^>]*">\s*)(<img\b[^>]+>)'
-        text = re.sub(pattern, lambda m: m[1] + attr(attr(attr(m[2], 'data-theme-light', appearance['light'][key]), 'data-theme-dark', appearance['dark'][key]), 'src', appearance['light'][key]), text)
+    def identity(match):
+        tag = match[0]
+        key = re.search(r'data-site-image="(logo|wallpaper)"', tag)[1]
+        return attr(attr(attr(tag, 'data-theme-light', appearance['light'][key]), 'data-theme-dark', appearance['dark'][key]), 'src', appearance['light'][key])
+    text = re.sub(r'<img\b[^>]*data-site-image="(?:logo|wallpaper)"[^>]*>', identity, text)
     families = {'Vazirmatn': 'Vazirmatn,Tahoma,sans-serif', 'Tahoma': 'Tahoma,sans-serif', 'Arial': 'Arial,sans-serif', 'system': 'system-ui,sans-serif'}
     css = ':root{--site-font:' + families[appearance['font']] + ';'
     for key, value in [('site-font-size', str(appearance['fontSize']) + 'px'), ('site-line-height', appearance['lineHeight']), ('heading-weight', appearance['headingWeight']), ('radius', str(appearance['radius']) + 'px'), ('site-width', str(appearance['width']) + 'px')]:

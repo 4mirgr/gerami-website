@@ -22,6 +22,7 @@ export class GitHubSession extends EventTarget{
    if(generation!==this.generation)return;
    if(user.login?.toLowerCase()!=='4mirgr'||!repo.permissions?.push){this.token='';this.set('forbidden','این حساب اجازهٔ انتشار در مخزن سایت را ندارد.');return;}
    this.set('connected','اتصال برقرار است؛ همهٔ ابزارها از همین حساب استفاده می‌کنند.',user.login);
+   try{if(this.popup&&!this.popup.closed)this.popup.close();}catch{/* Storage already delivered the verified session. */}
   }catch(error){if(generation===this.generation)this.set(error.status===401?'expired':'error',error.status===401?'ورود منقضی شده است؛ دوباره متصل شوید.':'تأیید اتصال ممکن نشد. اینترنت و دسترسی GitHub را بررسی و دوباره امتحان کنید.');}
  }
  async api(path,options={}){

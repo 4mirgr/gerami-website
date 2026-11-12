@@ -7,7 +7,7 @@
  const el=(tag,value='',className='')=>{const node=document.createElement(tag);node.textContent=value;if(className)node.className=className;return node;};
  function https(value){try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:null;}catch{return null;}}
  async function json(file){const res=await fetch(new URL('content/'+file,base),{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!res.ok)throw Error('Unavailable');return res.json();}
- let profile=null,articles=[],profileHost,articleHost,previewAssets={},previewDrafts=false;
+ let profile=null,articles=[],profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
  const path=location.pathname,isHome=path==='/'||path.endsWith('/index.html'),isBlog=path.endsWith('/blog.html');
  const imageSource=src=>previewAssets[src]||src;
  function renderProfile(){
@@ -43,14 +43,14 @@
   for(const item of matching){
    const card=el('details','','card cms-article');card.id='article-'+item.slug;card.append(el('summary',item['title_'+lang()]),el('p',[item.author,item.category,item.published_at,text('بازبینی: ','Reviewed: ')+(item.reviewed_at||'')].filter(Boolean).join(' · ')));
    if(typeof item.image==='string'&&/^\/assets\/uploads\/[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif)$/i.test(item.image)&&!item.image.includes('..')){const img=el('img');img.src=imageSource(item.image);img.alt=item['title_'+lang()];img.loading='lazy';img.style.maxWidth='100%';card.append(img);}
-   const body=el('div',item['body_'+lang()],'article-body');card.append(body);rich.then(({richText})=>richText(body,item['body_'+lang()]));
+   const body=el('div',item['body_'+lang()],'article-body');card.append(body);rich.then(({richText})=>richText(body,item['body_'+lang()],imageSource));
    const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);list.append(card);
   }
   window.dispatchEvent(new Event('site-articles-ready'));
  }
- json('site.json').then(value=>{profile=value;renderProfile();}).catch(()=>{});
- if(isHome||isBlog)json('articles.json').then(value=>{articles=Array.isArray(value.articles)?value.articles:[];renderArticles();}).catch(()=>{});
+ json('site.json').then(value=>{if(!previewActive){profile=value;renderProfile();}}).catch(()=>{});
+ if(isHome||isBlog)json('articles.json').then(value=>{if(!previewActive){articles=Array.isArray(value.articles)?value.articles:[];renderArticles();}}).catch(()=>{});
  new MutationObserver(()=>{renderProfile();renderArticles();}).observe(root,{attributes:true,attributeFilter:['lang']});
  window.addEventListener('hashchange',()=>{if(select){select.value=location.hash==='#professional'?'professional':location.hash==='#public'?'patients':'';renderArticles();}});
- window.addEventListener('site-studio-content',event=>{if(event.detail.profile)profile=event.detail.profile;if(event.detail.articles)articles=event.detail.articles.articles;previewAssets=event.detail.assets||{};previewDrafts=event.detail.preview===true;renderProfile();renderArticles();});
+ window.addEventListener('site-studio-content',event=>{previewActive=true;if(event.detail.profile)profile=event.detail.profile;if(event.detail.articles)articles=event.detail.articles.articles;previewAssets=event.detail.assets||{};previewDrafts=event.detail.preview===true;renderProfile();renderArticles();});
 })();

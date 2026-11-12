@@ -12,22 +12,36 @@ async function mediaDB(action){
  });}finally{db.close();}
 }
 export class SiteStore extends EventTarget{
- constructor(session){super();this.session=session;this.documents={};this.base={};this.shas={};this.conflicts=new Set();this.media=new Map();this.ready=false;this.remoteReady=false;this.busy=false;try{this.drafts=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');}catch{this.drafts={};}}
+ constructor(session){super();this.session=session;this.documents={};this.base={};this.shas={};this.conflicts=new Set();this.media=new Map();this.assetPreviews=new Map();this.ready=false;this.remoteReady=false;this.busy=false;try{this.drafts=JSON.parse(localStorage.getItem(DRAFT_KEY)||'{}');}catch{this.drafts={};}}
  changed(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(this.drafts));this.localStorageError=false;}catch{this.localStorageError=true;}this.storageError=this.localStorageError||this.mediaStorageError;
   const signature=[...this.media.keys()].join('|');
   if(this.ready&&signature!==this.mediaSignature){this.mediaSignature=signature;const snapshot=[...this.media].map(([path,file])=>[path,{base64:file.base64}]);this.mediaSave=(this.mediaSave||Promise.resolve()).then(()=>mediaDB(snapshot)).then(()=>{this.mediaStorageError=false;this.storageError=this.localStorageError;}).catch(()=>{this.mediaStorageError=true;this.storageError=true;this.dispatchEvent(new Event('change'));});}
   this.dispatchEvent(new Event('change'));}
  async load(){
   for(const path of managedPaths){const response=await fetch('/'+path,{cache:'no-store'});if(!response.ok)throw Error('دریافت محتوای سایت ممکن نشد.');const data=validateDocument(path,await response.json());this.install(path,data);}
-  try{for(const [path,base64] of await mediaDB()||[]){if(!/^assets\/uploads\/[a-z0-9-]+\.webp$/.test(path))continue;const blob=new Blob([Uint8Array.from(atob(base64),c=>c.charCodeAt(0))],{type:'image/webp'});this.media.set(path,{base64,url:URL.createObjectURL(blob)});}}catch{this.mediaStorageError=true;}
+  try{for(const [path,base64] of await mediaDB()||[]){if(!/^assets\/uploads\/[a-z0-9-]+\.webp$/.test(path))continue;const blob=new Blob([Uint8Array.from(atob(base64),c=>c.charCodeAt(0))],{type:'image/webp'});const url=URL.createObjectURL(blob);this.media.set(path,{base64,url});this.assetPreviews.set('/'+path,url);}}catch{this.mediaStorageError=true;}
   this.ready=true;this.changed();
  }
- install(path,data,sha){this.base[path]=clone(data);if(sha)this.shas[path]=sha;const draft=this.drafts[path];if(draft){try{validateDocument(path,draft.next);this.documents[path]=clone(draft.next);if(JSON.stringify(draft.base)!==JSON.stringify(data))this.conflicts.add(path);else this.conflicts.delete(path);}catch{delete this.drafts[path];this.documents[path]=clone(data);}}else this.documents[path]=clone(data);}
+ install(path,data,sha){
+  this.base[path]=clone(data);if(sha)this.shas[path]=sha;const draft=this.drafts[path];
+  if(draft){
+   // A draft may be incomplete. Publication validation must never erase it.
+   if(draft.next&&typeof draft.next==='object'&&!Array.isArray(draft.next))this.documents[path]=clone(draft.next);
+   else{this.documents[path]=clone(data);this.conflicts.add(path);return;}
+   if(JSON.stringify(draft.base)!==JSON.stringify(data))this.conflicts.add(path);else this.conflicts.delete(path);
+  }else this.documents[path]=clone(data);
+ }
+ async readFile(path,ref){
+  const file=await this.session.api(prefix+'/contents/'+path+'?ref='+ref);
+  // GitHub omits Contents API base64 above 1 MiB; Git Blobs still supplies it.
+  const payload=file.encoding==='none'||!file.content?await this.session.api(prefix+'/git/blobs/'+file.sha):file;
+  return [path,validateDocument(path,JSON.parse(decode(payload.content))),file.sha];
+ }
  async synchronize(){
   if(this.busy||this.session.state!=='connected')return;this.busy=true;this.remoteReady=false;this.changed();
   try{
    const ref=await this.session.api(prefix+'/git/ref/heads/main');
-   const files=await Promise.all(managedPaths.map(async path=>{const file=await this.session.api(prefix+'/contents/'+path+'?ref='+ref.object.sha);return [path,validateDocument(path,JSON.parse(decode(file.content))),file.sha];}));
+   const files=await Promise.all(managedPaths.map(path=>this.readFile(path,ref.object.sha)));
    for(const [path,data,sha] of files)this.install(path,data,sha);this.remoteReady=true;
   }finally{this.busy=false;this.changed();}
  }
@@ -62,8 +76,8 @@ export class SiteStore extends EventTarget{
  async history(){return this.session.api(prefix+'/commits?path=content&sha=main&per_page=15');}
  async restore(sha){
   if(!/^[a-f0-9]{40}$/.test(sha))throw Error('نسخه معتبر نیست.');
-  const files=await Promise.all(managedPaths.map(async path=>{try{const file=await this.session.api(prefix+'/contents/'+path+'?ref='+sha);return [path,validateDocument(path,JSON.parse(decode(file.content)))];}catch(error){if(error.status===404)return null;throw error;}}));
-  for(const entry of files)if(entry)this.edit(...entry);
+  const files=await Promise.all(managedPaths.map(async path=>{try{return await this.readFile(path,sha);}catch(error){if(error.status===404)return null;throw error;}}));
+  for(const entry of files)if(entry)this.edit(entry[0],entry[1]);
  }
- async stageImage(blob){const bytes=new Uint8Array(await blob.arrayBuffer());let binary='';for(const value of bytes)binary+=String.fromCharCode(value);const path='assets/uploads/studio-'+crypto.randomUUID()+'.webp';this.media.set(path,{base64:btoa(binary),url:URL.createObjectURL(blob)});this.changed();return '/'+path;}
+ async stageImage(blob){const bytes=new Uint8Array(await blob.arrayBuffer());let binary='';for(const value of bytes)binary+=String.fromCharCode(value);const path='assets/uploads/studio-'+crypto.randomUUID()+'.webp';const url=URL.createObjectURL(blob);this.media.set(path,{base64:btoa(binary),url});this.assetPreviews.set('/'+path,url);this.changed();await this.mediaSave;return '/'+path;}
 }
