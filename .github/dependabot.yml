@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: saturday
+      timezone: Asia/Tehran
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: saturday
+      timezone: Asia/Tehran
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
