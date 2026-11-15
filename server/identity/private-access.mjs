@@ -12,14 +12,21 @@ async function verified(env,token){
  const age=Math.min(3600,Math.floor(Number(exp)-Date.now()/1000));if(!Number.isFinite(age)||age<15)throw new ApiError(401,'private_sign_in_required');
  const header=await issueSession(env,{kind:'private',subject:user.userId,profileId:user.profileId,age});return {private:{profile_id:user.profileId},header};
 }
+async function exchange(env,grant,payload){
+ const config=await service(env,'/api/public-config');if(config.mode!=='cloud'||config.authRequired!==true||config.supabaseUrl!==AUTH||typeof config.publishableKey!=='string')throw new ApiError(503,'private_access_unavailable');
+ const response=await fetch(AUTH+'/auth/v1/token?grant_type='+grant,{method:'POST',headers:{apikey:config.publishableKey,'Content-Type':'application/json'},body:JSON.stringify(payload),redirect:'manual',signal:AbortSignal.timeout(20000)});
+ if(!response.ok)throw new ApiError(response.status===429?429:response.status>=500?503:401,'invalid_credentials');const tokens=await response.json();const proof=await verified(env,tokens.access_token);
+ return {...proof,native_session:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expires_in:tokens.expires_in,expires_at:tokens.expires_at,token_type:'bearer'}};
+}
 export async function privateLogin(request,env){
  const data=await body(request,['email','password']);if(typeof data.email!=='string'||data.email.length>320||typeof data.password!=='string'||data.password.length>4096)throw new ApiError(400,'invalid_credentials');
  await rate(env,request,'private-login',{limit:20});await rate(env,request,'private-account',{limit:8,identity:data.email.trim().toLowerCase()});
- const config=await service(env,'/api/public-config');if(config.mode!=='cloud'||config.authRequired!==true||config.supabaseUrl!==AUTH||typeof config.publishableKey!=='string')throw new ApiError(503,'private_access_unavailable');
- const response=await fetch(AUTH+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:config.publishableKey,'Content-Type':'application/json'},body:JSON.stringify({email:data.email.trim(),password:data.password}),redirect:'manual',signal:AbortSignal.timeout(20000)});
- if(!response.ok)throw new ApiError(response.status===429?429:response.status>=500?503:401,'invalid_credentials');const tokens=await response.json();const proof=await verified(env,tokens.access_token);
- // Transfer only this native AUS session, once. It never becomes a website role.
- return {...proof,native_session:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expires_in:tokens.expires_in,expires_at:tokens.expires_at,token_type:'bearer'}};
+ return exchange(env,'password',{email:data.email.trim(),password:data.password});
+}
+export async function privateRefresh(request,env){
+ const data=await body(request,['refresh_token']);if(typeof data.refresh_token!=='string'||!data.refresh_token||data.refresh_token.length>4096||/\s/.test(data.refresh_token))throw new ApiError(400,'invalid_credentials');
+ await rate(env,request,'private-refresh',{limit:80});await rate(env,request,'private-refresh-session',{limit:40,identity:digest(data.refresh_token)});
+ return exchange(env,'refresh_token',{refresh_token:data.refresh_token});
 }
 export async function privateSession(request,env){await body(request,[]);await rate(env,request,'private-session',{limit:40});const token=request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];return verified(env,token);}
 export async function privateRecovery(request,env){

@@ -91,6 +91,9 @@ def prepare_source(source: Path, destination: Path) -> None:
         if text.count(before) != 1:
             raise RuntimeError('AUS native session contract changed; review the private access bridge')
         text = text.replace(before, after, 1)
+    text, token_count = re.subn(r'  async function tokenRequest\(grant, payload\) \{.*?\n  \}\n  async function openSession', '  async function tokenRequest(grant, payload) {return requestPrivateTokens(grant,payload); }\n  async function openSession', text, count=1, flags=re.S)
+    if token_count != 1:
+        raise RuntimeError('AUS native token exchange contract changed; review the private access bridge')
     effect = """
   useEffect(()=>{
     if(!config||websiteHandoffUsed.current||callback.kind==='recovery'||callback.kind==='invalid')return;
@@ -100,7 +103,7 @@ def prepare_source(source: Path, destination: Path) -> None:
     openSession(tokens,epoch).catch(error=>{if(isCurrentAuth(epoch))setError(error.message);}).finally(()=>{if(isCurrentAuth(epoch))setBusy(false);});
   },[config]);
 """
-    text = "import {consumeHandoff,refreshPrivateAccess,clearPrivateAccess} from './website-access.mjs';\n" + text
+    text = "import {consumeHandoff,refreshPrivateAccess,clearPrivateAccess,requestPrivateTokens} from './website-access.mjs';\n" + text
     text = text.replace('  async function logout() {', effect + '  async function logout() {', 1)
     auth.write_text(text, encoding='utf-8')
 

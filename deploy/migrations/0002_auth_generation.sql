@@ -1,0 +1,3 @@
+ALTER TABLE website_users ADD COLUMN auth_version INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE website_sessions ADD COLUMN auth_version INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE website_reset_tokens ADD COLUMN auth_version INTEGER NOT NULL DEFAULT 0;

@@ -31,7 +31,10 @@ const renewalOptions = {
  onSession:value=>{if(mounted.current){setAccessToken(value.access_token);setSession(value);}},
  onInvalid:()=>{if(mounted.current){authEpoch.current++;}}
 };
-function openSession(opened){setAccessToken(opened.access_token);setSession(opened);}
+  async function tokenRequest(grant, payload) {
+    return response.json();
+  }
+  async function openSession(opened){setAccessToken(opened.access_token);setSession(opened);}
   async function logout() {
     if (current) {
       try {\n      } catch {}
@@ -93,6 +96,7 @@ class AdapterTests(unittest.TestCase):
         auth = (work / "src/auth.jsx").read_text()
         self.assertNotIn("local_demo", auth)
         self.assertIn('consumeHandoff', auth)
+        self.assertIn('return requestPrivateTokens(grant,payload)', auth)
         self.assertEqual((work / 'src/website-access.mjs').read_bytes(), (Path(__file__).resolve().parent.parent / 'deploy/aus-access-session.mjs').read_bytes())
         self.assertIn('result.mode === "cloud"', auth)
         self.assertIn("location.origin + import.meta.env.BASE_URL", auth)

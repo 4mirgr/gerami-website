@@ -24,10 +24,16 @@ export async function session(request,env,kind='website'){
  const token=cookie(request,kind);if(!token)return null;
  const row=await statement(env,'SELECT * FROM website_sessions WHERE token_hash=? AND kind=? AND expires_at>?',digest(token),kind,now()).first();if(!row)return null;
  if(kind==='private')return row;
- const user=await statement(env,`SELECT ${fields} FROM website_users WHERE id=? AND status='active'`,row.user_id).first();return user?{...row,user}:null;
+ const user=await statement(env,`SELECT ${fields},auth_version FROM website_users WHERE id=? AND status='active'`,row.user_id).first();return user&&row.auth_version===user.auth_version?{...row,user}:null;
 }
-export async function issueSession(env,{userId=null,kind='website',subject=null,profileId=null,age=86400}){
- const token=opaque(),time=now();await env.WEBSITE_DB.batch([statement(env,'INSERT INTO website_sessions(token_hash,kind,user_id,subject,profile_id,created_at,expires_at) VALUES(?,?,?,?,?,?,?)',digest(token),kind,userId,subject,profileId,time,time+age),statement(env,'DELETE FROM website_sessions WHERE expires_at<=?',time),statement(env,'DELETE FROM website_rate_limits WHERE expires_at<=?',time),statement(env,'DELETE FROM website_reset_tokens WHERE expires_at<=?',time)]);return cookieHeader(kind,token,age);
+export async function issueSession(env,{userId=null,kind='website',subject=null,profileId=null,age=86400,expectedVersion}){
+ const token=opaque(),time=now();let insert;
+ if(kind==='website'){
+  const guard=expectedVersion===undefined?'':' AND auth_version=?';
+  insert=statement(env,"INSERT INTO website_sessions(token_hash,kind,user_id,subject,profile_id,created_at,expires_at,auth_version) SELECT ?,?,id,NULL,NULL,?,?,auth_version FROM website_users WHERE id=? AND status='active'"+guard,digest(token),kind,time,time+age,userId,...(expectedVersion===undefined?[]:[expectedVersion]));
+ }else insert=statement(env,'INSERT INTO website_sessions(token_hash,kind,user_id,subject,profile_id,created_at,expires_at) VALUES(?,?,?,?,?,?,?)',digest(token),kind,userId,subject,profileId,time,time+age);
+ const result=await env.WEBSITE_DB.batch([insert,statement(env,'DELETE FROM website_sessions WHERE expires_at<=?',time),statement(env,'DELETE FROM website_rate_limits WHERE expires_at<=?',time),statement(env,'DELETE FROM website_reset_tokens WHERE expires_at<=?',time)]);
+ if(Number(result[0].meta.changes)!==1)throw new ApiError(401,'invalid_credentials');return cookieHeader(kind,token,age);
 }
 export async function requireUser(request,env,{admin=false,owner=false}={}){const value=await session(request,env);if(!value)throw new ApiError(401,'sign_in_required');if((owner&&value.user.role!=='owner')||(admin&&!['owner','admin'].includes(value.user.role)))throw new ApiError(403,'permission_denied');return value.user;}
 export async function rate(env,request,route,{limit=30,seconds=900,identity=''}={}){

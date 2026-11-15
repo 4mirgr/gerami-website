@@ -4,7 +4,7 @@ const origin='http://127.0.0.1:4173';
 import {managedPaths} from '../js/site-model.mjs';
 try{
  const context=await browser.newContext({viewport:{width:1600,height:1050}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const openPreviewArticle=async()=>{const frame=page.frameLocator('#site-preview');await frame.locator('body[data-page=blog]').waitFor();const article=frame.locator('.cms-article').first();await article.waitFor();if(!await article.evaluate(node=>node.open))await article.locator('summary').click();};
+ const openPreviewArticle=async()=>{const frame=page.frameLocator('#site-preview');await frame.locator('body[data-page=blog]').waitFor();const article=frame.locator('.cms-article').first();await article.waitFor();if(!await article.evaluate(node=>node.open)){await article.locator('summary').focus();await article.locator('summary').press('Enter');}await article.locator('.article-body').waitFor({state:'visible'});};
  await page.route('**/api/cms/status',r=>r.fulfill({json:{configured:true}}));
  await page.goto(origin+'/admin/#appearance');await page.waitForFunction(()=>document.querySelector('#studio-fields input')!==null);
  assert.match(await page.locator('#github-state').textContent(),/قطع/);assert.equal(await page.locator('#publish').isDisabled(),true);

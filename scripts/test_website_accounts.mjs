@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises
 import {createIdentityRuntime,privateToken} from './identity-test-runtime.mjs';
 const mf=createIdentityRuntime();
 try{
- const db=await mf.getD1Database('WEBSITE_DB');await db.exec((await readFile(new URL('../deploy/migrations/0001_website_identity.sql',import.meta.url),'utf8')).replace(/\n/g,' '));
+ const db=await mf.getD1Database('WEBSITE_DB');for(const name of ['0001_website_identity.sql','0002_auth_generation.sql'])await db.exec((await readFile(new URL('../deploy/migrations/'+name,import.meta.url),'utf8')).replace(/\n/g,' '));
  const post=(path,data,cookie='',headers={})=>mf.dispatchFetch('https://site.test/api/account/'+path,{method:'POST',headers:{Origin:'https://site.test','Content-Type':'application/json',Cookie:cookie,...headers},body:JSON.stringify(data)});
  const registered=await post('signup',{username:'sample-user',email:'user@example.org',display_name:'کاربر آزمایش',password:'test-only strong password'});assert.equal(registered.status,201);const cookie=registered.headers.get('set-cookie').split(';')[0];
  const info=await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:cookie}})).json();assert.equal(info.user.role,'member');assert.equal(info.user.email_verified,0);assert.equal(info.capabilities.privateWorkspace,false);assert.equal(info.destinations.some(d=>d.url==='/aus/'),false);assert.equal('password_hash' in info.user,false);
@@ -23,6 +23,9 @@ try{
  assert.equal((await post('private-recovery',{email:'doctor@example.org'})).status,200);
  const privateLogin=await post('private-login',{email:'doctor@example.org',password:'test-native-password'});assert.equal(privateLogin.status,200);const privateCookie=privateLogin.headers.get('set-cookie').split(';')[0];const privateState=await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:privateCookie}})).json();assert.equal(privateState.user,null);assert.equal(privateState.private.profile_id,'arash');assert.equal(privateState.capabilities.manageUsers,false);
  assert.equal((await mf.dispatchFetch('https://site.test/aus/assets/private.js',{headers:{Cookie:privateCookie}})).status,200);assert.equal((await mf.dispatchFetch('https://site.test/aus/%61ssets/private.js',{headers:{Cookie:privateCookie}})).status,400);
+ await db.prepare("UPDATE website_sessions SET expires_at=1 WHERE kind='private'").run();
+ assert.equal((await mf.dispatchFetch('https://site.test/aus/supabase/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{Cookie:privateCookie,Origin:'https://site.test'},body:'{}'})).status,401);
+ const refreshed=await post('private-refresh',{refresh_token:'native-refresh'});assert.equal(refreshed.status,200);const renewedCookie=refreshed.headers.get('set-cookie').split(';')[0];assert.equal((await mf.dispatchFetch('https://site.test/aus/assets/private.js',{headers:{Cookie:renewedCookie}})).status,200);
  assert.equal((await post('private-session',{},'',{Authorization:'Bearer '+privateToken})).status,200);assert.equal((await post('private-session',{},'',{Authorization:'Bearer eyJ.fake.fake'})).status,403);
  const reset=await post('admin/users/'+target.id,{action:'reset-link'},ownerCookie);const resetBody=await reset.json();assert.equal(reset.status,200);const token=resetBody.reset_url.split('#reset/')[1];assert.ok(token);assert.equal((await post('reset-password',{token,password:'replacement strong password'})).status,200);assert.equal((await post('reset-password',{token,password:'another strong password'})).status,400);
  assert.equal((await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:cookie}})).json()).user,null);
