@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 import {createIdentityRuntime,privateToken} from './identity-test-runtime.mjs';
-const mf=createIdentityRuntime();
+const mf=createIdentityRuntime({entry:'./identity-local-worker.mjs'});
 try{
  const db=await mf.getD1Database('WEBSITE_DB');for(const name of ['0001_website_identity.sql','0002_auth_generation.sql'])await db.exec((await readFile(new URL('../deploy/migrations/'+name,import.meta.url),'utf8')).replace(/\n/g,' '));
  const post=(path,data,cookie='',headers={})=>mf.dispatchFetch('https://site.test/api/account/'+path,{method:'POST',headers:{Origin:'https://site.test','Content-Type':'application/json',Cookie:cookie,...headers},body:JSON.stringify(data)});

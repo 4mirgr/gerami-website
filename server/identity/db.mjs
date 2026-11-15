@@ -5,7 +5,7 @@ export const statement=(env,sql,...params)=>env.WEBSITE_DB.prepare(sql).bind(...
 export const fields='id,username,email,display_name,phone,provider,email_verified,role,status,created_at,updated_at,last_login_at';
 export function ready(env){if(!env.WEBSITE_DB||typeof env.WEBSITE_DB.prepare!=='function'||typeof env.WEBSITE_PEPPER!=='string'||env.WEBSITE_PEPPER.length<32)throw new ApiError(503,'account_service_unavailable');}
 export const safeUser=row=>row?Object.fromEntries(fields.split(',').map(key=>[key,row[key]])):null;
-export function json(data,status=200,headers={}){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-Frame-Options':'SAMEORIGIN',...headers}});}
+export function json(data,status=200,extra={}){const headers=new Headers({'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-Frame-Options':'SAMEORIGIN'});const source=new Headers(extra);for(const [key,value] of source)if(key!=='set-cookie')headers.set(key,value);for(const value of source.getSetCookie())headers.append('Set-Cookie',value);return new Response(JSON.stringify(data),{status,headers});}
 export async function body(request,allowed){
  if(request.headers.get('Origin')!==new URL(request.url).origin)throw new ApiError(403,'origin_rejected');
  if(!/^application\/json(?:;|$)/i.test(request.headers.get('Content-Type')||''))throw new ApiError(415,'json_required');

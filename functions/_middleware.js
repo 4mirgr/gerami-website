@@ -1,3 +1,4 @@
+import {clinicConfigured} from '../server/identity/clinic-bridge.mjs';
 import {ApiError,ready,session,json} from '../server/identity/db.mjs';
 import {currentPrivate} from '../server/identity/private-access.mjs';
 function sensitivePath(path){return /^\/(?:aus|dash)(?:\/|$)/i.test(path)||/^\/build-info\.json$/i.test(path);}
@@ -8,6 +9,7 @@ export async function onRequest({request,env,next}){
  const normalized=new URL(url.origin+decoded.replaceAll('\\','/').replace(/\/{2,}/g,'/')).pathname;
  const sensitive=sensitivePath(url.pathname)||sensitivePath(normalized);if(!sensitive)return next();
  if(url.pathname!==normalized||/%|\\|\/\//.test(url.pathname)||!/^\/(?:aus|dash)(?:\/|$)|^\/build-info\.json$/.test(url.pathname))return json({error:'invalid_path'},400);
+ if((url.pathname==='/dash'||url.pathname.startsWith('/dash/'))&&clinicConfigured(env))return next();
  try{
   ready(env);const current=await session(request,env);const user=current?.user;const isAus=url.pathname==='/aus'||url.pathname.startsWith('/aus/');
   const allowed=isAus?(user?.role==='owner'||Boolean(await currentPrivate(request,env))):url.pathname==='/build-info.json'?user?.role==='owner':['owner','admin'].includes(user?.role);

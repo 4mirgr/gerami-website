@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';import {DatabaseSync} from 'node:sqlite';import {readFile,readdir} from 'node:fs/promises';
-import {handleAccount} from '../server/identity/handler.mjs';import {digest} from '../server/identity/crypto.mjs';
+import {handleLocalAccount as handleAccount} from '../server/identity/handler.mjs';import {digest} from '../server/identity/crypto.mjs';
 const files=(await readdir(new URL('../deploy/migrations/',import.meta.url))).filter(name=>name.endsWith('.sql')).sort();
 async function scenario(action,operation){
  const sqlite=new DatabaseSync(':memory:');for(const name of files)sqlite.exec(await readFile(new URL('../deploy/migrations/'+name,import.meta.url),'utf8'));

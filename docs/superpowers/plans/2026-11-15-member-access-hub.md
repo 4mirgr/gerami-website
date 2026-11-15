@@ -1,5 +1,7 @@
 # Member access and private application hub implementation plan
 
+Patient-account authority is superseded by `2026-11-15-shared-patient-portal.md` following the owner’s shared-Clinic request. Keep this plan’s GitHub-owner and AUS protections; do not reactivate independent D1 patient signup.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
 **Goal:** Add public login/signup, an owner administration hub and website user management, protect the unfinished clinic entry, and make the AUS application private to its existing two identities.

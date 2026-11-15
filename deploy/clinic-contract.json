@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/4mirgr/Clinic.git",
+  "commit": "7275e330a9a3eb5457a6aea0159cf448b1f51c47",
+  "api_prefix": "/dash/api/portal/",
+  "patient_mount": "/dash/portal/",
+  "authority": "clinic",
+  "purpose": "Reviewed integration-test checkout; not a backend deployment or automatic update pin"
+}
