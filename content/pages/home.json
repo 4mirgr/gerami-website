@@ -5,8 +5,8 @@
       "en": "Medicine, education & my journey | Dr. Amir Houshang Gerami"
     },
     "text-002": {
-      "fa": "وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای، آموزش پزشکی و آشنایی با پروژه‌های intmed و AUS.",
-      "en": "The personal website of Dr. Amir Houshang Gerami: professional profile, medical education, and the intmed and AUS projects."
+      "fa": "وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای و آموزش پزشکی.",
+      "en": "The personal website of Dr. Amir Houshang Gerami: professional profile and medical education."
     },
     "text-003": {
       "fa": "رفتن به محتوای اصلی",
@@ -81,16 +81,16 @@
       "en": "Discover more"
     },
     "text-033": {
-      "fa": "ایده‌هایی فراتر از پزشکی",
-      "en": "Ideas beyond medicine"
+      "fa": "آموزش، برای زندگی بهتر",
+      "en": "Learning for a healthier life"
     },
     "text-034": {
-      "fa": "پروژهٔ مستقل و تجربه‌های تازه",
-      "en": "An independent project and new experiences"
+      "fa": "مطالب آموزشی برای بیماران و همکاران",
+      "en": "Educational writing for patients and clinicians"
     },
     "text-035": {
-      "fa": "کشف پروژه",
-      "en": "Explore project"
+      "fa": "مطالعهٔ مطالب",
+      "en": "Read the articles"
     },
     "text-036": {
       "fa": "پشتِ نام، یک مسیر",
@@ -120,10 +120,6 @@
       "fa": "ورود به",
       "en": "Open"
     },
-    "text-043": {
-      "fa": "ورود به",
-      "en": "Open"
-    },
     "text-044": {
       "fa": "این نشانی‌ها برای دسترسی از دامنهٔ شخصی در نظر گرفته شده‌اند؛ اتصال سرویس‌ها به آن‌ها هنوز تکمیل نشده است.",
       "en": "These addresses are reserved for access through this domain; the services have not been connected yet."
@@ -134,7 +130,7 @@
     },
     "text-046": {
       "fa": "ایده‌هایی که به عمل می‌رسند",
-      "en": "Two projects, their own space"
+      "en": "Ideas put into practice"
     },
     "text-047": {
       "fa": "هر پروژه هویت و ساختار مستقل خود را دارد.",
@@ -149,18 +145,6 @@
       "en": "My medical project, informing the educational content selected for this website."
     },
     "text-050": {
-      "fa": "دربارهٔ پروژه",
-      "en": "About the project"
-    },
-    "text-051": {
-      "fa": "پروژهٔ شخصی",
-      "en": "Personal project"
-    },
-    "text-052": {
-      "fa": "پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند.",
-      "en": "An independent project, with selected public information contributing to my personal and professional profile."
-    },
-    "text-053": {
       "fa": "دربارهٔ پروژه",
       "en": "About the project"
     },
@@ -288,8 +272,8 @@
     "link-004": "/pages/projects.html#intmed",
     "link-005": "/pages/about.html",
     "link-006": "/pages/about.html",
-    "link-007": "/pages/projects.html#aus",
-    "link-008": "/pages/projects.html#aus",
+    "link-007": "/pages/blog.html",
+    "link-008": "/pages/blog.html",
     "link-009": "/pages/about.html",
     "link-010": "/pages/blog.html",
     "link-011": "/pages/projects.html",

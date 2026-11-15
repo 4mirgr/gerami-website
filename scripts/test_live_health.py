@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from live_health import CHECKS, probe
+from live_health import CHECKS, probe, probe_private
+from urllib.error import HTTPError
+from io import BytesIO
 
 
 class LiveHealth(unittest.TestCase):
@@ -19,9 +21,18 @@ class LiveHealth(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 probe(('/intmed/', CHECKS['/intmed/']))
 
-    def test_aus_requires_its_mounted_application_assets(self):
-        with patch('live_health.urlopen', return_value=self.response(b'<script src="/aus/assets/app.js"></script>')):
-            self.assertEqual(probe(('/aus/', CHECKS['/aus/'])), 'PASS production: /aus/')
+    def test_aus_requires_anonymous_navigation_and_api_to_be_blocked(self):
+        redirect = HTTPError('https://drgerami-md.ir/aus/',302,'redirect',{'Location':'/account/?mode=private&next=%2Faus%2F'},BytesIO())
+        unauthorized = HTTPError('https://drgerami-md.ir/aus/api/public-config',401,'denied',{},BytesIO(b'{"error":"sign_in_required"}'))
+        with patch('live_health.build_opener') as opener, patch('live_health.urlopen',side_effect=unauthorized):
+            opener.return_value.open.side_effect=redirect
+            self.assertIn('require authentication',probe_private())
+
+    def test_a_publicly_served_aus_shell_fails_privacy_health(self):
+        with patch('live_health.build_opener') as opener:
+            opener.return_value.open.return_value=self.response(b'app')
+            with self.assertRaises(RuntimeError):
+                probe_private()
 
 
 if __name__ == '__main__':

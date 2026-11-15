@@ -48,7 +48,7 @@ for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/inde
         target = site / unquote(url.path).lstrip('/') if url.path.startswith('/') else file.parent / unquote(url.path)
         if not target.is_file():
             errors.append(f'{path}: missing local asset {reference}')
-    if path in ('index.html', 'pages/projects.html') and assets.entries != ['/intmed/', '/aus/']:
+    if path in ('index.html', 'pages/projects.html') and assets.entries != ['/intmed/']:
         errors.append(f'{path}: project buttons must stay on the preview/production origin')
 
 # IntMed retains the upstream bytes except its documented service-worker scope.
@@ -80,8 +80,8 @@ if not (site / '404.html').is_file() or '/intmed /intmed/ 308' not in redirects 
 if report.get('aus_checks') != ['--test tests/cloud_auth.mjs']:
     errors.append('AUS authentication and owner-isolation release checks were not recorded')
 routes = json.loads((site / '_routes.json').read_text())
-if routes != {'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*', '/api/cms/*'], 'exclude': []}:
-    errors.append('Functions must handle only the AUS API and auth gateway paths')
+if routes != {'version': 1, 'include': ['/*'], 'exclude': []}:
+    errors.append('The private static assets and encoded aliases must pass the edge access gate')
 if any(path.name == '.git' for path in site.rglob('*')):
     errors.append('Git metadata must not be published')
 if errors:
