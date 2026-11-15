@@ -33,34 +33,34 @@
 **Files:** server/identity/{crypto,db,accounts,private-access}.mjs; functions/api/account/[[route]].js; deploy/migrations/0001_website_identity.sql; scripts/test_website_identity.mjs.
 **Interfaces:** GET session returns safe user/private profile and derived capabilities; POST signup/login/logout/profile/password/recovery/github/private-login/private-session; privileged paginated user listing, role/status editing, session revocation and reset-link creation.
 
-- [ ] Write security/permission, password/session, concurrency and SQLite integration tests.
-- [ ] Implement dedicated schema, standard salted password hashing, opaque hashed sessions, request validation and role checks.
-- [ ] Preserve incomplete/failed UI actions without exposing passwords or granting authority from email.
-- [ ] Provision separate production/preview D1 databases and additive binding configuration, preserving existing secrets/services.
+- [x] Write security/permission, password/session, concurrency and SQLite integration tests.
+- [x] Implement dedicated schema, standard salted password hashing, opaque hashed sessions, request validation and role checks.
+- [x] Preserve incomplete/failed UI actions without exposing passwords or granting authority from email.
+- [x] Provision separate production/preview D1 databases and additive binding configuration, preserving existing secrets/services.
 
 ### Task 2: Account UI and admin directory
 
 **Files:** account/index.html; account/account.mjs; account/account.css; js/account-menu.mjs; all public header templates; admin/index.html; dash/index.html; public customization model/content.
 **Interfaces:** Public header shows login/signup or the authenticated account panel. Owner hub includes public sections, Site Studio, IntMed, users, clinic /dash and private workspace. Normal members cannot see privileged/private destinations.
 
-- [ ] Add browser tests for mobile/bilingual/theme header, signup/login, role-specific hub, user filtering/editing and protected actions.
-- [ ] Implement accessible forms, safe text rendering, honest unverified-email state, current-password changes and one-time recovery UI.
-- [ ] Link existing CMS GitHub session to server-verified owner session; add user management/hub entry to Site Studio.
-- [ ] Add authenticated /dash placeholder without inventing a functioning clinic or patient data.
+- [x] Add browser tests for mobile/bilingual/theme header, signup/login, role-specific hub, user filtering/editing and protected actions.
+- [x] Implement accessible forms, safe text rendering, honest unverified-email state, current-password changes and one-time recovery UI.
+- [x] Link existing CMS GitHub session to server-verified owner session; add user management/hub entry to Site Studio.
+- [x] Add authenticated /dash placeholder without inventing a functioning clinic or patient data.
 
 ### Task 3: Private AUS boundary and public removal
 
 **Files:** functions/_middleware.js; server/identity/private-access.mjs; scripts/build_cloudflare.py; scripts/aus_frontend_adapter.py; js/deck.js; public templates/JSON; scripts/verify*.py; existing browser/gateway/health tests.
 **Interfaces:** Every /aus and /aus/* request is protected before static/API handling. Existing two identities keep their own native login/session. Private login can reuse their existing session; no broader user/admin role can grant access to a third AUS identity.
 
-- [ ] Test unauthenticated/private/member/owner/disabled/expired paths, assets, APIs, invalid origins, wrong issuer/subject and old public links.
-- [ ] Remove AUS cards, buttons, descriptions and destinations from public pages and prevent public navigation/custom-page links to private routes.
-- [ ] Keep the actual pinned AUS frontend build and backend binding; add only a reviewed access-session bridge if native-session refresh requires it.
-- [ ] Adapt old two-public-project expectations to one public IntMed entry plus private AUS gate; never remove independent-app validation.
+- [x] Test unauthenticated/private/member/owner/disabled/expired paths, assets, APIs, invalid origins, wrong issuer/subject and old public links.
+- [x] Remove AUS cards, buttons, descriptions and destinations from public pages and prevent public navigation/custom-page links to private routes.
+- [x] Keep the actual pinned AUS frontend build and backend binding; add only a reviewed access-session bridge if native-session refresh requires it.
+- [x] Adapt old two-public-project expectations to one public IntMed entry plus private AUS gate; never remove independent-app validation.
 
 ### Task 4: Verify and publish
 
-- [ ] Run meaningful native-runtime/SQLite tests, complete browser suite, a fresh combined build and independent code review.
+- [x] Run meaningful native-runtime/SQLite tests, complete browser suite, a fresh combined build and independent code review.
 - [ ] Exercise preview deployment against an isolated preview identity database; never seed fake production users or use production patients.
 - [ ] Publish through reviewed GitHub changes and existing Cloudflare integration.
 - [ ] Verify live header/account endpoints, anonymous private denial, public absence of AUS, and preserved IntMed/native backend boundaries.
