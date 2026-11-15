@@ -1,5 +1,5 @@
 import {clinicConfigured,clinicSession,forwardClinic,clinicError} from './clinic-bridge.mjs';
-import {ApiError,ready,json,session,safeUser,capabilities,destinations} from './db.mjs';
+import {ApiError,ready,json,body,cookie,cookieHeader,session,safeUser,capabilities,destinations} from './db.mjs';
 import * as accounts from './accounts.mjs';
 import {currentPrivate,privateLogin,privateSession,privateLogout,privateRecovery,privateRefresh} from './private-access.mjs';
 export async function handleLocalAccount(request,env){
@@ -39,10 +39,20 @@ export async function handleAccount(request,env){
    return json({user,private:localData.private||null,capabilities:cap,destinations:user||localData.private?entries:[],csrf_token:remote.csrf_token||null,patient_portal:remote.patient_portal||{available:false},identity_provider:'clinic'},200,headers);
   }
   if(path==='logout'&&request.method==='POST'){
-   const local=await handleLocalAccount(request.clone(),env);if(!local.ok)return local;
-   if(!clinicConfigured(env))return local;
-   const remote=await forwardClinic(request,env,{path:'/dash/api/portal/logout'}),headers=new Headers(remote.headers);for(const value of local.headers.getSetCookie())headers.append('Set-Cookie',value);
-   return new Response(remote.body,{status:remote.status,headers});
+   await body(request.clone(),[]);
+   const localCookie=cookie(request,'website');
+   const local=localCookie?await handleLocalAccount(request.clone(),env):null;
+   const localOkay=!localCookie||Boolean(local?.ok);
+   let remote=null,remoteOkay=!request.headers.get('Cookie')?.match(/(?:^|;\s*)(?:__Host-gerami-clinic|gerami_session)=/);
+   if(clinicConfigured(env)){try{remote=await forwardClinic(request,env,{path:'/dash/api/portal/logout'});remoteOkay=remote.ok;}catch{/* Clinic logout is independent of local D1 identity availability. */}}
+   const headers=new Headers();
+   for(const response of [local,remote])for(const value of response?.headers.getSetCookie()||[])headers.append('Set-Cookie',value);
+   headers.append('Set-Cookie',cookieHeader('website','',0));
+   // Clear browser access even when a server cannot confirm revocation. The
+   // explicit partial result never claims that unavailable service revoked it.
+   headers.append('Set-Cookie','__Host-gerami-clinic=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0');
+   headers.append('Set-Cookie','gerami_session=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0');
+   return json({signed_out:localOkay&&remoteOkay,patient_signed_out:remoteOkay,website_signed_out:localOkay,partial_logout:!localOkay||!remoteOkay},200,headers);
   }
   if(patientRoutes.has(path)||path==='admin/users'||path.startsWith('admin/users/')){
    if(path==='profile'){const local=await session(request,env);if(local?.user.role==='owner')return handleLocalAccount(request,env);}
