@@ -31,7 +31,7 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 def probe_admin(path):
-    request=Request(ORIGIN+path,headers={'Accept':'text/html','Cache-Control':'no-cache'})
+    request=Request(ORIGIN+path,headers={'User-Agent':'Gerami-Website-Health/1.0','Accept':'text/html','Cache-Control':'no-cache'})
     try:
         with build_opener(NoRedirect).open(request,timeout=20):
             raise RuntimeError('Administrator document unexpectedly served publicly')
