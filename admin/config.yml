@@ -43,14 +43,14 @@ collections:
               - {name: slug, label: شناسه یکتا (حروف انگلیسی و خط تیره), widget: string, pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'از حروف کوچک انگلیسی و خط تیره استفاده کنید']}
               - {name: status, label: وضعیت نمایش, widget: select, options: [draft, published], default: draft}
               - {name: audience, label: مخاطب, widget: select, options: [patients, professional]}
-              - {name: category, label: دسته‌بندی, widget: string}
-              - {name: title_fa, label: عنوان فارسی, widget: string}
-              - {name: title_en, label: عنوان انگلیسی, widget: string}
-              - {name: body_fa, label: متن فارسی, widget: markdown}
-              - {name: body_en, label: متن انگلیسی, widget: markdown}
-              - {name: author, label: نویسنده, widget: string}
+              - {name: category, label: دسته‌بندی, widget: string, required: false}
+              - {name: title_fa, label: عنوان فارسی, widget: string, required: false}
+              - {name: title_en, label: عنوان انگلیسی, widget: string, required: false}
+              - {name: body_fa, label: متن فارسی, widget: markdown, required: false}
+              - {name: body_en, label: متن انگلیسی, widget: markdown, required: false}
+              - {name: author, label: نویسنده, widget: string, required: false}
               - {name: published_at, label: تاریخ انتشار, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
-              - {name: reviewed_at, label: تاریخ بازبینی, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
+              - {name: reviewed_at, label: تاریخ بازبینی (اختیاری), widget: datetime, required: false, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
               - {name: image, label: تصویر, widget: image, required: false}
               - name: sources
                 label: منابع
