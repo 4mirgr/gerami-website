@@ -55,10 +55,13 @@ class ContentValidation(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(self.root)
 
-    def test_published_medical_content_requires_sources(self):
+    def test_optional_sources_still_reject_unsafe_urls(self):
         item={'slug':'missing-source','status':'published','audience':'patients',
               **{key:'Synthetic' for key in ('title_fa','title_en','body_fa','body_en','author','category')},
               'published_at':'2026-11-16','reviewed_at':'2026-11-16','sources':[]}
+        self.write('content/articles.json',{'articles':[item]})
+        self.assertEqual(validate(self.root), 1)
+        item['sources'] = [{'title':'Unsafe reference','url':'javascript:alert(1)'}]
         self.write('content/articles.json',{'articles':[item]})
         with self.assertRaisesRegex(ValueError,'source'):
             validate(self.root)
