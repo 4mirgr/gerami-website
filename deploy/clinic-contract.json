@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/4mirgr/Clinic.git",
-  "commit": "0e535551d76999ef73553795c8027423465df91b",
+  "commit": "2c3c8f9be692c745e46aee65cc6cfb1e427bf849",
   "api_prefix": "/dash/api/portal/",
   "patient_mount": "/dash/portal/",
   "authority": "clinic",
