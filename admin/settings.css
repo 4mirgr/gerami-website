@@ -15,13 +15,13 @@ button:disabled{cursor:default}
 .avatar .admin-icon{width:18px;height:18px}
 .sidebar nav{display:block}
 .nav-group{display:grid;gap:2px;margin-bottom:14px}
-.nav-heading{padding:0 11px 5px;font-size:10px;font-weight:550;color:var(--muted)}
-.sidebar nav a{padding:8px 9px;gap:10px;color:var(--text);font-size:11px;border:1px solid transparent;border-radius:8px;min-height:39px}
+.nav-heading{padding:0 11px 6px;font-size:11px;font-weight:550;color:var(--muted)}
+.sidebar nav a{padding:9px 10px;gap:10px;color:var(--text);font-size:13px;line-height:1.65;border:1px solid transparent;border-radius:9px;min-height:46px}
 .sidebar nav a:hover{background:var(--panel)}
 .sidebar nav a.active{color:var(--text);background:var(--panel);border-color:var(--line);box-shadow:var(--shadow);font-weight:650}
-.sidebar nav a>.nav-icon{display:grid;place-items:center;width:28px;height:28px;border-radius:7px;background:var(--soft);color:var(--text);flex-shrink:0}
+.sidebar nav a>.nav-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:7px;background:var(--soft);color:var(--text);flex-shrink:0}
 .sidebar nav a.active>.nav-icon{background:var(--button);color:var(--button-text)}
-.nav-icon .admin-icon{width:17px;height:17px}
+.nav-icon .admin-icon{width:19px;height:19px;stroke-width:1.8}
 .chevron{margin-inline-start:auto;margin-right:0;color:var(--muted);font-size:20px}
 .website-link{margin-top:8px}
 .sidebar-note{padding:15px 10px 0;margin-top:auto;border-top:1px solid var(--line);font-size:10px;line-height:1.9}
@@ -33,7 +33,7 @@ button:disabled{cursor:default}
 .primary{background:var(--button);color:var(--button-text);border-radius:9px;padding:10px 15px;box-shadow:var(--shadow);font-size:12px}
 .tool-button{border-radius:8px;box-shadow:var(--shadow)}
 .tool-button:hover{background:var(--soft)}
-#theme,#menu{width:36px;height:36px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:21px;box-shadow:var(--shadow)}
+#theme,#menu{width:44px;height:44px;flex-shrink:0;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:21px;box-shadow:var(--shadow)}
 #menu .admin-icon{margin:auto}
 #github-state{background:none;padding:4px;font-size:10px}
 .welcome{margin-bottom:18px;color:var(--muted);font-size:12px}
@@ -76,9 +76,9 @@ button:disabled{cursor:default}
 .studio-fields{max-height:none;gap:18px;padding:1px 1px 24px}
 .settings-group{border-radius:12px;padding:22px;box-shadow:var(--shadow)}
 .settings-group h3{font-size:16px;font-weight:600;margin-bottom:16px}
-.field{margin:16px 0;gap:7px;font-size:12px}
+.field{margin:16px 0;gap:7px;font-size:13px}
 .field>span{font-weight:550}
-.field>small{font-size:11px;line-height:1.8}
+.field>small{font-size:12px;line-height:1.8}
 .field input:not([type=checkbox]):not([type=color]):not([type=range]),.field select,.field textarea,.media-card select{border-radius:7px;min-height:42px;padding:9px 11px}
 .field textarea{min-height:110px;font-size:13px;line-height:2}
 .field input[type=color]{height:38px}
