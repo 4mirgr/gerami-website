@@ -45,6 +45,11 @@ const signup = `${config.supabaseUrl}/auth/v1/signup?redirect_to=${encodeURIComp
 const image = <img src="/brand-aa-180.png"/>;
 '''
 
+SIDEBAR_PROMO = '''          <small>هر قدم، نزدیک‌تر به استرالیا</small>
+          <div className="mini-logo">
+            AU <span>→</span> YOUR NEXT CHAPTER
+          </div>'''
+
 
 class AdapterTests(unittest.TestCase):
     def setUp(self):
@@ -55,7 +60,7 @@ class AdapterTests(unittest.TestCase):
         files = {
             "src/api.js": 'let bearer=""; export async function apiResponse(path, options={}) {return fetch("/api/" + path, {headers:{Authorization:`Bearer ${bearer}`},...options});}',
             "src/auth.jsx": AUTH,
-            "src/main.jsx": '<img src="/brand-aa-64.png"/>',
+            "src/main.jsx": '<img src="/brand-aa-64.png"/><div className="connection">connection-status</div>\n' + SIDEBAR_PROMO,
             "src/linkedin-panel.jsx": "fetch('/brand-aa-512.png',{cache:'force-cache'});",
             "src/style.css": '@import url("https://fonts.googleapis.com/css2?family=Vazirmatn");\nbody{font-family: Vazirmatn, Tahoma, sans-serif;}',
             "public/site.webmanifest": json.dumps({"start_url": "/", "icons": [{"src": "/brand-aa-192.png"}]}),
@@ -82,6 +87,19 @@ class AdapterTests(unittest.TestCase):
         prepare_source(self.source, destination)
         self.assertEqual((destination / "cloud/evidence-deadline.mjs").read_text(), "export const evidenceClosed=()=>false;")
         self.assertFalse((destination / "cloud/worker.mjs").exists())
+
+    def test_sidebar_promo_removed_only_from_disposable_copy(self):
+        work = self.root / 'sidebar-work'
+        prepare_source(self.source, work)
+        built = (work / 'src/main.jsx').read_text()
+        self.assertNotIn('YOUR NEXT CHAPTER', built)
+        self.assertNotIn('هر قدم، نزدیک‌تر به استرالیا', built)
+        self.assertIn('connection-status', built)
+        self.assertIn(SIDEBAR_PROMO, (self.source / 'src/main.jsx').read_text())
+        # Changed upstream markup requires a fresh review, not a silent skip.
+        (self.source / 'src/main.jsx').write_text('<div>unreviewed sidebar</div>')
+        with self.assertRaisesRegex(RuntimeError, 'contract changed'):
+            prepare_source(self.source, self.root / 'changed-sidebar')
 
     def test_paths_auth_and_public_inputs_preserve_original(self):
         before = {str(p.relative_to(self.source)): p.read_bytes()

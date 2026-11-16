@@ -54,8 +54,15 @@ def markdown(source):
     return '\n'.join(result)
 
 
+def article_copy(item, preferred='fa'):
+    for language in (preferred, 'en' if preferred == 'fa' else 'fa'):
+        if item.get('title_'+language, '').strip() and item.get('body_'+language, '').strip():
+            return {'language': language, 'title': item['title_'+language], 'body': item['body_'+language]}
+    raise ValueError('Published article needs one complete title/body language pair')
+
+
 def description(item, language):
-    text = re.sub(r'[#*`\[\]<>]', '', item['body_'+language])
+    text = re.sub(r'[#*`\[\]<>]', '', article_copy(item, language)['body'])
     return ' '.join(text.split())[:160]
 
 
@@ -66,32 +73,38 @@ def translate(tag, fa, en, **attrs):
 
 def article_page(template, item):
     url = ORIGIN+'/articles/'+item['slug']+'/'
+    copies = {language: article_copy(item, language) for language in ('fa', 'en')}
+    primary = copies['fa']
     # Blog templates use relative assets. Resolve them before nesting the page.
     template = re.sub(r'\b(href|src)="([^"\s]+)"', lambda m: m[0] if m[2].startswith(('#','/')) or urlsplit(m[2]).scheme
                       else m[1]+'="'+escape(urljoin('/pages/blog.html',m[2]))+'"', template)
     template = re.sub(r' data-(?:content|link)-key="[^"]+"', '', template)
-    titles = [item['title_fa']+' | دکتر گرامی', item['title_en']+' | Dr. Gerami']
+    titles = [copies['fa']['title']+' | دکتر گرامی', copies['en']['title']+' | Dr. Gerami']
     template = re.sub(r'<title\b[^>]*>.*?</title>',lambda _:translate('title',*titles),template,count=1,flags=re.S)
     template = re.sub(r'<meta name="description"[^>]*>',lambda _:'<meta name="description" content="'+escape(description(item,'fa'))+'" data-fa="'+escape(description(item,'fa'))+'" data-en="'+escape(description(item,'en'))+'">',template,count=1)
     template = re.sub(r'<link rel="canonical"[^>]*>',lambda _:'<link rel="canonical" href="'+url+'">',template,count=1)
-    schema = {'@context':'https://schema.org','@type':'Article','headline':item['title_fa'],
-              'description':description(item,'fa'),'url':url,'mainEntityOfPage':url,'inLanguage':'fa',
-              'datePublished':item['published_at'],'dateModified':item['reviewed_at'],
-              'author':{'@type':'Person','name':item['author']},'citation':[s['url'] for s in item.get('sources',[])]}
+    schema = {'@context':'https://schema.org','@type':'Article','headline':primary['title'],
+              'description':description(item,'fa'),'url':url,'mainEntityOfPage':url,'inLanguage':primary['language'],
+              'datePublished':item['published_at'],'dateModified':item.get('reviewed_at') or item['published_at'],
+              'citation':[s['url'] for s in item.get('sources',[])]}
+    if item.get('author', '').strip():
+        schema['author'] = {'@type':'Person','name':item['author']}
     metadata = ('<meta property="og:type" content="article"><meta property="og:url" content="'+url+'">'
-                '<meta property="og:title" content="'+escape(item['title_fa'])+'">'
+                '<meta property="og:title" content="'+escape(primary['title'])+'">'
                 '<meta property="og:description" content="'+escape(description(item,'fa'))+'">'
                 '<script type="application/ld+json">'+json.dumps(schema,ensure_ascii=False).replace('<','\\u003c')+'</script>'
                 '<script type="module" src="/js/article-page.mjs"></script>')
     template = template.replace('</head>',metadata+'\n</head>',1)
     sources = ''.join('<li><a rel="noopener noreferrer" href="'+escape(s['url'])+'">'+escape(s['title'])+'</a></li>' for s in item.get('sources',[]) if safe_link(s['url']))
-    main = ('<main id="main" tabindex="-1"><article class="container section" data-article-page="'+escape(item['slug'])+'" data-article-category="'+escape(item['category'])+'">'
+    author = '<span>'+escape(item['author'])+'</span>' if item.get('author', '').strip() else ''
+    reviewed = '<span>'+translate('span','بازبینی: ','Reviewed: ')+'<time dir="ltr" datetime="'+escape(item['reviewed_at'])+'">'+escape(item['reviewed_at'])+'</time></span>' if item.get('reviewed_at') else ''
+    bodies = ''.join('<div class="article-body" data-article-language="'+language+'" lang="'+copy['language']+'" dir="'+('rtl' if copy['language']=='fa' else 'ltr')+'"'+(' hidden' if language=='en' else '')+'>'+markdown(copy['body'])+'</div>' for language,copy in copies.items())
+    main = ('<main id="main" tabindex="-1"><article class="container section" data-article-page="'+escape(item['slug'])+'" data-article-category="'+escape(item.get('category', ''))+'">'
             '<a href="/pages/blog.html">'+translate('span','مطالب آموزشی','Education')+'</a>'
-            +translate('h1',item['title_fa'],item['title_en'])
-            +'<p class="article-meta"><span>'+escape(item['author'])+'</span><time dir="ltr" datetime="'+escape(item['published_at'])+'">'+escape(item['published_at'])+'</time><span>'+translate('span','بازبینی: ','Reviewed: ')+'<time dir="ltr" datetime="'+escape(item['reviewed_at'])+'">'+escape(item['reviewed_at'])+'</time></span></p>'
-            +'<div class="article-body" data-article-language="fa">'+markdown(item['body_fa'])+'</div>'
-            +'<div class="article-body" data-article-language="en" hidden>'+markdown(item['body_en'])+'</div>'
-            +translate('h2','منابع','Sources')+'<ul>'+sources+'</ul>'
+            +translate('h1',copies['fa']['title'],copies['en']['title'], **{'data-copy-fa':copies['fa']['language'],'data-copy-en':copies['en']['language'],'lang':primary['language'],'dir':'rtl' if primary['language']=='fa' else 'ltr'})
+            +'<p class="article-meta">'+author+'<time dir="ltr" datetime="'+escape(item['published_at'])+'">'+escape(item['published_at'])+'</time>'+reviewed+'</p>'
+            +bodies
+            +(translate('h2','منابع','Sources')+'<ul>'+sources+'</ul>' if sources else '')
             +'<aside class="notice">'+translate('p','این مطلب آموزشی است؛ تصمیم درمانی به ارزیابی فردی پزشک نیاز دارد.','Educational information; treatment decisions require an individual medical assessment.')
             +'<div class="actions"><a class="button" href="/account/?mode=signup#newsletter">'+translate('span','عضویت و خبرنامهٔ اختیاری','Account and optional newsletter')+'</a>'
             +'<a class="button button-secondary" href="/account/?next=%2Fdash%2Fportal%2F">'+translate('span','ورود به پرتال و تکمیل پرونده','Open your patient portal')+'</a></div></aside></article></main>')
@@ -114,7 +127,7 @@ def generate(output):
     for file in [output/'index.html',output/'pages/blog.html']:
         entries=ordered[:3] if file.name=='index.html' else ordered
         if entries:
-            links=''.join('<li><a href="/articles/'+item['slug']+'/">'+escape(item['title_fa'])+'</a></li>' for item in entries)
+            links=''.join('<li><a href="/articles/'+item['slug']+'/" dir="'+('rtl' if article_copy(item)['language']=='fa' else 'ltr')+'">'+escape(article_copy(item)['title'])+'</a></li>' for item in entries)
             page_html=re.sub(r'<article\b[^>]*class="[^"]*\barticle-topic\b[^"]*"[^>]*>.*?</article>', '', file.read_text(), flags=re.S)
             html=page_html.replace('</main>','<section class="container section" data-static-articles><h2>مطالب آموزشی</h2><ul>'+links+'</ul></section></main>',1)
             file.write_text(html,encoding='utf-8')

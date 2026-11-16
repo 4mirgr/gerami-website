@@ -1,4 +1,4 @@
-import {managedPaths,validateDocument,validateSite,clone} from '../js/site-model.mjs';
+import {managedPaths,validateDocument,validateSite,clone,prepareArticlesForPublication} from '../js/site-model.mjs';
 import {repository} from './github-session.mjs';
 const prefix='/repos/'+repository;
 const DRAFT_KEY='gerami-studio-drafts-v1';
@@ -54,8 +54,9 @@ export class SiteStore extends EventTarget{
   if(this.busy||!this.remoteReady||this.session.state!=='connected')throw Error('ابتدا اتصال را تأیید و آخرین نسخهٔ مخزن را دریافت کنید.');
   if(this.conflicts.size)throw Error('تعارض نسخه‌ها را پیش از انتشار برطرف کنید.');
   if(!this.count)throw Error('تغییری برای انتشار وجود ندارد.');
-  const dirty=this.dirty;validateSite(this.documents);
-  const snapshot=Object.fromEntries(dirty.map(path=>[path,clone(this.documents[path])]));const media=[...this.media];
+  const dirty=this.dirty,sourceSnapshot=Object.fromEntries(dirty.map(path=>[path,clone(this.documents[path])])),snapshot=clone(sourceSnapshot);
+  if(snapshot['content/articles.json'])snapshot['content/articles.json']=prepareArticlesForPublication(snapshot['content/articles.json']);
+  validateSite({...this.documents,...snapshot});const media=[...this.media];
   this.busy=true;this.changed();
   try{
    const ref=await this.session.api(prefix+'/git/ref/heads/main');const commit=await this.session.api(prefix+'/git/commits/'+ref.object.sha);
@@ -69,7 +70,17 @@ export class SiteStore extends EventTarget{
    const nextTree=await this.session.api(prefix+'/git/trees',{method:'POST',body:JSON.stringify({base_tree:commit.tree.sha,tree:changes})});
    const nextCommit=await this.session.api(prefix+'/git/commits',{method:'POST',body:JSON.stringify({message:'content: '+(message.trim().slice(0,160)||'publish Site Studio changes'),tree:nextTree.sha,parents:[ref.object.sha]})});
    await this.session.api(prefix+'/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:nextCommit.sha,force:false})});
-   for(const path of dirty){this.base[path]=snapshot[path];this.shas[path]=changes.find(item=>item.path===path).sha;if(JSON.stringify(this.documents[path])===JSON.stringify(snapshot[path]))delete this.drafts[path];else this.drafts[path]={base:clone(snapshot[path]),next:clone(this.documents[path])};}
+   for(const path of dirty){
+    this.base[path]=snapshot[path];this.shas[path]=changes.find(item=>item.path===path).sha;
+    if(JSON.stringify(this.documents[path])===JSON.stringify(sourceSnapshot[path])){this.documents[path]=clone(snapshot[path]);delete this.drafts[path];}
+    else{
+     if(path==='content/articles.json'){
+      const before=new Map(sourceSnapshot[path].articles.map(item=>[item.slug,item])),saved=new Map(snapshot[path].articles.map(item=>[item.slug,item]));
+      for(const item of this.documents[path].articles)if(before.has(item.slug)&&!before.get(item.slug).published_at&&saved.get(item.slug)?.published_at&&!item.published_at)item.published_at=saved.get(item.slug).published_at;
+     }
+     this.drafts[path]={base:clone(snapshot[path]),next:clone(this.documents[path])};
+    }
+   }
    for(const [path] of media)this.media.delete(path);return nextCommit;
   }finally{this.busy=false;this.changed();}
  }

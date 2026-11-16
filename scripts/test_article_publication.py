@@ -54,6 +54,25 @@ class ArticlePublicationTests(unittest.TestCase):
         self.assertFalse(any('/account/' in url or '/dash' in url or '/aus' in url or 'private-draft' in url for url in locations))
         self.assertIn('Sitemap: https://drgerami-md.ir/sitemap.xml',(self.root/'robots.txt').read_text())
 
+    def test_single_language_has_readable_fallback_without_invented_review_or_author(self):
+        for language in ('fa', 'en'):
+            with self.subTest(language=language):
+                other = 'en' if language == 'fa' else 'fa'
+                item = dict(self.item, **{'title_'+other:'', 'body_'+other:''},
+                            author='', category='', reviewed_at='', sources=[])
+                (self.root/'content/articles.json').write_text(json.dumps({'articles':[item]}))
+                generate(self.root)
+                page = (self.root/'articles/synthetic-education/index.html').read_text()
+                self.assertNotIn('Reviewed:', page)
+                self.assertNotIn('بازبینی:', page)
+                self.assertNotIn('"author":', page)
+                self.assertIn('"dateModified": "2026-11-16"', page)
+                self.assertIn('"inLanguage": "'+language+'"', page)
+                direction = 'rtl' if language == 'fa' else 'ltr'
+                self.assertIn('data-article-language="'+other+'" lang="'+language+'" dir="'+direction+'"', page)
+                self.assertIn('data-copy-'+other+'="'+language+'"', page)
+                self.assertIn(item['title_'+language].replace('<','&lt;').replace('>','&gt;'), (self.root/'pages/blog.html').read_text())
+
     def test_malformed_slug_cannot_write_outside_the_article_directory(self):
         item=dict(self.item,slug='../account')
         (self.root/'content/articles.json').write_text(json.dumps({'articles':[item]}))

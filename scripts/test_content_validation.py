@@ -70,6 +70,16 @@ class ContentValidation(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(self.root)
 
+    def test_a_persian_post_does_not_require_translation_or_a_claimed_review(self):
+        item={'slug':'persian-post','status':'published','audience':'patients',
+              'title_fa':'عنوان آزمایشی','body_fa':'متن آزمایشی','published_at':'2026-11-16',
+              'title_en':'','body_en':'','author':'','category':'','reviewed_at':'','sources':[]}
+        self.write('content/articles.json',{'articles':[item]})
+        self.assertEqual(validate(self.root),1)
+        item['body_fa']=''
+        self.write('content/articles.json',{'articles':[item]})
+        with self.assertRaises(ValueError):validate(self.root)
+
 
 if __name__ == '__main__':
     unittest.main()

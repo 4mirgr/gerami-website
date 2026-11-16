@@ -35,6 +35,8 @@ function status(){
  $('connection-fallback').hidden=session.state!=='error';
  $('publish').disabled=!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
  $('publish').textContent=store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
+ const publishableDrafts=new Set((store.documents['content/articles.json']?.articles||[]).filter(item=>item.status==='draft').map(item=>item.slug));
+ for(const control of document.querySelectorAll('[data-article-publish]'))control.disabled=!connected||!store.remoteReady||store.busy||store.conflicts.size>0||(!publishableDrafts.has(control.dataset.articlePublish)&&store.count===0);
  $('draft-state').textContent=!loaded?'در حال دریافت فایل‌ها…':store.storageError?'ذخیرهٔ محلی ممکن نشد؛ این صفحه را نبندید.':store.count?store.count+' تغییر در پیش‌نویس'+(store.media.size?'؛ تصاویر نیز همراه انتشار ذخیره می‌شوند.':' محلی'):'همهٔ تغییرات ثبت شده‌اند';
  $('sync').disabled=!connected||store.busy;
  const conflicts=$('conflict-list');conflicts.replaceChildren();for(const path of store.conflicts){const box=node('div',undefined,'conflict');box.append(node('p','این فایل هم‌زمان تغییر کرده است: '+path),button('استفاده از آخرین نسخه',()=>{store.resolve(path,false);render();}),button('حفظ ویرایش من روی نسخهٔ جدید',()=>{if(confirm('نسخهٔ مخزن را بررسی کرده‌اید؟ ویرایش شما جایگزین محتوای این فایل خواهد شد.')){store.resolve(path,true);render();}}));conflicts.append(box);}
@@ -46,13 +48,10 @@ session.addEventListener('change',()=>{status();if(session.state==='connected')s
 $('github-connect').addEventListener('click',()=>session.state==='connected'?session.verify():session.connect());
 $('github-disconnect').addEventListener('click',()=>session.disconnect());
 $('sync').addEventListener('click',synchronize);
-$('publish').addEventListener('click',attempt(async()=>{
- const dirty=store.dirty;for(const path of dirty)validateDocument(path,store.documents[path]);
- const dialog=$('publish-dialog');$('publish-files').replaceChildren(...[...dirty,...store.media.keys()].map(path=>node('li',path)));dialog.showModal();
-}));
-$('publish-confirm').addEventListener('click',attempt(async()=>{
- $('publish-dialog').close();const publishedMedia=[...store.media.keys()];const result=await store.publish($('publish-note').value);gallery.push(...publishedMedia.map(path=>'/'+path));notice('تغییرات در GitHub ثبت شد. ساخت و انتشار Cloudflare آغاز می‌شود.');const link=node('a','مشاهدهٔ نسخهٔ ثبت‌شده');link.href='https://github.com/'+repository+'/commit/'+result.sha;link.target='_blank';link.rel='noopener';$('studio-notice').append(' ',link);render();
-}));
+async function publishChanges(){
+ const publishedMedia=[...store.media.keys()];const result=await store.publish('');gallery.push(...publishedMedia.map(path=>'/'+path));notice('تغییرات ذخیره شد؛ نسخهٔ سایت در حال به‌روزرسانی است.');const link=node('a','مشاهدهٔ نسخهٔ ثبت‌شده');link.href='https://github.com/'+repository+'/commit/'+result.sha;link.target='_blank';link.rel='noopener';$('studio-notice').append(' ',link);render();status();
+}
+$('publish').addEventListener('click',attempt(publishChanges));
 $('undo').addEventListener('click',()=>{const value=undo.pop();if(!value)return;const previous=JSON.parse(value);for(const [path,data] of Object.entries(previous))store.edit(path,data);lastSnapshot='';render();});
  $('discard').addEventListener('click',()=>{if(store.count&&confirm('تمام پیش‌نویس‌های منتشرنشده کنار گذاشته شوند؟')){for(const path of store.dirty)store.discard(path);for(const [path,file] of store.media){URL.revokeObjectURL(file.url);store.assetPreviews.delete('/'+path);}store.media.clear();store.changed();undo=[];render();}});
 for(const dialog of document.querySelectorAll('dialog')){dialog.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dialog.close()));dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});}
@@ -86,20 +85,21 @@ function pageEditor(){
 }
 function articleEditor(){
  const path='content/articles.json';const data=clone(store.documents[path]);
- const section=group('مقالات و پیش‌نویس‌ها','هر مقاله را با دو زبان، مخاطب، دسته‌بندی، منابع و تاریخ بازبینی مدیریت کنید. پیش‌نویس‌ها در سایت عمومی نمایش داده نمی‌شوند.');
+ const section=group('مقالات و پیش‌نویس‌ها','عنوان و متن را بنویسید و «انتشار مقاله» را بزنید. تاریخ انتشار خودکار است؛ ترجمه و تاریخ بازبینی اختیاری‌اند. پیش‌نویس‌ها در سایت عمومی نمایش داده نمی‌شوند.');
  section.append(button('نوشتن مقالهٔ جدید',()=>{data.articles.unshift({slug:'article-'+Date.now().toString(36),status:'draft',audience:'patients',category:'',title_fa:'مقالهٔ جدید',title_en:'',body_fa:'',body_en:'',author:'',published_at:'',reviewed_at:'',image:'',sources:[]});edit(path,data);render();}),button('پیش‌نمایش مقالات',()=>setPreview('blog')));
  for(const [index,item] of data.articles.entries()){
   const box=node('details',undefined,'text-block');box.open=index===0;const summary=node('summary',(item.title_fa||item.slug)+' · '+(item.status==='published'?'منتشرشده':'پیش‌نویس'));box.append(summary);
   for(const [key,title] of [['title_fa','عنوان فارسی'],['title_en','English title'],['slug','شناسهٔ یکتا'],['category','دسته‌بندی'],['author','نویسنده']])field(box,title,item[key],value=>{item[key]=value;edit(path,data);});
   field(box,'مخاطب',item.audience,value=>{item.audience=value;edit(path,data);},{options:{patients:'بیماران و خانواده‌ها',professional:'پزشکان و همکاران'}});
   markdown(box,'متن فارسی',item.body_fa,value=>{item.body_fa=value;edit(path,data);});markdown(box,'English content',item.body_en,value=>{item.body_en=value;edit(path,data);}).dir='ltr';
-  for(const [key,title] of [['published_at','تاریخ انتشار'],['reviewed_at','تاریخ بازبینی']])field(box,title,item[key],value=>{item[key]=value;edit(path,data);},{type:'date'});
+  for(const [key,title] of [['published_at','تاریخ انتشار'],['reviewed_at','تاریخ بازبینی']])field(box,title,item[key],value=>{item[key]=value;edit(path,data);},{type:'date',help:key==='published_at'?'اگر خالی باشد، هنگام انتشار تاریخ امروز ثبت می‌شود.':'اختیاری؛ فقط تاریخ بازبینی انجام‌شده را وارد کنید.'});
   field(box,'تصویر مقاله',item.image,value=>{item.image=value;edit(path,data);},{help:'نشانی /assets/uploads/... را از رسانه‌ها کپی کنید.'});
   const sources=node('div',undefined,'sources-editor');sources.append(node('h4','منابع'));box.append(sources);
   for(const [sourceIndex,source] of (item.sources||[]).entries()){const row=node('div',undefined,'source-row');field(row,'عنوان منبع',source.title,value=>{source.title=value;edit(path,data);});field(row,'پیوند منبع',source.url,value=>{source.url=value;edit(path,data);},{type:'url'});row.append(button('حذف منبع',()=>{item.sources.splice(sourceIndex,1);edit(path,data);render();}));sources.append(row);}
   sources.append(button('افزودن منبع',()=>{(item.sources??=[]).push({title:'',url:'https://'});edit(path,data);render();}));
   field(box,'وضعیت نمایش',item.status,value=>{item.status=value;edit(path,data);summary.textContent=(item.title_fa||item.slug)+' · '+(value==='published'?'منتشرشده':'پیش‌نویس');},{options:{draft:'پیش‌نویس',published:'منتشرشده'}});
-  box.append(button('حذف مقاله',()=>{if(confirm('این مقاله حذف شود؟')){data.articles.splice(index,1);edit(path,data);render();}},'tool-button danger'));section.append(box);
+  const publish=button(item.status==='published'?'به‌روزرسانی مقاله':'انتشار مقاله',attempt(async()=>{item.status='published';edit(path,data);await publishChanges();}),'primary article-publish');publish.dataset.articlePublish=item.slug;publish.disabled=session.state!=='connected'||!store.remoteReady||store.busy||store.conflicts.size>0||(item.status==='published'&&store.count===0);
+  box.append(publish,button('حذف مقاله',()=>{if(confirm('این مقاله حذف شود؟')){data.articles.splice(index,1);edit(path,data);render();}},'tool-button danger'));section.append(box);
  }
 }
 function profileEditor(contactOnly=false){

@@ -48,6 +48,13 @@ def prepare_source(source: Path, destination: Path) -> None:
         else:
             shutil.copyfile(original, target)
 
+    # Owner-requested sidebar presentation only. Keep the connection status and
+    # all navigation/authentication intact; never edit the upstream checkout.
+    _replace_required(destination / "src/main.jsx", '''          <small>هر قدم، نزدیک‌تر به استرالیا</small>
+          <div className="mini-logo">
+            AU <span>→</span> YOUR NEXT CHAPTER
+          </div>''', '')
+
     _replace_required(destination / "src/api.js", 'fetch("/api/" + path,',
                       'fetch(import.meta.env.BASE_URL + "api/" + path,')
     auth = destination / "src/auth.jsx"

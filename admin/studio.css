@@ -8,3 +8,5 @@
 
 .ui-arrow{display:inline-block;vertical-align:middle;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .source-row{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
+
+#publish,.article-publish{background:#21884a;color:#fff;border:1px solid #19713d;box-shadow:0 1px 2px #0002}.article-publish{margin:16px 0;margin-inline-end:10px}.article-publish:hover,#publish:hover{background:#18723c}
