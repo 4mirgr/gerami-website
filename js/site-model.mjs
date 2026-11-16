@@ -17,6 +17,7 @@ export function safeLink(value){
  try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}
 }
 export const asset=value=>typeof value==='string'&&/^\/assets\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif|gif|svg)$/i.test(value)&&!value.includes('..');
+export const articleImage=value=>typeof value==='string'&&(asset(value)&&value.startsWith('/assets/uploads/')||/^https:\/\//i.test(value)&&safeLink(value));
 export const pageSlug=value=>typeof value==='string'&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value)&&!['index','page','admin','api','intmed','aus',...Object.keys(pages)].includes(value);
 function must(ok,message){if(!ok)throw Error(message);}
 const string=(s,max=20000)=>typeof s==='string'&&s.length<=max;
@@ -56,7 +57,7 @@ export function validateDocument(path,data){
    for(const key of ['title_fa','title_en','body_fa','body_en','author','category'])must(string(item[key]??'',100000),'متن مقاله معتبر نیست.');
    must(item.status!=='published'||['fa','en'].some(lang=>item['title_'+lang]?.trim()&&item['body_'+lang]?.trim()),'عنوان و متن مقاله را کامل کنید. ترجمهٔ انگلیسی اختیاری است.');
    for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&(item.status==='draft'||key==='reviewed_at'))||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,key==='published_at'?'تاریخ انتشار انتخاب‌شده معتبر نیست؛ آن را خالی بگذارید تا خودکار ثبت شود.':'تاریخ بازبینی انتخاب‌شده معتبر نیست؛ این فیلد اختیاری است.');}
-   must(!item.image||asset(item.image)&&item.image.startsWith('/assets/uploads/'),'تصویر مقاله را از رسانه‌های بارگذاری‌شده انتخاب کنید.');
+   must(!item.image||articleImage(item.image),'برای تصویر مقاله فایل بارگذاری کنید یا لینک مستقیم HTTPS معتبر وارد کنید.');
    must(!item.sources||Array.isArray(item.sources)&&item.sources.length<=100,'منابع معتبر نیستند.');for(const source of item.sources||[])must(string(source.title)&&source.url?.startsWith('https://')&&safeLink(source.url),'منبع نیاز به عنوان و پیوند HTTPS دارد.');
   }
  }else{
