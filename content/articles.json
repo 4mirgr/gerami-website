@@ -1,1 +1,64 @@
-{"articles": []}
+{
+  "articles": [
+    {
+      "slug": "prepare-internal-medicine-visit",
+      "title_fa": "برای ویزیت متخصص داخلی چه مدارک و اطلاعاتی آماده کنیم؟",
+      "title_en": "How to prepare for an internal medicine appointment",
+      "category": "آمادگی برای مراجعه",
+      "body_fa": "**خلاصهٔ مطلب:** پرسش اصلی، فهرست داروها و مدارک تاریخ‌دار را آماده کنید؛ در پایان ویزیت دربارهٔ قدم بعدی و زمان پیگیری بپرسید.\n\n# از مهم‌ترین مسئله شروع کنید\nپیش از ویزیت، مهم‌ترین پرسش یا تغییری را که نگرانش هستید یادداشت کنید. اگر چند موضوع دارید، آن‌ها را به ترتیب اهمیت بنویسید و موضوع اصلی را همان ابتدا با پزشک مطرح کنید. لازم نیست شرح‌حال را با اصطلاحات پزشکی بنویسید؛ توضیح روشن شما دربارهٔ زمان شروع و اثر مشکل بر زندگی روزمره مفیدتر است.\n\n# یک فهرست دارویی همراه داشته باشید\nنام داروهای نسخه‌ای، داروهای بدون نسخه، ویتامین‌ها، مکمل‌ها و فرآورده‌های گیاهی را همراه مقدار و زمان مصرف ثبت کنید. اگر نام دقیق را نمی‌دانید، بسته یا تصویر خوانای برچسب آن را همراه ببرید. تغییراتی را که از ویزیت قبلی در مصرف دارو یا حال عمومی ایجاد شده‌اند هم یادداشت کنید. برای آماده‌شدن ویزیت، دارو را خودسرانه قطع یا جابه‌جا نکنید؛ دستور اختصاصی پزشک خود را دنبال کنید.\n\n# مدارک را بر اساس تاریخ مرتب کنید\n- پاسخ آزمایش‌ها و گزارش‌های تصویربرداری را با تاریخ آن‌ها آماده کنید.\n- اگر در اورژانس، بیمارستان یا نزد پزشک دیگری ارزیابی شده‌اید، خلاصهٔ آن مراجعه را همراه ببرید.\n- نام و راه تماس پزشکان دیگر و اطلاعات ضروری بیمه را در دسترس داشته باشید.\n- در صورت ثبت عددهایی مانند فشار خون یا قند، خود یادداشت‌ها و زمان اندازه‌گیری را بیاورید؛ فقط یک عدد به‌یادمانده کافی نیست.\n\n# مدارک را چگونه همراه ببریم؟\nمدارک را به ترتیب تاریخ در یک پوشه یا به‌صورت فایل خوانا روی دستگاه شخصی خود مرتب کنید و هنگام ویزیت همراه داشته باشید. فهرست سوابق و علائمی که خودتان نوشته‌اید را از گزارش‌ها و ارزیابی‌های پزشک جدا نگه دارید تا مرور اطلاعات آسان‌تر باشد.\n\nاطلاعات شخصی، کد ملی و مدارک پزشکی را در پاسخ به خبرنامه یا بخش عمومی مقاله ننویسید. برای تفسیر اختصاصی نتیجهٔ آزمایش یا تصمیم درمانی، ارزیابی خود پزشک لازم است.\n\n# پیش از پایان ویزیت چه بپرسیم؟\nسه پرسش کاربردی را یادداشت کنید: قدم بعدی چیست، چه زمانی پیگیری لازم است و در صورت بروز چه تغییری باید زودتر تماس بگیرم؟ اگر توضیحی روشن نیست، همان‌جا درخواست کنید با زبان ساده‌تر تکرار شود. این فهرست عمومی است؛ دستور اختصاصی محل مراجعه اولویت دارد.",
+      "body_en": "**At a glance:** Prepare your main question, medication list and dated records; ask about next steps and follow-up before leaving.\n\n# Start with your main concern\nWrite down the change or question that matters most to you. Prioritise several concerns and bring up the main one early. Plain descriptions of when a problem started and how it affects everyday life are useful.\n\n# Bring a medication list\nInclude prescription medicines, over-the-counter products, vitamins, supplements and herbal remedies, with doses and timing. Bring packaging or a readable label if necessary. Note changes since your previous visit. Follow your clinician’s instructions; do not change medicines just to prepare for an appointment.\n\n# Organise your records\n- Bring dated laboratory and imaging reports.\n- Include summaries of recent emergency, hospital or specialist care.\n- Keep relevant insurance information and other clinicians’ contact details available.\n- Bring actual home measurement logs, including dates and times.\n\n# Bring your records privately\nOrganise dated records in a folder or as readable files on your own device and bring them to the visit. Keep your own notes about symptoms and history separate from clinical reports. Do not place medical records or national identification details in newsletter replies or public comments.\n\n# Ask about the next step\nBefore leaving, ask what happens next, when to follow up and which changes require earlier contact. Ask for an explanation in plain language when needed. Individual instructions from your clinic take priority.",
+      "sources": [
+        {
+          "title": "National Institute on Aging — How to Prepare for a Doctor’s Appointment",
+          "url": "https://www.nia.nih.gov/health/medical-care-and-appointments/how-prepare-doctors-appointment"
+        }
+      ],
+      "status": "draft",
+      "audience": "patients",
+      "author": "",
+      "published_at": "",
+      "reviewed_at": "",
+      "image": ""
+    },
+    {
+      "slug": "home-blood-pressure-recording",
+      "title_fa": "فشار خون را در خانه چگونه اندازه بگیریم و ثبت کنیم؟",
+      "title_en": "How to record blood pressure at home",
+      "category": "فشار خون",
+      "body_fa": "**خلاصهٔ مطلب:** روش اندازه‌گیری و زمان ثبت را منظم نگه دارید، همهٔ اعداد را یادداشت کنید و گزارش را در ویزیت همراه داشته باشید؛ بر اساس یک عدد، دارو را خودسرانه تغییر ندهید.\n\n# ثبت منظم از یک عدد تنها مفیدتر است\nاندازه‌گیری خانگی می‌تواند بخشی از ارزیابی فشار خون باشد، اما تشخیص یا تغییر درمان بر اساس یک عدد، بدون بررسی شرایط فرد، تصمیم مناسبی نیست. هدف این مطلب، آماده‌کردن یک گزارش قابل استفاده برای گفت‌وگو با پزشک است؛ برنامهٔ اختصاصی پزشک شما اولویت دارد.\n\n# دستگاه و شرایط اندازه‌گیری اهمیت دارند\nاز دستگاه معتبر و کاف مناسب استفاده کنید و دستور سازنده را برای نگهداری و استفاده دنبال کنید. در صورت تردید دربارهٔ اندازهٔ کاف یا اعتبار دستگاه، آن را در ویزیت مطرح کنید. اندازه‌گیری در حالت نشسته انجام می‌شود. دربارهٔ بازوی مناسب اندازه‌گیری از پزشک راهنمایی بگیرید، به‌خصوص اگر تفاوت اعداد دو بازو قبلاً مطرح شده است.\n\n# برای ارزیابی تشخیصی چه الگویی به کار می‌رود؟\nراهنمای NICE برای پایش خانگی با هدف تأیید تشخیص، این الگو را توصیه می‌کند:\n- در هر نوبت، دو اندازه‌گیری پیاپی در حالت نشسته، با فاصلهٔ دست‌کم یک دقیقه انجام شود.\n- فشار خون روزی دو نوبت، ترجیحاً صبح و عصر، ثبت شود.\n- ثبت حداقل چهار روز و ترجیحاً هفت روز ادامه یابد.\n- در تحلیل این دوره، اندازه‌گیری‌های روز اول کنار گذاشته و میانگین روزهای باقی‌مانده استفاده شود.\n\nاین الگو برای موقعیت مشخصِ ارزیابی تشخیصی است. برنامهٔ پیگیری شخصی، مدت ثبت یا شرایط خاص شما ممکن است متفاوت باشد؛ پیش از تغییر برنامه با پزشک هماهنگ کنید. محاسبهٔ میانگین در خانه جای تفسیر بالینی را نمی‌گیرد.\n\n# چه چیزهایی در جدول بنویسیم؟\nتاریخ، ساعت، هر دو عدد هر بار اندازه‌گیری و نکتهٔ مرتبطی را که پزشک خواسته است ثبت کنید. تمام یادداشت‌ها را نگه دارید؛ فقط اعداد دلخواه را انتخاب نکنید. اگر اندازه‌گیری طبق برنامه انجام نشد یا دستگاه خطا داد، همان را یادداشت کنید.\n\n# گزارش را چگونه به ویزیت ببریم؟\nجدول خوانا یا فایل آن را نزد خود و در محل خصوصی نگه دارید و هنگام ویزیت همراه داشته باشید. گزارش خانگی به پزشک کمک می‌کند الگوی اندازه‌گیری را بررسی کند. دیدن عدد متفاوت، به‌تنهایی مجوز مصرف دوز اضافه یا قطع دارو نیست. اگر پزشک برای علائم یا اعداد خاص برنامهٔ تماس یا اقدام فوری داده است، همان برنامه را دنبال کنید و منتظر پاسخ خبرنامه نمانید.",
+      "body_en": "**At a glance:** Keep measurement and recording consistent, retain all readings and bring the log to your visit; do not change medicine based on a single reading.\n\n# A log is more useful than one isolated value\nHome measurements can support assessment, but diagnosis and treatment changes require individual interpretation. Your clinician’s plan takes priority.\n\n# Use a validated device\nUse a suitable cuff and a validated device, following the manufacturer’s instructions. Ask about cuff size, device reliability and which arm to use if you are unsure. Take readings seated.\n\n# A diagnostic monitoring schedule\nNICE recommends the following when home monitoring is used to confirm a diagnosis:\n- Take two consecutive seated readings at least one minute apart.\n- Record twice daily, ideally morning and evening.\n- Continue for at least four days, ideally seven.\n- Discard day-one measurements when analysing that monitoring period and average the remaining measurements.\n\nThis recommendation concerns diagnostic assessment. Your own follow-up schedule may differ. A home average does not replace clinical interpretation.\n\n# Keep a complete record\nNote dates, times and both readings. Keep all entries, including relevant problems with the measurement. Keep the log privately and bring a readable copy to your visit. Do not change medicine doses based only on an isolated result. Follow any individual urgent-contact instructions from your clinician rather than waiting for a newsletter reply.",
+      "sources": [
+        {
+          "title": "NICE NG136 — Hypertension in adults: recommendations",
+          "url": "https://www.nice.org.uk/guidance/ng136/chapter/Recommendations"
+        }
+      ],
+      "status": "draft",
+      "audience": "patients",
+      "author": "",
+      "published_at": "",
+      "reviewed_at": "",
+      "image": ""
+    },
+    {
+      "slug": "understanding-hba1c-test",
+      "title_fa": "آزمایش HbA1c چیست و پیش از ویزیت دربارهٔ آن چه بدانیم؟",
+      "title_en": "Understanding the HbA1c blood test",
+      "category": "دیابت و آزمایش‌ها",
+      "body_fa": "**خلاصهٔ مطلب:** HbA1c نمایی از میانگین قند خون ماه‌های گذشته می‌دهد؛ تفسیر آن به شرایط شما و آزمایش‌های دیگر وابسته است و برای تعیین درمان شخصی به‌تنهایی کافی نیست.\n\n# HbA1c چه چیزی را نشان می‌دهد؟\nHbA1c آزمایش خونی است که تصویری از میانگین قند خون در حدود سه ماه گذشته ارائه می‌دهد. این آزمایش مقدار هموگلوبین متصل به گلوکز را اندازه می‌گیرد. در نتیجه، مفهوم آن با اندازه‌گیری قند خون در یک لحظه یکسان نیست و قرار نیست تمام نوسان‌های روزانه را به‌تنهایی توضیح دهد.\n\n# آیا برای این آزمایش باید ناشتا باشیم؟\nبرای خودِ آزمایش HbA1c معمولاً ناشتایی لازم نیست. بااین‌حال ممکن است در همان نسخه، آزمایش‌های دیگری هم درخواست شده باشند که دستور متفاوتی دارند. دستور پزشک و آزمایشگاه را برای مجموعهٔ آزمایش‌های خودتان بررسی کنید؛ از این مطلب دربارهٔ ناشتابودن همهٔ آزمایش‌ها نتیجه نگیرید.\n\n# چرا نتیجه باید با شرایط هر فرد تفسیر شود؟\nهر عاملی که عمر گلبول قرمز یا نوع هموگلوبین را تغییر دهد می‌تواند تفسیر HbA1c را تحت تأثیر قرار دهد. طبق توضیح NIDDK، خون‌ریزی اخیر، انتقال خون، برخی اختلالات هموگلوبین، درمان با اریتروپویتین یا همودیالیز از موارد مهم‌اند. کمبود شدید آهن، نارسایی کلیه و بیماری کبد نیز می‌توانند با نتایج نامتناسب همراه باشند. وجود یک عدد آزمایش، این شرایط را مشخص نمی‌کند؛ شرح‌حال و مقایسه با بررسی‌های دیگر لازم است.\n\nاگر نتیجه با اندازه‌گیری‌های قند یا وضعیت شما هماهنگ به نظر نمی‌رسد، آن را با پزشک مطرح کنید. هدف این است که علت تفاوت بررسی شود، نه اینکه برچسب آزمایش یا دارو را خودتان تغییر دهید.\n\n# در ویزیت چه اطلاعاتی همراه ببریم؟\n- نتیجهٔ کامل آزمایش با نام آزمایشگاه و تاریخ، و نتایج قبلی در صورت وجود.\n- فهرست داروها و تغییرات اخیر آن‌ها.\n- گزارش قندهای خانگی، اگر پزشک ثبت آن را توصیه کرده است.\n- اطلاعاتی مانند خون‌ریزی، انتقال خون یا بیماری‌های شناخته‌شده‌ای که می‌توانند بر تفسیر آزمایش اثر بگذارند.\n\n# آیا یک هدف برای همه مناسب است؟\nاین مطلب برای تعیین هدف شخصی HbA1c یا تجویز دارو نوشته نشده است. دربارهٔ معنای نتیجه، هدف مناسب شما و زمان بررسی بعدی از پزشک خود بپرسید. فایل یا نسخهٔ کاغذی آزمایش را نزد خود و در محل خصوصی نگه دارید و هنگام مراجعه همراه ببرید؛ ارسال آن در پاسخ عمومی خبرنامه، جای ثبت در پرونده یا ویزیت را نمی‌گیرد.",
+      "body_en": "**At a glance:** HbA1c reflects average blood glucose over recent months; interpretation depends on your circumstances and other findings, and it does not determine an individual treatment plan on its own.\n\n# What does HbA1c measure?\nThe A1C blood test provides information about average blood glucose over approximately the previous three months. It measures haemoglobin with glucose attached. It is different from a glucose reading at one moment and does not explain every daily fluctuation.\n\n# Do I need to fast?\nFasting is not usually needed for A1C itself. Other tests ordered at the same time may have different requirements. Follow the instructions for your complete laboratory request.\n\n# Context matters\nConditions affecting red blood cell lifespan or haemoglobin can alter interpretation. NIDDK describes recent blood loss, transfusion, haemoglobin variants, erythropoietin treatment and haemodialysis among relevant factors. Severe iron deficiency, kidney failure and liver disease may also affect results. Discuss unexpected differences between the laboratory result, glucose readings and your circumstances with your clinician.\n\n# Bring useful information\n- The complete dated laboratory result and earlier results when available.\n- Your medication list and recent changes.\n- Home glucose logs if your clinician has recommended them.\n- Relevant information such as recent blood loss or transfusion.\n\n# Ask about your own plan\nThis article does not set a personal A1C target or prescribe medicine. Ask what the result means for you, which target is appropriate and when to review it. Keep laboratory records privately and bring them to your appointment rather than sharing them in newsletter replies.",
+      "sources": [
+        {
+          "title": "NIDDK — The A1C Test & Diabetes",
+          "url": "https://www.niddk.nih.gov/health-information/diagnostic-tests/a1c-test"
+        }
+      ],
+      "status": "draft",
+      "audience": "patients",
+      "author": "",
+      "published_at": "",
+      "reviewed_at": "",
+      "image": ""
+    }
+  ]
+}

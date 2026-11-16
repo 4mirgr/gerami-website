@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
+import {createIdentityRuntime,privateToken} from './identity-test-runtime.mjs';
+const mf=createIdentityRuntime({entry:'./identity-local-worker.mjs'});
+try{
+ const db=await mf.getD1Database('WEBSITE_DB');for(const name of ['0001_website_identity.sql','0002_auth_generation.sql'])await db.exec((await readFile(new URL('../deploy/migrations/'+name,import.meta.url),'utf8')).replace(/\n/g,' '));
+ const post=(path,data,cookie='',headers={})=>mf.dispatchFetch('https://site.test/api/account/'+path,{method:'POST',headers:{Origin:'https://site.test','Content-Type':'application/json',Cookie:cookie,...headers},body:JSON.stringify(data)});
+ const registered=await post('signup',{username:'sample-user',email:'user@example.org',display_name:'کاربر آزمایش',password:'test-only strong password'});assert.equal(registered.status,201);const cookie=registered.headers.get('set-cookie').split(';')[0];
+ const info=await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:cookie}})).json();assert.equal(info.user.role,'member');assert.equal(info.user.email_verified,0);assert.equal(info.capabilities.privateWorkspace,false);assert.equal(info.destinations.some(d=>d.url==='/aus/'),false);assert.equal('password_hash' in info.user,false);
+ assert.equal((await post('signup',{username:'elevated-user',email:'other@example.org',display_name:'کاربر',password:'test-only strong password',role:'owner'})).status,400);
+ assert.equal((await mf.dispatchFetch('https://site.test/api/account/admin/users',{headers:{Cookie:cookie}})).status,403);
+ assert.equal((await post('login',{identifier:'sample-user',password:'wrong-password'})).status,401);
+ assert.equal((await post('login',{identifier:'sample-user',password:'test-only strong password'})).status,200);
+ assert.equal((await post('profile',{display_name:'Changed',phone:''},cookie,{Origin:'https://evil.example'})).status,403);
+ assert.equal((await mf.dispatchFetch('https://site.test/aus/',{redirect:'manual',headers:{Accept:'text/html'}})).status,302);
+ assert.equal((await mf.dispatchFetch('https://site.test/aus/assets/private.js')).status,401);
+ assert.equal((await mf.dispatchFetch('https://site.test/dash/',{headers:{Cookie:cookie,Accept:'text/html'}})).status,403);
+ assert.equal((await post('github',{},'',{Authorization:'Bearer not-owner'})).status,403);
+ const owner=await post('github',{},'',{Authorization:'Bearer owner-proof'});assert.equal(owner.status,200);const ownerCookie=owner.headers.get('set-cookie').split(';')[0];
+ const directory=await (await mf.dispatchFetch('https://site.test/api/account/admin/users',{headers:{Cookie:ownerCookie}})).json();assert.equal(directory.total,2);assert.ok(directory.users.every(user=>!('password_hash' in user)));const target=directory.users.find(user=>user.username==='sample-user');
+ assert.equal((await post('admin/users/'+target.id,{role:'owner'},ownerCookie)).status,400);
+ assert.equal((await mf.dispatchFetch('https://site.test/dash/',{headers:{Cookie:ownerCookie}})).status,200);
+ assert.equal((await mf.dispatchFetch('https://site.test/aus/assets/private.js',{headers:{Cookie:ownerCookie}})).status,200);
+ assert.equal((await post('private-recovery',{email:'doctor@example.org'})).status,200);
+ const privateLogin=await post('private-login',{email:'doctor@example.org',password:'test-native-password'});assert.equal(privateLogin.status,200);const privateCookie=privateLogin.headers.get('set-cookie').split(';')[0];const privateState=await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:privateCookie}})).json();assert.equal(privateState.user,null);assert.equal(privateState.private.profile_id,'arash');assert.equal(privateState.capabilities.manageUsers,false);
+ assert.equal((await mf.dispatchFetch('https://site.test/aus/assets/private.js',{headers:{Cookie:privateCookie}})).status,200);assert.equal((await mf.dispatchFetch('https://site.test/aus/%61ssets/private.js',{headers:{Cookie:privateCookie}})).status,400);
+ await db.prepare("UPDATE website_sessions SET expires_at=1 WHERE kind='private'").run();
+ assert.equal((await mf.dispatchFetch('https://site.test/aus/supabase/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{Cookie:privateCookie,Origin:'https://site.test'},body:'{}'})).status,401);
+ const refreshed=await post('private-refresh',{refresh_token:'native-refresh'});assert.equal(refreshed.status,200);const renewedCookie=refreshed.headers.get('set-cookie').split(';')[0];assert.equal((await mf.dispatchFetch('https://site.test/aus/assets/private.js',{headers:{Cookie:renewedCookie}})).status,200);
+ assert.equal((await post('private-session',{},'',{Authorization:'Bearer '+privateToken})).status,200);assert.equal((await post('private-session',{},'',{Authorization:'Bearer eyJ.fake.fake'})).status,403);
+ const reset=await post('admin/users/'+target.id,{action:'reset-link'},ownerCookie);const resetBody=await reset.json();assert.equal(reset.status,200);const token=resetBody.reset_url.split('#reset/')[1];assert.ok(token);assert.equal((await post('reset-password',{token,password:'replacement strong password'})).status,200);assert.equal((await post('reset-password',{token,password:'another strong password'})).status,400);
+ assert.equal((await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:cookie}})).json()).user,null);
+ const newLogin=await post('login',{identifier:'sample-user',password:'replacement strong password'});assert.equal(newLogin.status,200);const nextCookie=newLogin.headers.get('set-cookie').split(';')[0];
+ assert.equal((await post('admin/users/'+target.id,{status:'suspended'},ownerCookie)).status,200);assert.equal((await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:nextCookie}})).json()).user,null);
+ await db.prepare("UPDATE website_users SET status='suspended' WHERE username='sample-user'").run();assert.equal((await (await mf.dispatchFetch('https://site.test/api/account/session',{headers:{Cookie:cookie}})).json()).user,null);
+ console.log('PASS: real Workers crypto/D1 signup/login, no self-elevation/private access, safe user DTOs, cross-origin rejection, protected routes and live suspension.');
+}finally{await mf.dispose();}

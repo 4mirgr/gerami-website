@@ -12,9 +12,13 @@ export function prepareArticlesForPublication(data,clock=new Date()){
 }
 export function safeLink(value){
  if(typeof value!=='string'||value.length>2000||/[\s\\\u0000-\u001f]/.test(value))return false;
+ if(privateLink(value))return false;
  if(value.startsWith('/')&&!value.startsWith('//')&&!value.includes('..'))return true;
  if(/^#[a-zA-Z0-9_-]+$/.test(value))return true;
  try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}
+}
+export function privateLink(value){
+ try{const url=new URL(value,'https://drgerami-md.ir');if(url.hostname!=='drgerami-md.ir'&&!url.hostname.endsWith('.gerami-website.pages.dev')&&url.hostname!=='gerami-website.pages.dev')return false;let path=url.pathname;for(let i=0;i<3&&path.includes('%');i++)path=decodeURIComponent(path);path=new URL(path.replaceAll('\\','/'),url.origin).pathname;return /^\/(?:aus|dash)(?:\/|$)/.test(path)||path==='/build-info.json';}catch{return true;}
 }
 export const asset=value=>typeof value==='string'&&/^\/assets\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif|gif|svg)$/i.test(value)&&!value.includes('..');
 export const articleImage=value=>typeof value==='string'&&(asset(value)&&value.startsWith('/assets/uploads/')||/^https:\/\//i.test(value)&&safeLink(value));

@@ -51,3 +51,4 @@ for(const [path,next] of [['content/site.json',{...clone(documents['content/site
 }
 const largeArticle={slug:'large-draft',status:'draft',audience:'patients',body_fa:'م'.repeat(100000)};const large={articles:Array.from({length:7},(_,i)=>({...largeArticle,slug:'draft-'+i}))};validateDocument('content/articles.json',large);const largeJSON=JSON.stringify(large);assert.ok(Buffer.byteLength(largeJSON)>1024*1024);
 let blobRead=false;const largeStore=new SiteStore({async api(path){if(path.includes('/contents/'))return {sha:'large-sha',encoding:'none',content:''};blobRead=true;return {encoding:'base64',content:Buffer.from(largeJSON).toString('base64')};}});const largeRead=await largeStore.readFile('content/articles.json','commit');assert.equal(blobRead,true);assert.deepEqual(largeRead[1],large);
+for(const hidden of ['/aus/','/%61us/','/dash/','https://drgerami-md.ir/aus/'])assert.equal(safeLink(hidden),false,'Public configuration must not expose '+hidden);

@@ -8,10 +8,10 @@ from pathlib import Path
 from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parent.parent
-UNITS = ('test_aus_gateway.mjs', 'test_connection_check.mjs', 'test_cms_oauth.mjs', 'test_admin_gate.mjs', 'test_site_studio.mjs')
+UNITS = ('test_aus_gateway.mjs', 'test_connection_check.mjs', 'test_cms_oauth.mjs', 'test_admin_gate.mjs', 'test_site_studio.mjs', 'test_website_identity.mjs', 'test_credential_race.mjs', 'test_website_accounts.mjs', 'test_private_access_bridge.mjs', 'test_account_markup.mjs', 'test_clinic_bridge.mjs', 'test_patient_logout.mjs')
 BROWSERS = ('browser-check.mjs', 'test_personal_site.mjs', 'test_admin.mjs',
             'test_identity_font.mjs', 'test_content_order.mjs',
-            'test_cms_completion.mjs', 'test_cms_session.cjs', 'test_site_studio_browser.mjs', 'test_article_publish_browser.mjs', 'test_admin_gate_browser.mjs')
+            'test_cms_completion.mjs', 'test_cms_session.cjs', 'test_site_studio_browser.mjs', 'test_article_publish_browser.mjs', 'test_admin_gate_browser.mjs', 'test_account_browser.mjs', 'test_article_browser.mjs')
 
 
 def run(command):
@@ -32,9 +32,10 @@ def main():
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_live_health.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_aus_frontend_adapter.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_site_studio.py'])
+    run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_article_publication.py'])
     for script in UNITS:
         run(['node', 'scripts/' + script])
-    for folder in ('js', 'admin', 'functions'):
+    for folder in ('js', 'admin', 'functions', 'server', 'account'):
         for path in sorted([p for p in (ROOT / folder).rglob('*') if p.suffix in ('.js', '.mjs')]):
             run(['node', '--check', str(path.relative_to(ROOT))])
     if not args.browser:

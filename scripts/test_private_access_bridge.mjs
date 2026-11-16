@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {consumeHandoff,requestPrivateTokens,clearPrivateAccess} from '../deploy/aus-access-session.mjs';
+const values=new Map();const storage={getItem:k=>values.get(k)||null,removeItem:k=>values.delete(k)};
+values.set('gerami-aus-handoff',JSON.stringify({created_at:Date.now(),tokens:{access_token:'access-token',refresh_token:'refresh-token',expires_in:3600}}));assert.equal(consumeHandoff(storage).access_token,'access-token');assert.equal(consumeHandoff(storage),null);
+values.set('gerami-aus-handoff',JSON.stringify({created_at:Date.now()-61000,tokens:{access_token:'expired',refresh_token:'secret'}}));assert.equal(consumeHandoff(storage),null);assert.equal(values.size,0);
+const calls=[];const fetcher=async(url,options)=>{calls.push({url,options});return Response.json({native_session:{access_token:'renewed',refresh_token:'next-refresh'}});};
+assert.equal((await requestPrivateTokens('password',{email:'test@example.test',password:'native test password'},fetcher)).access_token,'renewed');assert.equal(calls[0].url,'/api/account/private-login');
+await requestPrivateTokens('refresh_token',{refresh_token:'previous'},fetcher);assert.equal(calls[1].url,'/api/account/private-refresh');assert.equal(JSON.parse(calls[1].options.body).refresh_token,'previous');
+await assert.rejects(requestPrivateTokens('client_credentials',{},fetcher),/Unsupported/);assert.equal(calls.length,2);
+for(const status of [400,401,403,429,503])await assert.rejects(requestPrivateTokens('refresh_token',{refresh_token:'test'},async()=>new Response('{}',{status})),error=>error.authTerminal===[400,401,403].includes(status));
+let destination;await clearPrivateAccess(async url=>{assert.equal(url,'/api/account/private-logout');throw Error('offline');},url=>{destination=url;});assert.equal(destination,'/account/?mode=private&next=%2Faus%2F');
+console.log('PASS: bounded one-use handoff, fixed password/refresh brokers, terminal/transient classification, logout always returns to the gated entry.');

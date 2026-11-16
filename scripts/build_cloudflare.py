@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PINS = ROOT / 'deploy/projects.json'
 PUBLIC_EXTENSIONS = {'.html', '.css', '.js', '.json', '.webmanifest', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.webp', '.woff', '.woff2', '.ttf', '.ico', '.pdf', '.txt'}
 SITE_FILES = ('index.html', 'favicon.svg')
-SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin', 'dash')
+SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin', 'account', 'dash', 'newsletter')
 
 
 def git(directory, *args):
@@ -156,10 +156,12 @@ def assemble(sources, output):
         for name in SITE_FILES:
             shutil.copy2(ROOT / name, stage / name)
         for name in SITE_DIRS:
-            copy_public(ROOT / name, stage / name, {'.mjs'} if name in ('js', 'admin') else ())
+            copy_public(ROOT / name, stage / name, {'.mjs'} if name in ('js', 'admin', 'account') else ())
         shutil.copy2(ROOT / 'admin/config.yml', stage / 'admin/config.yml')
         from site_studio import generate
         generate(ROOT, stage)
+        from article_publication import generate as generate_articles
+        generate_articles(stage)
         # AUS is a compiled authenticated application. Never copy its repository
         # root (which includes backend/private-data tooling) into public assets.
         copy_public(sources['intmed'] / pins['intmed']['public_directory'], stage / 'intmed')
@@ -184,9 +186,9 @@ def assemble(sources, output):
             shutil.copy2(ROOT / 'deploy' / name, stage / name)
         # Enable cards in the assembled artifact, where the actual apps now exist.
         with (stage / 'js/links.js').open('a', encoding='utf-8') as handle:
-            handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/',aus:'/aus/'}));\n")
-        ready_fa = 'هر دو پروژه از زیرمسیر همین سایت در دسترس‌اند.'
-        ready_en = 'Both projects are available under this site’s own paths.'
+            handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/'}));\n")
+        ready_fa = 'پروژهٔ IntMed از زیرمسیر همین سایت در دسترس است.'
+        ready_en = 'IntMed is available under this site’s own path.'
         for page in (stage / 'index.html', stage / 'pages/projects.html'):
             html = page.read_text()
             # Relative destinations keep Pages previews and the .ir site on their own host.
@@ -200,7 +202,7 @@ def assemble(sources, output):
         (stage / '_redirects').write_text('/intmed /intmed/ 308\n/aus /aus/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
         (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/*'], 'exclude': []}) + '\n', encoding='utf-8')
         (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحهٔ اصلی</a></html>\n', encoding='utf-8')
-        (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
+        (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/articles/*\n  Cache-Control: no-cache\n/newsletter/*\n  Cache-Control: no-store\n  X-Robots-Tag: noindex, nofollow\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/account/*\n  Cache-Control: no-store\n  X-Frame-Options: SAMEORIGIN\n  Content-Security-Policy: frame-ancestors \'self\'\n  X-Robots-Tag: noindex, nofollow\n/dash/*\n  Cache-Control: private, no-store\n  X-Robots-Tag: noindex, nofollow\n/aus/*\n  Cache-Control: private, no-store\n  X-Robots-Tag: noindex, nofollow\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
         from version_assets import version_assets
         version_assets(stage)
         files = [file for file in stage.rglob('*') if file.is_file()]

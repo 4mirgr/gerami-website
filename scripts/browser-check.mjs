@@ -35,8 +35,9 @@ try {
   socket.addEventListener('message', event => {
     const message = JSON.parse(event.data);
     if (message.method === 'Fetch.requestPaused') {
-      const unavailable = ausConfigMode === 'unavailable';
-      const body = unavailable ? {error:'AUS_APP binding missing (synthetic test)'} : {mode:'cloud',authRequired:true,supabaseUrl:'https://example.supabase.co',publishableKey:'sb_publishable_synthetic_test'};
+      const accountRequest=message.params.request.url.includes('/api/account/session');
+      const unavailable = !accountRequest&&ausConfigMode === 'unavailable';
+      const body = accountRequest?{user:null,private:null,capabilities:{},destinations:[]}:unavailable ? {error:'AUS_APP binding missing (synthetic test)'} : {mode:'cloud',authRequired:true,supabaseUrl:'https://example.supabase.co',publishableKey:'sb_publishable_synthetic_test'};
       send('Fetch.fulfillRequest',{requestId:message.params.requestId,responseCode:unavailable?503:200,responseHeaders:[{name:'Content-Type',value:'application/json'},{name:'Cache-Control',value:'no-store'}],body:Buffer.from(JSON.stringify(body)).toString('base64')},message.sessionId).catch(error=>errors.push(String(error)));
     }
     if (message.id && pending.has(message.id)) {
@@ -61,6 +62,7 @@ try {
   const {sessionId} = await send('Target.attachToTarget', {targetId,flatten:true});
   const call = (method, params={}) => send(method,params,sessionId);
   await call('Page.enable'); await call('Runtime.enable'); await call('Network.enable');
+  const accountPattern={urlPattern:baseURL+'/api/account/session*',requestStage:'Request'};await call('Fetch.enable',{patterns:[accountPattern]});
   async function evaluate(expression) {
     const result = await call('Runtime.evaluate', {expression,returnByValue:true,awaitPromise:true});
     if (result.exceptionDetails) throw Error(JSON.stringify(result.exceptionDetails));
@@ -95,7 +97,7 @@ try {
         assert.equal(state.headings,1,page); assert.equal(state.untranslated,0,page);
         if (page === '' || page === 'pages/projects.html') {
           assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>[link.dataset.appEntry,link.href])"), [
-            ['intmed',projectOrigin+'/intmed/'], ['aus',projectOrigin+'/aus/']
+            ['intmed',projectOrigin+'/intmed/']
           ], 'Project entries must stay on the .ir domain');
         }
         if(language==='en') assert.notEqual(state.title,faTitle,'Localized title '+page);
@@ -129,7 +131,7 @@ try {
     await new Promise(resolve=>setTimeout(resolve,25));
   }
   assert.equal(await evaluate("document.querySelector('[data-destination=intmed]').pathname"),'/intmed/');
-  assert.equal(await evaluate("document.querySelector('[data-destination=aus]').pathname"),'/aus/');
+  assert.equal(await evaluate("document.querySelector('[data-destination=aus]')"),null);
   assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),true);
   await navigate('pages/appointments.html');
   assert.equal(await evaluate("document.querySelector('[data-pending=appointment]').hidden"),false);
@@ -139,7 +141,7 @@ try {
   await navigate('pages/projects.html');
   await evaluate("new Promise(resolve=>setTimeout(resolve,100))");
   assert.equal(await evaluate("document.querySelector('[data-destination=intmed]')."+(combined?'pathname':'hash')),combined?'/intmed/':'#intmed');
-  assert.equal(await evaluate("document.querySelector('[data-destination=aus]')."+(combined?'pathname':'hash')),combined?'/aus/':'#aus');
+  assert.equal(await evaluate("document.querySelector('[data-destination=aus]')"),null);
   assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),combined);
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:remoteConfig.identifier});
   // JavaScript disabled: content and native mobile menu still work.
@@ -147,12 +149,12 @@ try {
   await navigate('');
   assert.equal(await evaluate("document.querySelector('.hero-introduction').textContent"),'دکتر امیرهوشنگ گرامی');
   assert.equal(await evaluate("document.querySelector('[data-language-toggle]').hidden"),true);
-  assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/',projectOrigin+'/aus/']);
+  assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/']);
   await evaluate("document.querySelector('.mobile-menu summary').click()");
   assert.equal(await evaluate("document.querySelector('.mobile-menu').open"),true);
   await call('Emulation.setScriptExecutionDisabled',{value:false});
   if (combined) {
-    await call('Fetch.enable',{patterns:[{urlPattern:baseURL+'/aus/api/public-config*',requestStage:'Request'}]});
+    await call('Fetch.enable',{patterns:[accountPattern,{urlPattern:baseURL+'/aus/api/public-config*',requestStage:'Request'}]});
     await navigate('aus/');
     for (let i=0;i<100;i++) {
       if (await evaluate("!!document.querySelector('#login-email')")) break;
@@ -167,7 +169,7 @@ try {
       await new Promise(resolve=>setTimeout(resolve,25));
     }
     assert.equal(await evaluate("!!document.querySelector('[role=alert]') && document.querySelector('#login-email') === null"),true,'Missing gateway must fail closed');
-    await call('Fetch.disable');
+    await call('Fetch.enable',{patterns:[accountPattern]});
     await navigate('intmed/');
     assert.equal(await evaluate("getComputedStyle(document.querySelector('#loginGate')).display!=='none'"),true,'IntMed login gate loads');
     assert.equal(await evaluate("typeof window.IntMedBackend"),'object','IntMed backend adapter is present');

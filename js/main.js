@@ -41,7 +41,7 @@
       const sameOrigin = url.origin === window.location.origin;
       if (url.protocol !== 'https:' && !(sameOrigin && url.protocol === 'http:')) return null;
       if (kind === 'linkedin' && !(url.protocol === 'https:' && /^(www\.)?linkedin\.com$/.test(url.hostname) && url.pathname.startsWith('/in/'))) return null;
-      if (kind === 'intmed' || kind === 'aus') {
+      if (kind === 'intmed') {
         const projectOrigin = sameOrigin || url.origin === 'https://drgerami-md.ir';
         const projectPath = url.pathname === '/' + kind || url.pathname.startsWith('/' + kind + '/');
         if (!projectOrigin || !projectPath) return null;
@@ -53,6 +53,7 @@
   const originalLinks = new WeakMap();
   function applyLinks(values) {
   Object.entries(values).forEach(([kind, value]) => {
+    if(kind==='aus')return;
     const destination = safeDestination(value, kind);
     if (!destination) {
       document.querySelectorAll('[data-destination="' + kind + '"]').forEach(link => {

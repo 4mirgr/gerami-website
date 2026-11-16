@@ -42,10 +42,16 @@ try{
  assert.equal((await get({request:new Request(origin+'/api/cms/session',{headers:{Cookie:pair}}),env})).status,200);
  const signedOut=await logout({request:new Request(origin+'/api/cms/session',{method:'DELETE',headers:{Origin:origin}}),env});
  assert.match(signedOut.headers.get('Set-Cookie'),/Max-Age=0/);
- for(const path of ['/admin/login','/admin/login.html','/admin/login.mjs','/admin/login.css','/admin/github-session.mjs','/','/intmed/','/aus/'])assert.equal((await visit(path)).status,200);
+ for(const path of ['/admin/login','/admin/login.html','/admin/login.mjs','/admin/login.css','/admin/github-session.mjs','/','/intmed/'])assert.equal((await visit(path)).status,200);
  for(const path of ['/%61dmin/','/ADMIN/','/admin%2Feditor.html','//admin/editor.html'])assert.equal((await visit(path)).status,400);
  const {default:missingConfig}= {default:await gate({request:new Request(origin+'/admin/',{headers:{Accept:'text/html'}}),env:{},next:()=>new Response('private')})};
  assert.equal(missingConfig.status,302);
+ // Once configured, native Clinic owns patient/staff decisions independently
+ // of this CMS shell cookie, including its anonymous API 401 response.
+ for(const cookie of ['',pair]){
+  const native=await gate({request:new Request(origin+'/dash/api/portal/documents',{headers:{Cookie:cookie}}),env:{...env,CLINIC_ORIGIN:'https://clinic.test',CLINIC_PROXY_KEY:'synthetic-proxy-key-for-clinic'.repeat(2)},next:()=>new Response('native Clinic authorization',{status:401})});
+  assert.equal(native.status,401);assert.equal(await native.text(),'native Clinic authorization');
+ }
  assert.equal((await readFile(new URL('../admin/login.html',import.meta.url),'utf8')).includes('login.mjs'),true);
 }finally{globalThis.fetch=realFetch;}
 console.log('PASS admin gate: anonymous HTML/config blocked, exact provider identity and write permission, signed origin-bound expiring cookie, CSRF, encoded aliases and logout cookie.');

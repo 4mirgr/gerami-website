@@ -82,6 +82,38 @@ def prepare_source(source: Path, destination: Path) -> None:
     else:
         raise RuntimeError('AUS recovery redirect contract changed; review before publishing')
 
+    # Keep native credentials in the native application. The one-use handoff
+    # avoids a second password prompt without persisting or merging accounts.
+    bridge = Path(__file__).resolve().parent.parent / 'deploy/aus-access-session.mjs'
+    shutil.copyfile(bridge, destination / 'src/website-access.mjs')
+    text = auth.read_text(encoding='utf-8')
+    hooks = {
+        '  const configRef=useRef(config);': '  const websiteHandoffUsed=useRef(false);\n  const configRef=useRef(config);',
+        'onSession:value=>{if(mounted.current){setAccessToken(value.access_token);setSession(value);}}': 'onSession:value=>{if(mounted.current){setAccessToken(value.access_token);setSession(value);void refreshPrivateAccess(value.access_token);}}',
+        "onInvalid:()=>{if(mounted.current){authEpoch.current++;": "onInvalid:()=>{if(mounted.current){void clearPrivateAccess();authEpoch.current++;",
+        'setAccessToken(opened.access_token);setSession(opened);': 'setAccessToken(opened.access_token);setSession(opened);void refreshPrivateAccess(opened.access_token);',
+        '      } catch {}\n    }\n  }\n  useEffect(()=>{': '      } catch {}\n    }\n    await clearPrivateAccess();\n  }\n  useEffect(()=>{',
+    }
+    for before, after in hooks.items():
+        if text.count(before) != 1:
+            raise RuntimeError('AUS native session contract changed; review the private access bridge')
+        text = text.replace(before, after, 1)
+    text, token_count = re.subn(r'  async function tokenRequest\(grant, payload\) \{.*?\n  \}\n  async function openSession', '  async function tokenRequest(grant, payload) {return requestPrivateTokens(grant,payload); }\n  async function openSession', text, count=1, flags=re.S)
+    if token_count != 1:
+        raise RuntimeError('AUS native token exchange contract changed; review the private access bridge')
+    effect = """
+  useEffect(()=>{
+    if(!config||websiteHandoffUsed.current||callback.kind==='recovery'||callback.kind==='invalid')return;
+    websiteHandoffUsed.current=true;
+    const tokens=consumeHandoff();if(!tokens)return;
+    const epoch=++authEpoch.current;setBusy(true);setError('');
+    openSession(tokens,epoch).catch(error=>{if(isCurrentAuth(epoch))setError(error.message);}).finally(()=>{if(isCurrentAuth(epoch))setBusy(false);});
+  },[config]);
+"""
+    text = "import {consumeHandoff,refreshPrivateAccess,clearPrivateAccess,requestPrivateTokens} from './website-access.mjs';\n" + text
+    text = text.replace('  async function logout() {', effect + '  async function logout() {', 1)
+    auth.write_text(text, encoding='utf-8')
+
     # JSX public image attributes and the image fetch used by LinkedIn cards.
     for path in (destination / "src").rglob("*"):
         if path.suffix not in {".js", ".jsx", ".mjs", ".css"}:

@@ -26,7 +26,7 @@ try {
  await page.waitForSelector('.cms-article');assert.equal(await page.locator('.cms-article').count(),1);
  await page.locator('.cms-article summary').click();
  assert.equal(await page.locator('.article-body img').count(),0);
- assert.equal(await page.locator('.cms-article a').count(),1);
+ assert.equal(await page.locator('.cms-article a').count(),2);assert.equal(await page.locator('.cms-article ul a').count(),1);assert.equal(await page.locator('.cms-article ul a').getAttribute('href'),'https://example.org/');assert.match(await page.getByRole('link',{name:'صفحهٔ مستقل مقاله',exact:true}).getAttribute('href'),/\/articles\/first-article\/$/);
  await page.locator('input[type=search]').fill('ناموجود');assert.equal(await page.locator('.cms-article').count(),0);
  await page.locator('input[type=search]').fill('');
  await page.locator('[data-language-toggle]').click();assert.equal(await page.locator('.cms-article summary').textContent(),'Test article');

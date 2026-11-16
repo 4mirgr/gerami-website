@@ -1,5 +1,7 @@
 # Website maintenance contract
 
+Read `docs/PROJECT_HANDOFF.md` before choosing the next stage. Owner decision on 2026-11-17 (Tehran): prioritize public design, articles and SEO; pause host signup/budget questions and real patient activation. Before enabling real patient signup, private medical uploads, booking or clinical interaction, remind the owner to arrange suitable Clinic hosting and review its current cost. This is a milestone reminder, not purchase authorization or permission to merge the blocked patient PR. Public educational content can proceed independently.
+
 Preserve the user-selected Enfhess public layout, Dompet admin layout, Persian/English, day/night controls, single theme-aware logo and local Vazirmatn font. Do not invent medical qualifications, CV entries, publications, contact information or analytics.
 
 Keep server-verified entry protection for the admin shell, CMS configuration and encoded aliases; only the exact login assets are public. The CMS entry cookie grants no clinical role. When integrating the shared Clinic portal, preserve its native staff/patient authentication and private-file checks instead of putting the CMS-owner gate in front of patient routes. See `docs/admin-access.md`.

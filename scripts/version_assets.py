@@ -5,11 +5,11 @@ from urllib.parse import urlsplit
 
 
 def version_assets(site):
-    for page in [site / 'index.html', *(site / 'pages').glob('*.html'), *(site / 'admin').glob('*.html')]:
+    for page in [site / 'index.html', *(site / 'pages').glob('*.html'), *(site / 'admin').glob('*.html'), *(site / 'account').glob('*.html'), *(site / 'dash').glob('*.html'), *(site / 'newsletter').glob('*.html'), *(site / 'articles').rglob('*.html')]:
         def replace(match):
             prefix, reference = match.groups()
             url = urlsplit(reference)
-            if url.scheme or url.netloc or not url.path.endswith(('.css', '.js')):
+            if url.scheme or url.netloc or not url.path.endswith(('.css', '.js', '.mjs')):
                 return match.group(0)
             target = (site / url.path.lstrip('/') if url.path.startswith('/') else page.parent / url.path).resolve()
             if not target.is_relative_to(site.resolve()) or not target.is_file():

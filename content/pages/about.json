@@ -45,8 +45,8 @@
       "en": "Dr. Amir Houshang Gerami"
     },
     "text-024": {
-      "fa": "این وب‌سایت محل معرفی من و انتشار مطالب آموزشی پزشکی است. پروژهٔ intmed به بخش آموزش پیوند می‌خورد و اطلاعات عمومیِ منتخب از پروژهٔ AUS به تکمیل معرفی شخصی و حرفه‌ای کمک می‌کند.",
-      "en": "This website brings together my profile and medical educational writing. The intmed project informs the education section, while selected public information from AUS will contribute to my personal and professional profile."
+      "fa": "این وب‌سایت محل معرفی من و انتشار مطالب آموزشی پزشکی است. پروژهٔ IntMed به بخش آموزش پیوند می‌خورد.",
+      "en": "This website brings together my profile and medical educational writing. IntMed informs its education section."
     },
     "text-025": {
       "fa": "نسخهٔ کامل سوابق، مدارک و فعالیت‌ها پس از تکمیل اطلاعات این صفحه در دسترس قرار می‌گیرد.",
@@ -105,18 +105,6 @@
       "en": "My medical project, informing the educational content selected for this website."
     },
     "text-039": {
-      "fa": "دربارهٔ پروژه",
-      "en": "About the project"
-    },
-    "text-040": {
-      "fa": "پروژهٔ شخصی",
-      "en": "Personal project"
-    },
-    "text-041": {
-      "fa": "پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند.",
-      "en": "An independent project, with selected public information contributing to my personal and professional profile."
-    },
-    "text-042": {
       "fa": "دربارهٔ پروژه",
       "en": "About the project"
     },
