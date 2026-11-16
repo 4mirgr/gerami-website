@@ -97,6 +97,9 @@ dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
 .app>footer{font-size:10px;margin-top:22px}
 #publish,.article-publish{background:#21884a;color:#fff;border:1px solid #19713d;box-shadow:var(--shadow)}
 .article-publish:hover,#publish:hover{background:#18723c}
+.article-cover{border-block:1px solid var(--line);padding-block:6px 16px;margin-block:18px}
+.article-cover img{display:block;width:100%;max-height:230px;object-fit:contain;background:var(--field);border:1px solid var(--line);border-radius:9px;margin-block:12px}
+.article-cover>p{font-size:11px;line-height:1.9;margin-bottom:10px}
 @media(max-width:1400px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1100px){.studio-workspace{grid-template-columns:1fr}.preview-panel{position:static}.bottom-grid{grid-template-columns:1fr}.app{padding-inline:24px}}
 @media(max-width:900px){.sidebar{width:258px;inset:0 0 0 auto;box-shadow:-10px 0 40px #0002}.app{margin:0;padding:20px}.topbar{gap:12px}.stats{gap:12px}.studio-heading h2{font-size:22px}}

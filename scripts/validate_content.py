@@ -17,6 +17,17 @@ def https(value):
     return parsed.scheme == 'https' and bool(parsed.hostname) and not parsed.username and not parsed.password
 
 
+def remote_article_image(value):
+    if not isinstance(value, str) or len(value) > 2000 or re.search(r'[\s\\\x00-\x1f]', value):
+        return False
+    try:
+        parsed = urlsplit(value)
+        parsed.port  # Reject malformed/out-of-range ports as the browser does.
+        return value.lower().startswith('https://') and https(value)
+    except ValueError:
+        return False
+
+
 def validate(root=ROOT):
     profile = json.loads((root / 'content/site.json').read_text())
     data = json.loads((root / 'content/articles.json').read_text())
@@ -70,7 +81,9 @@ def validate(root=ROOT):
                     raise ValueError('Article dates must use YYYY-MM-DD')
                 date.fromisoformat(value)
         image = item.get('image', '')
-        if image:
+        if image and not remote_article_image(image):
+            if not isinstance(image, str) or not re.fullmatch(r'/assets/uploads/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif|gif|svg)', image, re.I):
+                raise ValueError('Article image needs an uploaded file or a direct HTTPS URL')
             target = (root / image.lstrip('/')).resolve()
             uploads = (root / 'assets/uploads').resolve()
             if not image.startswith('/assets/uploads/') or '..' in image or not target.is_relative_to(uploads) or not target.is_file():

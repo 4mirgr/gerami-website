@@ -26,6 +26,13 @@ let {store,calls}=fixture();assert.equal((await store.publish('test')).sha,'next
 ({store,calls}=fixture({refConflict:true}));await assert.rejects(store.publish('test'),/concurrent/);assert.equal(store.count,1);
 ({store}=fixture());store.install('content/appearance.json',{...documents['content/appearance.json'],fontSize:20},'new-sha');assert.equal(store.conflicts.has('content/appearance.json'),true);store.resolve('content/appearance.json',true);assert.equal(store.conflicts.size,0);assert.equal(store.documents['content/appearance.json'].fontSize,18);
 const article={slug:'publication-test',status:'published',audience:'patients',title_fa:'عنوان آزمایشی',title_en:'Test title',body_fa:'متن آزمایشی',body_en:'Test body',author:'Synthetic author',category:'General',published_at:'',reviewed_at:'',sources:[]};
+const remoteImage='https://images.example.test/image?id=123&format=webp';
+assert.doesNotThrow(()=>validateDocument('content/articles.json',{articles:[{...article,published_at:'2026-11-16',image:remoteImage}]}));
+for(const image of ['http://example.test/a.jpg','javascript:alert(1)','//example.test/a.jpg','https://user:pass@example.test/a.jpg','https://example.test/a\n.jpg','https://example.test/\\a.jpg','data:image/png;base64,eA=='])assert.throws(()=>validateDocument('content/articles.json',{articles:[{...article,published_at:'2026-11-16',image}]}));
+({store,calls}=fixture());store.edit('content/articles.json',{articles:[{...article,image:remoteImage}]});await store.publish('remote article cover');
+const remoteBlob=calls.filter(c=>c.path.endsWith('/git/blobs')).map(c=>JSON.parse(c.body)).find(blob=>JSON.parse(blob.content).articles);assert.equal(JSON.parse(remoteBlob.content).articles[0].image,remoteImage);
+({store}=fixture());store.edit('content/articles.json',{articles:[{...article,image:'/assets/uploads/missing-cover.webp'}]});await assert.rejects(store.publish('missing local cover'),/تصویر/);
+const protectedAppearance=clone(documents['content/appearance.json']);protectedAppearance.light.logo=remoteImage;assert.throws(()=>validateDocument('content/appearance.json',protectedAppearance));
 const prepared=prepareArticlesForPublication({articles:[article]},new Date('2026-11-16T21:00:00Z'));assert.equal(prepared.articles[0].published_at,'2026-11-17');assert.equal(prepared.articles[0].reviewed_at,'');assert.equal(article.published_at,'');
 assert.equal(prepareArticlesForPublication({articles:[{...article,published_at:'2026-11-01',reviewed_at:'2026-10-30'}]}).articles[0].reviewed_at,'2026-10-30');
 ({store,calls}=fixture());store.edit('content/articles.json',{articles:[article]});

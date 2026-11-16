@@ -79,6 +79,23 @@ class ArticlePublicationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             generate(self.root)
 
+    def test_cover_image_is_in_initial_html_and_share_metadata_without_unsafe_urls(self):
+        for image in ['/assets/uploads/synthetic.webp', 'https://images.example.test/cover?format=webp&width=960']:
+            with self.subTest(image=image):
+                (self.root/'content/articles.json').write_text(json.dumps({'articles':[dict(self.item,image=image)]}))
+                generate(self.root)
+                page=(self.root/'articles/synthetic-education/index.html').read_text()
+                self.assertIn('class="article-cover-image"',page)
+                self.assertIn('src="'+image.replace('&','&amp;')+'"',page)
+                self.assertIn('referrerpolicy="no-referrer"',page)
+                self.assertIn('property="og:image"',page)
+        for image in ['javascript:alert(1)', 'https://user:password@example.test/a.jpg', '//example.test/a.jpg']:
+            (self.root/'content/articles.json').write_text(json.dumps({'articles':[dict(self.item,image=image)]}))
+            generate(self.root)
+            page=(self.root/'articles/synthetic-education/index.html').read_text()
+            self.assertFalse('class="article-cover-image"' in page)
+            self.assertFalse('property="og:image"' in page)
+
 
 if __name__ == '__main__':
     unittest.main()

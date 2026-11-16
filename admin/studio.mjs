@@ -1,11 +1,11 @@
 import {GitHubSession,repository} from './github-session.mjs';
 import {SiteStore} from './site-store.mjs';
-import {pages,fonts,sections,clone,validateDocument,pageSlug} from '../js/site-model.mjs';
+import {pages,fonts,sections,clone,validateDocument,pageSlug,articleImage} from '../js/site-model.mjs';
 const $=id=>document.getElementById(id);
 const node=(tag,text,className)=>{const element=document.createElement(tag);if(text!==undefined)element.textContent=text;if(className)element.className=className;return element;};
 const button=(label,handler,className='tool-button')=>{const b=node('button',label,className);b.type='button';b.addEventListener('click',handler);return b;};
 const session=new GitHubSession();const store=new SiteStore(session);const view=$('studio-fields');const preview=$('site-preview');
-let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false;
+let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false,imageSaving=false;
 const routes={pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانهٔ رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
 const appearancePath='content/appearance.json';const menuPath='content/navigation.json';const extraPath='content/extra-pages.json';
 let previewLanguage='fa',previewTheme='light',previewSize=1280;
@@ -33,12 +33,12 @@ function status(){
  // The shell has its own entry cookie even if the editor token is missing.
  $('github-disconnect').hidden=false;$('github-disconnect').disabled=busy;$('github-disconnect').textContent=session.logoutPending?'تلاش دوباره برای خروج':connected?'قطع اتصال و خروج':'خروج از مدیریت';$('connection-title').textContent=connected?'GitHub متصل است':'وضعیت اتصال GitHub';$('connection-message').textContent=session.message;
  $('connection-fallback').hidden=session.state!=='error';
- $('publish').disabled=!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
- $('publish').textContent=store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
+ $('publish').disabled=imageSaving||!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
+ $('publish').textContent=imageSaving?'در حال آماده‌سازی تصویر…':store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
  const publishableDrafts=new Set((store.documents['content/articles.json']?.articles||[]).filter(item=>item.status==='draft').map(item=>item.slug));
- for(const control of document.querySelectorAll('[data-article-publish]'))control.disabled=!connected||!store.remoteReady||store.busy||store.conflicts.size>0||(!publishableDrafts.has(control.dataset.articlePublish)&&store.count===0);
+ for(const control of document.querySelectorAll('[data-article-publish]'))control.disabled=imageSaving||!connected||!store.remoteReady||store.busy||store.conflicts.size>0||(!publishableDrafts.has(control.dataset.articlePublish)&&store.count===0);
  $('draft-state').textContent=!loaded?'در حال دریافت فایل‌ها…':store.storageError?'ذخیرهٔ محلی ممکن نشد؛ این صفحه را نبندید.':store.count?store.count+' تغییر در پیش‌نویس'+(store.media.size?'؛ تصاویر نیز همراه انتشار ذخیره می‌شوند.':' محلی'):'همهٔ تغییرات ثبت شده‌اند';
- $('sync').disabled=!connected||store.busy;
+ $('sync').disabled=!connected||store.busy||imageSaving;
  const conflicts=$('conflict-list');conflicts.replaceChildren();for(const path of store.conflicts){const box=node('div',undefined,'conflict');box.append(node('p','این فایل هم‌زمان تغییر کرده است: '+path),button('استفاده از آخرین نسخه',()=>{store.resolve(path,false);render();}),button('حفظ ویرایش من روی نسخهٔ جدید',()=>{if(confirm('نسخهٔ مخزن را بررسی کرده‌اید؟ ویرایش شما جایگزین محتوای این فایل خواهد شد.')){store.resolve(path,true);render();}}));conflicts.append(box);}
 }
 function sendPreview(){if(!loaded||!preview.contentWindow)return;preview.contentWindow.postMessage({type:'studio-draft',documents:store.documents,assets:Object.fromEntries(store.assetPreviews),language:previewLanguage,theme:previewTheme},location.origin);}
@@ -49,6 +49,7 @@ $('github-connect').addEventListener('click',()=>session.state==='connected'?ses
 $('github-disconnect').addEventListener('click',()=>session.disconnect());
 $('sync').addEventListener('click',synchronize);
 async function publishChanges(){
+ if(imageSaving)throw Error('آماده‌سازی یا لغو تصویر هنوز تمام نشده است؛ چند لحظه صبر کنید.');
  const publishedMedia=[...store.media.keys()];const result=await store.publish('');gallery.push(...publishedMedia.map(path=>'/'+path));notice('تغییرات ذخیره شد؛ نسخهٔ سایت در حال به‌روزرسانی است.');const link=node('a','مشاهدهٔ نسخهٔ ثبت‌شده');link.href='https://github.com/'+repository+'/commit/'+result.sha;link.target='_blank';link.rel='noopener';$('studio-notice').append(' ',link);render();status();
 }
 $('publish').addEventListener('click',attempt(publishChanges));
@@ -93,12 +94,17 @@ function articleEditor(){
   field(box,'مخاطب',item.audience,value=>{item.audience=value;edit(path,data);},{options:{patients:'بیماران و خانواده‌ها',professional:'پزشکان و همکاران'}});
   markdown(box,'متن فارسی',item.body_fa,value=>{item.body_fa=value;edit(path,data);});markdown(box,'English content',item.body_en,value=>{item.body_en=value;edit(path,data);}).dir='ltr';
   for(const [key,title] of [['published_at','تاریخ انتشار'],['reviewed_at','تاریخ بازبینی']])field(box,title,item[key],value=>{item[key]=value;edit(path,data);},{type:'date',help:key==='published_at'?'اگر خالی باشد، هنگام انتشار تاریخ امروز ثبت می‌شود.':'اختیاری؛ فقط تاریخ بازبینی انجام‌شده را وارد کنید.'});
-  field(box,'تصویر مقاله',item.image,value=>{item.image=value;edit(path,data);},{help:'نشانی /assets/uploads/... را از رسانه‌ها کپی کنید.'});
+  const cover=node('div',undefined,'article-cover'),coverImage=node('img'),coverStatus=node('p',undefined,'muted');coverStatus.setAttribute('role','status');
+  coverImage.alt='پیش‌نمایش تصویر مقاله';coverImage.referrerPolicy='no-referrer';coverImage.decoding='async';coverImage.addEventListener('load',()=>{coverStatus.textContent='';});coverImage.addEventListener('error',()=>{coverImage.hidden=true;coverStatus.textContent='تصویر باز نشد؛ لینک مستقیم تصویر را بررسی کنید یا فایل را بارگذاری کنید.';});
+  let coverTimer;function showCover(){clearTimeout(coverTimer);removeCover.hidden=!item.image;coverImage.hidden=!articleImage(item.image);if(coverImage.hidden){coverImage.removeAttribute('src');coverStatus.textContent=item.image?'لینک مستقیم HTTPS تصویر یا نشانی رسانهٔ بارگذاری‌شده را وارد کنید.':'';}else{coverStatus.textContent='در حال دریافت تصویر…';coverImage.src=store.assetPreviews.get(item.image)||item.image;}}
+  const coverURL=field(cover,'تصویر مقاله',item.image,value=>{item.image=value;edit(path,data);clearTimeout(coverTimer);coverTimer=setTimeout(()=>{if(cover.isConnected)showCover();},350);},{help:'لینک مستقیم HTTPS تصویر را بچسبانید یا همین‌جا فایل انتخاب کنید. لینک صفحهٔ وب، تصویر مستقیم نیست.'});coverURL.dir='ltr';
+  const upload=node('input');upload.type='file';upload.accept='image/png,image/jpeg,image/webp,image/avif';upload.addEventListener('change',attempt(async()=>{const file=upload.files[0];upload.value='';if(!file)return;const slug=item.slug;await openImage(file,image=>{const current=clone(store.documents[path]),target=current.articles.find(article=>article.slug===slug);if(!target)throw Error('مقاله تغییر کرده است؛ تصویر در رسانه‌ها نگهداری شد. دوباره مقاله را انتخاب کنید.');target.image=image;edit(path,current);});}));cover.append(label('بارگذاری تصویر مقاله',upload,'پس از برش یا تنظیم نور، «استفاده در مقاله» را بزنید. فایل همراه مقاله منتشر می‌شود.'));
+  const removeCover=button('حذف تصویر مقاله',()=>{item.image='';edit(path,data);coverURL.value='';showCover();});cover.append(coverImage,coverStatus,removeCover);box.append(cover);showCover();
   const sources=node('div',undefined,'sources-editor');sources.append(node('h4','منابع'));box.append(sources);
   for(const [sourceIndex,source] of (item.sources||[]).entries()){const row=node('div',undefined,'source-row');field(row,'عنوان منبع',source.title,value=>{source.title=value;edit(path,data);});field(row,'پیوند منبع',source.url,value=>{source.url=value;edit(path,data);},{type:'url'});row.append(button('حذف منبع',()=>{item.sources.splice(sourceIndex,1);edit(path,data);render();}));sources.append(row);}
   sources.append(button('افزودن منبع',()=>{(item.sources??=[]).push({title:'',url:'https://'});edit(path,data);render();}));
   field(box,'وضعیت نمایش',item.status,value=>{item.status=value;edit(path,data);summary.textContent=(item.title_fa||item.slug)+' · '+(value==='published'?'منتشرشده':'پیش‌نویس');},{options:{draft:'پیش‌نویس',published:'منتشرشده'}});
-  const publish=button(item.status==='published'?'به‌روزرسانی مقاله':'انتشار مقاله',attempt(async()=>{item.status='published';edit(path,data);await publishChanges();}),'primary article-publish');publish.dataset.articlePublish=item.slug;publish.disabled=session.state!=='connected'||!store.remoteReady||store.busy||store.conflicts.size>0||(item.status==='published'&&store.count===0);
+  const publish=button(item.status==='published'?'به‌روزرسانی مقاله':'انتشار مقاله',attempt(async()=>{item.status='published';edit(path,data);await publishChanges();}),'primary article-publish');publish.dataset.articlePublish=item.slug;publish.disabled=imageSaving||session.state!=='connected'||!store.remoteReady||store.busy||store.conflicts.size>0||(item.status==='published'&&store.count===0);
   box.append(publish,button('حذف مقاله',()=>{if(confirm('این مقاله حذف شود؟')){data.articles.splice(index,1);edit(path,data);render();}},'tool-button danger'));section.append(box);
  }
 }
@@ -172,12 +178,12 @@ async function mediaEditor(){
  }
  if(session.state==='connected')section.append(button('دریافت همهٔ تصاویر مخزن',attempt(async()=>{const files=await session.api('/repos/'+repository+'/contents/assets/uploads?ref=main').catch(error=>{if(error.status===404)return [];throw error;});gallery=files.filter(file=>file.type==='file'&&/\.(webp|png|jpe?g|avif)$/i.test(file.name)).map(file=>'/'+file.path);render();})));
 }
-let imageBitmap,rotation=0;
-$('image-dialog').addEventListener('close',()=>{imageBitmap?.close();imageBitmap=null;});
-async function openImage(blob){
+let imageBitmap,rotation=0,imageApply=null,imageGeneration=0;
+$('image-dialog').addEventListener('close',()=>{imageGeneration++;imageBitmap?.close();imageBitmap=null;imageApply=null;});
+async function openImage(blob,apply=null){
  if(blob.size>20*1024*1024)throw Error('حجم تصویر باید کمتر از ۲۰ مگابایت باشد.');
  if(!['image/jpeg','image/png','image/webp','image/avif'].includes(blob.type))throw Error('تصویر PNG، JPEG، WebP یا AVIF انتخاب کنید.');
- imageBitmap?.close();imageBitmap=await createImageBitmap(blob);if(imageBitmap.width*imageBitmap.height>64000000){imageBitmap.close();throw Error('ابعاد تصویر بسیار بزرگ است.');}
+ const generation=++imageGeneration,bitmap=await createImageBitmap(blob);if(generation!==imageGeneration){bitmap.close();return;}if(bitmap.width*bitmap.height>64000000){bitmap.close();throw Error('ابعاد تصویر بسیار بزرگ است.');}imageBitmap?.close();imageBitmap=bitmap;imageApply=apply;$('image-save').textContent=apply?'استفاده در مقاله':'افزودن نسخهٔ ویرایش‌شده';
  rotation=0;$('image-ratio').value='original';$('image-brightness').value='100';$('image-contrast').value='100';$('image-x').value='50';$('image-y').value='50';drawImage();$('image-dialog').showModal();
 }
 function drawImage(){
@@ -188,7 +194,7 @@ function drawImage(){
 }
 for(const id of ['image-ratio','image-brightness','image-contrast','image-x','image-y'])$(id).addEventListener('input',drawImage);
 $('image-rotate').addEventListener('click',()=>{rotation=(rotation+90)%360;drawImage();});
-$('image-save').addEventListener('click',attempt(async()=>{const blob=await new Promise(resolve=>$('image-canvas').toBlob(resolve,'image/webp',0.88));if(!blob)throw Error('ساخت تصویر ممکن نشد.');const path=await store.stageImage(blob);$('image-dialog').close();notice('تصویر به پیش‌نویس اضافه شد: '+path);render();}));
+$('image-save').addEventListener('click',attempt(async()=>{if(imageSaving)return;imageSaving=true;const generation=imageGeneration,apply=imageApply;$('image-save').disabled=true;status();try{const blob=await new Promise(resolve=>$('image-canvas').toBlob(resolve,'image/webp',0.88));if(generation!==imageGeneration||!$('image-dialog').open)return;if(!blob)throw Error('ساخت تصویر ممکن نشد.');const path=await store.stageImage(blob);if(generation!==imageGeneration||!$('image-dialog').open){const key=path.slice(1),file=store.media.get(key);if(file)URL.revokeObjectURL(file.url);store.media.delete(key);store.assetPreviews.delete(path);store.changed();await store.mediaSave;return;}apply?.(path);$('image-dialog').close();notice(apply?'تصویر به مقاله اضافه شد و همراه آن منتشر می‌شود.':'تصویر به پیش‌نویس اضافه شد: '+path);render();}finally{imageSaving=false;$('image-save').disabled=false;status();}}));
 async function historyEditor(){const section=group('تاریخچه و بازیابی','بازیابی، نسخهٔ انتخابی را به پیش‌نویس تبدیل می‌کند. پیش از انتشار آن را در پیش‌نمایش بررسی کنید. تاریخچه شامل متن‌ها، ظاهر، منوها، مقاله‌ها و رزومه است.');
  if(session.state!=='connected'){section.append(node('p','پس از اتصال GitHub، تاریخچهٔ فایل‌های سایت در دسترس است.'));return;}
  section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',new Date(commit.commit.author.date).toLocaleString('fa-IR')));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخهٔ انتخابی در پیش‌نویس آمادهٔ بررسی است.');render();})));rows.append(row);}})));

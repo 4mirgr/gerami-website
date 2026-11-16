@@ -83,6 +83,18 @@ class ContentValidation(unittest.TestCase):
         self.write('content/articles.json',{'articles':[item]})
         with self.assertRaises(ValueError):validate(self.root)
 
+    def test_article_cover_accepts_https_query_urls_and_preserves_local_file_checks(self):
+        item={'slug':'image-test','status':'published','audience':'patients',
+              'title_fa':'عنوان آزمایشی','body_fa':'متن آزمایشی','published_at':'2026-11-16',
+              'image':'https://images.example.test/image?id=1&format=webp'}
+        self.write('content/articles.json',{'articles':[item]})
+        self.assertEqual(validate(self.root),1)
+        for image in ['http://example.test/a.jpg','//example.test/a.jpg','https://user:pass@example.test/a.jpg','https://example.test/a\n.jpg','https://example.test/\\a.jpg','data:image/png;base64,eA==','/assets/uploads/missing.webp']:
+            with self.subTest(image=image):
+                item['image']=image
+                self.write('content/articles.json',{'articles':[item]})
+                with self.assertRaises(ValueError):validate(self.root)
+
 
 if __name__ == '__main__':
     unittest.main()

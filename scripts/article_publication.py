@@ -5,6 +5,7 @@ import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
+from validate_content import remote_article_image
 
 ORIGIN = 'https://drgerami-md.ir'
 escape = lambda value: html.escape(str(value), quote=True)
@@ -75,6 +76,9 @@ def article_page(template, item):
     url = ORIGIN+'/articles/'+item['slug']+'/'
     copies = {language: article_copy(item, language) for language in ('fa', 'en')}
     primary = copies['fa']
+    image=item.get('image','')
+    valid_image=remote_article_image(image) or isinstance(image,str) and bool(re.fullmatch(r'/assets/uploads/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif|gif|svg)',image,re.I)) and '..' not in image
+    image_url=urljoin(ORIGIN,image) if valid_image else ''
     # Blog templates use relative assets. Resolve them before nesting the page.
     template = re.sub(r'\b(href|src)="([^"\s]+)"', lambda m: m[0] if m[2].startswith(('#','/')) or urlsplit(m[2]).scheme
                       else m[1]+'="'+escape(urljoin('/pages/blog.html',m[2]))+'"', template)
@@ -89,21 +93,26 @@ def article_page(template, item):
               'citation':[s['url'] for s in item.get('sources',[])]}
     if item.get('author', '').strip():
         schema['author'] = {'@type':'Person','name':item['author']}
+    if image_url:
+        schema['image']=image_url
     metadata = ('<meta property="og:type" content="article"><meta property="og:url" content="'+url+'">'
                 '<meta property="og:title" content="'+escape(primary['title'])+'">'
                 '<meta property="og:description" content="'+escape(description(item,'fa'))+'">'
                 '<script type="application/ld+json">'+json.dumps(schema,ensure_ascii=False).replace('<','\\u003c')+'</script>'
                 '<script type="module" src="/js/article-page.mjs"></script>')
+    if image_url:
+        metadata+='<meta property="og:image" content="'+escape(image_url)+'">'
     template = template.replace('</head>',metadata+'\n</head>',1)
     sources = ''.join('<li><a rel="noopener noreferrer" href="'+escape(s['url'])+'">'+escape(s['title'])+'</a></li>' for s in item.get('sources',[]) if safe_link(s['url']))
     author = '<span>'+escape(item['author'])+'</span>' if item.get('author', '').strip() else ''
     reviewed = '<span>'+translate('span','بازبینی: ','Reviewed: ')+'<time dir="ltr" datetime="'+escape(item['reviewed_at'])+'">'+escape(item['reviewed_at'])+'</time></span>' if item.get('reviewed_at') else ''
     bodies = ''.join('<div class="article-body" data-article-language="'+language+'" lang="'+copy['language']+'" dir="'+('rtl' if copy['language']=='fa' else 'ltr')+'"'+(' hidden' if language=='en' else '')+'>'+markdown(copy['body'])+'</div>' for language,copy in copies.items())
+    cover='<img class="article-cover-image" src="'+escape(image)+'" alt="'+escape(primary['title'])+'" referrerpolicy="no-referrer" loading="lazy" style="display:block;max-width:100%;height:auto;max-height:480px;object-fit:contain;margin-block:24px">' if image_url else ''
     main = ('<main id="main" tabindex="-1"><article class="container section" data-article-page="'+escape(item['slug'])+'" data-article-category="'+escape(item.get('category', ''))+'">'
             '<a href="/pages/blog.html">'+translate('span','مطالب آموزشی','Education')+'</a>'
             +translate('h1',copies['fa']['title'],copies['en']['title'], **{'data-copy-fa':copies['fa']['language'],'data-copy-en':copies['en']['language'],'lang':primary['language'],'dir':'rtl' if primary['language']=='fa' else 'ltr'})
             +'<p class="article-meta">'+author+'<time dir="ltr" datetime="'+escape(item['published_at'])+'">'+escape(item['published_at'])+'</time>'+reviewed+'</p>'
-            +bodies
+            +cover+bodies
             +(translate('h2','منابع','Sources')+'<ul>'+sources+'</ul>' if sources else '')
             +'<aside class="notice">'+translate('p','این مطلب آموزشی است؛ تصمیم درمانی به ارزیابی فردی پزشک نیاز دارد.','Educational information; treatment decisions require an individual medical assessment.')
             +'<div class="actions"><a class="button" href="/account/?mode=signup#newsletter">'+translate('span','عضویت و خبرنامهٔ اختیاری','Account and optional newsletter')+'</a>'
