@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const node=(tag,text,className)=>{const element=document.createElement(tag);if(text!==undefined)element.textContent=text;if(className)element.className=className;return element;};
 const button=(label,handler,className='tool-button')=>{const b=node('button',label,className);b.type='button';b.addEventListener('click',handler);return b;};
 const session=new GitHubSession();const store=new SiteStore(session);const view=$('studio-fields');const preview=$('site-preview');
-let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false;
+let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false,imageSaving=false;
 const routes={pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانهٔ رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
 const appearancePath='content/appearance.json';const menuPath='content/navigation.json';const extraPath='content/extra-pages.json';
 let previewLanguage='fa',previewTheme='light',previewSize=1280;
@@ -33,12 +33,12 @@ function status(){
  // The shell has its own entry cookie even if the editor token is missing.
  $('github-disconnect').hidden=false;$('github-disconnect').disabled=busy;$('github-disconnect').textContent=session.logoutPending?'تلاش دوباره برای خروج':connected?'قطع اتصال و خروج':'خروج از مدیریت';$('connection-title').textContent=connected?'GitHub متصل است':'وضعیت اتصال GitHub';$('connection-message').textContent=session.message;
  $('connection-fallback').hidden=session.state!=='error';
- $('publish').disabled=!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
- $('publish').textContent=store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
+ $('publish').disabled=imageSaving||!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
+ $('publish').textContent=imageSaving?'در حال آماده‌سازی تصویر…':store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
  const publishableDrafts=new Set((store.documents['content/articles.json']?.articles||[]).filter(item=>item.status==='draft').map(item=>item.slug));
- for(const control of document.querySelectorAll('[data-article-publish]'))control.disabled=!connected||!store.remoteReady||store.busy||store.conflicts.size>0||(!publishableDrafts.has(control.dataset.articlePublish)&&store.count===0);
+ for(const control of document.querySelectorAll('[data-article-publish]'))control.disabled=imageSaving||!connected||!store.remoteReady||store.busy||store.conflicts.size>0||(!publishableDrafts.has(control.dataset.articlePublish)&&store.count===0);
  $('draft-state').textContent=!loaded?'در حال دریافت فایل‌ها…':store.storageError?'ذخیرهٔ محلی ممکن نشد؛ این صفحه را نبندید.':store.count?store.count+' تغییر در پیش‌نویس'+(store.media.size?'؛ تصاویر نیز همراه انتشار ذخیره می‌شوند.':' محلی'):'همهٔ تغییرات ثبت شده‌اند';
- $('sync').disabled=!connected||store.busy;
+ $('sync').disabled=!connected||store.busy||imageSaving;
  const conflicts=$('conflict-list');conflicts.replaceChildren();for(const path of store.conflicts){const box=node('div',undefined,'conflict');box.append(node('p','این فایل هم‌زمان تغییر کرده است: '+path),button('استفاده از آخرین نسخه',()=>{store.resolve(path,false);render();}),button('حفظ ویرایش من روی نسخهٔ جدید',()=>{if(confirm('نسخهٔ مخزن را بررسی کرده‌اید؟ ویرایش شما جایگزین محتوای این فایل خواهد شد.')){store.resolve(path,true);render();}}));conflicts.append(box);}
 }
 function sendPreview(){if(!loaded||!preview.contentWindow)return;preview.contentWindow.postMessage({type:'studio-draft',documents:store.documents,assets:Object.fromEntries(store.assetPreviews),language:previewLanguage,theme:previewTheme},location.origin);}
@@ -49,6 +49,7 @@ $('github-connect').addEventListener('click',()=>session.state==='connected'?ses
 $('github-disconnect').addEventListener('click',()=>session.disconnect());
 $('sync').addEventListener('click',synchronize);
 async function publishChanges(){
+ if(imageSaving)throw Error('آماده‌سازی یا لغو تصویر هنوز تمام نشده است؛ چند لحظه صبر کنید.');
  const publishedMedia=[...store.media.keys()];const result=await store.publish('');gallery.push(...publishedMedia.map(path=>'/'+path));notice('تغییرات ذخیره شد؛ نسخهٔ سایت در حال به‌روزرسانی است.');const link=node('a','مشاهدهٔ نسخهٔ ثبت‌شده');link.href='https://github.com/'+repository+'/commit/'+result.sha;link.target='_blank';link.rel='noopener';$('studio-notice').append(' ',link);render();status();
 }
 $('publish').addEventListener('click',attempt(publishChanges));
@@ -103,7 +104,7 @@ function articleEditor(){
   for(const [sourceIndex,source] of (item.sources||[]).entries()){const row=node('div',undefined,'source-row');field(row,'عنوان منبع',source.title,value=>{source.title=value;edit(path,data);});field(row,'پیوند منبع',source.url,value=>{source.url=value;edit(path,data);},{type:'url'});row.append(button('حذف منبع',()=>{item.sources.splice(sourceIndex,1);edit(path,data);render();}));sources.append(row);}
   sources.append(button('افزودن منبع',()=>{(item.sources??=[]).push({title:'',url:'https://'});edit(path,data);render();}));
   field(box,'وضعیت نمایش',item.status,value=>{item.status=value;edit(path,data);summary.textContent=(item.title_fa||item.slug)+' · '+(value==='published'?'منتشرشده':'پیش‌نویس');},{options:{draft:'پیش‌نویس',published:'منتشرشده'}});
-  const publish=button(item.status==='published'?'به‌روزرسانی مقاله':'انتشار مقاله',attempt(async()=>{item.status='published';edit(path,data);await publishChanges();}),'primary article-publish');publish.dataset.articlePublish=item.slug;publish.disabled=session.state!=='connected'||!store.remoteReady||store.busy||store.conflicts.size>0||(item.status==='published'&&store.count===0);
+  const publish=button(item.status==='published'?'به‌روزرسانی مقاله':'انتشار مقاله',attempt(async()=>{item.status='published';edit(path,data);await publishChanges();}),'primary article-publish');publish.dataset.articlePublish=item.slug;publish.disabled=imageSaving||session.state!=='connected'||!store.remoteReady||store.busy||store.conflicts.size>0||(item.status==='published'&&store.count===0);
   box.append(publish,button('حذف مقاله',()=>{if(confirm('این مقاله حذف شود؟')){data.articles.splice(index,1);edit(path,data);render();}},'tool-button danger'));section.append(box);
  }
 }
@@ -193,7 +194,7 @@ function drawImage(){
 }
 for(const id of ['image-ratio','image-brightness','image-contrast','image-x','image-y'])$(id).addEventListener('input',drawImage);
 $('image-rotate').addEventListener('click',()=>{rotation=(rotation+90)%360;drawImage();});
-$('image-save').addEventListener('click',attempt(async()=>{const generation=imageGeneration,apply=imageApply;$('image-save').disabled=true;try{const blob=await new Promise(resolve=>$('image-canvas').toBlob(resolve,'image/webp',0.88));if(generation!==imageGeneration)return;if(!blob)throw Error('ساخت تصویر ممکن نشد.');const path=await store.stageImage(blob);if(generation!==imageGeneration){const key=path.slice(1),file=store.media.get(key);if(file)URL.revokeObjectURL(file.url);store.media.delete(key);store.assetPreviews.delete(path);store.changed();await store.mediaSave;return;}apply?.(path);$('image-dialog').close();notice(apply?'تصویر به مقاله اضافه شد و همراه آن منتشر می‌شود.':'تصویر به پیش‌نویس اضافه شد: '+path);render();}finally{$('image-save').disabled=false;}}));
+$('image-save').addEventListener('click',attempt(async()=>{if(imageSaving)return;imageSaving=true;const generation=imageGeneration,apply=imageApply;$('image-save').disabled=true;status();try{const blob=await new Promise(resolve=>$('image-canvas').toBlob(resolve,'image/webp',0.88));if(generation!==imageGeneration||!$('image-dialog').open)return;if(!blob)throw Error('ساخت تصویر ممکن نشد.');const path=await store.stageImage(blob);if(generation!==imageGeneration||!$('image-dialog').open){const key=path.slice(1),file=store.media.get(key);if(file)URL.revokeObjectURL(file.url);store.media.delete(key);store.assetPreviews.delete(path);store.changed();await store.mediaSave;return;}apply?.(path);$('image-dialog').close();notice(apply?'تصویر به مقاله اضافه شد و همراه آن منتشر می‌شود.':'تصویر به پیش‌نویس اضافه شد: '+path);render();}finally{imageSaving=false;$('image-save').disabled=false;status();}}));
 async function historyEditor(){const section=group('تاریخچه و بازیابی','بازیابی، نسخهٔ انتخابی را به پیش‌نویس تبدیل می‌کند. پیش از انتشار آن را در پیش‌نمایش بررسی کنید. تاریخچه شامل متن‌ها، ظاهر، منوها، مقاله‌ها و رزومه است.');
  if(session.state!=='connected'){section.append(node('p','پس از اتصال GitHub، تاریخچهٔ فایل‌های سایت در دسترس است.'));return;}
  section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',new Date(commit.commit.author.date).toLocaleString('fa-IR')));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخهٔ انتخابی در پیش‌نویس آمادهٔ بررسی است.');render();})));rows.append(row);}})));
