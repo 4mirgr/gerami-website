@@ -59,16 +59,16 @@ def validate(root=ROOT):
             raise ValueError('Invalid article status or audience')
         required = ('title_fa', 'title_en', 'body_fa', 'body_en', 'author', 'category')
         for key in required:
-            if not isinstance(item.get(key, ''), str) or (item['status'] == 'published' and not item.get(key, '').strip()):
-                raise ValueError(f'Published article requires {key}')
+            if not isinstance(item.get(key, ''), str):
+                raise ValueError(f'Invalid article text: {key}')
+        if item['status']=='published' and not any(item.get('title_'+lang,'').strip() and item.get('body_'+lang,'').strip() for lang in ('fa','en')):
+            raise ValueError('Published article requires a title and body in at least one language')
         for key in ('published_at', 'reviewed_at'):
             value = item.get(key, '')
-            if value or item['status'] == 'published':
+            if value or (key=='published_at' and item['status']=='published'):
                 if not isinstance(value, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', value):
                     raise ValueError('Article dates must use YYYY-MM-DD')
                 date.fromisoformat(value)
-        if item.get('published_at') and item.get('reviewed_at') and item['reviewed_at'] < item['published_at']:
-            raise ValueError('Article review cannot precede publication')
         image = item.get('image', '')
         if image:
             target = (root / image.lstrip('/')).resolve()

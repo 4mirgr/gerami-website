@@ -4,6 +4,12 @@ export const fonts={Vazirmatn:'وزیرمتن',Tahoma:'Tahoma',Arial:'Arial',sys
 export const sections={hero:'معرفی و کارت‌های اصلی',explore:'مسیرهای دسترسی',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'آموزش',articles:'تازه‌ترین مطالب'};
 export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
 export const clone=value=>JSON.parse(JSON.stringify(value));
+export function prepareArticlesForPublication(data,clock=new Date()){
+ const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Tehran',calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(clock).map(part=>[part.type,part.value]));
+ const today=`${parts.year}-${parts.month}-${parts.day}`,next=clone(data);
+ for(const article of next.articles)if(article.status==='published'&&!article.published_at)article.published_at=today;
+ return next;
+}
 export function safeLink(value){
  if(typeof value!=='string'||value.length>2000||/[\s\\\u0000-\u001f]/.test(value))return false;
  if(value.startsWith('/')&&!value.startsWith('//')&&!value.includes('..'))return true;
@@ -47,9 +53,9 @@ export function validateDocument(path,data){
   for(const item of data.articles){
    must(typeof item.slug==='string'&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)&&!seen.has(item.slug),'شناسهٔ مقاله نامعتبر یا تکراری است.');seen.add(item.slug);
    must(['draft','published'].includes(item.status)&&['patients','professional'].includes(item.audience),'وضعیت یا مخاطب مقاله معتبر نیست.');
-   for(const key of ['title_fa','title_en','body_fa','body_en','author','category'])must(string(item[key]??'',100000)&&(item.status!=='published'||item[key]?.trim()),'برای انتشار مقاله، عنوان و متن دو زبان، نویسنده و دسته‌بندی را کامل کنید.');
-   for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&item.status==='draft')||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,'تاریخ انتشار و بازبینی معتبر نیست.');}
-   must(!item.published_at||!item.reviewed_at||item.reviewed_at>=item.published_at,'تاریخ بازبینی نباید قبل از انتشار باشد.');
+   for(const key of ['title_fa','title_en','body_fa','body_en','author','category'])must(string(item[key]??'',100000),'متن مقاله معتبر نیست.');
+   must(item.status!=='published'||['fa','en'].some(lang=>item['title_'+lang]?.trim()&&item['body_'+lang]?.trim()),'عنوان و متن مقاله را کامل کنید. ترجمهٔ انگلیسی اختیاری است.');
+   for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&(item.status==='draft'||key==='reviewed_at'))||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,key==='published_at'?'تاریخ انتشار انتخاب‌شده معتبر نیست؛ آن را خالی بگذارید تا خودکار ثبت شود.':'تاریخ بازبینی انتخاب‌شده معتبر نیست؛ این فیلد اختیاری است.');}
    must(!item.image||asset(item.image)&&item.image.startsWith('/assets/uploads/'),'تصویر مقاله را از رسانه‌های بارگذاری‌شده انتخاب کنید.');
    must(!item.sources||Array.isArray(item.sources)&&item.sources.length<=100,'منابع معتبر نیستند.');for(const source of item.sources||[])must(string(source.title)&&source.url?.startsWith('https://')&&safeLink(source.url),'منبع نیاز به عنوان و پیوند HTTPS دارد.');
   }
