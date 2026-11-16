@@ -1,7 +1,7 @@
 const KEY='decap-cms-user';
 export const repository='4mirgr/gerami-website';
 export class GitHubSession extends EventTarget{
- constructor(){super();this.state='checking';this.login='';this.message='در حال بررسی اتصال…';this.token='';this.generation=0;
+ constructor(){super();this.state='checking';this.login='';this.message='در حال بررسی اتصال…';this.token='';this.generation=0;this.logoutPending=false;
   window.addEventListener('storage',event=>{if(event.key===KEY)this.verify();});
   window.addEventListener('message',event=>{
    if(event.origin!==location.origin||event.source!==this.popup)return;
@@ -43,5 +43,8 @@ export class GitHubSession extends EventTarget{
   this.set('connecting','منتظر تکمیل ورود در پنجرهٔ GitHub…');clearInterval(this.poll);const start=Date.now();const old=this.read();
   this.poll=setInterval(()=>{if(this.read()&&this.read()!==old){clearInterval(this.poll);this.verify();}else if(Date.now()-start>180000||this.popup.closed){clearInterval(this.poll);if(this.state==='connecting')this.set('disconnected','ورود تکمیل نشد؛ دوباره اتصال را بزنید.');}},800);
  }
- disconnect(){clearInterval(this.poll);++this.generation;this.token='';try{localStorage.removeItem(KEY);}catch{}this.set('disconnected','اتصال این مرورگر قطع شد؛ پیش‌نویس‌ها حفظ شدند.');window.dispatchEvent(new CustomEvent('cms-session-cleared'));}
+ async disconnect(){if(this.state==='disconnecting')return;clearInterval(this.poll);++this.generation;this.token='';this.logoutPending=true;try{localStorage.removeItem(KEY);}catch{}this.set('disconnecting','اتصال مرورگر قطع شد؛ در حال خروج از مدیریت…');window.dispatchEvent(new CustomEvent('cms-session-cleared'));
+  try{const response=await fetch('/api/cms/session',{method:'DELETE',credentials:'same-origin',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error();this.logoutPending=false;this.set('disconnected','خروج از مدیریت انجام شد؛ پیش‌نویس‌ها حفظ شدند.');if(location.pathname.startsWith('/admin/')&&location.pathname!=='/admin/login.html')location.assign('/admin/login.html');}
+  catch{this.set('disconnected','اتصال مرورگر قطع شد؛ خروج سرور تأیید نشد. اتصال را بررسی و دوباره تلاش کنید.');}
+ }
 }
