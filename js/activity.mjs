@@ -6,6 +6,10 @@ async function record(kind,value,category=''){
 }
 if(!preview){
  let searchTimer;document.addEventListener('input',event=>{if(!event.target.matches('.article-toolbar input[type=search]'))return;clearTimeout(searchTimer);const value=event.target.value;searchTimer=setTimeout(()=>{if(value.trim().length>=2)void record('search',value);},850);});
+ // Full article pages use the same explicit consent and visible-time rule.
+ const fullArticle=document.querySelector('[data-article-page]');let fullTimer,fullRecorded=false;
+ function scheduleFull(){clearTimeout(fullTimer);if(!fullArticle||fullRecorded||document.visibilityState!=='visible')return;fullTimer=setTimeout(()=>{if(fullArticle.isConnected&&document.visibilityState==='visible'){fullRecorded=true;void record('article_open',fullArticle.dataset.articlePage,fullArticle.dataset.articleCategory||'');}},8000);}
+ scheduleFull();document.addEventListener('visibilitychange',scheduleFull);
  const timers=new Map(),observed=new WeakSet();
  function clear(node){clearTimeout(timers.get(node));timers.delete(node);}
  function schedule(node){clear(node);if(!node.open||document.visibilityState!=='visible')return;timers.set(node,setTimeout(()=>{timers.delete(node);if(node.open&&node.isConnected&&document.visibilityState==='visible'){const slug=node.id.replace(/^article-/,'');void record('article_open',slug,node.dataset.articleCategory||'');}},8000));}

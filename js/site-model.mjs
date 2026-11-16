@@ -55,6 +55,7 @@ export function validateDocument(path,data){
    for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&item.status==='draft')||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,'تاریخ انتشار و بازبینی معتبر نیست.');}
    must(!item.published_at||!item.reviewed_at||item.reviewed_at>=item.published_at,'تاریخ بازبینی نباید قبل از انتشار باشد.');
    must(!item.image||asset(item.image)&&item.image.startsWith('/assets/uploads/'),'تصویر مقاله را از رسانه‌های بارگذاری‌شده انتخاب کنید.');
+   must(item.status!=='published'||Array.isArray(item.sources)&&item.sources.length>0,'برای انتشار محتوای آموزشی دست‌کم یک منبع معتبر اضافه کنید.');
    must(!item.sources||Array.isArray(item.sources)&&item.sources.length<=100,'منابع معتبر نیستند.');for(const source of item.sources||[])must(string(source.title)&&source.url?.startsWith('https://')&&safeLink(source.url),'منبع نیاز به عنوان و پیوند HTTPS دارد.');
   }
  }else{

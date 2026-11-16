@@ -154,3 +154,5 @@ body,button,:lang(fa){font-family:Vazirmatn,Tahoma,sans-serif}
 
 /* All interface text uses the locally hosted Vazirmatn family. */
 html,body,body *{font-family:Vazirmatn,Tahoma,sans-serif!important}
+
+.article-meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:baseline}.article-meta time{display:inline-block;direction:ltr;unicode-bidi:isolate;white-space:nowrap}

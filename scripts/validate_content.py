@@ -77,6 +77,8 @@ def validate(root=ROOT):
                 raise ValueError('Article image must exist within assets/uploads')
         if not isinstance(item.get('sources', []), list):
             raise ValueError('Article sources must be a list')
+        if item['status'] == 'published' and not item.get('sources'):
+            raise ValueError('Published educational articles require at least one source')
         for source in item.get('sources', []):
             if not isinstance(source, dict) or not isinstance(source.get('url'), str) or not https(source['url']) or not isinstance(source.get('title'), str):
                 raise ValueError('Article sources require title and safe HTTPS URLs')

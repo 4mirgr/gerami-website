@@ -18,7 +18,7 @@ export async function handleLocalAccount(request,env){
  }catch(error){if(error instanceof ApiError)return json({error:error.code},error.status,error.status===429?{'Retry-After':'60'}:{});return json({error:'account_service_unavailable'},503);}
 }
 
-const patientRoutes=new Set(['signup','login','recovery','reset-password','password','profile','patient-profile','privacy','activity','documents']);
+const patientRoutes=new Set(['signup','login','recovery','reset-password','password','profile','patient-profile','privacy','activity','documents','newsletter','newsletter/confirm','newsletter/unsubscribe']);
 export async function handleAccount(request,env){
  try{
   const url=new URL(request.url),path=url.pathname.slice('/api/account/'.length);
@@ -54,9 +54,9 @@ export async function handleAccount(request,env){
    headers.append('Set-Cookie','gerami_session=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0');
    return json({signed_out:localOkay&&remoteOkay,patient_signed_out:remoteOkay,website_signed_out:localOkay,partial_logout:!localOkay||!remoteOkay},200,headers);
   }
-  if(patientRoutes.has(path)||path==='admin/users'||path.startsWith('admin/users/')){
+  if(patientRoutes.has(path)||path==='admin/newsletter'||path==='admin/users'||path.startsWith('admin/users/')){
    if(path==='profile'){const local=await session(request,env);if(local?.user.role==='owner')return handleLocalAccount(request,env);}
-   const local=path.startsWith('admin/users')?await session(request,env):null;
+   const local=path.startsWith('admin/')?await session(request,env):null;
    return await forwardClinic(request,env,{path:'/dash/api/portal/'+(path==='patient-profile'?'profile':path)+url.search,owner:local?.user});
   }
   return handleLocalAccount(request,env);

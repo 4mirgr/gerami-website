@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 
 def version_assets(site):
-    for page in [site / 'index.html', *(site / 'pages').glob('*.html'), *(site / 'admin').glob('*.html'), *(site / 'account').glob('*.html'), *(site / 'dash').glob('*.html')]:
+    for page in [site / 'index.html', *(site / 'pages').glob('*.html'), *(site / 'admin').glob('*.html'), *(site / 'account').glob('*.html'), *(site / 'dash').glob('*.html'), *(site / 'newsletter').glob('*.html'), *(site / 'articles').rglob('*.html')]:
         def replace(match):
             prefix, reference = match.groups()
             url = urlsplit(reference)

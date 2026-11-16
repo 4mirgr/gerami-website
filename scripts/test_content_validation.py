@@ -22,6 +22,7 @@ class ContentValidation(unittest.TestCase):
         (self.root / name).write_text(json.dumps(data))
 
     def test_empty_site_is_valid_without_invented_content(self):
+        self.write('content/articles.json', {'articles':[]})
         self.assertEqual(validate(self.root), 0)
 
     def test_missing_translations_and_bad_links_block_publication(self):
@@ -46,12 +47,20 @@ class ContentValidation(unittest.TestCase):
     def test_publication_dates_use_sortable_iso_format(self):
         item={'slug':'dated', 'status':'published', 'audience':'patients',
               **{key:'Verified' for key in ('title_fa','title_en','body_fa','body_en','author','category')},
-              'published_at':'2026-11-12','reviewed_at':'2026-11-12','sources':[]}
+              'published_at':'2026-11-12','reviewed_at':'2026-11-12','sources':[{'title':'Synthetic source','url':'https://example.test/reference'}]}
         self.write('content/articles.json', {'articles':[item]})
         self.assertEqual(validate(self.root), 1)
         item['published_at']='20261112'
         self.write('content/articles.json', {'articles':[item]})
         with self.assertRaises(ValueError):
+            validate(self.root)
+
+    def test_published_medical_content_requires_sources(self):
+        item={'slug':'missing-source','status':'published','audience':'patients',
+              **{key:'Synthetic' for key in ('title_fa','title_en','body_fa','body_en','author','category')},
+              'published_at':'2026-11-16','reviewed_at':'2026-11-16','sources':[]}
+        self.write('content/articles.json',{'articles':[item]})
+        with self.assertRaisesRegex(ValueError,'source'):
             validate(self.root)
 
     def test_automatic_updates_cannot_change_repository_or_mount(self):
