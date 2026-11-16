@@ -2,6 +2,7 @@ import {clinicConfigured,clinicSession,forwardClinic,clinicError} from './clinic
 import {ApiError,ready,json,body,cookie,cookieHeader,session,safeUser,capabilities,destinations} from './db.mjs';
 import * as accounts from './accounts.mjs';
 import {currentPrivate,privateLogin,privateSession,privateLogout,privateRecovery,privateRefresh} from './private-access.mjs';
+import {clearCMSCookie} from '../cms-access.mjs';
 export async function handleLocalAccount(request,env){
  try{
   ready(env);const path=new URL(request.url).pathname.slice('/api/account/'.length);
@@ -48,6 +49,7 @@ export async function handleAccount(request,env){
    const headers=new Headers();
    for(const response of [local,remote])for(const value of response?.headers.getSetCookie()||[])headers.append('Set-Cookie',value);
    headers.append('Set-Cookie',cookieHeader('website','',0));
+   headers.append('Set-Cookie',clearCMSCookie());
    // Clear browser access even when a server cannot confirm revocation. The
    // explicit partial result never claims that unavailable service revoked it.
    headers.append('Set-Cookie','__Host-gerami-clinic=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0');

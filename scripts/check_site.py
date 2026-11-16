@@ -8,10 +8,10 @@ from pathlib import Path
 from urllib.request import urlopen
 
 ROOT = Path(__file__).resolve().parent.parent
-UNITS = ('test_aus_gateway.mjs', 'test_connection_check.mjs', 'test_cms_oauth.mjs', 'test_site_studio.mjs', 'test_website_identity.mjs', 'test_credential_race.mjs', 'test_website_accounts.mjs', 'test_private_access_bridge.mjs', 'test_account_markup.mjs', 'test_clinic_bridge.mjs', 'test_patient_logout.mjs')
+UNITS = ('test_aus_gateway.mjs', 'test_connection_check.mjs', 'test_cms_oauth.mjs', 'test_admin_gate.mjs', 'test_site_studio.mjs', 'test_website_identity.mjs', 'test_credential_race.mjs', 'test_website_accounts.mjs', 'test_private_access_bridge.mjs', 'test_account_markup.mjs', 'test_clinic_bridge.mjs', 'test_patient_logout.mjs')
 BROWSERS = ('browser-check.mjs', 'test_personal_site.mjs', 'test_admin.mjs',
             'test_identity_font.mjs', 'test_content_order.mjs',
-            'test_cms_completion.mjs', 'test_cms_session.cjs', 'test_site_studio_browser.mjs', 'test_account_browser.mjs', 'test_article_browser.mjs')
+            'test_cms_completion.mjs', 'test_cms_session.cjs', 'test_site_studio_browser.mjs', 'test_admin_gate_browser.mjs', 'test_account_browser.mjs', 'test_article_browser.mjs')
 
 
 def run(command):

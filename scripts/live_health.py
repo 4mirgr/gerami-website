@@ -2,13 +2,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from urllib.request import Request, urlopen, build_opener, HTTPRedirectHandler
 from urllib.error import HTTPError
-from urllib.parse import urlsplit, parse_qs
+from urllib.parse import urlsplit, parse_qs, urljoin
 
 ORIGIN = 'https://drgerami-md.ir'
 CHECKS = {
     '/': b'css/enfhess.css',
-    '/admin/': b'dompet.css',
-    '/admin/editor.html': b'decap-cms@3.10.0',
+    '/admin/login.html': b'login.mjs',
     '/api/cms/status': b'"configured":true',
     '/intmed/': b'<title>IntMed</title>',
     '/account/': b'account/account.mjs',
@@ -30,6 +29,18 @@ def probe(item):
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, request, file_pointer, code, message, headers, new_url):
         return None
+
+
+def probe_admin(path):
+    request=Request(ORIGIN+path,headers={'User-Agent':'Gerami-Website-Health/1.0','Accept':'text/html','Cache-Control':'no-cache'})
+    try:
+        with build_opener(NoRedirect).open(request,timeout=20):
+            raise RuntimeError('Administrator document unexpectedly served publicly')
+    except HTTPError as error:
+        location=urlsplit(urljoin(ORIGIN+'/',error.headers.get('Location','')))
+        if error.code!=302 or location.path not in ('/admin/login','/admin/login.html') or location.scheme!='https' or location.netloc!=urlsplit(ORIGIN).netloc or location.username is not None or location.password is not None:
+            raise RuntimeError('Administrator document did not require the local login gate') from error
+    return f'PASS production: {path} require authentication'
 
 
 def probe_private():
@@ -56,3 +67,5 @@ if __name__ == '__main__':
         for result in pool.map(probe, CHECKS.items()):
             print(result)
     print(probe_private())
+    for path in ('/admin/','/admin/editor.html'):
+        print(probe_admin(path))
