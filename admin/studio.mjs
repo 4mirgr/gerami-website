@@ -27,10 +27,11 @@ function field(parent,title,value,change,{type='text',help='',min,max,step,optio
 }
 function group(title,description){const section=node('section',undefined,'settings-group');section.append(node('h3',title));if(description)section.append(node('p',description,'muted'));view.append(section);return section;}
 function status(){
- const connected=session.state==='connected';const busy=['checking','connecting'].includes(session.state);
+ const connected=session.state==='connected';const busy=['checking','connecting','disconnecting'].includes(session.state);
  $('github-state').textContent=connected?'متصل · '+session.login:session.state==='checking'?'بررسی اتصال…':session.state==='connecting'?'در انتظار ورود…':'قطع اتصال';
  $('github-state').dataset.state=session.state;$('github-connect').textContent=connected?'بررسی مجدد':'اتصال به GitHub';$('github-connect').disabled=busy;
- $('github-disconnect').hidden=!connected;$('connection-title').textContent=connected?'GitHub متصل است':'وضعیت اتصال GitHub';$('connection-message').textContent=session.message;
+ // The shell has its own entry cookie even if the editor token is missing.
+ $('github-disconnect').hidden=false;$('github-disconnect').disabled=busy;$('github-disconnect').textContent=session.logoutPending?'تلاش دوباره برای خروج':connected?'قطع اتصال و خروج':'خروج از مدیریت';$('connection-title').textContent=connected?'GitHub متصل است':'وضعیت اتصال GitHub';$('connection-message').textContent=session.message;
  $('connection-fallback').hidden=session.state!=='error';
  $('publish').disabled=!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
  $('publish').textContent=store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
@@ -41,7 +42,7 @@ function status(){
 function sendPreview(){if(!loaded||!preview.contentWindow)return;preview.contentWindow.postMessage({type:'studio-draft',documents:store.documents,assets:Object.fromEntries(store.assetPreviews),language:previewLanguage,theme:previewTheme},location.origin);}
 let previewTimer;store.addEventListener('change',()=>{status();clearTimeout(previewTimer);previewTimer=setTimeout(sendPreview,150);});
 async function synchronize(){if(syncing||!loaded||session.state!=='connected')return;syncing=true;try{await store.synchronize();notice('آخرین نسخهٔ مخزن دریافت شد. پیش‌نویس‌های شما حفظ شدند.');render();}catch(error){notice(error.message,true);}finally{syncing=false;}}
-session.addEventListener('change',()=>{status();if(session.state==='connected')synchronize();if(['disconnected','expired'].includes(session.state)){$('editor-slot').replaceChildren();window.dispatchEvent(new Event('cms-editor-reset'));}});
+session.addEventListener('change',()=>{status();if(session.state==='connected')synchronize();if(['disconnecting','disconnected','expired'].includes(session.state)){$('editor-slot').replaceChildren();window.dispatchEvent(new Event('cms-editor-reset'));}});
 $('github-connect').addEventListener('click',()=>session.state==='connected'?session.verify():session.connect());
 $('github-disconnect').addEventListener('click',()=>session.disconnect());
 $('sync').addEventListener('click',synchronize);

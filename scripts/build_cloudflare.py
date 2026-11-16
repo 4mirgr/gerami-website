@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PINS = ROOT / 'deploy/projects.json'
 PUBLIC_EXTENSIONS = {'.html', '.css', '.js', '.json', '.webmanifest', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.webp', '.woff', '.woff2', '.ttf', '.ico', '.pdf', '.txt'}
 SITE_FILES = ('index.html', 'favicon.svg')
-SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin')
+SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin', 'dash')
 
 
 def git(directory, *args):
@@ -198,7 +198,7 @@ def assemble(sources, output):
                 html = html.replace('</head>', '<script src="/legacy-intmed-links.js" defer></script>\n</head>', 1)
             page.write_text(html, encoding='utf-8')
         (stage / '_redirects').write_text('/intmed /intmed/ 308\n/aus /aus/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
-        (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/aus/api/*', '/aus/supabase/*', '/api/cms/*'], 'exclude': []}) + '\n', encoding='utf-8')
+        (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/*'], 'exclude': []}) + '\n', encoding='utf-8')
         (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحهٔ اصلی</a></html>\n', encoding='utf-8')
         (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
         from version_assets import version_assets
