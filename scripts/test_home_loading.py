@@ -47,6 +47,18 @@ class HomeLoading(unittest.TestCase):
             self.assertNotIn('<script>window.pwned=true</script>', text)
             self.assertEqual(before, {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()})
 
+    def test_inner_pages_embed_only_their_own_public_documents(self):
+        for ident in ('about', 'blog', 'appointments', 'projects'):
+            with self.subTest(page=ident):
+                text = bake_settings(ROOT, (ROOT / 'pages' / (ident + '.html')).read_text(), ident)
+                documents = self.snapshot(text)['documents']
+                expected = {'content/appearance.json', 'content/navigation.json', 'content/site.json', 'content/pages/' + ident + '.json'}
+                if ident == 'blog':
+                    expected.update({'content/topics.json', 'content/articles.json'})
+                self.assertEqual(set(documents), expected)
+                self.assertIn('<script id="site-theme-bootstrap">', text)
+                self.assertNotRegex(text, r'<script[^>]+src="[^"]*js/theme\.js')
+
     def test_large_article_feed_falls_back_without_bloating_html(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

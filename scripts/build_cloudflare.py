@@ -203,10 +203,12 @@ def assemble(sources, output):
         (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
         from version_assets import version_assets
         version_assets(stage)
+        from public_assets import optimize_public_assets
+        performance = optimize_public_assets(stage)
         files = [file for file in stage.rglob('*') if file.is_file()]
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
-        report = {'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'aus_checks': aus_checks, 'aus_warnings': aus_warnings, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS authenticated frontend with same-origin API and auth gateway', 'root legacy worker retirement', 'same-origin project entries']}
+        report = {'performance': performance, 'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'aus_checks': aus_checks, 'aus_warnings': aus_warnings, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS authenticated frontend with same-origin API and auth gateway', 'root legacy worker retirement', 'same-origin project entries']}
         (stage / 'build-info.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         stage.rename(output)
     return report

@@ -106,12 +106,17 @@ def topic_markup(root, directory=False):
     return result
 
 
-def home_bootstrap(root, text):
-    # These documents are already public. Freeze only a bounded home-page subset
+def home_bootstrap(root, text, ident="home"):
+    # These documents are already public. Freeze only a bounded per-page subset
     # in the same deployment as its HTML; large feeds keep the network fallback.
     snapshot = {'version': 1, 'documents': {}}
-    paths = ('content/appearance.json', 'content/navigation.json', 'content/pages/home.json',
-             'content/site.json', 'content/topics.json', 'content/articles.json')
+    paths = ['content/appearance.json', 'content/navigation.json', 'content/site.json']
+    if ident != 'extra':
+        paths.append('content/pages/' + ident + '.json')
+    if ident in ('home', 'blog'):
+        paths.extend(['content/topics.json', 'content/articles.json'])
+    if ident == 'extra':
+        paths.append('content/extra-pages.json')
     def serialize(value):
         value = json.dumps(value, ensure_ascii=False, separators=(',', ':'))
         for char in ('<', '>', '&', '\u2028', '\u2029'):
@@ -132,7 +137,7 @@ def home_bootstrap(root, text):
         code = theme.read_text()
         if re.search(r'</script', code, re.I):
             raise ValueError('Theme script requires a reviewed safe inline adapter')
-        text = re.sub(r'<script src="(?:/)?js/theme\.js(?:\?[^"<>]*)?"></script>',
+        text = re.sub(r'<script src="(?:/|\.\./)?js/theme\.js(?:\?[^"<>]*)?"></script>',
                       lambda _: '<script id="site-theme-bootstrap">' + code + '</script>', text, count=1)
     return text
 
@@ -208,7 +213,7 @@ def bake_settings(root, text, ident):
         css += '--site-background:' + ('url("' + value['background'] + '")' if value['background'] else 'none') + ';}'
     text = re.sub(r'<style id="site-settings">.*?</style>', '', text, flags=re.S)
     text = text.replace('</head>', '<style id="site-settings">' + css + '</style></head>')
-    return home_bootstrap(root, text) if ident == 'home' else text
+    return home_bootstrap(root, text, ident)
 
 
 def apply_static_settings(root, output):
