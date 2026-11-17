@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 UNITS = ('test_aus_gateway.mjs', 'test_connection_check.mjs', 'test_cms_oauth.mjs', 'test_admin_gate.mjs', 'test_site_studio.mjs', 'test_topics.mjs')
 BROWSERS = ('browser-check.mjs', 'test_personal_site.mjs', 'test_admin.mjs',
             'test_identity_font.mjs', 'test_public_glass.mjs', 'test_reading_glass.mjs', 'test_mobile_brand.mjs', 'test_topic_reading.mjs', 'test_pages_canonical.mjs', 'test_content_order.mjs',
-            'test_cms_completion.mjs', 'test_cms_session.cjs', 'test_site_studio_browser.mjs', 'test_topic_editor.mjs', 'test_article_publish_browser.mjs', 'test_admin_gate_browser.mjs', 'test_home_loading_browser.mjs')
+            'test_cms_completion.mjs', 'test_cms_session.cjs', 'test_site_studio_browser.mjs', 'test_topic_editor.mjs', 'test_article_publish_browser.mjs', 'test_admin_gate_browser.mjs', 'test_home_loading_browser.mjs', 'test_domain_account.mjs')
 
 
 def run(command):
@@ -43,7 +43,7 @@ def main():
     server = None
     try:
         if not args.reuse_server:
-            server = subprocess.Popen([sys.executable, '-m', 'http.server', '4173', '--bind', '127.0.0.1'], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            server = subprocess.Popen([sys.executable, 'scripts/preview_server.py'], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         ready = False
         for _ in range(50):
             if server and server.poll() is not None:

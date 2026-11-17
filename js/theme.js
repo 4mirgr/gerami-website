@@ -11,11 +11,14 @@
       if (img.getAttribute('src') !== source) img.setAttribute('src', source);
     });
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === 'dark' ? '#07121f' : '#f5f8fc';
+    if (meta) meta.content = theme === 'dark' ? '#0d1918' : '#f1f8f5';
     const button = document.querySelector('[data-theme-toggle]');
     if (button) {
       button.hidden = false;
-      button.textContent = theme === 'dark' ? '☀' : '☾';
+      const icon=document.createElement('span');
+      icon.className='ui-material-icon '+(theme==='dark'?'icon-sun':'icon-moon');
+      icon.setAttribute('aria-hidden','true');
+      button.replaceChildren(icon);
       const fa = root.lang !== 'en';
       button.setAttribute('aria-label', theme === 'dark' ? (fa ? 'فعال‌کردن حالت روز' : 'Switch to day mode') : (fa ? 'فعال‌کردن حالت شب' : 'Switch to night mode'));
       button.setAttribute('aria-pressed', String(theme === 'dark'));

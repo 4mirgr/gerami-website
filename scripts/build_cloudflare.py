@@ -191,7 +191,7 @@ def assemble(sources, output):
             html = page.read_text()
             # Relative destinations keep Pages previews and the .ir site on their own host.
             html = html.replace('href="https://drgerami-md.ir/intmed/"', 'href="/intmed/"').replace('href="https://drgerami-md.ir/aus/"', 'href="/aus/"')
-            html, count = re.subn(r'<p[^>]*id="project-entry-status"[^>]*>.*?</p>', f'<p class="link-status" id="project-entry-status" data-fa="{ready_fa}" data-en="{ready_en}">{ready_fa}</p>', html, flags=re.S)
+            html, count = re.subn(r'<p[^>]*id="project-entry-status"[^>]*>.*?</p>', lambda match: match[0] if 'data-content-key=' in match[0] else f'<p class="link-status" id="project-entry-status" data-fa="{ready_fa}" data-en="{ready_en}">{ready_fa}</p>', html, flags=re.S)
             if count != 1:
                 raise ValueError('Project entry markup changed; review the deployment adapter')
             if page.name == 'index.html':

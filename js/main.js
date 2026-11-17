@@ -23,7 +23,9 @@
     const description = document.querySelector('meta[name="description"]');
     if (description?.dataset[language]) description.content = description.dataset[language];
     if (toggle) {
-      toggle.textContent = language === 'fa' ? 'EN' : 'فا';
+      const icon=document.createElement('span');icon.className='ui-material-icon icon-language';icon.setAttribute('aria-hidden','true');
+      const badge=document.createElement('span');badge.className='language-badge';badge.textContent=language==='fa'?'EN':'فا';badge.setAttribute('aria-hidden','true');
+      toggle.replaceChildren(icon,badge);
       toggle.setAttribute('aria-label', language === 'fa' ? 'Switch to English' : 'تغییر زبان به فارسی');
     }
     try { localStorage.setItem('ahg-lang', language); } catch (_) { /* No persistence needed. */ }
