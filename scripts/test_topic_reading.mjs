@@ -10,7 +10,7 @@ try{
  await p.waitForSelector('.cms-article');assert.equal(await p.locator('.cms-article').count(),6);
  await p.locator('[data-topic-card=cardiology]').click();await p.waitForSelector('[data-topic-filter]');
  assert.equal(new URL(p.url()).searchParams.get('topic'),'cardiology');assert.equal(await p.locator('.cms-article').count(),12);assert.match(await p.locator('[data-article-count]').textContent(),/14/);
- await p.locator('[data-page-next]').click();assert.equal(await p.locator('.cms-article').count(),2);await p.reload();await p.waitForSelector('.cms-article');assert.equal(await p.locator('.cms-article').count(),2);
+ await p.locator('[data-page-next]').focus();await p.keyboard.press('Enter');assert.equal(await p.locator('[data-site-section=articles] h2').evaluate(e=>e===document.activeElement),true,'Paging must keep keyboard users with the updated results');assert.equal(await p.locator('.cms-article').count(),2);await p.reload();await p.waitForSelector('.cms-article');assert.equal(await p.locator('.cms-article').count(),2);
  await p.locator('[data-topic-filter]').selectOption('heart-failure');assert.equal(await p.locator('.cms-article').count(),12);
  await p.locator('[data-audience-filter]').selectOption('professional');assert.equal(await p.locator('.cms-article').count(),5);
  await p.locator('[data-language-toggle]').click();assert.equal(await p.locator('[data-topic-filter]').inputValue(),'heart-failure');assert.equal(await p.locator('.cms-article summary').first().textContent(),'Lesson 1');

@@ -266,3 +266,4 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:n
 .reading-hero .hero-art { -webkit-mask-image:linear-gradient(#000,transparent); mask-image:linear-gradient(#000,transparent); }
 [data-theme=dark] body::before { background-image:linear-gradient(#0b122180,#0b122180),var(--glass-art); }
 [data-theme=dark] :is(.topic-link p,.topic-count,.post-meta,.post-excerpt) { color:var(--ink); }
+.topic-track { scroll-padding-inline:5px; }

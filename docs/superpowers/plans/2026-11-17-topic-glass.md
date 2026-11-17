@@ -22,23 +22,23 @@ Keep FA/EN/RTL/day/night, local font/single logo, opaque fallback, real protecte
 
 Files: content/topics.json; js/topics.mjs; js/site-model.mjs; admin/studio.mjs; admin/index.html; preview dispatch; scripts/test_topics.mjs.
 Interface: topics tree nodes {id,fa,en,description_fa,description_en,icon,children}; max depth2/max100 total; flattenTopics returns ancestors/path labels; topic article reference optional. validateSite rejects missing references. Managed topics use existing atomic Git publication.
-- [ ] Write schema/reference tests; observe RED on missing managed document.
-- [ ] Implement catalog validation, tree helpers and 12 educational branches with subtopics.
-- [ ] Add Studio topic editing/order/children, guarded deletion and article selection. Include topic data in preview messages.
-- [ ] Run catalog tests and existing Studio unit tests, then commit.
+- [x] Write schema/reference tests; observe RED on missing managed document.
+- [x] Implement catalog validation, tree helpers and 12 educational branches with subtopics.
+- [x] Add Studio topic editing/order/children, guarded deletion and article selection. Include topic data in preview messages.
+- [x] Run catalog tests and existing Studio unit tests, then commit.
 
 ## Task 2 — topic-first public reading
 
 Files: index.html; pages/blog.html; content/pages/{home,blog}.json; content/appearance.json; js/content.js; new browser regression.
-- [ ] Write a browser test for topic links/parent-child filtering/query reload/pagination with synthetic posts; observe RED.
-- [ ] Render topic carousel/directory from catalog; compose search/topic/audience filters in shareable URLs, 12-per-page archive and 6 latest home posts.
-- [ ] Preserve published-only display, Markdown/source/image safety, legacy categories, audience links and CMS section/text controls.
-- [ ] Test 27 synthetic records, drafts excluded, no-result/unknown-topic states, browser history and Studio preview editing. Commit.
+- [x] Write a browser test for topic links/parent-child filtering/query reload/pagination with synthetic posts; observe RED.
+- [x] Render topic carousel/directory from catalog; compose search/topic/audience filters in shareable URLs, 12-per-page archive and 6 latest home posts.
+- [x] Preserve published-only display, Markdown/source/image safety, legacy categories, audience links and CMS section/text controls.
+- [x] Test 27 synthetic records, drafts excluded, no-result/unknown-topic states, browser history and Studio preview editing. Commit.
 
 ## Task 3 — deep glass and persistent floating navigation
 
 Files: css/glass.css; js/main.js; js/site-customizer.mjs; scripts/site_studio.py; browser regressions; report.
-- [ ] Observe RED for header position after real scroll, open menu bounds and anchor clearance.
-- [ ] Add global themed art, translucent blur surfaces, lit bevel edges and sticky inset header with compact mobile row and correctly anchored full-width menu. Measure actual header clearance.
-- [ ] Inspect fresh light/dark desktop/mobile screenshots against ZIP. Verify keyboard/swipe/RTL, reduced motion, no-filter/no-JS and no overlap.
+- [x] Observe RED for header position after real scroll, open menu bounds and anchor clearance.
+- [x] Add global themed art, translucent blur surfaces, lit bevel edges and sticky inset header with compact mobile row and correctly anchored full-width menu. Measure actual header clearance.
+- [x] Inspect fresh light/dark desktop/mobile screenshots against ZIP. Verify keyboard/swipe/RTL, reduced motion, no-filter/no-JS and no overlap.
 - [ ] Run full browser suite and fresh combined build. Fresh independent review; fix important findings with RED→GREEN, then exact-head CI and Git deploy. Verify canonical domain and update report.
