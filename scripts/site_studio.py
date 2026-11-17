@@ -79,11 +79,14 @@ def topic_markup(root, directory=False):
     escape = lambda value: html.escape(str(value), quote=True)
     label = lambda tag, fa, en: '<' + tag + ' data-fa="' + escape(fa) + '" data-en="' + escape(en) + '">' + escape(fa) + '</' + tag + '>'
     result = ''
+    art = dict(heart='heart', endocrine='pancreas', digestive='digestive', lungs='lungs', kidney='kidneys', joint='joint', blood='blood-cells', cell='blood-cells', microbe='infection', age='stethoscope', medicine='education')
     for topic in catalog['topics']:
         ident = topic['id']
         tag = 'article' if directory else 'li'
         result += '<' + tag + ' class="topic-tile glass-surface" data-topic-id="' + escape(ident) + '">'
         result += '<a class="topic-link"' + ('' if directory else ' data-topic-card="' + escape(ident) + '"') + ' href="/pages/blog.html?topic=' + escape(ident) + '">'
+        if topic['icon'] in art:
+            result += '<span class="topic-icon"><img class="topic-art" src="/assets/topics/' + art[topic['icon']] + '.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async"></span>'
         result += label('h3', topic['fa'], topic['en'])
         if not directory:
             result += label('p', topic['description_fa'], topic['description_en'])

@@ -76,8 +76,8 @@
     },
     {
       "id": "gastroenterology",
-      "fa": "گوارش و کبد",
-      "en": "Gastroenterology",
+      "fa": "گوارش٫ کبد ٫ کیسه صفرا و مجاری صفراوی و پانکراس",
+      "en": "Digestive system, liver, gallbladder, bile ducts & pancreas",
       "icon": "digestive",
       "description_fa": "سلامت گوارش، کبد، بیماری‌های التهابی روده",
       "description_en": "Digestive health, Liver, Inflammatory bowel disease",
@@ -150,8 +150,8 @@
     },
     {
       "id": "nephrology",
-      "fa": "کلیه و فشار خون",
-      "en": "Nephrology",
+      "fa": "نفرولوژی - کلیه و فشار خون",
+      "en": "Nephrology · Kidneys & blood pressure",
       "icon": "kidney",
       "description_fa": "سلامت کلیه، فشار خون، آب و الکترولیت",
       "description_en": "Kidney health, Blood pressure, Fluids and electrolytes",
@@ -187,8 +187,8 @@
     },
     {
       "id": "rheumatology",
-      "fa": "روماتولوژی و مفاصل",
-      "en": "Rheumatology",
+      "fa": "روماتولوژی و بیماری های خودایمن",
+      "en": "Rheumatology & autoimmune diseases",
       "icon": "joint",
       "description_fa": "التهاب مفاصل، بیماری‌های خودایمنی",
       "description_en": "Arthritis, Autoimmune conditions",
@@ -215,8 +215,8 @@
     },
     {
       "id": "hematology",
-      "fa": "خون و کم‌خونی",
-      "en": "Hematology",
+      "fa": "هماتولوژی - خون",
+      "en": "Hematology · Blood",
       "icon": "blood",
       "description_fa": "کم‌خونی، انعقاد خون",
       "description_en": "Anemia, Clotting",
@@ -243,8 +243,8 @@
     },
     {
       "id": "oncology",
-      "fa": "سرطان‌شناسی",
-      "en": "Oncology",
+      "fa": "انکولوژی - سرطان",
+      "en": "Oncology · Cancer",
       "icon": "cell",
       "description_fa": "آگاهی دربارهٔ سرطان، مراقبت در سرطان",
       "description_en": "Cancer awareness, Cancer care",
@@ -271,8 +271,8 @@
     },
     {
       "id": "infectious-diseases",
-      "fa": "بیماری‌های عفونی",
-      "en": "Infectious diseases",
+      "fa": "بیماری های عفونی و نقص ایمنی",
+      "en": "Infectious diseases & immunodeficiency",
       "icon": "microbe",
       "description_fa": "عفونت‌ها، واکسیناسیون",
       "description_en": "Infections, Vaccination",
@@ -291,34 +291,6 @@
           "fa": "واکسیناسیون",
           "en": "Vaccination",
           "icon": "microbe",
-          "description_fa": "",
-          "description_en": "",
-          "children": []
-        }
-      ]
-    },
-    {
-      "id": "allergy-immunology",
-      "fa": "آلرژی و ایمنی",
-      "en": "Allergy & immunology",
-      "icon": "shield",
-      "description_fa": "آلرژی‌ها، دستگاه ایمنی",
-      "description_en": "Allergies, Immune system",
-      "children": [
-        {
-          "id": "allergies",
-          "fa": "آلرژی‌ها",
-          "en": "Allergies",
-          "icon": "shield",
-          "description_fa": "",
-          "description_en": "",
-          "children": []
-        },
-        {
-          "id": "immune-health",
-          "fa": "دستگاه ایمنی",
-          "en": "Immune system",
-          "icon": "shield",
           "description_fa": "",
           "description_en": "",
           "children": []
@@ -355,8 +327,8 @@
     },
     {
       "id": "internal-medicine",
-      "fa": "داخلی عمومی",
-      "en": "Internal medicine",
+      "fa": "فرهنگ و اصول مراجعه به مراکز درمانی و پیگیری درمان",
+      "en": "Navigating healthcare & following up on treatment",
       "icon": "medicine",
       "description_fa": "پیشگیری و سلامت، آموزش بالینی",
       "description_en": "Prevention, Clinical education",

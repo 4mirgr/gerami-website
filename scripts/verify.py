@@ -2,6 +2,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+import gzip
 
 ROOT = Path(__file__).resolve().parent.parent
 errors = []
@@ -75,10 +76,14 @@ for file, page in pages.items():
         elif url.fragment and target in pages and unquote(url.fragment) not in pages[target].ids:
             errors.append(f'{file.relative_to(ROOT)}: missing anchor {reference}')
 
-entry = sum((ROOT / path).stat().st_size for path in ('index.html', 'css/style.css', 'css/glass.css', 'js/main.js', 'js/links.js', 'js/theme.js', 'js/content.js', 'js/site-model.mjs', 'js/topics.mjs', 'js/site-customizer.mjs', 'js/rich-text.mjs', 'css/customizer.css', 'assets/favicon.ico'))
-if entry > 116 * 1024:
+resources=('index.html', 'css/style.css', 'css/glass.css', 'js/main.js', 'js/links.js', 'js/theme.js', 'js/content.js', 'js/account.js', 'js/site-model.mjs', 'js/topics.mjs', 'js/site-customizer.mjs', 'js/rich-text.mjs', 'css/customizer.css', 'assets/favicon.ico')
+entry = sum((ROOT / path).stat().st_size for path in resources)
+compressed = sum(len(gzip.compress((ROOT / path).read_bytes())) for path in resources)
+# The expanded bilingual introduction and project overview increase document
+# bytes; enforce a transfer budget as well as the bounded source budget.
+if entry > 144 * 1024 or compressed > 52 * 1024:
     errors.append(f'initial resource budget exceeded: {entry} bytes')
 if errors:
     raise SystemExit('\n'.join(errors))
 print(f'PASS: {len(pages)} pages; local links and anchors; one h1/main; translation pairs; no external assets.')
-print(f'Initial HTML/CSS/JS/icon (images excluded): {entry:,} bytes uncompressed (budget: 118,784).')
+print(f'Initial HTML/CSS/JS/icon (images excluded): {entry:,} source bytes, {compressed:,} gzip bytes (budgets: 144 KiB / 52 KiB).')

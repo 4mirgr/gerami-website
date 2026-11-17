@@ -55,6 +55,16 @@ function renderTopics(){
   function state(){const offset=Math.abs(rail.scrollLeft),max=rail.scrollWidth-rail.clientWidth;prev.disabled=offset<2;next.disabled=offset>=max-2;}
   for(const [button,direction] of [[prev,-1],[next,1]])if(button){button.hidden=false;button.textContent=direction<0?(root.dir==='rtl'?'→':'←'):(root.dir==='rtl'?'←':'→');button.onclick=()=>rail.scrollBy({left:(root.dir==='rtl'?-1:1)*direction*rail.clientWidth*.8,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});button.setAttribute('aria-label',direction<0?text('موضوعات قبلی','Previous topics'):text('موضوعات بعدی','Next topics'));}
   rail.onscroll=state;requestAnimationFrame(state);
+  if(!rail.dataset.dragBound){
+   rail.dataset.dragBound='true';let startX=0,startScroll=0,active=false,dragged=false;
+   rail.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'||event.button!==0)return;active=true;dragged=false;startX=event.clientX;startScroll=rail.scrollLeft;});
+   rail.addEventListener('pointermove',event=>{if(!active)return;const distance=event.clientX-startX;if(!dragged&&Math.abs(distance)<8)return;if(!dragged){dragged=true;rail.setPointerCapture(event.pointerId);rail.classList.add('is-dragging');}rail.scrollLeft=startScroll-distance;event.preventDefault();});
+   const end=()=>{active=false;rail.classList.remove('is-dragging');};
+   rail.addEventListener('pointerup',end);rail.addEventListener('pointercancel',end);rail.addEventListener('lostpointercapture',end);
+   rail.addEventListener('pointerleave',()=>{if(!dragged)end();});
+   rail.addEventListener('dragstart',event=>event.preventDefault());
+   rail.addEventListener('click',event=>{if(dragged&&event.detail!==0){event.preventDefault();event.stopImmediatePropagation();dragged=false;}},true);
+  }
  }
  const input=document.querySelector('#home-search');if(input)input.placeholder=text('دربارهٔ چه موضوعی می‌خواهید بخوانید؟','What would you like to read about?');
 }

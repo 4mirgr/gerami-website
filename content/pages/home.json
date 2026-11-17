@@ -17,8 +17,8 @@
       "en": "Dr. Amir Houshang Gerami"
     },
     "text-005": {
-      "fa": "پزشکی · آموزش · ارتباط",
-      "en": "Medicine · Education · Connection"
+      "fa": "درمان - پرونده سازی - آموزش و فرهنگ در علم پزشکی",
+      "en": "Care · Health records · Medical education & culture"
     },
     "text-012": {
       "fa": "فهرست",
@@ -29,8 +29,8 @@
       "en": "Dr. Amir Houshang Gerami"
     },
     "text-078": {
-      "fa": "فضایی برای معرفی مسیر حرفه‌ای، به‌اشتراک‌گذاری آموزش و دسترسی به پروژه‌های من.",
-      "en": "A place to explore my professional journey, educational writing, and projects."
+      "fa": "آموزش و مقالات پزشکی - پروژه ها و اپلیکشن های آموزشی و حوزه سلامت - محصولات پزشکی و سلامت",
+      "en": "Medical education & articles · Educational and health apps & projects · Medical and wellness products"
     },
     "text-079": {
       "fa": "دسترسی سریع",
@@ -41,7 +41,7 @@
       "en": "Stay connected"
     },
     "text-086": {
-      "fa": "مطالب آموزشی جایگزین ارزیابی و مشاورهٔ پزشکی فردی نیستند.",
+      "fa": "مطالب آموزشی جایگزین ارزیابی و مشاوره پزشکی فردی نیستند.",
       "en": "Educational content does not replace individual medical assessment or advice."
     },
     "text-087": {
@@ -49,68 +49,72 @@
       "en": "© Dr. Amir Houshang Gerami. All rights reserved."
     },
     "text-100": {
-      "fa": "کتابخانهٔ آموزش پزشکی",
-      "en": "MEDICAL READING LIBRARY"
+      "fa": "آموزش و درمان",
+      "en": "Education & care"
     },
     "text-101": {
-      "fa": "دکتر امیرهوشنگ گرامی · متخصص داخلی",
-      "en": "Dr. Amir Houshang Gerami · Internal medicine"
+      "fa": "دکتر امیرهوشنگ گرامی ٫ متخصص بیماری های داخلی",
+      "en": "Dr. Amir Houshang Gerami · Internal medicine specialist"
     },
     "text-102": {
-      "fa": "سلامت را بهتر بشناسیم.",
-      "en": "Understand health, one topic at a time."
+      "fa": "در مسیر ارتقا فرهنگ سلامت و آموزش پزشکی",
+      "en": "Advancing health literacy and medical education"
     },
     "text-103": {
-      "fa": "مطالب آموزشی برای بیماران، خانواده‌ها و همکاران؛ از موضوعی که برایتان مهم است شروع کنید.",
-      "en": "Educational writing for patients, families and clinicians. Start with what matters to you."
+      "fa": "در این وبسایت قصد داریم محتوای پزشکی برای عموم و کادر درمان و علم آموزان رشته های پزشکی و درمانی را به زبانی ساده بازگو کنیم. case های پزشکی را به اشتراک بگذاریم و با قابلیت های نوین تکنولوژی با تکیه بر علم در ارتقا فرهنگ سلامت و آموزش پزشکی قدم برداریم. از پروژه ها و اپلیکیشن های کاربردی پزشکی دیدن کنید و پنل سلامت و پرونده شخصی خود را بسازید و ارتقا دهید.",
+      "en": "We explain medical knowledge in plain language for the public, healthcare professionals and students. We share medical cases and explore new technology grounded in science to advance health literacy and medical education. Explore practical medical projects and apps, and build and develop your personal health panel and record."
     },
     "text-104": {
       "fa": "از کجا شروع کنیم؟",
       "en": "FIND YOUR SUBJECT"
     },
     "text-105": {
-      "fa": "موضوعی برای خواندن انتخاب کنید",
-      "en": "Choose a topic to explore"
+      "fa": "موضوعات و سرفصل های اصلی",
+      "en": "Main topics & subjects"
     },
     "text-106": {
-      "fa": "تازه در کتابخانه",
-      "en": "LATEST IN THE LIBRARY"
+      "fa": "تازه ها در مجموعه پست ها و مطالب",
+      "en": "New in posts & articles"
     },
     "text-107": {
-      "fa": "تازه‌ترین مطالب",
-      "en": "Latest posts"
+      "fa": "تازه ترین مطالب و پست ها",
+      "en": "Latest articles & posts"
     },
     "text-108": {
       "fa": "شاخه‌ها و زیرشاخه‌ها",
       "en": "TOPICS & SUBTOPICS"
     },
     "text-109": {
-      "fa": "نقشهٔ موضوعیِ پزشکی داخلی",
-      "en": "Your internal medicine reading map"
+      "fa": "موضوعات و سرفصل ها",
+      "en": "Topics & subjects"
     },
     "text-110": {
       "fa": "از یک شاخهٔ کلی به موضوع دقیق‌تر برسید. این دسته‌بندی مربوط به مطالب آموزشی است.",
       "en": "Go from a broad subject to a specific question. These categories organize educational writing."
     },
     "text-111": {
-      "fa": "پزشکی با نگاهی انسانی",
-      "en": "MEDICINE WITH A HUMAN PERSPECTIVE"
+      "fa": "نگاه کلی و آشنایی بیشتر",
+      "en": "Overview & introduction"
     },
     "text-112": {
-      "fa": "پشت این نوشته‌ها، یک مسیر حرفه‌ای است.",
-      "en": "The person behind the writing."
+      "fa": "مسیر حرفه ای و معرفی - تشکیل پرونده و ویزیت",
+      "en": "Professional background · Health records & visits"
     },
     "text-113": {
-      "fa": "با مسیر حرفه‌ای و حوزهٔ فعالیت من آشنا شوید و اطلاعات مراجعه را ببینید.",
-      "en": "Explore my professional background, focus areas and visit information."
+      "fa": "با مسیر حرفه‌ای و حوزه فعالیت من آشنا شوید. پرونده شخصی خود را بسازید و مسیر سلامت خود را رصد کنید.",
+      "en": "Explore my professional background and focus areas. Build your personal record and follow your health journey."
     },
     "text-114": {
       "fa": "یادگیری ساختارمند با IntMed",
       "en": "Structured learning with IntMed"
     },
     "text-115": {
-      "fa": "ورودی مستقل پروژهٔ آموزش پزشکی برای دانشجویان و همکاران.",
-      "en": "A separate medical education project for students and clinicians."
+      "fa": "پروژه ای سازمان یافته با هدف اصلی آمادگی برای آزمون های پزشکی بودر-ارتقا-دستیاری-آزمون های درون بخشی و پره اینترنی و مطالب بالینی رشته داخلی و قلب و عروق",
+      "en": "A structured project for medical board, promotion, residency, departmental and pre-internship exams, alongside clinical learning in internal medicine and cardiology."
+    },
+    "text-116": {
+      "fa": "امکانات این بخش شامل پنل اختصاصی و سازمان یافته ی خصوصی شما برای برنامه ریزی و مطالعه دروس داخلی و قلب با منبع هاریسون ۲۰۲۵ شامل درسنامه های خلاصه - فلش کارت - آزمون های چهار گزینه ای ارتقا٫بورد های تخصصی و فوق تخصصی و آزمون های تالیفی - آزمون های شبیه ساز KF PMP - قابلیت هایلایت کردن و یادداشت برداری - تحلیل آزمون ها با پاسخ تشریحی و آزمون گیری مجدد و بررسی درصد ها و نمرات - تصاویر و الگوریتم های هاریسون با طبقه بندی دروس - بانک تصاویر لام خون محیطی و بسیاری امکانات آموزشی متنوع.",
+      "en": "Features include a private, organized study panel for internal medicine and cardiology based on Harrison 2025: concise lessons, flashcards, specialty and subspecialty board and promotion questions, original questions, KF and PMP simulations, highlighting and notes, explained answers, retesting and score analysis, categorized Harrison images and algorithms, a peripheral blood smear image bank, and more."
     }
   },
   "links": {}

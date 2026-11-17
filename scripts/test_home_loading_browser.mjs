@@ -17,7 +17,7 @@ try{
  assert.equal(await page.locator('[data-topic-card]').count(),topicCount);
  await page.locator('[data-language-toggle]').click();
  await page.waitForFunction(()=>document.documentElement.lang==='en');
- assert.match(await page.locator('#hero-title').textContent(),/Understand health/);
+ assert.match(await page.locator('#hero-title').textContent(),/Advancing health literacy/);
  await page.locator('[data-theme-toggle]').click();
  assert.equal(await page.locator('.brand-identity img').count(),1);
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('site-studio-content',{detail:{profile:{},topics:{topics:[]},articles:{articles:[]},assets:{},preview:true}})));
