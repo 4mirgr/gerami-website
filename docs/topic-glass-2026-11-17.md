@@ -44,3 +44,13 @@
 
 
 اصلاح آزمون canonical: route interception مرورگر، درخواست پس از redirect را دوباره intercept نمی‌کند؛ fixture نخست به 404 سرور ساده می‌رسید. آن fixture با HTTPServer واقعی روی پورت آزاد و redirect 308 واقعی جایگزین شد. روی همین fixture، ماژول واقعیِ قبل از اصلاح (`56e4c7c`) فیلتر ۰ و RED داشت و ماژول اصلاح‌شده، آرشیو/پروفایل/منوی فعال را پاس کرد (`/tmp/canonical-http-red.log` و `/tmp/canonical-http-green.log`). فقط fixture و این گزارش بعد از ساخت موفق `02743bd` تغییر کرده‌اند؛ کد محصول همان نسخهٔ ساخته‌شده است.
+
+
+## انتشار تأییدشده — ۱۷ نوامبر ۲۰۲۶
+
+- head نهایی [PR20](https://github.com/4mirgr/gerami-website/pull/20)، `328921e93350c799bf5b3e9e6fe86a8ceadbaaa8` است. اجرای کامل محلی `CHROMIUM_PATH=/usr/bin/chromium python3 scripts/check_site.py --browser` با fixture واقعی HTTP پس از همهٔ اصلاح‌ها exit 0 داشت (`/tmp/topic-canonical-http-final-check.log`). ساخت تازهٔ `/tmp/gerami-topic-glass-canonical-20261117` برای محصول `02743bd` با ۴۲۲ فایل موفق شد؛ تفاوت بعدیِ head نهایی فقط آزمون HTTP و این گزارش است. CI نهایی نیز ساخت تازهٔ خودش را انجام داد.
+- دو CI آخرین head، [Website verification / Node22](https://github.com/4mirgr/gerami-website/actions/runs/44063990689) و [Personal site maintenance](https://github.com/4mirgr/gerami-website/actions/runs/44063990606)، موفق شدند. base پیش از merge همان `c41e158` بود؛ PR با expected_head_sha دقیق ادغام شد و main به `86a59e3c6a850829447e3e390e4d099310914c44` رسید. force/bypass انجام نشد.
+- پیش‌نمایش نهایی Git `44ea7076-cf28-4449-9125-02cd528dc98f` deploy موفق داشت. مرورگر واقعی ۱۲ کارت، ۲۹ زیرموضوع، fill روشن ۰٫۳۴، blur(28px)/saturate(1.45)، هدر sticky در ۸px پس از اسکرول، منوی داخل قاب در هر دو زبان و تغییر واقعی شب را تأیید کرد. آرشیو canonical بدون `.html` نیز انتخاب cardiology را حفظ کرد.
+- تولید Git Cloudflare `e3f15a22-0bc2-4709-b963-6139ef8156c9` با merge `86a59e3…` در ۱۳:۵۴ تهران deploy موفق شد. بررسی ناشناسِ خود دامنه HTTP 200، اثر انگشت `glass.css?v=972ffc9afa95bad4`، همان fill/blur، هدر ۸px، یک لوگو، ۱۲/۲۹ موضوع و بدون سرریز و لینک عمومی AUS را دید. منوی باز درست بود و `/pages/blog.html?topic=cardiology` پس از redirect به `/pages/blog?topic=cardiology` فیلتر واقعی و صفر مقالهٔ واقعیِ فعلی را نشان داد؛ مطلب ساختگی منتشر نشد.
+- `/admin/`، `/admin/config.yml` و ماژول تازهٔ `/admin/topic-editor.mjs` بدون نشست 401 دادند و `/intmed/` پاسخ 200 داشت. آزمون ویرایش موضوع، پیش‌نویس، حفاظت ارجاع و انتخاب مقاله با دادهٔ ساختگی/مرورگر محلی اجرا شد؛ ورود خصوصی مالک یا کار با دادهٔ بیمار انجام نشد.
+- هیچ هزینه/هاست، ثبت‌نام بیمار، ایمیل، حساب، secret یا backend عوض نشد. یادآوری تأمین میزبان و گیت‌های Clinic پیش از تعامل واقعی با بیمار همچنان لازم است. گزارش پس از انتشار، تغییر مستندات همان محصول است؛ رندرها و مسیر احراز هویت را عوض نمی‌کند.

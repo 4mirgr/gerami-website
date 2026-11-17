@@ -41,4 +41,4 @@ Files: css/glass.css; js/main.js; js/site-customizer.mjs; scripts/site_studio.py
 - [x] Observe RED for header position after real scroll, open menu bounds and anchor clearance.
 - [x] Add global themed art, translucent blur surfaces, lit bevel edges and sticky inset header with compact mobile row and correctly anchored full-width menu. Measure actual header clearance.
 - [x] Inspect fresh light/dark desktop/mobile screenshots against ZIP. Verify keyboard/swipe/RTL, reduced motion, no-filter/no-JS and no overlap.
-- [ ] Run full browser suite and fresh combined build. Fresh independent review; fix important findings with RED→GREEN, then exact-head CI and Git deploy. Verify canonical domain and update report.
+- [x] Run full browser suite and fresh combined build. Fresh independent review; fix important findings with RED→GREEN, then exact-head CI and Git deploy. Verify canonical domain and update report.
