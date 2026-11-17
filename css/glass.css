@@ -267,3 +267,16 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:n
 [data-theme=dark] body::before { background-image:linear-gradient(#0b122180,#0b122180),var(--glass-art); }
 [data-theme=dark] :is(.topic-link p,.topic-count,.post-meta,.post-excerpt) { color:var(--ink); }
 .topic-track { scroll-padding-inline:5px; }
+/* Give the mobile identity its own row; never abbreviate the owner's name. */
+@media(max-width:760px) {
+ :root { --header-clearance:160px; }
+ .site-header .header-inner { flex-wrap:wrap; gap:6px; }
+ .site-header .brand { flex:0 0 100%; width:100%; min-height:44px; margin-inline:0; justify-content:flex-start; }
+ .site-header .brand>span:last-child { flex:1; min-width:0; }
+ .site-header .brand-name { max-width:none; overflow:visible; text-overflow:clip; white-space:normal; overflow-wrap:anywhere; font-size:.85rem; line-height:1.6; }
+ .site-header .mobile-menu { margin-inline-end:auto; }
+ .site-header .mobile-menu>nav {
+  max-height:min(65vh,calc(100vh - var(--header-clearance)));
+  max-height:min(65dvh,calc(100dvh - var(--header-clearance)));
+ }
+}
