@@ -5,6 +5,16 @@ export const pages={home:'صفحهٔ اصلی',about:'دربارهٔ من',servi
 export const fonts={Vazirmatn:'وزیرمتن',Tahoma:'Tahoma',Arial:'Arial',system:'فونت سیستم'};
 export const sections={hero:'معرفی و کارت‌های اصلی',explore:'کاروسل موضوعات',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'نقشهٔ شاخه‌ها و زیرشاخه‌ها',articles:'تازه‌ترین مطالب'};
 export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json','content/topics.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
+let publicSnapshot;
+export async function readPublicDocument(path){
+ if(!managedPaths.includes(path))throw Error('Unknown public document');
+ if(publicSnapshot===undefined){
+  try{const data=JSON.parse(globalThis.document?.getElementById('site-public-data')?.textContent||'null');publicSnapshot=data?.version===1&&data.documents&&typeof data.documents==='object'?data.documents:null;}catch{publicSnapshot=null;}
+ }
+ if(publicSnapshot&&Object.hasOwn(publicSnapshot,path))return publicSnapshot[path];
+ const response=await fetch(new URL('../'+path,import.meta.url),{cache:'no-store',signal:AbortSignal.timeout(10000)});
+ if(!response.ok)throw Error('Unavailable');return response.json();
+}
 export const clone=value=>JSON.parse(JSON.stringify(value));
 export function prepareArticlesForPublication(data,clock=new Date()){
  const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Tehran',calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(clock).map(part=>[part.type,part.value]));

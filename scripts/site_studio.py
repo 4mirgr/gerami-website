@@ -103,6 +103,37 @@ def topic_markup(root, directory=False):
     return result
 
 
+def home_bootstrap(root, text):
+    # These documents are already public. Freeze only a bounded home-page subset
+    # in the same deployment as its HTML; large feeds keep the network fallback.
+    snapshot = {'version': 1, 'documents': {}}
+    paths = ('content/appearance.json', 'content/navigation.json', 'content/pages/home.json',
+             'content/site.json', 'content/topics.json', 'content/articles.json')
+    def serialize(value):
+        value = json.dumps(value, ensure_ascii=False, separators=(',', ':'))
+        for char in ('<', '>', '&', '\u2028', '\u2029'):
+            value = value.replace(char, '\\u' + format(ord(char), '04x'))
+        return value
+    for path in paths:
+        value = json.loads((root / path).read_text())
+        snapshot['documents'][path] = value
+        if len(serialize(snapshot).encode('utf-8')) > 65536:
+            del snapshot['documents'][path]
+    text = re.sub(r'<script id="site-public-data" type="application/json">.*?</script>', '', text, flags=re.S)
+    data = '<script id="site-public-data" type="application/json">' + serialize(snapshot) + '</script>'
+    text = text.replace('</head>', data + '</head>', 1)
+    # Exact repository-owned theme code stays before paint without a blocking
+    # HTTP round trip. UI handlers and storage/media preferences stay identical.
+    theme = root / 'js/theme.js'
+    if theme.is_file():
+        code = theme.read_text()
+        if re.search(r'</script', code, re.I):
+            raise ValueError('Theme script requires a reviewed safe inline adapter')
+        text = re.sub(r'<script src="(?:/)?js/theme\.js(?:\?[^"<>]*)?"></script>',
+                      lambda _: '<script id="site-theme-bootstrap">' + code + '</script>', text, count=1)
+    return text
+
+
 def bake_settings(root, text, ident):
     if ident == 'home':
         for marker, directory in [('topic-rail', False), ('topic-directory', True)]:
@@ -173,7 +204,8 @@ def bake_settings(root, text, ident):
         css += '--glass-art:url("' + value['wallpaper'] + '");'
         css += '--site-background:' + ('url("' + value['background'] + '")' if value['background'] else 'none') + ';}'
     text = re.sub(r'<style id="site-settings">.*?</style>', '', text, flags=re.S)
-    return text.replace('</head>', '<style id="site-settings">' + css + '</style></head>')
+    text = text.replace('</head>', '<style id="site-settings">' + css + '</style></head>')
+    return home_bootstrap(root, text) if ident == 'home' else text
 
 
 def apply_static_settings(root, output):

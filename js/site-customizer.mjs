@@ -1,4 +1,4 @@
-import {validateDocument,pages,safeLink,asset,publicPath} from './site-model.mjs';
+import {validateDocument,pages,safeLink,asset,publicPath,readPublicDocument} from './site-model.mjs';
 import {richText} from './rich-text.mjs';
 const root=document.documentElement;
 const page=document.body.dataset.page;
@@ -6,7 +6,7 @@ let documents={},previewAssets={};
 const preview=new URLSearchParams(location.search).has('studio-preview')&&parent!==window;
 const lang=()=>root.lang==='en'?'en':'fa';
 const source=url=>previewAssets[url]||url;
-const read=async path=>{const response=await fetch('/'+path,{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Unavailable');return validateDocument(path,await response.json());};
+const read=async path=>validateDocument(path,await readPublicDocument(path));
 function navigation(){
  const value=documents['content/navigation.json'];if(!value)return;
  function items(list){const fragment=document.createDocumentFragment();for(const item of list){if(!safeLink(item.url))continue;const link=document.createElement('a');link.href=item.url;const span=document.createElement('span');span.dataset.fa=item.fa;span.dataset.en=item.en;span.textContent=item[lang()];link.append(span);const target=new URL(item.url,location.href);if(publicPath(target.pathname)===publicPath(location.pathname)&&(!target.hash||target.hash===location.hash))link.setAttribute('aria-current',target.hash?'location':'page');
@@ -46,7 +46,7 @@ function extraPage(){
  const host=document.querySelector('[data-extra-body]');richText(host,value['body_'+lang()],source);if(value.image&&asset(value.image)){const img=document.createElement('img');img.src=source(value.image);img.alt=title;host.prepend(img);}
 }
 function apply(){textBlocks();navigation();appearance();extraPage();}
-const paths=['content/appearance.json','content/navigation.json','content/extra-pages.json'];if(Object.hasOwn(pages,page))paths.push(`content/pages/${page}.json`);
+const paths=['content/appearance.json','content/navigation.json'];if(document.body.dataset.extraPage)paths.push('content/extra-pages.json');if(Object.hasOwn(pages,page))paths.push(`content/pages/${page}.json`);
 await Promise.allSettled(paths.map(async path=>{try{documents[path]=await read(path);}catch{/* The original template remains available. */}}));apply();
 new MutationObserver(()=>{apply();}).observe(root,{attributes:true,attributeFilter:['lang','data-theme']});
 window.addEventListener('site-articles-ready',appearance);

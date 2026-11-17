@@ -1,12 +1,12 @@
 /* Public reading UI: published records only, safe DOM/Markdown, shareable topic filters. */
 import {richText} from './rich-text.mjs';
-import {articleImage,publicPath} from './site-model.mjs';
+import {articleImage,publicPath,readPublicDocument} from './site-model.mjs';
 import {validateTopics,flattenTopics,topicIds,topicIcon} from './topics.mjs';
-const base=new URL('../',import.meta.url),root=document.documentElement,main=document.querySelector('main');
+const root=document.documentElement,main=document.querySelector('main');
 const lang=()=>root.lang==='en'?'en':'fa',text=(fa,en)=>lang()==='fa'?fa:en;
 const el=(tag,value='',className='')=>{const n=document.createElement(tag);n.textContent=value;if(className)n.className=className;return n;};
 function https(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password?u.href:null;}catch{return null;}}
-async function json(file){const r=await fetch(new URL('content/'+file,base),{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('Unavailable');return r.json();}
+const json=file=>readPublicDocument('content/'+file);
 let profile=null,articles=[],catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
 const path=publicPath(location.pathname),isHome=path==='/',isBlog=path.endsWith('/blog');
 const imageSource=src=>previewAssets[src]||src;
