@@ -1,0 +1,61 @@
+{
+  "images": {
+    "/assets/ui/material-controls.png": "/assets/optimized/material-controls.95b2f25b406261cb.webp",
+    "/assets/topics/blood-cells.webp": "/assets/optimized/blood-cells.7c07605f74f2a328.webp",
+    "/assets/topics/digestive.webp": "/assets/optimized/digestive.f37a67b25873bd5d.webp",
+    "/assets/topics/education.webp": "/assets/optimized/education.7cbb04e2e0cb3679.webp",
+    "/assets/topics/heart.webp": "/assets/optimized/heart.012d14fb0e841a4f.webp",
+    "/assets/topics/infection.webp": "/assets/optimized/infection.9b15781399cae676.webp",
+    "/assets/topics/joint.webp": "/assets/optimized/joint.d29f6c42f3e67991.webp",
+    "/assets/topics/kidneys.webp": "/assets/optimized/kidneys.c73f1e5c64b0acda.webp",
+    "/assets/topics/lungs.webp": "/assets/optimized/lungs.a6846b207b26e967.webp",
+    "/assets/topics/pancreas.webp": "/assets/optimized/pancreas.4704a794860d4c81.webp",
+    "/assets/topics/stethoscope.webp": "/assets/optimized/stethoscope.4f6ea226462d6523.webp"
+  },
+  "bytes": {
+    "material-controls": {
+      "original": 809591,
+      "optimized": 8470
+    },
+    "blood-cells": {
+      "original": 72880,
+      "optimized": 9158
+    },
+    "digestive": {
+      "original": 64044,
+      "optimized": 8336
+    },
+    "education": {
+      "original": 61188,
+      "optimized": 8048
+    },
+    "heart": {
+      "original": 60576,
+      "optimized": 7680
+    },
+    "infection": {
+      "original": 70228,
+      "optimized": 8950
+    },
+    "joint": {
+      "original": 65590,
+      "optimized": 7758
+    },
+    "kidneys": {
+      "original": 63110,
+      "optimized": 8262
+    },
+    "lungs": {
+      "original": 63398,
+      "optimized": 8434
+    },
+    "pancreas": {
+      "original": 69740,
+      "optimized": 8246
+    },
+    "stethoscope": {
+      "original": 59842,
+      "optimized": 7110
+    }
+  }
+}

@@ -25,6 +25,8 @@ jobs:
         run: python scripts/check_site.py --browser
       - name: Build and verify the pinned independent applications
         run: python scripts/build_cloudflare.py
+      - name: Verify deploy asset graph, transfer budget and repeat-navigation cache
+        run: node scripts/test_public_assets_browser.mjs _site
       - name: Keep visual evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
