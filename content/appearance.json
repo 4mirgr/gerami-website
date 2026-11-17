@@ -43,11 +43,7 @@
       "visible": true
     },
     {
-      "id": "projects",
-      "visible": true
-    },
-    {
-      "id": "about",
+      "id": "articles",
       "visible": true
     },
     {
@@ -55,7 +51,11 @@
       "visible": true
     },
     {
-      "id": "articles",
+      "id": "about",
+      "visible": true
+    },
+    {
+      "id": "projects",
       "visible": true
     }
   ]

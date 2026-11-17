@@ -40,50 +40,6 @@
       "fa": "پزشکی، با توجه به نیاز و دانش مخاطب",
       "en": "Medical writing shaped around the reader"
     },
-    "text-023": {
-      "fa": "برای عموم",
-      "en": "For the public"
-    },
-    "text-024": {
-      "fa": "سلامت به زبان ساده",
-      "en": "Health in plain language"
-    },
-    "text-025": {
-      "fa": "مطالب این بخش برای بیماران، خانواده‌ها و علاقه‌مندان به سلامت آماده می‌شوند؛ با توضیح اصطلاحات، منابع و تاریخ بازبینی.",
-      "en": "This section is for patients, families, and people interested in health, with terminology explained, references provided, and review dates shown."
-    },
-    "text-026": {
-      "fa": "هنوز مقاله‌ای در این بخش منتشر نشده است.",
-      "en": "No articles have been published in this section yet."
-    },
-    "text-027": {
-      "fa": "برای دانشجویان و پزشکان",
-      "en": "For students & clinicians"
-    },
-    "text-028": {
-      "fa": "آموزش پزشکی",
-      "en": "Professional learning"
-    },
-    "text-029": {
-      "fa": "مطالب تخصصی منتخب از intmed پس از آماده‌سازی، تعیین سطح مخاطب و بازبینی منابع در این بخش منتشر می‌شوند.",
-      "en": "Selected professional content from intmed will be published after preparation, audience definition, and source review."
-    },
-    "text-030": {
-      "fa": "هنوز مقاله‌ای در این بخش منتشر نشده است.",
-      "en": "No articles have been published in this section yet."
-    },
-    "text-031": {
-      "fa": "دربارهٔ محتوای آموزشی",
-      "en": "About educational content"
-    },
-    "text-032": {
-      "fa": "مطالب سایت برای آموزش هستند و جایگزین تشخیص، نسخه یا مشاورهٔ پزشکی فردی نیستند. تصمیم درمانی باید با توجه به شرایط هر فرد و ارزیابی پزشک گرفته شود.",
-      "en": "The content is educational and does not replace individual diagnosis, prescriptions, or medical advice. Treatment decisions require an individual assessment."
-    },
-    "text-033": {
-      "fa": "آشنایی با intmed",
-      "en": "About intmed"
-    },
     "text-034": {
       "fa": "دکتر امیرهوشنگ گرامی",
       "en": "Dr. Amir Houshang Gerami"

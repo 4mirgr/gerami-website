@@ -9,7 +9,7 @@ const source=url=>previewAssets[url]||url;
 const read=async path=>{const response=await fetch('/'+path,{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Unavailable');return validateDocument(path,await response.json());};
 function navigation(){
  const value=documents['content/navigation.json'];if(!value)return;
- function items(list){const fragment=document.createDocumentFragment();for(const item of list){if(!safeLink(item.url))continue;const link=document.createElement('a');link.href=item.url;const span=document.createElement('span');span.dataset.fa=item.fa;span.dataset.en=item.en;span.textContent=item[lang()];link.append(span);if(new URL(item.url,location.href).pathname===(location.pathname==='/'?'/index.html':location.pathname))link.setAttribute('aria-current','page');
+ function items(list){const fragment=document.createDocumentFragment();for(const item of list){if(!safeLink(item.url))continue;const link=document.createElement('a');link.href=item.url;const span=document.createElement('span');span.dataset.fa=item.fa;span.dataset.en=item.en;span.textContent=item[lang()];link.append(span);const target=new URL(item.url,location.href);if(target.pathname===(location.pathname==='/'?'/index.html':location.pathname)&&(!target.hash||target.hash===location.hash))link.setAttribute('aria-current',target.hash?'location':'page');
   if(item.children?.length){const details=document.createElement('details');details.className='nav-group';const summary=document.createElement('summary');summary.textContent=item[lang()];const sub=document.createElement('div');sub.className='nav-submenu';sub.append(link,items(item.children));details.append(summary,sub);details.addEventListener('keydown',event=>{if(event.key==='Escape'){details.open=false;summary.focus();}});fragment.append(details);}else fragment.append(link);
  }return fragment;}
  for(const node of document.querySelectorAll('.desktop-nav,.mobile-menu>nav'))node.replaceChildren(items(value.header));
@@ -23,6 +23,7 @@ function appearance(){
  for(const [name,val] of Object.entries(colors))if(/^#[0-9a-f]{6}$/i.test(val))root.style.setProperty('--'+name,val);
  for(const [name,val] of Object.entries({'site-font-size':value.fontSize+'px','site-line-height':value.lineHeight,'heading-weight':value.headingWeight,'radius':value.radius+'px','site-width':value.width+'px'}))root.style.setProperty('--'+name,String(val));
  root.dataset.customBackground=String(Boolean(colors.background));
+ root.style.setProperty('--glass-art',`url("${source(colors.wallpaper)}")`);
  root.style.setProperty('--site-background',colors.background?`url("${source(colors.background)}")`:'none');
  for(const img of document.querySelectorAll('img[data-theme-light][data-theme-dark]')){
   const key=img.dataset.siteImage||(img.closest('.brand-identity')?'logo':img.dataset.themeLight.includes('wallpaper')?'wallpaper':null);
@@ -58,7 +59,7 @@ if(preview){
    documents={...documents,...next};previewAssets={};for(const [path,url] of Object.entries(event.data.assets||{}))if(asset(path)&&typeof url==='string'&&url.startsWith('blob:'+location.origin+'/'))previewAssets[path]=url;
    if(['fa','en'].includes(event.data.language)){root.lang=event.data.language;root.dir=root.lang==='fa'?'rtl':'ltr';}
    if(['light','dark'].includes(event.data.theme))root.dataset.theme=event.data.theme;
-   apply();window.dispatchEvent(new CustomEvent('site-studio-content',{detail:{profile:documents['content/site.json'],articles:documents['content/articles.json'],assets:previewAssets,preview:true}}));textBlocks();notify('studio-applied');
+   apply();window.dispatchEvent(new CustomEvent('site-studio-content',{detail:{profile:documents['content/site.json'],articles:documents['content/articles.json'],topics:documents['content/topics.json'],assets:previewAssets,preview:true}}));textBlocks();notify('studio-applied');
   }catch{notify('studio-error');}
  });
  document.addEventListener('click',event=>{const node=event.target.closest('[data-content-key]');if(node){event.preventDefault();notify('studio-select',{page,key:node.dataset.contentKey});}else if(event.target.closest('a'))event.preventDefault();},true);

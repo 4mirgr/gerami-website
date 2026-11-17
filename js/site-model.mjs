@@ -1,8 +1,9 @@
+import {validateTopics,flattenTopics} from './topics.mjs';
 /* Shared, dependency-free contract for the public site and its manager. */
 export const pages={home:'صفحهٔ اصلی',about:'دربارهٔ من',services:'حوزه‌های فعالیت',blog:'آموزش و مقالات',projects:'پروژه‌ها',contact:'ارتباط',appointments:'اطلاعات مراجعه',beyond:'فراتر از پزشکی'};
 export const fonts={Vazirmatn:'وزیرمتن',Tahoma:'Tahoma',Arial:'Arial',system:'فونت سیستم'};
-export const sections={hero:'معرفی و کارت‌های اصلی',explore:'مسیرهای دسترسی',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'آموزش',articles:'تازه‌ترین مطالب'};
-export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
+export const sections={hero:'معرفی و کارت‌های اصلی',explore:'کاروسل موضوعات',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'نقشهٔ شاخه‌ها و زیرشاخه‌ها',articles:'تازه‌ترین مطالب'};
+export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json','content/topics.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
 export const clone=value=>JSON.parse(JSON.stringify(value));
 export function prepareArticlesForPublication(data,clock=new Date()){
  const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Tehran',calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(clock).map(part=>[part.type,part.value]));
@@ -49,6 +50,8 @@ export function validateDocument(path,data){
   if(data.linkedin)must(/^(www\.)?linkedin\.com$/.test(new URL(data.linkedin).hostname),'لینکدین باید از linkedin.com باشد.');
   must(Array.isArray(data.cv)&&data.cv.length<=100,'فهرست رزومه معتبر نیست.');
   for(const item of data.cv)for(const key of ['title_fa','title_en','detail_fa','detail_en'])must(string(item[key])&&item[key].trim(),'سوابق به عنوان و شرح دو زبان نیاز دارند.');
+ }else if(path==='content/topics.json'){
+  validateTopics(data);
  }else if(path==='content/articles.json'){
   must(Array.isArray(data.articles)&&data.articles.length<=500,'فهرست مقالات معتبر نیست.');const seen=new Set();
   for(const item of data.articles){
@@ -57,6 +60,7 @@ export function validateDocument(path,data){
    for(const key of ['title_fa','title_en','body_fa','body_en','author','category'])must(string(item[key]??'',100000),'متن مقاله معتبر نیست.');
    must(item.status!=='published'||['fa','en'].some(lang=>item['title_'+lang]?.trim()&&item['body_'+lang]?.trim()),'عنوان و متن مقاله را کامل کنید. ترجمهٔ انگلیسی اختیاری است.');
    for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&(item.status==='draft'||key==='reviewed_at'))||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,key==='published_at'?'تاریخ انتشار انتخاب‌شده معتبر نیست؛ آن را خالی بگذارید تا خودکار ثبت شود.':'تاریخ بازبینی انتخاب‌شده معتبر نیست؛ این فیلد اختیاری است.');}
+   must(item.topic===undefined||item.topic===''||typeof item.topic==='string'&&item.topic.length<=80&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(item.topic),'موضوع مقاله معتبر نیست.');
    must(!item.image||articleImage(item.image),'برای تصویر مقاله فایل بارگذاری کنید یا لینک مستقیم HTTPS معتبر وارد کنید.');
    must(!item.sources||Array.isArray(item.sources)&&item.sources.length<=100,'منابع معتبر نیستند.');for(const source of item.sources||[])must(string(source.title)&&source.url?.startsWith('https://')&&safeLink(source.url),'منبع نیاز به عنوان و پیوند HTTPS دارد.');
   }
@@ -71,6 +75,8 @@ export function validateDocument(path,data){
 }
 export function validateSite(documents){
  for(const path of managedPaths)validateDocument(path,documents[path]);
+ const topicSet=new Set(flattenTopics(documents['content/topics.json']).map(t=>t.id));
+ for(const article of documents['content/articles.json'].articles)if(article.topic&&!topicSet.has(article.topic))throw Error('موضوع مقاله وجود ندارد؛ ابتدا موضوع مقاله را تغییر دهید.');
  const available=new Set(['/','/index.html',...Object.keys(pages).filter(id=>id!=='home').map(id=>'/pages/'+id+'.html'),...documents['content/extra-pages.json'].pages.filter(item=>item.published).map(item=>'/pages/'+item.slug+'.html')]);
  const check=url=>{const path=url.split(/[?#]/)[0];if(path.startsWith('/pages/')&&!available.has(path))throw Error('پیوند به صفحهٔ ناموجود یا منتشرنشده: '+path);};
  const menu=items=>{for(const item of items){check(item.url);menu(item.children||[]);}};
