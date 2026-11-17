@@ -112,3 +112,6 @@
     });
   });
 })();
+
+/* Keep native anchor scrolling and keyboard focus clear of a variable-height header. */
+(() => {const header=document.querySelector('.site-header');if(!header)return;const measure=()=>document.documentElement.style.setProperty('--header-clearance',Math.ceil(header.getBoundingClientRect().height+32)+'px');measure();new ResizeObserver(measure).observe(header);})();

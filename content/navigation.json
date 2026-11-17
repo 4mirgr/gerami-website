@@ -7,27 +7,21 @@
       "children": []
     },
     {
-      "fa": "دربارهٔ من",
-      "en": "About",
-      "url": "/pages/about.html",
+      "fa": "موضوعات",
+      "en": "Topics",
+      "url": "/index.html#topics",
       "children": []
     },
     {
-      "fa": "حوزه‌های فعالیت",
-      "en": "Focus areas",
-      "url": "/pages/services.html",
-      "children": []
-    },
-    {
-      "fa": "آموزش",
-      "en": "Education",
+      "fa": "همهٔ مطالب",
+      "en": "All posts",
       "url": "/pages/blog.html",
       "children": []
     },
     {
-      "fa": "پروژه‌ها",
-      "en": "Projects",
-      "url": "/pages/projects.html",
+      "fa": "دربارهٔ پزشک",
+      "en": "About",
+      "url": "/pages/about.html",
       "children": []
     },
     {

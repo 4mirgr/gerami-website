@@ -29,7 +29,7 @@ try {
           }
           await page.keyboard.press('Escape');
         }
-        const rectangles=await page.locator('.explore-section>a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
+        const rectangles=await page.locator('[data-topic-rail]>li').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         for(let i=0;i<rectangles.length;i++)for(let j=i+1;j<rectangles.length;j++) {
           const a=rectangles[i],b=rectangles[j];assert.ok(a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top,'Navigation cards must not overlap');
         }

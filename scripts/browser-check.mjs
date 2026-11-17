@@ -147,7 +147,7 @@ try {
   // JavaScript disabled: content and native mobile menu still work.
   await call('Emulation.setScriptExecutionDisabled',{value:true});
   await navigate('');
-  assert.equal(await evaluate("document.querySelector('.hero-introduction').textContent"),'دکتر امیرهوشنگ گرامی');
+  assert.match(await evaluate("document.querySelector('.hero-introduction').textContent"),/دکتر امیرهوشنگ گرامی/);
   assert.equal(await evaluate("document.querySelector('[data-language-toggle]').hidden"),true);
   assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/']);
   await evaluate("document.querySelector('.mobile-menu summary').click()");

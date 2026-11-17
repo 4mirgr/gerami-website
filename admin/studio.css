@@ -10,3 +10,5 @@
 .source-row{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
 
 #publish,.article-publish{background:#21884a;color:#fff;border:1px solid #19713d;box-shadow:0 1px 2px #0002}.article-publish{margin:16px 0;margin-inline-end:10px}.article-publish:hover,#publish:hover{background:#18723c}
+
+.topic-editor-node,.topic-editor-child{border:1px solid var(--line,#d7dce4);border-radius:14px;padding:16px;margin-block:14px}.topic-editor-node>summary,.topic-editor-child>summary{cursor:pointer;font-weight:700;min-height:44px}.topic-editor-children{padding-inline-start:16px}.topic-editor-node input[readonly]{opacity:.65}

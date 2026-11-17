@@ -1,0 +1,385 @@
+{
+  "topics": [
+    {
+      "id": "cardiology",
+      "fa": "قلب و عروق",
+      "en": "Cardiology",
+      "icon": "heart",
+      "description_fa": "عروق کرونر، نارسایی قلب، اختلالات ریتم",
+      "description_en": "Coronary disease, Heart failure, Heart rhythm",
+      "children": [
+        {
+          "id": "coronary",
+          "fa": "عروق کرونر",
+          "en": "Coronary disease",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heart-failure",
+          "fa": "نارسایی قلب",
+          "en": "Heart failure",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "arrhythmia",
+          "fa": "اختلالات ریتم",
+          "en": "Heart rhythm",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "endocrinology",
+      "fa": "غدد و متابولیسم",
+      "en": "Endocrinology",
+      "icon": "endocrine",
+      "description_fa": "دیابت، تیروئید، اختلالات متابولیک",
+      "description_en": "Diabetes, Thyroid, Metabolic conditions",
+      "children": [
+        {
+          "id": "diabetes",
+          "fa": "دیابت",
+          "en": "Diabetes",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "thyroid",
+          "fa": "تیروئید",
+          "en": "Thyroid",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "metabolism",
+          "fa": "اختلالات متابولیک",
+          "en": "Metabolic conditions",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "gastroenterology",
+      "fa": "گوارش و کبد",
+      "en": "Gastroenterology",
+      "icon": "digestive",
+      "description_fa": "سلامت گوارش، کبد، بیماری‌های التهابی روده",
+      "description_en": "Digestive health, Liver, Inflammatory bowel disease",
+      "children": [
+        {
+          "id": "digestive-health",
+          "fa": "سلامت گوارش",
+          "en": "Digestive health",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "liver",
+          "fa": "کبد",
+          "en": "Liver",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "ibd",
+          "fa": "بیماری‌های التهابی روده",
+          "en": "Inflammatory bowel disease",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "pulmonology",
+      "fa": "ریه و تنفس",
+      "en": "Pulmonology",
+      "icon": "lungs",
+      "description_fa": "آسم، بیماری انسدادی ریه، خواب و تنفس",
+      "description_en": "Asthma, COPD, Sleep and breathing",
+      "children": [
+        {
+          "id": "asthma",
+          "fa": "آسم",
+          "en": "Asthma",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "copd",
+          "fa": "بیماری انسدادی ریه",
+          "en": "COPD",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "sleep-breathing",
+          "fa": "خواب و تنفس",
+          "en": "Sleep and breathing",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "nephrology",
+      "fa": "کلیه و فشار خون",
+      "en": "Nephrology",
+      "icon": "kidney",
+      "description_fa": "سلامت کلیه، فشار خون، آب و الکترولیت",
+      "description_en": "Kidney health, Blood pressure, Fluids and electrolytes",
+      "children": [
+        {
+          "id": "kidney-health",
+          "fa": "سلامت کلیه",
+          "en": "Kidney health",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "hypertension",
+          "fa": "فشار خون",
+          "en": "Blood pressure",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "electrolytes",
+          "fa": "آب و الکترولیت",
+          "en": "Fluids and electrolytes",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "rheumatology",
+      "fa": "روماتولوژی و مفاصل",
+      "en": "Rheumatology",
+      "icon": "joint",
+      "description_fa": "التهاب مفاصل، بیماری‌های خودایمنی",
+      "description_en": "Arthritis, Autoimmune conditions",
+      "children": [
+        {
+          "id": "arthritis",
+          "fa": "التهاب مفاصل",
+          "en": "Arthritis",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "autoimmune",
+          "fa": "بیماری‌های خودایمنی",
+          "en": "Autoimmune conditions",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "hematology",
+      "fa": "خون و کم‌خونی",
+      "en": "Hematology",
+      "icon": "blood",
+      "description_fa": "کم‌خونی، انعقاد خون",
+      "description_en": "Anemia, Clotting",
+      "children": [
+        {
+          "id": "anemia",
+          "fa": "کم‌خونی",
+          "en": "Anemia",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "clotting",
+          "fa": "انعقاد خون",
+          "en": "Clotting",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "oncology",
+      "fa": "سرطان‌شناسی",
+      "en": "Oncology",
+      "icon": "cell",
+      "description_fa": "آگاهی دربارهٔ سرطان، مراقبت در سرطان",
+      "description_en": "Cancer awareness, Cancer care",
+      "children": [
+        {
+          "id": "cancer-awareness",
+          "fa": "آگاهی دربارهٔ سرطان",
+          "en": "Cancer awareness",
+          "icon": "cell",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cancer-care",
+          "fa": "مراقبت در سرطان",
+          "en": "Cancer care",
+          "icon": "cell",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "infectious-diseases",
+      "fa": "بیماری‌های عفونی",
+      "en": "Infectious diseases",
+      "icon": "microbe",
+      "description_fa": "عفونت‌ها، واکسیناسیون",
+      "description_en": "Infections, Vaccination",
+      "children": [
+        {
+          "id": "infections",
+          "fa": "عفونت‌ها",
+          "en": "Infections",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "vaccination",
+          "fa": "واکسیناسیون",
+          "en": "Vaccination",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "allergy-immunology",
+      "fa": "آلرژی و ایمنی",
+      "en": "Allergy & immunology",
+      "icon": "shield",
+      "description_fa": "آلرژی‌ها، دستگاه ایمنی",
+      "description_en": "Allergies, Immune system",
+      "children": [
+        {
+          "id": "allergies",
+          "fa": "آلرژی‌ها",
+          "en": "Allergies",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "immune-health",
+          "fa": "دستگاه ایمنی",
+          "en": "Immune system",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "geriatrics",
+      "fa": "سلامت سالمندی",
+      "en": "Geriatrics",
+      "icon": "age",
+      "description_fa": "سالمندی سالم، چندبیماری در سالمندی",
+      "description_en": "Healthy aging, Multiple conditions",
+      "children": [
+        {
+          "id": "healthy-aging",
+          "fa": "سالمندی سالم",
+          "en": "Healthy aging",
+          "icon": "age",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "multiple-conditions",
+          "fa": "چندبیماری در سالمندی",
+          "en": "Multiple conditions",
+          "icon": "age",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "internal-medicine",
+      "fa": "داخلی عمومی",
+      "en": "Internal medicine",
+      "icon": "medicine",
+      "description_fa": "پیشگیری و سلامت، آموزش بالینی",
+      "description_en": "Prevention, Clinical education",
+      "children": [
+        {
+          "id": "prevention",
+          "fa": "پیشگیری و سلامت",
+          "en": "Prevention",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "clinical-education",
+          "fa": "آموزش بالینی",
+          "en": "Clinical education",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    }
+  ]
+}

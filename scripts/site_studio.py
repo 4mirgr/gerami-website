@@ -73,7 +73,40 @@ def generate(root, output):
     (output / 'pages/studio-preview.html').write_text(bake_settings(root, text, 'extra'))
 
 
+def topic_markup(root, directory=False):
+    catalog = json.loads((root / 'content/topics.json').read_text())
+    articles = json.loads((root / 'content/articles.json').read_text())['articles']
+    escape = lambda value: html.escape(str(value), quote=True)
+    label = lambda tag, fa, en: '<' + tag + ' data-fa="' + escape(fa) + '" data-en="' + escape(en) + '">' + escape(fa) + '</' + tag + '>'
+    result = ''
+    for topic in catalog['topics']:
+        ident = topic['id']
+        tag = 'article' if directory else 'li'
+        result += '<' + tag + ' class="topic-tile glass-surface" data-topic-id="' + escape(ident) + '">'
+        result += '<a class="topic-link"' + ('' if directory else ' data-topic-card="' + escape(ident) + '"') + ' href="/pages/blog.html?topic=' + escape(ident) + '">'
+        result += label('h3', topic['fa'], topic['en'])
+        if not directory:
+            result += label('p', topic['description_fa'], topic['description_en'])
+        ids = {ident, *(child['id'] for child in topic['children'])}
+        count = sum(1 for item in articles if item.get('status') == 'published' and item.get('topic') in ids)
+        if count:
+            result += label('small', str(count) + ' مطلب', str(count) + ' posts')
+        result += '</a>'
+        if directory:
+            result += '<div class="subtopic-links">'
+            for child in topic['children']:
+                result += '<a href="/pages/blog.html?topic=' + escape(child['id']) + '">' + label('span', child['fa'], child['en']) + '</a>'
+            result += '</div>'
+        result += '</' + tag + '>'
+    if not catalog['topics']:
+        result += '<' + ('p' if directory else 'li') + '>موضوعات آموزشی در حال تنظیم هستند.</' + ('p' if directory else 'li') + '>'
+    return result
+
+
 def bake_settings(root, text, ident):
+    if ident == 'home':
+        for marker, directory in [('topic-rail', False), ('topic-directory', True)]:
+            text = re.sub(r'<!--' + marker + r':start-->.*?<!--' + marker + r':end-->', lambda _: '<!--' + marker + ':start-->' + topic_markup(root, directory) + '<!--' + marker + ':end-->', text, flags=re.S)
     escape = lambda value: html.escape(str(value), quote=True)
     appearance = json.loads((root / 'content/appearance.json').read_text())
     navigation = json.loads((root / 'content/navigation.json').read_text())
@@ -137,6 +170,7 @@ def bake_settings(root, text, ident):
         value = appearance[mode]
         css += ':root' + ('[data-theme=dark]' if mode == 'dark' else ':not([data-theme=dark])') + '{'
         css += ''.join('--' + key + ':' + value[key] + ';' for key in ('paper', 'white', 'ink', 'muted', 'wash', 'line', 'teal', 'button', 'buttonText'))
+        css += '--glass-art:url("' + value['wallpaper'] + '");'
         css += '--site-background:' + ('url("' + value['background'] + '")' if value['background'] else 'none') + ';}'
     text = re.sub(r'<style id="site-settings">.*?</style>', '', text, flags=re.S)
     return text.replace('</head>', '<style id="site-settings">' + css + '</style></head>')
