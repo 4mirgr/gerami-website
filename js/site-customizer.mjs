@@ -1,4 +1,4 @@
-import {validateDocument,pages,safeLink,asset} from './site-model.mjs';
+import {validateDocument,pages,safeLink,asset,publicPath} from './site-model.mjs';
 import {richText} from './rich-text.mjs';
 const root=document.documentElement;
 const page=document.body.dataset.page;
@@ -9,7 +9,7 @@ const source=url=>previewAssets[url]||url;
 const read=async path=>{const response=await fetch('/'+path,{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('Unavailable');return validateDocument(path,await response.json());};
 function navigation(){
  const value=documents['content/navigation.json'];if(!value)return;
- function items(list){const fragment=document.createDocumentFragment();for(const item of list){if(!safeLink(item.url))continue;const link=document.createElement('a');link.href=item.url;const span=document.createElement('span');span.dataset.fa=item.fa;span.dataset.en=item.en;span.textContent=item[lang()];link.append(span);const target=new URL(item.url,location.href);if(target.pathname===(location.pathname==='/'?'/index.html':location.pathname)&&(!target.hash||target.hash===location.hash))link.setAttribute('aria-current',target.hash?'location':'page');
+ function items(list){const fragment=document.createDocumentFragment();for(const item of list){if(!safeLink(item.url))continue;const link=document.createElement('a');link.href=item.url;const span=document.createElement('span');span.dataset.fa=item.fa;span.dataset.en=item.en;span.textContent=item[lang()];link.append(span);const target=new URL(item.url,location.href);if(publicPath(target.pathname)===publicPath(location.pathname)&&(!target.hash||target.hash===location.hash))link.setAttribute('aria-current',target.hash?'location':'page');
   if(item.children?.length){const details=document.createElement('details');details.className='nav-group';const summary=document.createElement('summary');summary.textContent=item[lang()];const sub=document.createElement('div');sub.className='nav-submenu';sub.append(link,items(item.children));details.append(summary,sub);details.addEventListener('keydown',event=>{if(event.key==='Escape'){details.open=false;summary.focus();}});fragment.append(details);}else fragment.append(link);
  }return fragment;}
  for(const node of document.querySelectorAll('.desktop-nav,.mobile-menu>nav'))node.replaceChildren(items(value.header));

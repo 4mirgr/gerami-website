@@ -1,6 +1,6 @@
 /* Public reading UI: published records only, safe DOM/Markdown, shareable topic filters. */
 import {richText} from './rich-text.mjs';
-import {articleImage} from './site-model.mjs';
+import {articleImage,publicPath} from './site-model.mjs';
 import {validateTopics,flattenTopics,topicIds,topicIcon} from './topics.mjs';
 const base=new URL('../',import.meta.url),root=document.documentElement,main=document.querySelector('main');
 const lang=()=>root.lang==='en'?'en':'fa',text=(fa,en)=>lang()==='fa'?fa:en;
@@ -8,13 +8,13 @@ const el=(tag,value='',className='')=>{const n=document.createElement(tag);n.tex
 function https(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password?u.href:null;}catch{return null;}}
 async function json(file){const r=await fetch(new URL('content/'+file,base),{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('Unavailable');return r.json();}
 let profile=null,articles=[],catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
-const path=location.pathname,isHome=path==='/'||path.endsWith('/index.html'),isBlog=path.endsWith('/blog.html');
+const path=publicPath(location.pathname),isHome=path==='/',isBlog=path.endsWith('/blog');
 const imageSource=src=>previewAssets[src]||src;
  function renderProfile(){
   if(!profile)return;window.dispatchEvent(new CustomEvent('site-profile',{detail:profile}));
-  if(!['/about.html','/contact.html','/appointments.html'].some(p=>path.endsWith(p)))return;
+  if(!['/about','/contact','/appointments'].some(p=>path.endsWith(p)))return;
   if(!profileHost){profileHost=el('section','','cms-profile container');main.append(profileHost);}profileHost.replaceChildren();
-  if(path.endsWith('/about.html')){
+  if(path.endsWith('/about')){
    if(profile['bio_'+lang()])profileHost.append(el('p',profile['bio_'+lang()]));const entries=Array.isArray(profile.cv)?profile.cv:[];
    document.querySelectorAll('[data-cv-placeholder]').forEach(node=>{node.hidden=entries.length>0;});
    if(entries.length)profileHost.append(el('h2',text('رزومه و سوابق','CV and experience')));
