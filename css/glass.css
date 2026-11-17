@@ -18,7 +18,7 @@ h2 { font-size:clamp(1.5rem,2.6vw,2.4rem); }
 button { color:var(--ink); }
 a,button,summary { touch-action:manipulation; }
 :is(a,button,summary,input,select):focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
-.skip-link { z-index:40; }
+.skip-link { z-index:40; color:var(--paper); }
 .site-header { position:relative; z-index:30; background:var(--white); border-bottom:1px solid var(--line); }
 .header-inner { min-height:94px; gap:14px; }
 .brand { gap:10px; min-width:0; }

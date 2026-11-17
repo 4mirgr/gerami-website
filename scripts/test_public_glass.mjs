@@ -47,6 +47,8 @@ try {
   await page.goto(origin);
   await page.keyboard.press('Tab');
   assert.equal(await page.locator('.skip-link').evaluate(link=>{const r=link.getBoundingClientRect();return document.activeElement===link&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.skip-link')===link;}),true,'Focused skip link must be above the header');
+  const skipColors=await page.locator('.skip-link').evaluate(e=>({fg:getComputedStyle(e).color,bg:getComputedStyle(e).backgroundColor}));
+  assert.ok(contrast(skipColors.fg,skipColors.bg)>=4.5,'Focused skip link must be readable');
   await page.goto(origin+'/pages/blog.html');
   const footer=await page.locator('.site-footer nav a[aria-current=page]').evaluate(link=>({foreground:getComputedStyle(link).color,background:getComputedStyle(link.closest('footer')).backgroundColor}));
   assert.ok(contrast(footer.foreground,footer.background)>=4.5,'Current footer links must remain readable');
