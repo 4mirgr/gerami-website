@@ -95,7 +95,7 @@ try {
         assert.equal(state.headings,1,page); assert.equal(state.untranslated,0,page);
         if (page === '' || page === 'pages/projects.html') {
           assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>[link.dataset.appEntry,link.href])"), [
-            ['intmed',projectOrigin+'/intmed/'], ['aus',projectOrigin+'/aus/']
+            ['intmed',projectOrigin+'/intmed/']
           ], 'Project entries must stay on the .ir domain');
         }
         if(language==='en') assert.notEqual(state.title,faTitle,'Localized title '+page);
@@ -121,6 +121,7 @@ try {
   assert.equal(await evaluate('document.documentElement.lang'),'en');
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   // Exercise configured destinations and reject unsafe schemes, not just the default fallback.
+  const fixture=await call('Page.addScriptToEvaluateOnNewDocument',{source:"addEventListener('DOMContentLoaded',()=>{if(location.pathname.endsWith('/pages/projects.html')){const a=document.createElement('a');a.dataset.destination='aus';a.href='#aus';a.hidden=true;document.body.append(a)}},{once:true})"});
   const config = await call('Page.addScriptToEvaluateOnNewDocument',{source:"addEventListener('DOMContentLoaded',()=>{window.SITE_LINKS={intmed:'/intmed/',aus:'/aus/',linkedin:'https://www.linkedin.com/in/example/',email:'mailto:public@example.com',phone:'tel:+982100000000',appointment:'javascript:alert(1)'};const s=document.createElement('script');s.src='/js/main.js';document.head.append(s)},{once:true})"});
   await navigate('pages/projects.html');
   // A separately appended local script may finish after load in cached runs.
@@ -142,12 +143,13 @@ try {
   assert.equal(await evaluate("document.querySelector('[data-destination=aus]')."+(combined?'pathname':'hash')),combined?'/aus/':'#aus');
   assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),combined);
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:remoteConfig.identifier});
+  await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:fixture.identifier});
   // JavaScript disabled: content and native mobile menu still work.
   await call('Emulation.setScriptExecutionDisabled',{value:true});
   await navigate('');
   assert.equal(await evaluate("document.querySelector('.hero-introduction').textContent"),'دکتر امیرهوشنگ گرامی');
   assert.equal(await evaluate("document.querySelector('[data-language-toggle]').hidden"),true);
-  assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/',projectOrigin+'/aus/']);
+  assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>link.href)"),[projectOrigin+'/intmed/']);
   await evaluate("document.querySelector('.mobile-menu summary').click()");
   assert.equal(await evaluate("document.querySelector('.mobile-menu').open"),true);
   await call('Emulation.setScriptExecutionDisabled',{value:false});

@@ -6,7 +6,7 @@ from urllib.parse import urlsplit, urljoin
 
 ORIGIN = 'https://drgerami-md.ir'
 CHECKS = {
-    '/': b'css/enfhess.css',
+    '/': b'css/glass.css',
     '/admin/login.html': b'login.mjs',
     '/api/cms/status': b'"configured":true',
     '/intmed/': b'<title>IntMed</title>',
