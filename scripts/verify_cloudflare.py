@@ -48,7 +48,7 @@ for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/inde
         target = site / unquote(url.path).lstrip('/') if url.path.startswith('/') else file.parent / unquote(url.path)
         if not target.is_file():
             errors.append(f'{path}: missing local asset {reference}')
-    if path in ('index.html', 'pages/projects.html') and assets.entries != ['/intmed/', '/aus/']:
+    if path in ('index.html', 'pages/projects.html') and assets.entries != ['/intmed/']:
         errors.append(f'{path}: project buttons must stay on the preview/production origin')
 
 # IntMed retains the upstream bytes except its documented service-worker scope.

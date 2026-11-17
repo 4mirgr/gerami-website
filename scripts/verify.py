@@ -59,6 +59,8 @@ for path in ('index.html', 'pages/projects.html'):
 for file, page in pages.items():
     for reference in page.refs:
         url = urlsplit(reference)
+        if url.path.rstrip('/') == '/aus' or url.fragment == 'aus':
+            errors.append(f'{file.relative_to(ROOT)}: private AUS must not be promoted on public pages')
         if url.scheme or url.netloc:
             continue
         path = unquote(url.path)
