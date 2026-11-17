@@ -43,8 +43,11 @@ try{
  assert.equal(await page.locator('#publish').count(),0);
  await page.evaluate(()=>document.fonts.ready);assert.match(await page.locator('h1').evaluate(el=>getComputedStyle(el).fontFamily),/Vazirmatn/);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ const backArrowPointsToStart=()=>page.locator('.back svg').evaluate(svg=>{const matrix=svg.getScreenCTM(),tip=new DOMPoint(4,12).matrixTransform(matrix),tail=new DOMPoint(20,12).matrixTransform(matrix);return document.documentElement.dir==='rtl'?tip.x>tail.x:tip.x<tail.x;});
+ assert.equal(await backArrowPointsToStart(),true,'Persian back arrow points to inline start');
  await page.waitForFunction(()=>document.getElementById('entry-status')?.textContent.includes('حساب مجاز'));
  await page.locator('#entry-language').click();assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+ assert.equal(await backArrowPointsToStart(),true,'English back arrow points to inline start');
  assert.match(await page.locator('#entry-status').textContent(),/Sign in with your authorized account/);
  await page.locator('#entry-theme').click();const chosenTheme=await page.locator('html').getAttribute('data-theme');await page.reload();
  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');assert.equal(await page.locator('html').getAttribute('data-theme'),chosenTheme);
