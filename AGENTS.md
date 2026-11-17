@@ -1,6 +1,6 @@
 # Website maintenance contract
 
-Preserve the user-selected Enfhess public layout, Dompet admin layout, Persian/English, day/night controls, single theme-aware logo and local Vazirmatn font. Do not invent medical qualifications, CV entries, publications, contact information or analytics.
+The owner's 2026-11-17 glassmorphism reference request supersedes the Enfhess public-layout preference; read docs/glass-design-2026-11-17.md. Match supplied visual references rather than inventing a replacement style. Preserve the Settings admin, Persian/English, day/night controls, single theme-aware logo, local Vazirmatn and existing functionality. Do not invent qualifications, CV entries, publications, contact information or analytics.
 
 Keep server-verified entry protection for the admin shell, CMS configuration and encoded aliases; only the exact login assets are public. The CMS entry cookie grants no clinical role. When integrating the shared Clinic portal, preserve its native staff/patient authentication and private-file checks instead of putting the CMS-owner gate in front of patient routes. See `docs/admin-access.md`.
 
