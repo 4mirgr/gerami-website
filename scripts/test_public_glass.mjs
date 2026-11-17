@@ -31,6 +31,11 @@ try {
       }
     }
   }
+  await page.goto(origin+'/pages/blog.html');
+  const footer=await page.locator('.site-footer nav a[aria-current=page]').evaluate(link=>({foreground:getComputedStyle(link).color,background:getComputedStyle(link.closest('footer')).backgroundColor}));
+  const luminance=color=>color.match(/[\d.]+/g).slice(0,3).map(Number).map(n=>{const c=n/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4;}).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
+  const shades=[luminance(footer.foreground),luminance(footer.background)].sort((a,b)=>a-b);
+  assert.ok((shades[1]+.05)/(shades[0]+.05)>=4.5,'Current footer links must remain readable');
   // Owner-selected art, typography, section visibility/order still drive the actual public page.
   const appearance=JSON.parse(await readFile(new URL('../content/appearance.json',import.meta.url)));
   appearance.font='Tahoma';appearance.fontSize=19;appearance.radius=8;
@@ -41,6 +46,7 @@ try {
   await page.route('**/content/appearance.json',route=>route.fulfill({json:appearance}));
   await page.evaluate(()=>localStorage.setItem('ahg-theme','light'));await page.reload();
   await page.waitForFunction(()=>getComputedStyle(document.body).fontSize==='19px');
+  assert.equal(await page.locator('.desktop-nav a[aria-current=page]').getAttribute('href'),'/index.html');
   assert.match(await page.locator('.hero-art').getAttribute('src'),/identity\/wallpaper-day/);
   assert.match(await page.locator('h1').evaluate(e=>getComputedStyle(e).fontFamily),/^Tahoma/);
   assert.equal(await page.locator('.signature-copy').evaluate(e=>getComputedStyle(e).borderRadius),'8px');
