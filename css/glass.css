@@ -2,13 +2,13 @@
 :root {
   --paper:#f3f4fa; --white:#ffffff; --ink:#19243a; --muted:#56627a;
   --wash:#e9edf7; --line:#d4dbea; --teal:#3c527d; --accent:#5266a0;
-  --radius:28px; --glass-art:url('../assets/glass/ribbon-day.webp');
+  --radius:28px; --button:#263957; --buttonText:#ffffff; --glass-art:url('../assets/glass/ribbon-day.webp');
   --glass-shadow:0 24px 70px #24345a0c, inset 0 1px 0 #ffffffb3;
 }
 :root[data-theme=dark] {
   color-scheme:dark; --paper:#0b1221; --white:#152033; --ink:#eef3ff;
   --muted:#b7c3d9; --wash:#16243a; --line:#33445e; --teal:#b2c9ff;
-  --accent:#b6caff; --glass-art:url('../assets/glass/ribbon-night.webp');
+  --accent:#b6caff; --button:#c3d4fa; --buttonText:#142039; --glass-art:url('../assets/glass/ribbon-night.webp');
   --glass-shadow:0 24px 70px #0003, inset 0 1px 0 #d4e1ff18;
 }
 body { background-color:var(--paper); line-height:1.9; }
@@ -89,6 +89,7 @@ a,button,summary { touch-action:manipulation; }
 .article-body { line-height:2; }
 .site-footer { background:#101b2e; color:#eef3ff; padding-block:56px 24px; margin-top:32px; }
 .site-footer .text-link,.site-footer a { color:#d5e1ff; }
+.site-footer nav a[aria-current=page] { color:#eef3ff; }
 .site-footer p,.footer-bottom { color:#b4c2d9; }
 .site-footer .nav-submenu { background:#17243b; color:#eef3ff; }
 @supports ((backdrop-filter:blur(20px)) or (-webkit-backdrop-filter:blur(20px))) {
