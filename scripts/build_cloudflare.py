@@ -185,8 +185,8 @@ def assemble(sources, output):
         # Enable cards in the assembled artifact, where the actual apps now exist.
         with (stage / 'js/links.js').open('a', encoding='utf-8') as handle:
             handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/',aus:'/aus/'}));\n")
-        ready_fa = 'هر دو پروژه از زیرمسیر همین سایت در دسترس‌اند.'
-        ready_en = 'Both projects are available under this site’s own paths.'
+        ready_fa = 'پروژهٔ آموزشی IntMed از زیرمسیر همین سایت در دسترس است.'
+        ready_en = 'The IntMed education project is available under this site’s own path.'
         for page in (stage / 'index.html', stage / 'pages/projects.html'):
             html = page.read_text()
             # Relative destinations keep Pages previews and the .ir site on their own host.
