@@ -18,6 +18,7 @@ h2 { font-size:clamp(1.5rem,2.6vw,2.4rem); }
 button { color:var(--ink); }
 a,button,summary { touch-action:manipulation; }
 :is(a,button,summary,input,select):focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+.skip-link { z-index:40; }
 .site-header { position:relative; z-index:30; background:var(--white); border-bottom:1px solid var(--line); }
 .header-inner { min-height:94px; gap:14px; }
 .brand { gap:10px; min-width:0; }
@@ -47,7 +48,7 @@ a,button,summary { touch-action:manipulation; }
 .signature-copy .actions { justify-content:center; margin-top:28px; gap:12px; }
 .button,.hero-profile-link { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:48px; border-radius:99px; padding:11px 23px; font-size:.85rem; text-decoration:none; border:1px solid var(--line); }
 .button-primary { border-color:transparent; box-shadow:0 4px 14px #172e5510; }
-.button-primary:hover { filter:brightness(1.1); }
+.button-primary:hover { background:var(--button); color:var(--buttonText); filter:brightness(1.05); }
 .button-secondary,.hero-profile-link { background:var(--white); color:var(--ink); }
 .explore-section { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; padding-block:36px 48px; }
 .explore-section>a { position:relative; text-decoration:none; border:1px solid var(--line); background:var(--white); border-radius:var(--radius); padding:28px; box-shadow:var(--glass-shadow); }
@@ -128,6 +129,7 @@ a,button,summary { touch-action:manipulation; }
   .brand { width:100%; justify-content:center; margin-inline:0; }
   .header-inner { justify-content:center; gap:10px; }
   .mobile-menu { margin-inline-end:auto; }
+  .mobile-menu>nav { inset-inline-start:0; inset-inline-end:auto; }
   .hero-introduction { font-size:.92rem; }
   .signature-copy .actions>a { width:100%; }
 }

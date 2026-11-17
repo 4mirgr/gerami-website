@@ -3,6 +3,8 @@ import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 
 const origin='http://127.0.0.1:4173';
+const luminance=color=>color.match(/[\d.]+/g).slice(0,3).map(Number).map(n=>{const c=n/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4;}).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
+const contrast=(a,b)=>{const shades=[luminance(a),luminance(b)].sort((a,b)=>a-b);return (shades[1]+.05)/(shades[0]+.05);};
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try {
   const page=await browser.newPage();
@@ -20,6 +22,13 @@ try {
         assert.equal(await page.locator('.brand-identity img').count(),1);
         assert.equal(await page.locator('h1').isVisible(),true);
         assert.equal(await page.locator('a[href*="aus"]').count(),0,'No public AUS promotion');
+        if(await page.locator('.mobile-menu summary').isVisible()) {
+          await page.locator('.mobile-menu summary').click();
+          for(const link of await page.locator('.mobile-menu>nav a').all()) {
+            const box=await link.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width,`Open menu links must fit ${width}/${language}`);
+          }
+          await page.keyboard.press('Escape');
+        }
         const rectangles=await page.locator('.explore-section>a').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         for(let i=0;i<rectangles.length;i++)for(let j=i+1;j<rectangles.length;j++) {
           const a=rectangles[i],b=rectangles[j];assert.ok(a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top,'Navigation cards must not overlap');
@@ -28,14 +37,19 @@ try {
           assert.equal(await link.isVisible(),true);
           const box=await link.boundingBox();assert.ok(box.height>=44);
         }
+        const primary=page.locator('.signature-copy .button-primary');
+        await primary.hover();
+        const colors=await primary.evaluate(e=>({fg:getComputedStyle(e).color,bg:getComputedStyle(e).backgroundColor}));
+        assert.ok(contrast(colors.fg,colors.bg)>=4.5,`CTA hover contrast ${theme}`);
       }
     }
   }
+  await page.goto(origin);
+  await page.keyboard.press('Tab');
+  assert.equal(await page.locator('.skip-link').evaluate(link=>{const r=link.getBoundingClientRect();return document.activeElement===link&&document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.skip-link')===link;}),true,'Focused skip link must be above the header');
   await page.goto(origin+'/pages/blog.html');
   const footer=await page.locator('.site-footer nav a[aria-current=page]').evaluate(link=>({foreground:getComputedStyle(link).color,background:getComputedStyle(link.closest('footer')).backgroundColor}));
-  const luminance=color=>color.match(/[\d.]+/g).slice(0,3).map(Number).map(n=>{const c=n/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4;}).reduce((sum,c,i)=>sum+c*[.2126,.7152,.0722][i],0);
-  const shades=[luminance(footer.foreground),luminance(footer.background)].sort((a,b)=>a-b);
-  assert.ok((shades[1]+.05)/(shades[0]+.05)>=4.5,'Current footer links must remain readable');
+  assert.ok(contrast(footer.foreground,footer.background)>=4.5,'Current footer links must remain readable');
   // Owner-selected art, typography, section visibility/order still drive the actual public page.
   const appearance=JSON.parse(await readFile(new URL('../content/appearance.json',import.meta.url)));
   appearance.font='Tahoma';appearance.fontSize=19;appearance.radius=8;
@@ -44,7 +58,7 @@ try {
   const about=appearance.sections.findIndex(s=>s.id==='about');
   appearance.sections.splice(1,0,...appearance.sections.splice(about,1));
   await page.route('**/content/appearance.json',route=>route.fulfill({json:appearance}));
-  await page.evaluate(()=>localStorage.setItem('ahg-theme','light'));await page.reload();
+  await page.evaluate(()=>localStorage.setItem('ahg-theme','light'));await page.goto(origin);
   await page.waitForFunction(()=>getComputedStyle(document.body).fontSize==='19px');
   assert.equal(await page.locator('.desktop-nav a[aria-current=page]').getAttribute('href'),'/index.html');
   assert.match(await page.locator('.hero-art').getAttribute('src'),/identity\/wallpaper-day/);
