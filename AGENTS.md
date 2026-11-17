@@ -13,3 +13,5 @@ Before production, run `python3 scripts/build_cloudflare.py` into a fresh output
 Automatic maintenance may advance only full commit pins on the explicitly configured upstream branches and patch versions permitted by the existing npm range, after all browser and combined-build checks pass. Do not automatically change layouts, schema, source repositories, branches, mounts, accounts, secrets or medical content. If main moved during checks, abort the push and revalidate a fresh checkout. No force pushes. Production continues through the existing Cloudflare Git integration.
 
 Use the user-supplied Codex Extended Library as an index: select at most two relevant guides initially, read pinned source documents and adapt them to the existing project and session authorization. Reference details are in `docs/site-review-2026-11-12.md`.
+
+Owner deferred paid hosting and real patient interaction: continue public design/content/SEO. Before enabling patient signup, records, medical uploads or booking, remind the owner about Clinic hosting and verify its deployment/privacy gates. Do not merge the blocked shared-patient PR as part of a visual release.

@@ -52,9 +52,9 @@ for file in [ROOT / 'index.html', *sorted((ROOT / 'pages').glob('*.html'))]:
         errors.append(f'{file.relative_to(ROOT)}: external resources {page.external_resources}')
 
 for path in ('index.html', 'pages/projects.html'):
-    expected = [('intmed', 'https://drgerami-md.ir/intmed/'), ('aus', 'https://drgerami-md.ir/aus/')]
+    expected = [('intmed', 'https://drgerami-md.ir/intmed/')]
     if pages[(ROOT / path).resolve()].app_entries != expected:
-        errors.append(f'{path}: expected two direct project buttons on the .ir domain')
+        errors.append(f'{path}: expected the public IntMed entry on the .ir domain')
 
 for file, page in pages.items():
     for reference in page.refs:
@@ -73,7 +73,7 @@ for file, page in pages.items():
         elif url.fragment and target in pages and unquote(url.fragment) not in pages[target].ids:
             errors.append(f'{file.relative_to(ROOT)}: missing anchor {reference}')
 
-entry = sum((ROOT / path).stat().st_size for path in ('index.html', 'css/style.css', 'css/enfhess.css', 'js/main.js', 'js/links.js', 'js/theme.js', 'js/deck.js', 'js/content.js', 'js/site-model.mjs', 'js/site-customizer.mjs', 'js/rich-text.mjs', 'css/customizer.css', 'assets/favicon.ico'))
+entry = sum((ROOT / path).stat().st_size for path in ('index.html', 'css/style.css', 'css/glass.css', 'js/main.js', 'js/links.js', 'js/theme.js', 'js/content.js', 'js/site-model.mjs', 'js/site-customizer.mjs', 'js/rich-text.mjs', 'css/customizer.css', 'assets/favicon.ico'))
 if entry > 116 * 1024:
     errors.append(f'initial resource budget exceeded: {entry} bytes')
 if errors:

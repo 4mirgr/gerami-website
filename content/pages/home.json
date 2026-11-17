@@ -1,12 +1,12 @@
 {
   "blocks": {
     "text-001": {
-      "fa": "پزشکی، آموزش و مسیر من | دکتر امیرهوشنگ گرامی",
-      "en": "Medicine, education & my journey | Dr. Amir Houshang Gerami"
+      "fa": "دکتر امیرهوشنگ گرامی | متخصص داخلی و آموزش سلامت",
+      "en": "Dr. Amir Houshang Gerami | Internal medicine & health education"
     },
     "text-002": {
-      "fa": "وب‌سایت شخصی دکتر امیرهوشنگ گرامی؛ معرفی حرفه‌ای، آموزش پزشکی و آشنایی با پروژه‌های intmed و AUS.",
-      "en": "The personal website of Dr. Amir Houshang Gerami: professional profile, medical education, and the intmed and AUS projects."
+      "fa": "وب‌سایت دکتر امیرهوشنگ گرامی، متخصص داخلی؛ معرفی، آموزش سلامت برای بیماران و همکاران، و اطلاعات مراجعه.",
+      "en": "Dr. Amir Houshang Gerami, internal medicine specialist: profile, health education for patients and clinicians, and visit information."
     },
     "text-003": {
       "fa": "رفتن به محتوای اصلی",
@@ -25,8 +25,8 @@
       "en": "Menu"
     },
     "text-019": {
-      "fa": "پزشکی داخلی / آموزش / تجربه",
-      "en": "INTERNAL MEDICINE / EDUCATION / EXPERIENCE"
+      "fa": "متخصص داخلی · آموزش و آگاهی سلامت",
+      "en": "INTERNAL MEDICINE · HEALTH EDUCATION"
     },
     "text-020": {
       "fa": "دکتر امیرهوشنگ گرامی",
@@ -51,46 +51,6 @@
     "text-025": {
       "fa": "آشنایی با من",
       "en": "Meet the physician"
-    },
-    "text-026": {
-      "fa": "دانش پزشکی، ساختارمند",
-      "en": "Medical knowledge, organized"
-    },
-    "text-027": {
-      "fa": "پروژهٔ آموزش پزشکی",
-      "en": "A medical education project"
-    },
-    "text-028": {
-      "fa": "کشف پروژه",
-      "en": "Explore project"
-    },
-    "text-029": {
-      "fa": "دکتر امیرهوشنگ گرامی",
-      "en": "Dr. Amir Houshang Gerami"
-    },
-    "text-030": {
-      "fa": "پزشکی با نگاهی انسانی",
-      "en": "Medicine with a human perspective"
-    },
-    "text-031": {
-      "fa": "معرفی، سوابق و مسیر حرفه‌ای",
-      "en": "Profile, background and professional journey"
-    },
-    "text-032": {
-      "fa": "آشنایی بیشتر",
-      "en": "Discover more"
-    },
-    "text-033": {
-      "fa": "ایده‌هایی فراتر از پزشکی",
-      "en": "Ideas beyond medicine"
-    },
-    "text-034": {
-      "fa": "پروژهٔ مستقل و تجربه‌های تازه",
-      "en": "An independent project and new experiences"
-    },
-    "text-035": {
-      "fa": "کشف پروژه",
-      "en": "Explore project"
     },
     "text-036": {
       "fa": "پشتِ نام، یک مسیر",
@@ -120,21 +80,17 @@
       "fa": "ورود به",
       "en": "Open"
     },
-    "text-043": {
-      "fa": "ورود به",
-      "en": "Open"
-    },
     "text-044": {
-      "fa": "این نشانی‌ها برای دسترسی از دامنهٔ شخصی در نظر گرفته شده‌اند؛ اتصال سرویس‌ها به آن‌ها هنوز تکمیل نشده است.",
-      "en": "These addresses are reserved for access through this domain; the services have not been connected yet."
+      "fa": "پروژهٔ آموزشی IntMed از همین دامنه در دسترس است.",
+      "en": "The IntMed education project is accessible through this domain."
     },
     "text-045": {
       "fa": "پروژه‌های من",
       "en": "My projects"
     },
     "text-046": {
-      "fa": "ایده‌هایی که به عمل می‌رسند",
-      "en": "Two projects, their own space"
+      "fa": "پزشکی، در پیوند با یادگیری",
+      "en": "Medicine meets continuous learning"
     },
     "text-047": {
       "fa": "هر پروژه هویت و ساختار مستقل خود را دارد.",
@@ -149,18 +105,6 @@
       "en": "My medical project, informing the educational content selected for this website."
     },
     "text-050": {
-      "fa": "دربارهٔ پروژه",
-      "en": "About the project"
-    },
-    "text-051": {
-      "fa": "پروژهٔ شخصی",
-      "en": "Personal project"
-    },
-    "text-052": {
-      "fa": "پروژهٔ مستقل من؛ اطلاعات عمومیِ منتخب آن به معرفی شخصی و حرفه‌ای این سایت کمک می‌کند.",
-      "en": "An independent project, with selected public information contributing to my personal and professional profile."
-    },
-    "text-053": {
       "fa": "دربارهٔ پروژه",
       "en": "About the project"
     },
@@ -284,12 +228,6 @@
   "links": {
     "link-001": "/pages/appointments.html",
     "link-002": "/pages/about.html",
-    "link-003": "/pages/projects.html#intmed",
-    "link-004": "/pages/projects.html#intmed",
-    "link-005": "/pages/about.html",
-    "link-006": "/pages/about.html",
-    "link-007": "/pages/projects.html#aus",
-    "link-008": "/pages/projects.html#aus",
     "link-009": "/pages/about.html",
     "link-010": "/pages/blog.html",
     "link-011": "/pages/projects.html",
