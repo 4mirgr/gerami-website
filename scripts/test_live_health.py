@@ -21,6 +21,13 @@ class LiveHealth(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 probe(('/intmed/', CHECKS['/intmed/']))
 
+    def test_home_health_accepts_fingerprinted_assets_and_requires_public_snapshot(self):
+        with patch('live_health.urlopen', return_value=self.response(b'<link href="/assets/runtime/glass.0123456789abcdef.css"><script id="site-public-data" type="application/json">{}</script>')):
+            self.assertEqual(probe(('/', CHECKS['/'])), 'PASS production: /')
+        with patch('live_health.urlopen', return_value=self.response(b'<html><title>Unavailable</title></html>')):
+            with self.assertRaises(RuntimeError):
+                probe(('/', CHECKS['/']))
+
     def test_aus_requires_its_mounted_application_assets(self):
         with patch('live_health.urlopen', return_value=self.response(b'<script src="/aus/assets/app.js"></script>')):
             self.assertEqual(probe(('/aus/', CHECKS['/aus/'])), 'PASS production: /aus/')
