@@ -15,7 +15,7 @@
   logout.addEventListener('click',async()=>{
    logout.disabled=true;
    try{
-    const reply=await fetch('/api/cms/session',{method:'DELETE',credentials:'same-origin',cache:'no-store'});
+    const reply=await fetch('/api/cms/session',{method:'DELETE',credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(8000)});
     if(!reply.ok)throw Error('logout_failed');
     try{localStorage.removeItem('decap-cms-user');}catch{}
     authenticated=false;render();
@@ -25,7 +25,7 @@
  }
  async function refresh(){
   try{
-   const response=await fetch('/api/cms/session',{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
+   const response=await fetch('/api/cms/session',{credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'},signal:AbortSignal.timeout(8000)});
    if(!response.ok)return;const data=await response.json();authenticated=data.authenticated===true;render();
   }catch{/* Keep the existing sign-in link during temporary network failures. */}
  }

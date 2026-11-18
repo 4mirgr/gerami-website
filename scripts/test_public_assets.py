@@ -1,5 +1,6 @@
 """Check deploy-time cache identities, relocation and protected app boundaries."""
 import hashlib
+import base64
 import re
 import shutil
 import tempfile
@@ -42,12 +43,26 @@ class PublicAssets(unittest.TestCase):
             for page in [site / 'index.html', *sorted((site / 'pages').glob('*.html'))]:
                 text = page.read_text()
                 self.assertNotRegex(text, r'(?:src|href)="(?:\.\./|/)?(?:js|css)/')
-                self.assertIn('rel="modulepreload"', text)
+                self.assertTrue('id="site-public-runtime"' in text)
+                self.assertNotRegex(text, r'<script\b[^>]*\bsrc=')
+                self.assertNotRegex(text, r'<link\b[^>]*\brel="modulepreload"')
                 self.assertNotRegex(text, r'<link\b[^>]*rel="stylesheet"')
+                import json
+                embedded = json.loads(re.search(r'<script id="site-embedded-assets" type="application/json">(.*?)</script>', text, re.S)[1])
+                for path, uri in embedded.items():
+                    self.assertEqual(base64.b64decode(uri.split(',',1)[1]), (site/path.lstrip('/')).read_bytes())
                 styles = re.findall(r'<style data-public-stylesheet="([^"]+)">(.*?)</style>', text, re.S)
                 self.assertEqual(len(styles), 3)
                 for url, css_text in styles:
-                    self.assertEqual(css_text, (site / url.lstrip('/')).read_text(), 'inline cascade must match the exact emitted stylesheet')
+                    for path in embedded:
+                        variable='--site-media-'+hashlib.sha256(path.encode()).hexdigest()[:12]
+                        css_text=css_text.replace('var('+variable+',none)','url("'+path+'")')
+                    font=next((site/'assets/runtime').glob('Vazirmatn.*.woff2'))
+                    def font_url(match):
+                        self.assertEqual(base64.b64decode(match[1]),font.read_bytes())
+                        return 'url("/assets/runtime/'+font.name+'")'
+                    css_text=re.sub(r'url\("data:font/woff2;base64,([^"]+)"\)',font_url,css_text)
+                    self.assertTrue(css_text==(site/url.lstrip('/')).read_text(),'inline cascade must retain exact source rules after restoring embedded URLs')
                 for url in re.findall(r'(?:src|href)="(/assets/(?:runtime|optimized)/[^"?]+)', text):
                     self.assertTrue((site / url.lstrip('/')).is_file(), url)
             self.assertEqual(protected, {name: (site / name).read_bytes() for name in protected})
@@ -65,6 +80,23 @@ class PublicAssets(unittest.TestCase):
                     handle.write(unsafe)
                 with self.assertRaisesRegex(ValueError, 'reviewed safe inline adapter'):
                     optimize_public_assets(site)
+
+    def test_public_runtime_rejects_unreviewed_module_or_script_breakout(self):
+        for file,code in [('js/main.js','\nconst unsafe="</script>";'),('js/site-model.mjs','\nexport default 1;')]:
+            with self.subTest(file=file), tempfile.TemporaryDirectory() as folder:
+                site=self.stage(folder)
+                with (site/file).open('a') as handle:handle.write(code)
+                with self.assertRaisesRegex(ValueError,'review|Review'):
+                    optimize_public_assets(site)
+
+    def test_external_published_image_is_not_read_as_a_local_file(self):
+        with tempfile.TemporaryDirectory() as folder:
+            site=self.stage(folder)
+            page=site/'index.html'
+            remote='https://example.test/assets/identity/logo-day.webp'
+            page.write_text(page.read_text().replace('</main>','<img src="'+remote+'"></main>'))
+            optimize_public_assets(site)
+            self.assertTrue('<img src="'+remote+'">' in page.read_text())
 
     def test_changed_dependency_changes_all_importer_cache_identities(self):
         with tempfile.TemporaryDirectory() as before, tempfile.TemporaryDirectory() as after:
