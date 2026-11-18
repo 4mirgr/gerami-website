@@ -22,6 +22,25 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
+ // Navigation must paint while every request after the HTML is still pending.
+ // This reproduces mobile blank screens caused by a stalled stylesheet before
+ // the synchronous theme bootstrap, without treating an aborted file as a pass.
+ for(const path of ['/', '/pages/about.html', '/pages/blog.html']){
+  const stalled=await browser.newContext({viewport:{width:390,height:844}}),held=[];
+  await stalled.route('**/*',route=>{
+   if(route.request().isNavigationRequest())return route.continue();
+   return new Promise(resolve=>held.push(async()=>{await route.abort().catch(()=>{});resolve();}));
+  });
+  try{
+   const page=await stalled.newPage();
+   await page.goto(origin+path,{waitUntil:'commit'});
+   await page.locator(path==='/'?'#hero-title':'main h1').waitFor({state:'visible',timeout:1500});
+   await page.waitForFunction(()=>performance.getEntriesByName('first-contentful-paint').length>0,{},{timeout:1500});
+   assert.ok((await page.locator('main').innerText()).trim().length>20);
+   assert.equal(await page.locator('link[rel="stylesheet"]').count(),0,'public paint must not depend on a CSS fetch');
+   console.log('PASS first-response paint with every subresource pending: '+path);
+  }finally{await Promise.all(held.map(release=>release()));await stalled.close();}
+ }
  const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[],bad=[],jsonRequests=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});
@@ -31,8 +50,9 @@ try{
  assert.equal(jsonRequests.length,0);
  assert.equal(hits.filter(p=>p.includes('/assets/topics/')||p.endsWith('material-controls.png')).length,0,'full-resolution decorative originals must never be downloaded');
  assert.ok(await page.locator('img.topic-art').evaluateAll(images=>images.length>0&&images.filter(i=>i.complete).every(i=>i.naturalWidth===192)),'deployed badges use correctly decoded 192px derivatives');
- const cold=await page.evaluate(()=>({resources:performance.getEntriesByType('resource').length,bytes:performance.getEntriesByType('resource').reduce((n,r)=>n+r.transferSize,0),fcp:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,load:performance.getEntriesByType('navigation')[0].loadEventEnd}));
+ const cold=await page.evaluate(()=>({resources:performance.getEntriesByType('resource').length,bytes:performance.getEntriesByType('resource').reduce((n,r)=>n+r.transferSize,0),navigationBytes:performance.getEntriesByType('navigation')[0].transferSize,fcp:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,load:performance.getEntriesByType('navigation')[0].loadEventEnd}));
  assert.ok(cold.bytes<450000,'public homepage transfer budget: '+JSON.stringify(cold));
+ assert.ok(cold.bytes+cold.navigationBytes<550000,'HTML and subresources together must stay within the public transfer budget');
  const before=hits.filter(p=>/^\/assets\/(runtime|optimized)\//.test(p)).length;
  for(const path of ['/pages/about.html','/pages/blog.html','/pages/appointments.html','/pages/projects.html']){
   await page.goto(origin+path,{waitUntil:'networkidle'});

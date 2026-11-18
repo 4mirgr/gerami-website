@@ -62,6 +62,7 @@ def optimize_public_assets(site):
     for path in sources:emit(path)
     pages=[site/'index.html',*sorted((site/'pages').glob('*.html'))]
     preloads=[mapping[p] for p in sources if p.suffix=='.mjs']
+    inline_css_max_bytes=0
     for page in pages:
         text=page.read_text()
         def reference(match):
@@ -70,8 +71,27 @@ def optimize_public_assets(site):
             if target and '/'+target.relative_to(site).as_posix() in images:url=images['/'+target.relative_to(site).as_posix()]
             return match[1]+url+'"' if url else match[0]
         text=re.sub(r'((?:src|href)=")([^"\s]+)"',reference,text)
+        # A synchronous theme script after a stylesheet also waits for that
+        # stylesheet: one stalled CSS request can leave even the body unparsed.
+        # Embed the exact reviewed public CSS in place, retaining its cascade and
+        # fingerprinted font/image URLs. Other app/admin documents stay untouched.
+        css_bytes=0
+        def inline_style(match):
+            nonlocal css_bytes
+            href=re.search(r'\bhref="([^"]+)"',match[0])
+            target=resolve(href[1],page) if href else None
+            if not target or target.parent!=runtime or target.suffix!='.css':
+                raise ValueError('Public stylesheet requires a reviewed local inline adapter')
+            css=target.read_text()
+            if re.search(r'</style|@import\b',css,re.I) or re.search(r'\bmedia\s*=',match[0],re.I):
+                raise ValueError('Public stylesheet requires a reviewed safe inline adapter')
+            css_bytes+=len(css.encode())
+            if css_bytes>98304:raise ValueError('Public inline CSS exceeds the first-response budget')
+            return '<style data-public-stylesheet="/'+target.relative_to(site).as_posix()+'">'+css+'</style>'
+        text=re.sub(r'<link\b(?=[^>]*\brel="stylesheet")[^>]*>',inline_style,text,flags=re.I)
+        inline_css_max_bytes=max(inline_css_max_bytes,css_bytes)
         text=text.replace('</head>',''.join('<link rel="modulepreload" href="'+url+'">' for url in preloads)+'</head>',1)
         page.write_text(text)
     with (site/'_headers').open('a') as handle:
         handle.write('/assets/runtime/*\n  Cache-Control: public, max-age=31536000, immutable\n/assets/optimized/*\n  Cache-Control: public, max-age=31536000, immutable\n')
-    return {'images':manifest['bytes'],'runtime_files':len(mapping),'public_pages':len(pages)}
+    return {'images':manifest['bytes'],'runtime_files':len(mapping),'public_pages':len(pages),'render_blocking_stylesheets':0,'inline_css_max_bytes':inline_css_max_bytes}
