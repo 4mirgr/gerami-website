@@ -43,12 +43,28 @@ class PublicAssets(unittest.TestCase):
                 text = page.read_text()
                 self.assertNotRegex(text, r'(?:src|href)="(?:\.\./|/)?(?:js|css)/')
                 self.assertIn('rel="modulepreload"', text)
+                self.assertNotRegex(text, r'<link\b[^>]*rel="stylesheet"')
+                styles = re.findall(r'<style data-public-stylesheet="([^"]+)">(.*?)</style>', text, re.S)
+                self.assertEqual(len(styles), 3)
+                for url, css_text in styles:
+                    self.assertEqual(css_text, (site / url.lstrip('/')).read_text(), 'inline cascade must match the exact emitted stylesheet')
                 for url in re.findall(r'(?:src|href)="(/assets/(?:runtime|optimized)/[^"?]+)', text):
                     self.assertTrue((site / url.lstrip('/')).is_file(), url)
             self.assertEqual(protected, {name: (site / name).read_bytes() for name in protected})
             self.assertIn('/admin/*\n  Cache-Control: no-cache', (site / '_headers').read_text())
             self.assertLess(sum(row['optimized'] for row in report['images'].values()), 100000)
             self.assertFalse((site / 'assets/optimized/manifest.json').exists())
+            self.assertEqual(report['render_blocking_stylesheets'], 0)
+            self.assertLessEqual(report['inline_css_max_bytes'], 98304)
+
+    def test_style_breakout_or_import_cannot_enter_the_inline_document(self):
+        for unsafe in ('/* </style><script>alert(1)</script> */', '@import url("https://example.com/a.css");'):
+            with self.subTest(css=unsafe), tempfile.TemporaryDirectory() as folder:
+                site = self.stage(folder)
+                with (site / 'css/style.css').open('a') as handle:
+                    handle.write(unsafe)
+                with self.assertRaisesRegex(ValueError, 'reviewed safe inline adapter'):
+                    optimize_public_assets(site)
 
     def test_changed_dependency_changes_all_importer_cache_identities(self):
         with tempfile.TemporaryDirectory() as before, tempfile.TemporaryDirectory() as after:
