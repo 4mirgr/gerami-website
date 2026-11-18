@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+const source=await readFile(new URL('../deploy/asset-check.js',import.meta.url),'utf8');
+await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
+const probe=globalThis.GERAMI_ASSET_PROBE;
+const spec={label:'public font',path:'/assets/fonts/Vazirmatn.woff2',range:'bytes=0-8191'};
+let options;
+const ok=await probe(spec,'https://example.test',async(url,init)=>{options=init;return new Response(new Uint8Array(8192),{status:206,headers:{'content-range':'bytes 0-8191/111152'}});});
+assert.equal(ok.outcome,'ok');assert.equal(ok.bytes,8192);assert.equal(options.headers.Range,'bytes=0-8191');assert.equal(options.credentials,'omit');assert.equal(options.redirect,'error');assert.equal(options.method,'GET');
+const full=await probe(spec,'https://example.test',async()=>new Response('not a range'));
+assert.equal(full.outcome,'network_or_range_error');
+const headers=await probe(spec,'https://example.test',()=>new Promise(()=>{}),10);
+assert.equal(headers.outcome,'timeout');assert.equal(headers.phase,'waiting_headers');
+const body=await probe(spec,'https://example.test',async()=>new Response(new ReadableStream({start(c){c.enqueue(new Uint8Array([1,2,3]));}}),{status:206,headers:{'content-range':'bytes 0-8191/111152'}}),15);
+assert.equal(body.outcome,'timeout');assert.equal(body.phase,'reading_body');assert.equal(body.bytes,3);assert.equal(body.status,206);
+assert.ok(!JSON.stringify(body).includes('public-asset-check='));
+console.log('PASS public media diagnostic: credential-free GET, verified ranges, separate header/body deadlines and byte counts.');
