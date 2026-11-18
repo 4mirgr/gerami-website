@@ -1,5 +1,7 @@
 """Check deploy-time cache identities, relocation and protected app boundaries."""
+import base64
 import hashlib
+import json
 import re
 import shutil
 import tempfile
@@ -7,6 +9,7 @@ import unittest
 from pathlib import Path
 
 from public_assets import optimize_public_assets
+from asset_check import build_asset_check
 from site_studio import ROOT, bake_settings
 
 
@@ -75,6 +78,25 @@ class PublicAssets(unittest.TestCase):
             optimize_public_assets(b)
             for name in ('topics', 'site-model', 'rich-text', 'site-customizer', 'content'):
                 self.assertNotEqual(next((a / 'assets/runtime').glob(name + '.*')).name, next((b / 'assets/runtime').glob(name + '.*')).name)
+
+    def test_delivery_controls_compare_identical_bytes_without_changing_public_pages(self):
+        with tempfile.TemporaryDirectory() as folder:
+            site = self.stage(folder)
+            optimize_public_assets(site)
+            pages = {p: p.read_bytes() for p in [site / 'index.html', *sorted((site / 'pages').glob('*.html'))]}
+            build_asset_check(ROOT, site)
+            text = (site / 'asset-check.html').read_text()
+            specs = json.loads(re.search(r'const specs=(\[.*?\]);', text)[1])
+            self.assertEqual(len(specs), 7)
+            for binary, encoded in ((specs[1], specs[2]), (specs[3], specs[4])):
+                data = (site / binary['path'].lstrip('/')).read_bytes()
+                self.assertEqual(base64.b64decode((site / encoded['path'].lstrip('/')).read_bytes(), validate=True), data)
+                self.assertEqual(binary['sha256'], hashlib.sha256(data).hexdigest())
+                self.assertEqual(encoded['sourceBytes'], len(data))
+            self.assertIn('/assets/runtime/Vazirmatn.', specs[1]['path'])
+            self.assertEqual(pages, {p: p.read_bytes() for p in pages})
+            self.assertLess(len(text.encode()), 12000)
+            self.assertIn('/asset-check\n  Cache-Control: no-cache', (site / '_headers').read_text())
 
 
 if __name__ == '__main__':

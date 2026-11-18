@@ -26,4 +26,6 @@ public images, and records header/body phases, received bytes and the path of a
 controlling same-origin service worker. Each test has a six-second deadline.
 Results stay on the user's device; no account endpoints, cookies or stored data
 are read. It needs no separate JS or font download to display its controls. The
-source unit tests cover ignored ranges and both header/body stalls.
+source unit tests cover ignored ranges and both header/body stalls. The follow-up
+V2 comparison and device evidence are documented in
+`docs/public-asset-transport-2026-11-18.md`.
