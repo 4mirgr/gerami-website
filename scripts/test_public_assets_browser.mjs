@@ -41,10 +41,10 @@ try{
    console.log('PASS first-response paint with every subresource pending: '+path);
   }finally{await Promise.all(held.map(release=>release()));await stalled.close();}
  }
- const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[],bad=[],jsonRequests=[];
+ const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[],bad=[],jsonRequests=[],normalMirrors=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});
- page.on('request',r=>{if(r.url().includes('/content/')&&r.url().endsWith('.json'))jsonRequests.push(r.url());});
+ page.on('request',r=>{if(r.url().includes('/content/')&&r.url().endsWith('.json'))jsonRequests.push(r.url());if(new URL(r.url()).hostname==='raw.githubusercontent.com')normalMirrors.push(r.url());});
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.waitForSelector('[data-topic-card]');
  assert.equal(jsonRequests.length,0);
@@ -80,18 +80,98 @@ try{
  });
  assert.equal(new URL(jsonRequests.at(-1)).pathname,'/content/site.json');
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
+ assert.deepEqual(normalMirrors,[],'healthy primary delivery must not download alternate copies');
  console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:after-before,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
+ // Reproduce the carrier failure: same-origin font/art never send headers.
+ // Only a pinned public mirror may recover them; executable code stays local.
+ async function serveMirror(route,corruptFont=false){
+  const url=new URL(route.request().url());
+  assert.equal(route.request().headers().cookie,undefined);
+  assert.equal(route.request().headers().referer,undefined);
+  assert.match(url.pathname,/^\/4mirgr\/gerami-website\/38519df205b699ac954eeba0d09276a6b376c46c\/assets\//);
+  const relative=url.pathname.split('/').slice(4).join('/'),file=resolve(root,relative);
+  assert.ok(file.startsWith(root+'/assets/'));
+  const body=await readFile(file);
+  return route.fulfill({status:200,contentType:file.endsWith('.woff2')?'font/woff2':'image/webp',headers:{'Access-Control-Allow-Origin':'*'},body:corruptFont&&file.endsWith('.woff2')?Buffer.alloc(body.length):body});
+ }
+ const broken=await browser.newContext({viewport:{width:390,height:844}}),held=[],mirrors=[],recoveryErrors=[];
+ await broken.addInitScript(()=>{window.recoveryEvents=[];addEventListener('site-public-asset-recovery',event=>window.recoveryEvents.push(event.detail));});
+ await broken.addCookies([{name:'private_test_marker',value:'never-send',domain:'raw.githubusercontent.com',path:'/',secure:true,sameSite:'None'}]);
+ await broken.route('**/*',async route=>{
+  const url=new URL(route.request().url());
+  if(url.hostname==='raw.githubusercontent.com'){
+   mirrors.push(url.href);
+   return serveMirror(route);
+  }
+  if(url.origin===origin&&url.pathname.startsWith('/assets/')&&/\.(woff2|webp)$/.test(url.pathname))return new Promise(resolve=>held.push(async()=>{await route.abort().catch(()=>{});resolve();}));
+  return route.continue();
+ });
+ try{
+  const failed=await broken.newPage();
+  failed.on('pageerror',error=>recoveryErrors.push(error.message));
+  await failed.goto(origin,{waitUntil:'domcontentloaded'});
+  await failed.locator('#hero-title').waitFor({state:'visible'});
+  await failed.waitForFunction(()=>window.recoveryEvents.some(event=>event.path.endsWith('.woff2')&&event.outcome==='installed'),{},{timeout:9000});
+  await failed.waitForFunction(()=>document.querySelector('.brand-logo').src.startsWith('blob:')&&document.querySelector('.brand-logo').naturalWidth>0,{},{timeout:9000});
+  await failed.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:'),{},{timeout:9000});
+  await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});
+  const fontCDP=await failed.context().newCDPSession(failed);await fontCDP.send('DOM.enable');await fontCDP.send('CSS.enable');
+  const {root:rootNode}=await fontCDP.send('DOM.getDocument');const {nodeId:heading}=await fontCDP.send('DOM.querySelector',{nodeId:rootNode.nodeId,selector:'#hero-title'});
+  const recoveredFont=await fontCDP.send('CSS.getPlatformFontsForNode',{nodeId:heading});
+  assert.ok(recoveredFont.fonts.some(font=>font.familyName.includes('Vazirmatn')),'actual glyphs use the recovered font');
+  assert.ok(mirrors.some(url=>url.endsWith('/assets/fonts/Vazirmatn.woff2')));
+  assert.ok(mirrors.every(url=>!url.includes('/api/')&&!url.endsWith('.js')&&!url.endsWith('.mjs')));
+  await failed.locator('[data-theme-toggle]').click();
+  await failed.waitForFunction(()=>document.documentElement.dataset.theme==='dark'&&document.querySelector('.brand-logo').src.startsWith('blob:')&&document.querySelector('.brand-logo').naturalWidth>0,{},{timeout:9000});
+  await failed.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:'),{},{timeout:9000});
+  await failed.locator('[data-language-toggle]').click();
+  await failed.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:')&&document.querySelector('.brand-logo').src.startsWith('blob:')&&document.querySelector('.brand-logo').naturalWidth>0,{},{timeout:3000});
+  await failed.locator('[data-theme-toggle]').click();
+  await failed.waitForFunction(()=>document.documentElement.dataset.theme==='light'&&getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:'),{},{timeout:3000});
+  assert.deepEqual(recoveryErrors,[]);
+  console.log('PASS carrier fault reproduction: blocked primary font/art recover from byte-identical public mirror; theme remains usable.');
+ }finally{await Promise.all(held.map(release=>release()));await broken.close();}
+ const corrupt=await browser.newContext({viewport:{width:390,height:844}}),corruptHeld=[];
+ await corrupt.addInitScript(()=>{window.recoveryEvents=[];addEventListener('site-public-asset-recovery',event=>window.recoveryEvents.push(event.detail));});
+ await corrupt.route('**/*',route=>{
+  const url=new URL(route.request().url());
+  if(url.hostname==='raw.githubusercontent.com')return serveMirror(route,true);
+  if(url.origin===origin&&url.pathname.endsWith('.woff2'))return new Promise(resolve=>corruptHeld.push(async()=>{await route.abort().catch(()=>{});resolve();}));
+  return route.continue();
+ });
+ try{
+  const failed=await corrupt.newPage();await failed.goto(origin,{waitUntil:'domcontentloaded'});
+  await failed.waitForFunction(()=>window.recoveryEvents.some(event=>event.path.endsWith('.woff2')&&event.outcome==='unavailable'),{},{timeout:9000});
+  await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});
+  const cdp=await failed.context().newCDPSession(failed);await cdp.send('DOM.enable');await cdp.send('CSS.enable');
+  const {root:documentNode}=await cdp.send('DOM.getDocument');
+  const {nodeId}=await cdp.send('DOM.querySelector',{nodeId:documentNode.nodeId,selector:'#hero-title'});
+  const {fonts}=await cdp.send('CSS.getPlatformFontsForNode',{nodeId});
+  assert.ok(fonts.length>0&&fonts.every(font=>!font.familyName.includes('Vazirmatn')),'corrupt alternate font must never be rendered');
+  assert.ok((await failed.locator('main').innerText()).trim().length>20,'system-font content stays readable when both routes fail');
+  console.log('PASS mirror integrity: corrupt font rejected; readable content retained.');
+ }finally{await Promise.all(corruptHeld.map(release=>release()));await corrupt.close();}
  // The isolated carrier diagnostic must decode the same real bytes via both
- // transports, and must not rely on its own font or external script to start.
+ // origins, and must not rely on its own font or external script to start.
+ await page.route('https://raw.githubusercontent.com/**',route=>serveMirror(route));
  await page.goto(origin+'/asset-check.html?run=1',{waitUntil:'load'});
  await page.waitForFunction(()=>document.getElementById('report').textContent.length>0,{},{timeout:45000});
  const delivery=JSON.parse(await page.locator('#report').textContent());
- assert.equal(delivery.version,2);assert.equal(delivery.results.length,7);
+ assert.equal(delivery.version,3);assert.equal(delivery.results.length,7);
  const pairs=delivery.results.filter(r=>r.matchesSource!==undefined);
  assert.equal(pairs.length,4);
  for(const result of pairs){assert.equal(result.outcome,'ok',JSON.stringify(result));assert.equal(result.matchesSource,true);assert.equal(result.decoded,true);}
  assert.equal(delivery.results.at(-1).decoded,true);
  assert.equal(await page.locator('script[src],link[rel="stylesheet"]').count(),0);
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
- console.log('PASS built delivery diagnostic: identical font/image bytes decode through binary and text transports.');
+ console.log('PASS built delivery diagnostic: identical font/image bytes decode through primary and independent origins.');
+ const noJS=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+ try{
+  const plain=await noJS.newPage();await plain.goto(origin,{waitUntil:'networkidle'});
+  assert.equal(await plain.locator('.brand-logo').count(),1);
+  assert.ok(await plain.locator('.brand-logo').evaluate(image=>image.complete&&image.naturalWidth>0));
+  assert.ok((await plain.locator('main').innerText()).trim().length>20);
+  assert.match(await plain.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art')),/\/assets\/glass\/ribbon-day\.webp/);
+  console.log('PASS no-JavaScript artifact: single real logo, readable content and original wallpaper restored.');
+ }finally{await noJS.close();}
 }finally{await browser.close();await new Promise(r=>server.close(r));}

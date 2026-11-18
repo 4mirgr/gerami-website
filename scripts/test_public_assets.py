@@ -6,10 +6,12 @@ import re
 import shutil
 import tempfile
 import unittest
+import gzip
 from pathlib import Path
 
 from public_assets import optimize_public_assets
 from asset_check import build_asset_check
+from public_asset_recovery import add_public_asset_recovery, public_mirrors
 from site_studio import ROOT, bake_settings
 
 
@@ -41,7 +43,7 @@ class PublicAssets(unittest.TestCase):
             self.assertIn("new URL('/'+path,import.meta.url)", model)
             css = next((site / 'assets/runtime').glob('glass.*.css')).read_text()
             self.assertNotIn('material-controls.png', css)
-            self.assertIn('/assets/optimized/material-controls.', css)
+            self.assertNotRegex(css, r'url\([\'\"]?/assets/', 'CSS art downloads must be managed and cancellable')
             for page in [site / 'index.html', *sorted((site / 'pages').glob('*.html'))]:
                 text = page.read_text()
                 self.assertNotRegex(text, r'(?:src|href)="(?:\.\./|/)?(?:js|css)/')
@@ -90,13 +92,45 @@ class PublicAssets(unittest.TestCase):
             self.assertEqual(len(specs), 7)
             for binary, encoded in ((specs[1], specs[2]), (specs[3], specs[4])):
                 data = (site / binary['path'].lstrip('/')).read_bytes()
-                self.assertEqual(base64.b64decode((site / encoded['path'].lstrip('/')).read_bytes(), validate=True), data)
+                self.assertRegex(encoded['path'], r'^https://raw\.githubusercontent\.com/4mirgr/gerami-website/[a-f0-9]{40}/assets/')
+                compatibility = next((site / 'delivery-check').glob(Path(binary['path']).stem + '.*.txt'))
+                self.assertEqual(base64.b64decode(compatibility.read_bytes(), validate=True), data)
                 self.assertEqual(binary['sha256'], hashlib.sha256(data).hexdigest())
                 self.assertEqual(encoded['sourceBytes'], len(data))
             self.assertIn('/assets/runtime/Vazirmatn.', specs[1]['path'])
             self.assertEqual(pages, {p: p.read_bytes() for p in pages})
             self.assertLess(len(text.encode()), 12000)
             self.assertIn('/asset-check\n  Cache-Control: no-cache', (site / '_headers').read_text())
+
+    def test_recovery_preserves_protected_files_and_small_first_response(self):
+        with tempfile.TemporaryDirectory() as folder:
+            site = self.stage(folder)
+            optimize_public_assets(site)
+            protected = {p: p.read_bytes() for directory in ('admin', 'functions') for p in (site / directory).rglob('*') if p.is_file()}
+            add_public_asset_recovery(ROOT, site)
+            self.assertEqual(protected, {p: p.read_bytes() for p in protected})
+            self.assertLess(len(gzip.compress((site / 'index.html').read_bytes())), 28000)
+            mirrors = public_mirrors(ROOT, site)
+            self.assertEqual(len(mirrors), 18)
+            for path, entry in mirrors.items():
+                self.assertEqual(hashlib.sha256((site / path.lstrip('/')).read_bytes()).hexdigest(), entry['sha256'])
+                self.assertNotIn('/api/', path)
+
+    def test_mirror_stale_bytes_or_nonpublic_paths_block_the_build(self):
+        for mutation in ('bytes', 'path'):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as folder, tempfile.TemporaryDirectory() as config:
+                site = self.stage(folder)
+                optimize_public_assets(site)
+                root = Path(config)
+                (root / 'deploy').mkdir()
+                spec = json.loads((ROOT / 'deploy/public-asset-mirror.json').read_text())
+                if mutation == 'bytes':
+                    spec['assets']['/assets/fonts/Vazirmatn.woff2'] = '0' * 64
+                else:
+                    spec['assets']['/admin/config.yml'] = '0' * 64
+                (root / 'deploy/public-asset-mirror.json').write_text(json.dumps(spec))
+                with self.assertRaises(ValueError):
+                    public_mirrors(root, site)
 
 
 if __name__ == '__main__':
