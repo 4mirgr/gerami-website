@@ -63,6 +63,7 @@ def optimize_public_assets(site):
     pages=[site/'index.html',*sorted((site/'pages').glob('*.html'))]
     preloads=[mapping[p] for p in sources if p.suffix=='.mjs']
     inline_css_max_bytes=0
+    delivery={}
     for page in pages:
         text=page.read_text()
         def reference(match):
@@ -92,6 +93,9 @@ def optimize_public_assets(site):
         inline_css_max_bytes=max(inline_css_max_bytes,css_bytes)
         text=text.replace('</head>',''.join('<link rel="modulepreload" href="'+url+'">' for url in preloads)+'</head>',1)
         page.write_text(text)
+    from public_delivery import deliver_page
+    for page in pages:
+        delivery[page.relative_to(site).as_posix()]=deliver_page(site,page,preloads,font_url,urls.values())
     with (site/'_headers').open('a') as handle:
         handle.write('/assets/runtime/*\n  Cache-Control: public, max-age=31536000, immutable\n/assets/optimized/*\n  Cache-Control: public, max-age=31536000, immutable\n')
-    return {'images':manifest['bytes'],'runtime_files':len(mapping),'public_pages':len(pages),'render_blocking_stylesheets':0,'inline_css_max_bytes':inline_css_max_bytes}
+    return {'images':manifest['bytes'],'runtime_files':len(mapping),'public_pages':len(pages),'render_blocking_stylesheets':0,'inline_css_max_bytes':inline_css_max_bytes,'delivery':delivery}
