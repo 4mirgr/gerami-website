@@ -1,15 +1,17 @@
-"""Build isolated, byte-identical binary/text delivery controls; never used by the site."""
+"""Build standalone public delivery comparisons; no account state is accessed."""
 import base64
 import hashlib
 import json
 import re
 from pathlib import Path
+from public_asset_recovery import public_mirrors
 
 
 def build_asset_check(root, site):
     root, site = Path(root), Path(site)
     controls = site / 'delivery-check'
     controls.mkdir()
+    mirrors = public_mirrors(root, site)
     specs = [{'label': 'آیکون کوچک', 'path': '/favicon.svg'}]
     for label, source, kind in (
         ('فونت', next((site / 'assets/runtime').glob('Vazirmatn.*.woff2')), 'font'),
@@ -21,7 +23,7 @@ def build_asset_check(root, site):
         encoded.write_bytes(base64.b64encode(data))
         common = {'kind': kind, 'sha256': digest, 'sourceBytes': len(data)}
         specs.append({**common, 'label': label + '؛ مسیر واقعی سایت', 'path': '/' + source.relative_to(site).as_posix()})
-        specs.append({**common, 'label': label + '؛ همان داده با انتقال متنی', 'path': '/' + encoded.relative_to(site).as_posix(), 'encoding': 'base64'})
+        specs.append({**common, 'label': label + '؛ مسیر مستقل GitHub', 'path': mirrors['/' + source.relative_to(site).as_posix()]['url']})
     specs.extend([
         {'label': 'بخش ۸ کیلوبایتی فونت', 'path': '/assets/fonts/Vazirmatn.woff2', 'range': 'bytes=0-8191'},
         {'label': 'آیکون موضوع', 'path': '/assets/optimized/heart.012d14fb0e841a4f.webp', 'kind': 'image'},

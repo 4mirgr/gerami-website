@@ -6,6 +6,7 @@ let documents={},previewAssets={};
 const preview=new URLSearchParams(location.search).has('studio-preview')&&parent!==window;
 const lang=()=>root.lang==='en'?'en':'fa';
 const source=url=>previewAssets[url]||url;
+const background=url=>window.SITE_PUBLIC_BACKGROUND?.(source(url))||`url("${source(url)}")`;
 const read=async path=>validateDocument(path,await readPublicDocument(path));
 function navigation(){
  const value=documents['content/navigation.json'];if(!value)return;
@@ -23,8 +24,8 @@ function appearance(){
  for(const [name,val] of Object.entries(colors))if(/^#[0-9a-f]{6}$/i.test(val))root.style.setProperty('--'+name,val);
  for(const [name,val] of Object.entries({'site-font-size':value.fontSize+'px','site-line-height':value.lineHeight,'heading-weight':value.headingWeight,'radius':value.radius+'px','site-width':value.width+'px'}))root.style.setProperty('--'+name,String(val));
  root.dataset.customBackground=String(Boolean(colors.background));
- root.style.setProperty('--glass-art',`url("${source(colors.wallpaper)}")`);
- root.style.setProperty('--site-background',colors.background?`url("${source(colors.background)}")`:'none');
+ root.style.setProperty('--glass-art',background(colors.wallpaper));
+ root.style.setProperty('--site-background',colors.background?background(colors.background):'none');
  for(const img of document.querySelectorAll('img[data-theme-light][data-theme-dark]')){
   const key=img.dataset.siteImage||(img.closest('.brand-identity')?'logo':img.dataset.themeLight.includes('wallpaper')?'wallpaper':null);
   if(key)img.dataset.siteImage=key;

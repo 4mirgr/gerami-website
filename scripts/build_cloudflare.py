@@ -205,6 +205,8 @@ def assemble(sources, output):
         version_assets(stage)
         from public_assets import optimize_public_assets
         performance = optimize_public_assets(stage)
+        from public_asset_recovery import add_public_asset_recovery
+        add_public_asset_recovery(ROOT, stage)
         from asset_check import build_asset_check
         build_asset_check(ROOT, stage)
         files = [file for file in stage.rglob('*') if file.is_file()]

@@ -2,6 +2,7 @@
 import hashlib,json,re,shutil
 from pathlib import Path
 from urllib.parse import urlsplit,unquote
+from public_asset_recovery import public_mirrors, controlled_public_css
 
 
 def optimize_public_assets(site):
@@ -27,6 +28,7 @@ def optimize_public_assets(site):
     font_url='/assets/runtime/Vazirmatn.'+fingerprint(font.read_bytes())+'.woff2'
     shutil.copy2(font,site/font_url.lstrip('/'))
     mapping={font:font_url}
+    mirrors=public_mirrors(Path(__file__).resolve().parent.parent,site)
     visiting=set()
     sources=sorted([*site.glob('js/*.js'),*site.glob('js/*.mjs'),*site.glob('css/*.css')])
 
@@ -56,6 +58,7 @@ def optimize_public_assets(site):
                 url=images.get('/'+target.relative_to(site).as_posix()) or mapping.get(target) or '/'+target.relative_to(site).as_posix()
                 return 'url("'+url+'")'
             text=re.sub(r'url\(\s*([\'\"]?)([^)\'\"]+)\1\s*\)',css_url,text)
+            text=controlled_public_css(text,mirrors)
         data=text.encode();url='/assets/runtime/'+path.stem+'.'+fingerprint(data)+path.suffix
         (site/url.lstrip('/')).write_bytes(data);mapping[path]=url;visiting.remove(path);return url
 
@@ -89,6 +92,14 @@ def optimize_public_assets(site):
             if css_bytes>98304:raise ValueError('Public inline CSS exceeds the first-response budget')
             return '<style data-public-stylesheet="/'+target.relative_to(site).as_posix()+'">'+css+'</style>'
         text=re.sub(r'<link\b(?=[^>]*\brel="stylesheet")[^>]*>',inline_style,text,flags=re.I)
+        text=re.sub(r'(<style\b[^>]*>)(.*?)(</style>)',lambda m:m[1]+controlled_public_css(m[2],mirrors)+m[3],text,flags=re.S|re.I)
+        text=re.sub(r'<link\b[^>]*>',lambda m:'' if 'as="font"' in m[0] and font_url in m[0] else m[0],text)
+        def lazy_art(match):
+            tag=match[0];src=re.search(r'\bsrc="([^"]+)"',tag)
+            if not src or urlsplit(src[1]).path not in mirrors:return tag
+            tag=re.sub(r'\sloading="[^"]*"','',tag)
+            return tag[:-1]+' loading="lazy">'
+        text=re.sub(r'<img\b[^>]*>',lazy_art,text,flags=re.I)
         inline_css_max_bytes=max(inline_css_max_bytes,css_bytes)
         text=text.replace('</head>',''.join('<link rel="modulepreload" href="'+url+'">' for url in preloads)+'</head>',1)
         page.write_text(text)

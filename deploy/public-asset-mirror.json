@@ -1,0 +1,24 @@
+{
+  "repository": "4mirgr/gerami-website",
+  "commit": "38519df205b699ac954eeba0d09276a6b376c46c",
+  "assets": {
+    "/assets/fonts/Vazirmatn.woff2": "4e3fa217d38fdafc1fea4414ceb58ca5e662cf0ab5fa735a8c8c20e8b42cad92",
+    "/assets/glass/ribbon-day.webp": "b722cf5791f180499dfaae18a5d743f9a9d0bb7df15ad316148f7567cd2a16b7",
+    "/assets/glass/ribbon-night.webp": "4f29b7e289080da4daa7e74485722d806c18bb34cb49b4c31c396eb8e3e9441f",
+    "/assets/identity/logo-day.webp": "bd6a43c0e47492fc400d5aedd96e5b7dd769d1e56b1bf120fcb42251c5b0137a",
+    "/assets/identity/logo-night.webp": "7bde7b8e353c356ce4875ec72b6047e93ad9837aa39c6c9b9ed4ded4e211c1cb",
+    "/assets/identity/wallpaper-day.webp": "40ed174445b3f3a5514cd6a15016c4319ab47aa5c4da0c2018a199858d78ef45",
+    "/assets/identity/wallpaper-night.webp": "fde918bbd92c0ecbb4d5f384f4d926b36da64883a58089827a372ecc26e3ea0e",
+    "/assets/optimized/blood-cells.7c07605f74f2a328.webp": "7c07605f74f2a32823bc6e4a2f369ebc9693fbf42ea8d71a429daa293498e86c",
+    "/assets/optimized/digestive.f37a67b25873bd5d.webp": "f37a67b25873bd5d5916677a12bcf0e0540588dff21cef0c603f404d83b6725d",
+    "/assets/optimized/education.7cbb04e2e0cb3679.webp": "7cbb04e2e0cb36798322f12843d38e48313bf3a08e7eee5da94f2f4d7aa1730f",
+    "/assets/optimized/heart.012d14fb0e841a4f.webp": "012d14fb0e841a4ff659c85f3d2377abefe2e7051faa9921b9ff4e7541c4e2b4",
+    "/assets/optimized/infection.9b15781399cae676.webp": "9b15781399cae676e3ce65a26698070947290886b9ace3095043729784688d6b",
+    "/assets/optimized/joint.d29f6c42f3e67991.webp": "d29f6c42f3e67991d9293b5106051bc8f01ec5b5dc96d866dab4a22bfe100a03",
+    "/assets/optimized/kidneys.c73f1e5c64b0acda.webp": "c73f1e5c64b0acda27f72f40dee88cb5f8cc9d25e7d5bcc7c78a958e9a0272b9",
+    "/assets/optimized/lungs.a6846b207b26e967.webp": "a6846b207b26e96733050a546509485dd71da7c0e43df52cd8d69746771490ff",
+    "/assets/optimized/material-controls.95b2f25b406261cb.webp": "95b2f25b406261cb06fd3af95841407f9e93e8ae65fbe8f714fbe4c79b7e9191",
+    "/assets/optimized/pancreas.4704a794860d4c81.webp": "4704a794860d4c81e82b234d937c374e17dfce46c1518a892da575b96c7ce37e",
+    "/assets/optimized/stethoscope.4f6ea226462d6523.webp": "4f6ea226462d652367935be9149cae7eaaacadb0d49e78c5d68678896d8d3f66"
+  }
+}

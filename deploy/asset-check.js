@@ -1,4 +1,4 @@
-/* Read-only, same-origin public file checks. No storage, cookies or account APIs. */
+/* Public file checks on the site and pinned public GitHub copies; no credentials. */
 (() => {
  async function probe(spec,origin,fetcher=fetch,timeoutMs=6000){
   const started=performance.now(),controller=new AbortController();let timer,status,firstByteMs,bytes=0,phase='waiting_headers',range='',decoded=false,matchesSource,sourceBytes;
@@ -55,7 +55,7 @@
    if(result.decoded&&spec.kind==='font')document.getElementById('sample').style.fontFamily='VazirmatnCheck,Tahoma,sans-serif';
   }
   const nav=performance.getEntriesByType('navigation')[0],controller=navigator.serviceWorker?.controller;let worker='';try{if(controller){const u=new URL(controller.scriptURL);if(u.origin===location.origin)worker=u.pathname;}}catch{}
-  report.textContent=JSON.stringify({version:2,checkedAt:new Date().toISOString(),navigation:nav?{dnsMs:Math.round(nav.domainLookupEnd-nav.domainLookupStart),connectMs:Math.round(nav.connectEnd-nav.connectStart),firstByteMs:Math.round(nav.responseStart-nav.requestStart),protocol:nav.nextHopProtocol}:null,controllingWorker:worker,results},null,2);
+  report.textContent=JSON.stringify({version:3,checkedAt:new Date().toISOString(),navigation:nav?{dnsMs:Math.round(nav.domainLookupEnd-nav.domainLookupStart),connectMs:Math.round(nav.connectEnd-nav.connectStart),firstByteMs:Math.round(nav.responseStart-nav.requestStart),protocol:nav.nextHopProtocol}:null,controllingWorker:worker,results},null,2);
   status.textContent='بررسی تمام شد. کپی نتیجه را بزنید و همراه نام اینترنت و وضعیت VPN بفرستید.';run.disabled=false;copy.disabled=false;
  });
  copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(report.textContent);status.textContent='نتیجه کپی شد.';}catch{status.textContent='متن نتیجه را از پایین صفحه انتخاب و کپی کنید.';}});
