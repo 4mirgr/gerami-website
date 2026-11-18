@@ -1,6 +1,5 @@
 """Check the assembled artifact and that imported app files retain their content."""
 import argparse
-import base64
 import hashlib
 import json
 from html.parser import HTMLParser
@@ -37,14 +36,12 @@ class Assets(HTMLParser):
             self.entries.append(attributes.get('href'))
 
 
-for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html', 'connection-check.html'):
+for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html', 'connection-check.html', 'asset-check.html'):
     file = site / path
     assets = Assets()
     assets.feed(file.read_text())
     for reference in assets.refs:
         url = urlsplit(reference)
-        if path in ('index.html', 'pages/projects.html') and reference == 'data:image/x-icon;base64,' + base64.b64encode((site / 'assets/favicon.ico').read_bytes()).decode():
-            continue  # Only the exact reviewed local favicon may be embedded here.
         if url.scheme or url.netloc:
             errors.append(f'{path}: external entry-point asset {reference}')
             continue
