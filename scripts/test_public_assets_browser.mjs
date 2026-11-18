@@ -81,4 +81,17 @@ try{
  assert.equal(new URL(jsonRequests.at(-1)).pathname,'/content/site.json');
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
  console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:after-before,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
+ // The isolated carrier diagnostic must decode the same real bytes via both
+ // transports, and must not rely on its own font or external script to start.
+ await page.goto(origin+'/asset-check.html?run=1',{waitUntil:'load'});
+ await page.waitForFunction(()=>document.getElementById('report').textContent.length>0,{},{timeout:45000});
+ const delivery=JSON.parse(await page.locator('#report').textContent());
+ assert.equal(delivery.version,2);assert.equal(delivery.results.length,7);
+ const pairs=delivery.results.filter(r=>r.matchesSource!==undefined);
+ assert.equal(pairs.length,4);
+ for(const result of pairs){assert.equal(result.outcome,'ok',JSON.stringify(result));assert.equal(result.matchesSource,true);assert.equal(result.decoded,true);}
+ assert.equal(delivery.results.at(-1).decoded,true);
+ assert.equal(await page.locator('script[src],link[rel="stylesheet"]').count(),0);
+ assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
+ console.log('PASS built delivery diagnostic: identical font/image bytes decode through binary and text transports.');
 }finally{await browser.close();await new Promise(r=>server.close(r));}

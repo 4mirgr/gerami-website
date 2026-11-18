@@ -182,11 +182,6 @@ def assemble(sources, output):
         shutil.copy2(ROOT / 'deploy/legacy-intmed-links.js', stage / 'legacy-intmed-links.js')
         for name in ('connection-check.html', 'connection-check.js'):
             shutil.copy2(ROOT / 'deploy' / name, stage / name)
-        diagnostic=(ROOT/'deploy/asset-check.html').read_text()
-        diagnostic_code=(ROOT/'deploy/asset-check.js').read_text()
-        if diagnostic.count('<!-- public-asset-check-script -->')!=1 or re.search(r'</script',diagnostic_code,re.I):
-            raise ValueError('Review the safe public asset diagnostic adapter')
-        (stage/'asset-check.html').write_text(diagnostic.replace('<!-- public-asset-check-script -->','<script>'+diagnostic_code+'</script>'))
         # Enable cards in the assembled artifact, where the actual apps now exist.
         with (stage / 'js/links.js').open('a', encoding='utf-8') as handle:
             handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/',aus:'/aus/'}));\n")
@@ -210,6 +205,8 @@ def assemble(sources, output):
         version_assets(stage)
         from public_assets import optimize_public_assets
         performance = optimize_public_assets(stage)
+        from asset_check import build_asset_check
+        build_asset_check(ROOT, stage)
         files = [file for file in stage.rglob('*') if file.is_file()]
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
