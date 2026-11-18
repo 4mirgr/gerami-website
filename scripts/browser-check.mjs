@@ -140,8 +140,12 @@ try {
   await navigate('pages/projects.html');
   await evaluate("new Promise(resolve=>setTimeout(resolve,100))");
   assert.equal(await evaluate("document.querySelector('[data-destination=intmed]')."+(combined?'pathname':'hash')),combined?'/intmed/':'#intmed');
-  assert.equal(await evaluate("document.querySelector('[data-destination=aus]')."+(combined?'pathname':'hash')),combined?'/aus/':'#aus');
-  assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),combined);
+  // AUS is deliberately absent from the public page. This synthetic link is
+  // appended after its initial link pass, so an unsafe override must preserve
+  // its original fragment rather than manufacture a public project entry.
+  assert.equal(await evaluate("document.querySelector('[data-destination=aus]').hash"),'#aus');
+  assert.equal(await evaluate("document.querySelector('[data-destination=aus]').host"),new URL(baseURL).host);
+  assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),false,'Unsafe configuration keeps its unavailable warning visible');
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:remoteConfig.identifier});
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:fixture.identifier});
   // JavaScript disabled: content and native mobile menu still work.

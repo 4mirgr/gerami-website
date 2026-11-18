@@ -15,7 +15,7 @@ from pathlib import Path
 BASE = "/aus/"
 PUBLIC_INPUTS = (
     "src", "public", "index.html", "package.json", "package-lock.json",
-    "vite.config.js", "cloud/gp-discovery-sources.json", "library/sources.json",
+    "scripts/frontend.mjs", "cloud/gp-discovery-sources.json", "library/sources.json",
     "cloud/evidence-deadline.mjs",
 )
 
@@ -75,7 +75,7 @@ def prepare_source(source: Path, destination: Path) -> None:
                           "encodeURIComponent(location.origin + import.meta.env.BASE_URL)")
     elif text.count('encodeURIComponent(recoveryRedirect(location.href))') == 2 and "'./auth-recovery.mjs'" in text:
         # Signup and password recovery share the reviewed URL helper. Bind its
-        # disposable build copy to Vite's mount; never silently skip the check.
+        # disposable build copy to the configured public mount; never silently skip the check.
         _replace_required(destination / 'src/auth-recovery.mjs',
                           "return url.origin + (url.pathname === '/aus' || url.pathname.startsWith('/aus/') ? '/aus/' : '/');",
                           'return url.origin + import.meta.env.BASE_URL;')
@@ -98,8 +98,8 @@ def prepare_source(source: Path, destination: Path) -> None:
                                 "font-family: Tahoma, system-ui, sans-serif;")
         path.write_text(text, encoding="utf-8")
 
-    # Vite rewrites index.html asset URLs itself; public HTML/manifest are copied
-    # verbatim by Vite, so their own navigation and icon URLs need the base too.
+    # The reviewed frontend builder rewrites index entry URLs; public HTML/manifest
+    # navigation and icon URLs need their own mount adaptation.
     for path in (destination / "public").rglob("*.html"):
         text = path.read_text(encoding="utf-8")
         text = re.sub(r'(href|src)=(["\'])/(?!/)', r'\1=\2' + BASE, text)
@@ -131,6 +131,6 @@ def prepare_and_build(source: Path, output: Path) -> Path:
                        cwd=work, check=True)
         dist = work / "dist"
         if not (dist / "index.html").is_file():
-            raise RuntimeError("AUS Vite build did not produce index.html")
+            raise RuntimeError("AUS frontend build did not produce index.html")
         shutil.copytree(dist, output, dirs_exist_ok=True)
     return output
