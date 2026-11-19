@@ -25,7 +25,9 @@ class HomeLoading(unittest.TestCase):
             'content/appearance.json', 'content/navigation.json', 'content/pages/home.json',
             'content/site.json', 'content/topics.json', 'content/articles.json'})
         for path, data in snapshot['documents'].items():
-            self.assertEqual(data, json.loads((ROOT / path).read_text()))
+            expected = json.loads((ROOT / path).read_text())
+            if path == 'content/site.json': expected['cv'] = []
+            self.assertEqual(data, expected)
         self.assertLessEqual(len(json.dumps(snapshot, ensure_ascii=False).encode()), 65536)
         self.assertIn('<script id="site-theme-bootstrap">', text)
         self.assertNotRegex(text, r'<script[^>]+src="(?:/)?js/theme\.js')
@@ -43,7 +45,7 @@ class HomeLoading(unittest.TestCase):
             path.write_text(json.dumps(value, ensure_ascii=False))
             before = {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()}
             text = self.render(root)
-            self.assertEqual(self.snapshot(text)['documents']['content/site.json'], value)
+            self.assertEqual(self.snapshot(text)['documents']['content/site.json'], {**value, 'cv': []})
             self.assertNotIn('<script>window.pwned=true</script>', text)
             self.assertEqual(before, {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()})
 

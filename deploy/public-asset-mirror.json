@@ -1,6 +1,6 @@
 {
   "repository": "4mirgr/gerami-website",
-  "commit": "38519df205b699ac954eeba0d09276a6b376c46c",
+  "commit": "8b5b6579572dfc865f8b894800ec10ca336ad8c2",
   "assets": {
     "/assets/fonts/Vazirmatn.woff2": "4e3fa217d38fdafc1fea4414ceb58ca5e662cf0ab5fa735a8c8c20e8b42cad92",
     "/assets/glass/ribbon-day.webp": "b722cf5791f180499dfaae18a5d743f9a9d0bb7df15ad316148f7567cd2a16b7",
@@ -19,6 +19,8 @@
     "/assets/optimized/lungs.a6846b207b26e967.webp": "a6846b207b26e96733050a546509485dd71da7c0e43df52cd8d69746771490ff",
     "/assets/optimized/material-controls.95b2f25b406261cb.webp": "95b2f25b406261cb06fd3af95841407f9e93e8ae65fbe8f714fbe4c79b7e9191",
     "/assets/optimized/pancreas.4704a794860d4c81.webp": "4704a794860d4c81e82b234d937c374e17dfce46c1518a892da575b96c7ce37e",
-    "/assets/optimized/stethoscope.4f6ea226462d6523.webp": "4f6ea226462d652367935be9149cae7eaaacadb0d49e78c5d68678896d8d3f66"
+    "/assets/optimized/stethoscope.4f6ea226462d6523.webp": "4f6ea226462d652367935be9149cae7eaaacadb0d49e78c5d68678896d8d3f66",
+    "/assets/glass/golden-gate-day.webp": "c90a54ebb0af5f437f2f52fa6bada131759a26c74e6dbd86b314f101ba5be321",
+    "/assets/glass/golden-gate-night.webp": "6643355a4c32928519ef626909d8781c33f8ab982d83ffc4da250f6a952c94ed"
   }
 }

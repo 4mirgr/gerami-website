@@ -1,0 +1,9 @@
+# Golden Gate glass and professional profile — 2026-11-19
+
+The owner supplied the exact Golden Gate light/dark photographs and requested neutral transparent glass rather than the green palette. The original photographs are resized to 1600×900 WebP (30,966 and 26,298 bytes), served locally and included in the reviewed, integrity-checked public mirror. Provenance is in `assets/glass/golden-gate-sources.json`. Existing bounded delivery recovery, readable system-font fallback and no-JavaScript artwork remain intact; no full font/image payload is embedded into HTML.
+
+The footer uses the existing optimized version of the owner's supplied blue metallic logo. The supplied Persian CV informs ten bilingual education, clinical, teaching and research entries, a source-linked 2022 Frontiers publication, and the professional email. The confirmed LinkedIn URL is used. Training is not upgraded into an unprovided completed qualification. The original CV PDF and personal identity details are not published. The CV is statically rendered on About, escaped, and excluded from other pages' inline profile snapshots.
+
+Validation: the complete source Chromium suite passes, including CMS/private entry protection, actual pinned Decap session behavior, editor publishing, bilingual/mobile layouts and profile hydration. The combined public build and assembled artifact browser suite pass, including held primary asset responses, independent delivery, corrupted mirror rejection and no-JS presentation. A local desktop/mobile visual inspection confirmed both wallpapers, transparent surfaces, footer logo, CV and no horizontal overflow. These checks do not claim an actual iPhone or Iranian carrier test.
+
+Shared Google/username authentication requested subsequently is a separate increment. This visual release does not activate patient registration, medical storage or a native Clinic deployment.

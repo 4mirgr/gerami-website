@@ -61,7 +61,7 @@
  let appearance;try{appearance=JSON.parse(document.getElementById('site-public-data')?.textContent).documents['content/appearance.json'];}catch{}
  function backgrounds(){
   const mode=document.documentElement.dataset.theme==='dark'?'dark':'light';
-  const value=appearance?.[mode];background(value?.wallpaper||`/assets/glass/ribbon-${mode==='dark'?'night':'day'}.webp`);if(value?.background)background(value.background);
+  const value=appearance?.[mode];background(value?.wallpaper||`/assets/glass/golden-gate-${mode==='dark'?'night':'day'}.webp`);if(value?.background)background(value.background);
   const sprite=Object.keys(assets).find(path=>path.includes('/material-controls.'));if(sprite)background(sprite);
  }
  const font=Object.keys(assets).find(path=>assets[path].type==='font/woff2');

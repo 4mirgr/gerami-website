@@ -1,0 +1,16 @@
+{
+  "requested": "2026-11-19",
+  "exports": "1600x900 WebP; original colors and aspect ratio retained",
+  "sources": {
+    "light": {
+      "url": "https://applemagazine.com/wp-content/uploads/2026/06/macOS-27-Golden-Gate-Light-5K-scaled.jpg",
+      "source_sha256": "2756566c6ad2a47c5c0686df128f6e6cf7d843edfcc7204e8d3b36b9e89e1e07",
+      "asset": "golden-gate-day.webp"
+    },
+    "dark": {
+      "url": "https://applemagazine.com/wp-content/uploads/2026/06/macOS-27-Golden-Gate-Dark-5K-scaled.jpg",
+      "source_sha256": "4dae1befe4b79367f8508840cd3d1e89716593398ad6cabac339095d414a8121",
+      "asset": "golden-gate-night.webp"
+    }
+  }
+}

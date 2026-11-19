@@ -12,18 +12,24 @@ def build_asset_check(root, site):
     controls = site / 'delivery-check'
     controls.mkdir()
     mirrors = public_mirrors(root, site)
+    appearance = json.loads((site / 'content/appearance.json').read_text())
+    # Retain the two immutable V2 URLs, never encode arbitrary owner uploads.
+    for legacy in (next((site / 'assets/runtime').glob('Vazirmatn.*.woff2')), site / 'assets/glass/ribbon-day.webp'):
+        data = legacy.read_bytes()
+        digest = hashlib.sha256(data).hexdigest()
+        (controls / (legacy.stem + '.' + digest[:16] + '.txt')).write_bytes(base64.b64encode(data))
     specs = [{'label': 'آیکون کوچک', 'path': '/favicon.svg'}]
     for label, source, kind in (
         ('فونت', next((site / 'assets/runtime').glob('Vazirmatn.*.woff2')), 'font'),
-        ('پس‌زمینه', site / 'assets/glass/ribbon-day.webp', 'image'),
+        ('پس‌زمینه', site / appearance['light']['wallpaper'].lstrip('/'), 'image'),
     ):
         data = source.read_bytes()
         digest = hashlib.sha256(data).hexdigest()
-        encoded = controls / (source.stem + '.' + digest[:16] + '.txt')
-        encoded.write_bytes(base64.b64encode(data))
         common = {'kind': kind, 'sha256': digest, 'sourceBytes': len(data)}
-        specs.append({**common, 'label': label + '؛ مسیر واقعی سایت', 'path': '/' + source.relative_to(site).as_posix()})
-        specs.append({**common, 'label': label + '؛ مسیر مستقل GitHub', 'path': mirrors['/' + source.relative_to(site).as_posix()]['url']})
+        path = '/' + source.relative_to(site).as_posix()
+        specs.append({**common, 'label': label + '؛ مسیر واقعی سایت', 'path': path})
+        if path in mirrors:
+            specs.append({**common, 'label': label + '؛ مسیر مستقل GitHub', 'path': mirrors[path]['url']})
     specs.extend([
         {'label': 'بخش ۸ کیلوبایتی فونت', 'path': '/assets/fonts/Vazirmatn.woff2', 'range': 'bytes=0-8191'},
         {'label': 'آیکون موضوع', 'path': '/assets/optimized/heart.012d14fb0e841a4f.webp', 'kind': 'image'},

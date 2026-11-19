@@ -7,6 +7,22 @@ from site_studio import ROOT, generate, bake_settings
 
 
 class SiteStudioBuild(unittest.TestCase):
+    def test_public_profile_is_baked_and_escaped_without_waiting_for_javascript(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            shutil.copytree(ROOT / 'content', root / 'content')
+            profile = json.loads((root / 'content/site.json').read_text())
+            profile['bio_fa'] = 'معرفی واقعی <script>bad()</script>'
+            profile['cv'] = [{'title_fa': 'آموزش بالینی', 'title_en': 'Clinical training', 'detail_fa': 'شرح مستند <img onerror=bad()>', 'detail_en': 'Documented training'}]
+            (root / 'content/site.json').write_text(json.dumps(profile))
+            template = '<html><head></head><body><main><section data-profile-host></section></main></body></html>'
+            page = bake_settings(root, template, 'about')
+            self.assertIn('class="cv-card card glass-surface"', page)
+            self.assertIn('معرفی واقعی &lt;script&gt;bad()&lt;/script&gt;', page)
+            self.assertIn('شرح مستند &lt;img onerror=bad()&gt;', page)
+            self.assertIn('data-en="Clinical training"', page)
+            self.assertNotIn('<img onerror=bad()>', page)
+
     def test_static_edits_custom_pages_and_escaping_leave_sources_unchanged(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp) / 'source'

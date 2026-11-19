@@ -88,7 +88,7 @@ try{
   const url=new URL(route.request().url());
   assert.equal(route.request().headers().cookie,undefined);
   assert.equal(route.request().headers().referer,undefined);
-  assert.match(url.pathname,/^\/4mirgr\/gerami-website\/38519df205b699ac954eeba0d09276a6b376c46c\/assets\//);
+  assert.match(url.pathname,/^\/4mirgr\/gerami-website\/8b5b6579572dfc865f8b894800ec10ca336ad8c2\/assets\//);
   const relative=url.pathname.split('/').slice(4).join('/'),file=resolve(root,relative);
   assert.ok(file.startsWith(root+'/assets/'));
   const body=await readFile(file);
@@ -171,7 +171,7 @@ try{
   assert.equal(await plain.locator('.brand-logo').count(),1);
   assert.ok(await plain.locator('.brand-logo').evaluate(image=>image.complete&&image.naturalWidth>0));
   assert.ok((await plain.locator('main').innerText()).trim().length>20);
-  assert.match(await plain.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art')),/\/assets\/glass\/ribbon-day\.webp/);
+  assert.match(await plain.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art')),/\/assets\/glass\/golden-gate-day\.webp/);
   console.log('PASS no-JavaScript artifact: single real logo, readable content and original wallpaper restored.');
  }finally{await noJS.close();}
 }finally{await browser.close();await new Promise(r=>server.close(r));}
