@@ -7,7 +7,7 @@ from urllib.parse import urlsplit, urljoin
 ORIGIN = 'https://drgerami-md.ir'
 CHECKS = {
     '/': b'id="site-public-data"',
-    '/admin/login.html': b'login.mjs',
+    '/pages/account': b'id="account-forms"',
     '/api/cms/status': b'"configured":true',
     '/intmed/': b'<title>IntMed</title>',
     '/aus/': b'/aus/assets/',
@@ -37,7 +37,7 @@ def probe_admin(path):
             raise RuntimeError('Administrator document unexpectedly served publicly')
     except HTTPError as error:
         location=urlsplit(urljoin(ORIGIN+'/',error.headers.get('Location','')))
-        if error.code!=302 or location.path not in ('/admin/login','/admin/login.html') or location.scheme!='https' or location.netloc!=urlsplit(ORIGIN).netloc or location.username is not None or location.password is not None:
+        if error.code!=302 or location.path not in ('/pages/account','/pages/account.html') or location.scheme!='https' or location.netloc!=urlsplit(ORIGIN).netloc or location.username is not None or location.password is not None:
             raise RuntimeError('Administrator document did not require the local login gate') from error
     return f'PASS production: {path} require authentication'
 

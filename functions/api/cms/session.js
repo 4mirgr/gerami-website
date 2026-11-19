@@ -1,4 +1,5 @@
 import {CMSAccessError,cmsConfigured,hasCMSAccess,issueCMSCookie,clearCMSCookie,verifyCMSOwner} from '../../../server/cms-access.mjs';
+import {cookieValue,COOKIE_ACCESS,COOKIE_REFRESH} from '../../../server/account.mjs';
 const response=(body,status=200,cookie)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer',...(cookie?{'Set-Cookie':cookie}:{})}});
 const sameOrigin=request=>request.headers.get('Origin')===new URL(request.url).origin;
 export async function onRequestGet({request,env}){return response({authenticated:await hasCMSAccess(request,env),configured:cmsConfigured(env)});}
@@ -18,5 +19,9 @@ export async function onRequestPost({request,env}){
 }
 export async function onRequestDelete({request}){
  if(!sameOrigin(request))return response({error:'origin_rejected'},403);
+ if(cookieValue(request,COOKIE_ACCESS)||cookieValue(request,COOKIE_REFRESH)){
+  const {onRequest}=await import('../account/[[path]].js');
+  return onRequest({request:new Request(new URL('/api/account/logout',request.url),{method:'POST',headers:{Origin:new URL(request.url).origin,'Content-Type':'application/json',Cookie:request.headers.get('Cookie')||''},body:'{}'})});
+ }
  return response({authenticated:false},200,clearCMSCookie());
 }

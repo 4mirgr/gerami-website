@@ -33,7 +33,7 @@ class LiveHealth(unittest.TestCase):
             self.assertEqual(probe(('/aus/', CHECKS['/aus/'])), 'PASS production: /aus/')
 
     def test_admin_health_accepts_only_the_local_login_gate(self):
-        redirect=HTTPError('https://drgerami-md.ir/admin/',302,'redirect',{'Location':'/admin/login.html?next=%2Fadmin%2F'},BytesIO())
+        redirect=HTTPError('https://drgerami-md.ir/admin/',302,'redirect',{'Location':'/pages/account.html?next=%2Fadmin%2F'},BytesIO())
         with patch('live_health.build_opener') as opener:
             opener.return_value.open.side_effect=redirect
             self.assertIn('require authentication',probe_admin('/admin/'))

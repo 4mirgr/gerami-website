@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 
 class Preview(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if urlsplit(self.path).path == '/api/cms/session':
+        if urlsplit(self.path).path in ('/api/cms/session','/api/account/session'):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Cache-Control', 'no-store')
