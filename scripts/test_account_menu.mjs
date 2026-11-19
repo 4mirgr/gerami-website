@@ -17,6 +17,7 @@ try{
   assert.equal(await page.locator('#account-clinic-link').getAttribute('href'),role==='user'?'/clinic/portal/':'/clinic/');
   assert.equal(await page.locator('#account-menu a[href="/intmed/"]').count(),1);
   const menuBox=await page.locator('#account-menu').boundingBox();assert(menuBox.x>=0&&menuBox.x+menuBox.width<=390);
+  await page.setViewportSize({width:568,height:320});await trigger.hover();const landscape=await page.locator('#account-menu').boundingBox();assert(landscape.y+landscape.height<=320,'Landscape menu must fit the available height');await page.setViewportSize({width:390,height:844});
   await trigger.press('Escape');await page.locator('#account-menu').waitFor({state:'hidden'});
   await trigger.focus();await trigger.press('ArrowDown');await page.locator('#account-menu a').first().waitFor({state:'visible'});
   assert.equal(await page.locator('#account-menu a').first().evaluate(el=>el===document.activeElement),true);
