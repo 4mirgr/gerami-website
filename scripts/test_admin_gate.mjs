@@ -9,7 +9,7 @@ const visit=(path,extra={})=>gate({request:new Request(origin+path,{headers:{Acc
 for(const path of ['/admin','/admin/','/admin/editor.html','/dash','/dash/']){
  const response=await visit(path);
  assert.equal(response.status,302,`Anonymous navigation must not receive ${path}`);
- assert.equal(new URL(response.headers.get('Location'),origin).pathname,'/admin/login.html');
+ assert.equal(new URL(response.headers.get('Location'),origin).pathname,'/pages/account.html');
  assert.equal((await response.text()).includes('private-editor-document'),false);
 }
 const api=await gate({request:new Request(origin+'/admin/config.yml'),env,next:()=>new Response('private-config')});
@@ -34,7 +34,7 @@ try{
  const cookie=accepted.headers.get('Set-Cookie');assert.match(cookie,/Path=\/; HttpOnly; Secure; SameSite=Lax/);
  assert.equal(cookie.includes('synthetic-owner-proof'),false);
  const pair=cookie.split(';')[0];
- assert.equal((await visit('/admin/',{Cookie:pair})).status,200);
+ assert.equal((await visit('/admin/',{Cookie:pair})).status,302,'GitHub publishing capability alone must not grant the app administrator role');
  assert.equal((await visit('/admin/',{Cookie:pair.slice(0,-3)+'bad'})).status,302);
  assert.equal(await hasCMSAccess(new Request('https://another.test/admin/',{headers:{Cookie:pair}}),env),false);
  const originalNow=Date.now;Date.now=()=>originalNow()+3600_000;
@@ -42,7 +42,8 @@ try{
  assert.equal((await get({request:new Request(origin+'/api/cms/session',{headers:{Cookie:pair}}),env})).status,200);
  const signedOut=await logout({request:new Request(origin+'/api/cms/session',{method:'DELETE',headers:{Origin:origin}}),env});
  assert.match(signedOut.headers.get('Set-Cookie'),/Max-Age=0/);
- for(const path of ['/admin/login','/admin/login.html','/admin/login.mjs','/admin/login.css','/admin/github-session.mjs','/','/intmed/','/aus/'])assert.equal((await visit(path)).status,200);
+ for(const path of ['/admin/login','/admin/login.html'])assert.equal((await visit(path)).status,302);
+ for(const path of ['/admin/login.mjs','/admin/login.css','/admin/github-session.mjs','/','/intmed/','/aus/'])assert.equal((await visit(path)).status,200);
  for(const path of ['/%61dmin/','/ADMIN/','/admin%2Feditor.html','//admin/editor.html'])assert.equal((await visit(path)).status,400);
  const {default:missingConfig}= {default:await gate({request:new Request(origin+'/admin/',{headers:{Accept:'text/html'}}),env:{},next:()=>new Response('private')})};
  assert.equal(missingConfig.status,302);

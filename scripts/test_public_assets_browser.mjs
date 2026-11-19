@@ -8,7 +8,7 @@ const root=resolve(process.argv[2]||'_site'),hits=[];
 const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.woff2':'font/woff2'};
 const server=createServer(async(req,res)=>{
  const url=new URL(req.url,'http://localhost'),path=resolve(root,'.'+decodeURIComponent(url.pathname));
- if(url.pathname==='/api/cms/session'){
+ if(['/api/cms/session','/api/account/session'].includes(url.pathname)){
   res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({authenticated:false,configured:true}));return;
  }
  try{

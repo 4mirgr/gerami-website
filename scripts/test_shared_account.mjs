@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import {onRequest} from '../functions/api/account/[[path]].js';
+import {onRequest as gate} from '../functions/_middleware.js';
+import {onRequestDelete as cmsLogout} from '../functions/api/cms/session.js';
+const origin='https://drgerami-md.ir';
+const invoke=(path,body,headers={})=>onRequest({request:new Request(origin+'/api/account/'+path,{method:body===undefined?'GET':'POST',headers:{Origin:origin,'Content-Type':'application/json',...headers},...(body===undefined?{}:{body:JSON.stringify(body)})}),env:{}});
+const realFetch=globalThis.fetch;let calls=[],role='user',revoked=false,fail=false;
+const session={access_token:'signed.synthetic.token',refresh_token:'synthetic-refresh',expires_in:3600,user:{id:'synthetic-user'}};
+globalThis.fetch=async(url,options={})=>{
+ calls.push({url:String(url),options});if(fail)throw Error('network');
+ if(String(url).endsWith('/auth/v1/settings'))return Response.json({external:{google:false,email:true},disable_signup:false});
+ if(String(url).includes('/auth/v1/logout'))return new Response(null,{status:204});
+ if(String(url).includes('/auth/v1/user'))return Response.json({id:'synthetic-user',email_confirmed_at:'2026-01-01',user_metadata:{role:'admin'}});
+ if(String(url).endsWith('/rpc/gerami_account'))return revoked?Response.json({message:'session revoked'},{status:403}):Response.json({id:'synthetic-user',role,username:'member',email:'member@example.test',name:'Member'});
+ if(String(url).includes('/token?')||String(url).endsWith('/intmed-login'))return Response.json(session);
+ throw Error('Unexpected upstream '+url);
+};
+try{
+ assert.equal((await invoke('session')).status,200);assert.equal(calls.length,0);
+ assert.equal((await invoke('login',{identity:'member',password:'valid-password'},{Origin:'https://evil.test'})).status,403);assert.equal(calls.length,0);
+ const login=await invoke('login',{identity:'member',password:'valid-password',role:'admin'});assert.equal(login.status,200);
+ const result=await login.json();assert.equal(result.account.role,'user');assert.equal(JSON.stringify(result).includes('signed.synthetic'),false);
+ const cookies=login.headers.getSetCookie();assert.equal(cookies.length,2);for(const c of cookies){assert.match(c,/^__Host-gerami-/);assert.match(c,/Path=\/; HttpOnly; Secure; SameSite=Lax/);}
+ assert(calls.some(c=>c.url.endsWith('/intmed-login')));
+ const cookie=cookies.map(c=>c.split(';')[0]).join('; ');
+ role='secretary';assert.equal((await (await invoke('session',undefined,{Cookie:cookie})).json()).account.role,'secretary');
+ const enter=()=>gate({request:new Request(origin+'/admin/',{headers:{Cookie:cookie,Accept:'text/html'}}),env:{},next:()=>new Response('private editor')});
+ assert.equal((await enter()).status,302);role='user';assert.equal((await enter()).status,302);
+ role='admin';assert.equal((await enter()).status,200);
+ role='user';assert.equal((await enter()).status,302); // A live role change takes effect without trusting the old token.
+ revoked=true;assert.equal((await invoke('session',undefined,{Cookie:cookie})).status,401);revoked=false;
+ fail=true;assert.equal((await invoke('logout',{}, {Cookie:cookie})).status,503);fail=false;
+ const logout=await invoke('logout',{}, {Cookie:cookie});assert.equal(logout.status,200);assert(logout.headers.getSetCookie().every(c=>c.includes('Max-Age=0')));
+ const cmsOut=await cmsLogout({request:new Request(origin+'/api/cms/session',{method:'DELETE',headers:{Origin:origin,Cookie:cookie}})});assert.equal(cmsOut.status,200);assert(cmsOut.headers.getSetCookie().some(c=>c.startsWith('__Host-gerami-access=;')));
+ const formOut=await onRequest({request:new Request(origin+'/api/account/logout',{method:'POST',headers:{Origin:origin,'Content-Type':'application/x-www-form-urlencoded',Cookie:cookie},body:'csrfmiddlewaretoken=synthetic'})});assert.equal(formOut.status,303);assert.equal(formOut.headers.get('Location'),'/pages/account.html');
+ assert.equal((await invoke('google',{})).status,409); // No broken OAuth redirect when provider is disabled.
+ assert.equal((await invoke('callback')).status,400);
+ assert.equal((await invoke('unknown')).status,404);
+ console.log('PASS shared account: same-origin CSRF, existing username Auth, server roles, HttpOnly tokens, live revocation, retryable logout and disabled Google.');
+}finally{globalThis.fetch=realFetch;}
