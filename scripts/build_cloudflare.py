@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PINS = ROOT / 'deploy/projects.json'
 PUBLIC_EXTENSIONS = {'.html', '.css', '.js', '.json', '.webmanifest', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.webp', '.woff', '.woff2', '.ttf', '.ico', '.pdf', '.txt'}
-SITE_FILES = ('index.html', 'favicon.svg')
+SITE_FILES = ('index.html', 'favicon.svg', 'robots.txt', 'sitemap.xml')
 SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin', 'dash')
 
 

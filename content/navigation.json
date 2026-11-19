@@ -49,6 +49,12 @@
       "en": "Projects",
       "url": "/pages/projects.html",
       "children": []
+    },
+    {
+      "fa": "حریم خصوصی",
+      "en": "Privacy",
+      "url": "/pages/privacy.html",
+      "children": []
     }
   ]
 }

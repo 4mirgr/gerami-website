@@ -19,7 +19,7 @@ try{
  });
  await page.goto(origin);await page.waitForSelector('.account-signin');
  assert.equal(await page.locator('.account-signin').getAttribute('href'),'/pages/account.html');
- const box=await page.locator('.account-signin').boundingBox();assert(box.width<=40);
+ const box=await page.locator('.account-signin').boundingBox();assert.equal(box.width,44);assert.equal(box.height,44);
  await page.evaluate(()=>localStorage.setItem('user',JSON.stringify({role:'admin',authenticated:true})));
  await page.locator('.account-signin').click();await page.waitForSelector('form[data-account-form="login"]');
  for(const form of await page.locator('form').all())assert.equal(await form.getAttribute('method'),'post','A missing/broken JS module must never put credentials in a URL');
