@@ -22,6 +22,7 @@ try{
  const box=await page.locator('.account-signin').boundingBox();assert(box.width<=40);
  await page.evaluate(()=>localStorage.setItem('user',JSON.stringify({role:'admin',authenticated:true})));
  await page.locator('.account-signin').click();await page.waitForSelector('form[data-account-form="login"]');
+ for(const form of await page.locator('form').all())assert.equal(await form.getAttribute('method'),'post','A missing/broken JS module must never put credentials in a URL');
  assert.equal(await page.locator('[data-manager-only]:visible').count(),0);
  await page.locator('[data-account-form="login"] [name=identity]').fill('member');await page.locator('[data-account-form="login"] [name=password]').fill('synthetic-password');
  await page.locator('[data-account-form="login"] button').click();await page.locator('#account-profile').waitFor({state:'visible'});

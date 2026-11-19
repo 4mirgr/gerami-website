@@ -42,7 +42,7 @@ for(const form of document.querySelectorAll('form[data-account-form]'))form.addE
   form.querySelectorAll('input[type=password]').forEach(el=>el.value='');
   if(result.authenticated){account=result.account;changed(account);status.textContent='';render();
    const next=new URLSearchParams(location.search).get('next');if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||''))location.assign(next);
-  }else{status.textContent=t('ایمیل و پوشهٔ اسپم را برای پیام تأیید بررسی کنید؛ پس از تأیید می‌توانید وارد شوید.','Check your email and spam folder for confirmation, then sign in.');status.dataset.kind='success';}
+  }else{status.textContent=t('ایمیل و پوشهٔ اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
 document.querySelector('#google-signin').addEventListener('click',()=>action(async()=>{
@@ -60,6 +60,7 @@ async function initialize(){try{
  const params=new URLSearchParams(location.search);
  if(params.has('logout')&&account)status.textContent=t('برای خروج، دکمهٔ خروج از حساب را بزنید.','Use Sign out to end your session.');
  if(params.has('reauth')&&account)status.textContent=t('برای ادامه، از حساب خارج شوید و دوباره وارد شوید.','To continue, sign out and sign in again.');
+ if(['invalid_callback','account_unavailable'].includes(params.get('error')))message({message:params.get('error')});
 }catch(error){message(error);}
 try{const providers=await accountAPI('providers');document.querySelector('#google-note').hidden=providers.google;document.querySelector('#google-signin').setAttribute('aria-describedby',providers.google?'':'google-note');}catch{/* A retry checks the real provider state. */}
 }

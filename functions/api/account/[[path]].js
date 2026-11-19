@@ -94,6 +94,10 @@ export async function onRequest({request}){
   return reply({error:'not_found'},404);
  }catch(error){
   const status=error instanceof AccountError?error.status:503;
+  if(path==='callback'){
+   const headers=new Headers({'Location':'/pages/account.html?error='+(status===503?'account_unavailable':'invalid_callback'),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});
+   headers.append('Set-Cookie',cookie(COOKIE_FLOW,'',0));return new Response(null,{status:303,headers});
+  }
   return reply({error:error instanceof AccountError?error.message:'account_unavailable'},path==='session'&&(status===400||status===401)?401:status,path==='callback'?[cookie(COOKIE_FLOW,'',0)]:[]);
  }
 }

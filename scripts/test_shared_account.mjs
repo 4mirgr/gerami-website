@@ -34,7 +34,7 @@ try{
  const cmsOut=await cmsLogout({request:new Request(origin+'/api/cms/session',{method:'DELETE',headers:{Origin:origin,Cookie:cookie}})});assert.equal(cmsOut.status,200);assert(cmsOut.headers.getSetCookie().some(c=>c.startsWith('__Host-gerami-access=;')));
  const formOut=await onRequest({request:new Request(origin+'/api/account/logout',{method:'POST',headers:{Origin:origin,'Content-Type':'application/x-www-form-urlencoded',Cookie:cookie},body:'csrfmiddlewaretoken=synthetic'})});assert.equal(formOut.status,303);assert.equal(formOut.headers.get('Location'),'/pages/account.html');
  assert.equal((await invoke('google',{})).status,409); // No broken OAuth redirect when provider is disabled.
- assert.equal((await invoke('callback')).status,400);
+ const badCallback=await invoke('callback');assert.equal(badCallback.status,303);assert.equal(badCallback.headers.get('Location'),'/pages/account.html?error=invalid_callback');
  assert.equal((await invoke('unknown')).status,404);
  console.log('PASS shared account: same-origin CSRF, existing username Auth, server roles, HttpOnly tokens, live revocation, retryable logout and disabled Google.');
 }finally{globalThis.fetch=realFetch;}
