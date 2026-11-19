@@ -25,8 +25,8 @@ try {
  await page.locator('.cms-article summary').click();
  assert.equal(await page.locator('.article-body img').count(),0);
  assert.equal(await page.locator('.cms-article a').count(),1);
- await page.locator('input[type=search]').fill('ناموجود');assert.equal(await page.locator('.cms-article').count(),0);
- await page.locator('input[type=search]').fill('');
+ await page.locator('[data-article-search]').fill('ناموجود');assert.equal(await page.locator('.cms-article').count(),0);
+ await page.locator('[data-article-search]').fill('');
  await page.locator('[data-language-toggle]').click();assert.equal(await page.locator('.cms-article summary').textContent(),'Test article');
  await page.locator('[data-audience-filter]').selectOption('professional');assert.equal(await page.locator('.cms-article').count(),0);
  console.log('PASS: system/manual/persistent themes, mobile overflow, published-only articles, safe text/sources, search, language, audience filter.');
