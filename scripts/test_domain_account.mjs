@@ -3,13 +3,15 @@ import {chromium} from 'playwright';
 const origin='http://127.0.0.1:4173';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
- const page=await browser.newPage({viewport:{width:390,height:844}});let account=null,failLogout=false,logins=[];
+ const page=await browser.newPage({viewport:{width:390,height:844}});let account=null,failLogout=false,loginRole='user',rejectLogin=false,googleNext,logins=[];
  await page.route('**/api/account/*',async route=>{
   const name=new URL(route.request().url()).pathname.split('/').at(-1);
   if(name==='providers')return route.fulfill({json:{google:false,email:true,signup:true}});
+  if(name==='google'){googleNext=route.request().postDataJSON().next;return route.fulfill({status:409,json:{error:'google_not_configured'}});}
   if(name==='login'){
+   if(rejectLogin)return route.fulfill({status:401,json:{error:'account_rejected'}});
    logins.push(route.request().postDataJSON());assert.equal(route.request().headers().origin,origin);
-   account={id:'synthetic-user',role:'user',name:'Member',username:'member',email:'member@example.test'};
+   account={id:'synthetic-user',role:loginRole,name:'Member',username:'member',email:'member@example.test'};
   }
   if(name==='logout'){
    if(failLogout)return route.fulfill({status:503,json:{error:'account_unavailable'}});
@@ -25,7 +27,8 @@ try{
  for(const form of await page.locator('form').all())assert.equal(await form.getAttribute('method'),'post','A missing/broken JS module must never put credentials in a URL');
  assert.equal(await page.locator('[data-manager-only]:visible').count(),0);
  await page.locator('[data-account-form="login"] [name=identity]').fill('member');await page.locator('[data-account-form="login"] [name=password]').fill('synthetic-password');
- await page.locator('[data-account-form="login"] button').click();await page.locator('#account-profile').waitFor({state:'visible'});
+ await page.locator('[data-account-form="login"] button').click();await page.waitForURL(origin+'/');
+ await page.goto(origin+'/pages/account.html');await page.locator('#account-profile').waitFor({state:'visible'});
  assert.equal(logins.length,1);assert.equal(await page.locator('[data-manager-only]:visible').count(),0);
  assert.equal(await page.evaluate(()=>Object.values(localStorage).some(v=>v.includes('synthetic-password'))),false);
  assert.equal(await page.locator('.account-signin.is-authenticated').count(),1);
@@ -41,6 +44,13 @@ try{
  await page.locator('[data-account-mode=signup]').click();assert.equal(await page.locator('[data-account-form=signup]:visible').count(),1);
  for(const theme of ['light','dark']){await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
  assert.equal(await page.locator('a[href*="chatgpt.site"],a[href*="signin-with-chatgpt"]').count(),0);
+ await page.route('**/clinic/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Synthetic clinic destination</h1>'}));
+ await page.route('**/admin/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Synthetic admin destination</h1>'}));
+ for(const [role,next,target] of [['admin','','/'],['user','/clinic/','/clinic/portal/'],['secretary','/clinic/portal/','/clinic/'],['admin','/admin/#dashboard','/admin/#dashboard'],['user','https://evil.test/','/']]){
+  account=null;loginRole=role;await page.goto(origin+'/pages/account.html'+(next?'?next='+encodeURIComponent(next):''));await page.locator('[data-account-form=login] [name=identity]').fill('member');await page.locator('[data-account-form=login] [name=password]').fill('synthetic-password');await page.locator('[data-account-form=login] button').click();await page.waitForURL(origin+target);
+ }
+ account=null;rejectLogin=true;await page.goto(origin+'/pages/account.html');await page.locator('[data-account-form=login] [name=identity]').fill('member');await page.locator('[data-account-form=login] [name=password]').fill('synthetic-password');await page.locator('[data-account-form=login] button').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(new URL(page.url()).pathname,'/pages/account.html');
+ await page.locator('#google-signin').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(googleNext,'/');
  const slow=await browser.newPage();let release;const held=new Promise(resolve=>release=resolve);
  await slow.route('**/api/account/*',async route=>{await held;await route.fulfill({json:{authenticated:false}}).catch(()=>{});});
  await slow.goto(origin+'/pages/account.html',{waitUntil:'load',timeout:4000});assert.equal(await slow.locator('h1').isVisible(),true);release();await slow.close();

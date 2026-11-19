@@ -51,7 +51,7 @@ try{
    await page.goto(origin+'/admin/editor');await page.waitForURL(origin+'/admin/#pages');
    tokens.get('admin.signed.test').role='user';await page.goto(origin+'/admin/');await page.waitForURL('**/pages/account.html?**');
   }else{
-   await page.locator('#account-profile').waitFor({state:'visible'});await page.goto(origin+'/admin/');await page.waitForURL('**/pages/account.html?**');
+   await page.waitForURL(origin+'/');await page.goto(origin+'/admin/');await page.waitForURL('**/pages/account.html?**');
    const response=await page.request.get(origin+'/admin/config.yml');assert.equal(response.status(),401);
   }
   await context.close();

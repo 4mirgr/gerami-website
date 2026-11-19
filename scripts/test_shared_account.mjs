@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {onRequest} from '../functions/api/account/[[path]].js';
+import {safeNext,newFlow,encode,COOKIE_FLOW} from '../server/account.mjs';
 import {onRequest as gate} from '../functions/_middleware.js';
 import {onRequestDelete as cmsLogout} from '../functions/api/cms/session.js';
 const origin='https://drgerami-md.ir';
@@ -16,6 +17,9 @@ globalThis.fetch=async(url,options={})=>{
  throw Error('Unexpected upstream '+url);
 };
 try{
+ assert.equal(safeNext(undefined),'/');assert.equal(safeNext('/'),'/');assert.equal(safeNext('//evil.test'),'/');
+ for(const kind of ['login','signup','recovery']){const {flow}=await newFlow(kind);const callback=await invoke('callback?flow='+flow.state+'&code=synthetic-code',undefined,{Cookie:COOKIE_FLOW+'='+encode(flow)});assert.equal(callback.status,303);assert.equal(callback.headers.get('Location'),kind==='recovery'?'/pages/account.html?reset=1':'/');}
+ calls=[];
  assert.equal((await invoke('session')).status,200);assert.equal(calls.length,0);
  assert.equal((await invoke('login',{identity:'member',password:'valid-password'},{Origin:'https://evil.test'})).status,403);assert.equal(calls.length,0);
  const login=await invoke('login',{identity:'member',password:'valid-password',role:'admin'});assert.equal(login.status,200);

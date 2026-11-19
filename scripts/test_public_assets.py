@@ -74,11 +74,14 @@ class PublicAssets(unittest.TestCase):
     def test_comment_compaction_preserves_rules_between_comments(self):
         with tempfile.TemporaryDirectory() as folder:
             site = self.stage(folder)
-            rule = '/* lead */ .must-survive { color:red } /* tail */\n'
+            rule = '/* lead */ .must-survive { color:red; --label:"a ; { b"; width:calc(100% - 12px) } /* tail */\n'
             with (site / 'css/glass.css').open('a') as handle:
                 handle.write('\n' + rule)
             optimize_public_assets(site)
-            self.assertIn(rule.strip(), (site / 'index.html').read_text())
+            text = (site / 'index.html').read_text()
+            self.assertRegex(text, r'\.must-survive\s*\{\s*color:\s*red[;} ]')
+            self.assertIn('"a ; { b"', text)
+            self.assertIn('calc(100% - 12px)', text)
 
     def test_changed_dependency_changes_all_importer_cache_identities(self):
         with tempfile.TemporaryDirectory() as before, tempfile.TemporaryDirectory() as after:
