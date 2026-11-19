@@ -48,6 +48,12 @@ try{
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.waitForSelector('[data-topic-card]');
  assert.equal(jsonRequests.length,0);
+ // The new module must also work after dependency fingerprinting and snapshots.
+ await page.locator('.mobile-menu>summary').click();
+ await page.locator('#toolbar-search').fill('About');
+ assert.equal(await page.locator('.toolbar-links a:visible').count(),1);
+ assert.match(await page.locator('.toolbar-links a:visible').getAttribute('href'),/about/);
+ await page.keyboard.press('Escape');
  assert.equal(hits.filter(p=>p.includes('/assets/topics/')||p.endsWith('material-controls.png')).length,0,'full-resolution decorative originals must never be downloaded');
  assert.ok(await page.locator('img.topic-art').evaluateAll(images=>images.length>0&&images.filter(i=>i.complete).every(i=>i.naturalWidth===192)),'deployed badges use correctly decoded 192px derivatives');
  const cold=await page.evaluate(()=>({resources:performance.getEntriesByType('resource').length,bytes:performance.getEntriesByType('resource').reduce((n,r)=>n+r.transferSize,0),navigationBytes:performance.getEntriesByType('navigation')[0].transferSize,fcp:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,load:performance.getEntriesByType('navigation')[0].loadEventEnd}));

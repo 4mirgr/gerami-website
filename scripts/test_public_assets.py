@@ -71,6 +71,15 @@ class PublicAssets(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'reviewed safe inline adapter'):
                     optimize_public_assets(site)
 
+    def test_comment_compaction_preserves_rules_between_comments(self):
+        with tempfile.TemporaryDirectory() as folder:
+            site = self.stage(folder)
+            rule = '/* lead */ .must-survive { color:red } /* tail */\n'
+            with (site / 'css/glass.css').open('a') as handle:
+                handle.write('\n' + rule)
+            optimize_public_assets(site)
+            self.assertIn(rule.strip(), (site / 'index.html').read_text())
+
     def test_changed_dependency_changes_all_importer_cache_identities(self):
         with tempfile.TemporaryDirectory() as before, tempfile.TemporaryDirectory() as after:
             a, b = self.stage(before), self.stage(after)

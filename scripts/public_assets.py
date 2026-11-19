@@ -52,6 +52,9 @@ def optimize_public_assets(site):
             text=re.sub(r"new URL\(['\"]\.\./['\"],\s*import\.meta\.url\)","new URL('/',import.meta.url)",text)
             text=re.sub(r"new URL\(['\"]\.\./['\"]\s*\+\s*path,\s*import\.meta\.url\)","new URL('/'+path,import.meta.url)",text)
         else:
+            # Keep source attribution/docs readable without sending standalone
+            # CSS comments in every page's bounded inline stylesheet.
+            text=re.sub(r'(?m)^[ \t]*/\*(?:(?!\*/)[^\r\n])*\*/[ \t]*\n','',text)
             def css_url(match):
                 reference=match[2];target=resolve(reference,path)
                 if not target:return match[0]
