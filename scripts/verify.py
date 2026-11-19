@@ -81,9 +81,11 @@ entry = sum((ROOT / path).stat().st_size for path in resources)
 compressed = sum(len(gzip.compress((ROOT / path).read_bytes())) for path in resources)
 # The expanded bilingual introduction and project overview increase document
 # bytes; enforce a transfer budget as well as the bounded source budget.
-if entry > 144 * 1024 or compressed > 52 * 1024:
+# The role-aware account disclosure adds a small vector icon and navigation;
+# keep the compressed transfer ceiling unchanged and bound source growth.
+if entry > 156 * 1024 or compressed > 52 * 1024:
     errors.append(f'initial resource budget exceeded: {entry} bytes')
 if errors:
     raise SystemExit('\n'.join(errors))
 print(f'PASS: {len(pages)} pages; local links and anchors; one h1/main; translation pairs; no external assets.')
-print(f'Initial HTML/CSS/JS/icon (images excluded): {entry:,} source bytes, {compressed:,} gzip bytes (budgets: 144 KiB / 52 KiB).')
+print(f'Initial HTML/CSS/JS/icon (images excluded): {entry:,} source bytes, {compressed:,} gzip bytes (budgets: 156 KiB / 52 KiB).')

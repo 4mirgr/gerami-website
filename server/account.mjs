@@ -41,4 +41,4 @@ export async function newFlow(kind='login'){
  const challenge=btoa(String.fromCharCode(...new Uint8Array(hash))).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
  return {flow,challenge,cookie:cookie(COOKIE_FLOW,encode(flow),600)};
 }
-export const safeNext=value=>typeof value==='string'&&/^\/(?:admin\/(?:#(?:dashboard|pages))?|pages\/account(?:\.html)?|dash\/(?:portal\/)?)$/.test(value)?value:'/pages/account.html';
+export const safeNext=value=>typeof value==='string'&&/^\/(?:admin\/(?:#(?:dashboard|pages))?|pages\/account(?:\.html)?|(?:dash|clinic)\/(?:portal\/)?)$/.test(value)?value:'/pages/account.html';

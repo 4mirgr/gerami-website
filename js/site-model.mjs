@@ -1,7 +1,7 @@
 import {validateTopics,flattenTopics} from './topics.mjs';
 /* Shared, dependency-free contract for the public site and its manager. */
 export function publicPath(value){const path=value.replace(/\/+$/,'').replace(/\.html$/,'');return path===''||path==='/index'?'/':path;}
-export const pages={home:'صفحهٔ اصلی',about:'دربارهٔ من',services:'حوزه‌های فعالیت',blog:'آموزش و مقالات',projects:'پروژه‌ها',contact:'ارتباط',appointments:'اطلاعات مراجعه',beyond:'فراتر از پزشکی'};
+export const pages={home:'صفحهٔ اصلی',about:'دربارهٔ من',services:'حوزه‌های فعالیت',blog:'آموزش و مقالات',projects:'پروژه‌ها',contact:'ارتباط',appointments:'اطلاعات مراجعه',beyond:'فراتر از پزشکی',privacy:'حریم خصوصی'};
 export const fonts={Vazirmatn:'وزیرمتن',Tahoma:'Tahoma',Arial:'Arial',system:'فونت سیستم'};
 export const sections={hero:'معرفی و کارت‌های اصلی',explore:'کاروسل موضوعات',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'نقشهٔ شاخه‌ها و زیرشاخه‌ها',articles:'تازه‌ترین مطالب'};
 export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json','content/topics.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
