@@ -1,5 +1,6 @@
 """Publish fingerprinted public assets without changing protected or mounted apps."""
 import hashlib,json,re,shutil
+from rcssmin import cssmin
 from pathlib import Path
 from urllib.parse import urlsplit,unquote
 from public_asset_recovery import public_mirrors, controlled_public_css
@@ -52,16 +53,16 @@ def optimize_public_assets(site):
             text=re.sub(r"new URL\(['\"]\.\./['\"],\s*import\.meta\.url\)","new URL('/',import.meta.url)",text)
             text=re.sub(r"new URL\(['\"]\.\./['\"]\s*\+\s*path,\s*import\.meta\.url\)","new URL('/'+path,import.meta.url)",text)
         else:
-            # Keep source attribution/docs readable without sending standalone
-            # CSS comments in every page's bounded inline stylesheet.
-            text=re.sub(r'(?m)^[ \t]*/\*(?:(?!\*/)[^\r\n])*\*/[ \t]*\n','',text)
+            # Validate original bytes before compaction can remove an unsafe comment.
+            if re.search(r'</style|@import\b',text,re.I):
+                raise ValueError('Public stylesheet requires a reviewed safe inline adapter')
             def css_url(match):
                 reference=match[2];target=resolve(reference,path)
                 if not target:return match[0]
                 url=images.get('/'+target.relative_to(site).as_posix()) or mapping.get(target) or '/'+target.relative_to(site).as_posix()
                 return 'url("'+url+'")'
             text=re.sub(r'url\(\s*([\'\"]?)([^)\'\"]+)\1\s*\)',css_url,text)
-            text=controlled_public_css(text,mirrors)
+            text=cssmin(controlled_public_css(text,mirrors),keep_bang_comments=True)
         data=text.encode();url='/assets/runtime/'+path.stem+'.'+fingerprint(data)+path.suffix
         (site/url.lstrip('/')).write_bytes(data);mapping[path]=url;visiting.remove(path);return url
 

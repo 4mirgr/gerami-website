@@ -1,2 +1,5 @@
 # Used by IntMed's own canonical-content validator; not by the website runtime.
 jsonschema==4.26.0
+
+# Build-only CSS compaction keeps public inline styles within the first-response budget.
+rcssmin==1.3.0
