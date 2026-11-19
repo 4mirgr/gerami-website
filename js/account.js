@@ -2,7 +2,7 @@ import {getSession,signOut} from './account-client.mjs';
 const host=document.querySelector('[data-account-controls]');
 if(host){
  const initial=host.querySelector('a').cloneNode(true),fa=()=>document.documentElement.lang!=='en',t=(a,b)=>fa()?a:b;
- let account=null,key='',timer,suppressFocus=false,signingOut=false,button,menu;
+ let account=null,key='',timer,signingOut=false,button,menu;
  const isOpen=()=>host.dataset.accountOpen==='true';
  function open(){if(menu){clearTimeout(timer);host.dataset.accountOpen='true';menu.hidden=false;button.setAttribute('aria-expanded','true');menu.style.transform='';const rect=menu.getBoundingClientRect(),width=document.documentElement.clientWidth;const shift=rect.left<12?12-rect.left:rect.right>width-12?width-12-rect.right:0;menu.style.transform=`translateX(${shift}px)`;}}
  function close(){clearTimeout(timer);delete host.dataset.accountOpen;if(menu)menu.hidden=true;button?.setAttribute('aria-expanded','false');}
@@ -29,12 +29,11 @@ if(host){
   menu.append(logout,status);host.replaceChildren(button,menu);
   if(wasOpen)open();if(focus&&host.querySelector('#'+focus))host.querySelector('#'+focus).focus();
  }
- host.addEventListener('pointerenter',event=>{clearTimeout(timer);if(event.pointerType==='mouse'){suppressFocus=false;open();}});
+ host.addEventListener('pointerenter',event=>{clearTimeout(timer);if(event.pointerType==='mouse')open();});
  host.addEventListener('pointerleave',()=>{timer=setTimeout(()=>{if(!signingOut&&!menu?.contains(document.activeElement))close();},180);});
- host.addEventListener('focusin',()=>{if(!suppressFocus)open();});
- host.addEventListener('focusout',()=>{setTimeout(()=>{if(!signingOut&&!host.contains(document.activeElement)){suppressFocus=false;close();}},0);});
+ host.addEventListener('focusout',()=>{setTimeout(()=>{if(!signingOut&&!host.contains(document.activeElement))close();},0);});
  host.addEventListener('keydown',event=>{
-  if(event.key==='Escape'){event.preventDefault();suppressFocus=true;close();button?.focus();return;}
+  if(event.key==='Escape'){event.preventDefault();close();button?.focus();return;}
   if(!menu||!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
   event.preventDefault();open();const items=[...menu.querySelectorAll('a,button:not(:disabled)')],index=items.indexOf(document.activeElement);
   const next=event.key==='Home'?0:event.key==='End'?items.length-1:event.key==='ArrowDown'?(index+1)%items.length:(index-1+items.length)%items.length;items[next]?.focus();

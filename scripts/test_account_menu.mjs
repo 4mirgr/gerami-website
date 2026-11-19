@@ -26,5 +26,10 @@ try{
   assert.equal(await page.locator('#account-menu').count(),0);
   await page.close();
  }
+ const touch=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ await touch.route('**/api/account/session',route=>route.fulfill({json:{authenticated:true,account:{id:'touch',role:'user',name:'Touch user'}}}));
+ await touch.goto(origin);const trigger=touch.locator('.account-signin[aria-expanded]');await trigger.waitFor();
+ await trigger.tap();assert.equal(await trigger.getAttribute('aria-expanded'),'true','The first touch must open the menu');
+ await trigger.tap();assert.equal(await trigger.getAttribute('aria-expanded'),'false');await touch.close();
  console.log('PASS account menu: 44px circle, hover/touch/keyboard, role-specific clinic paths, bounded mobile menu, real logout and retry.');
 }finally{await browser.close();}
