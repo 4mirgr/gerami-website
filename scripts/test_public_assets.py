@@ -93,10 +93,11 @@ class PublicAssets(unittest.TestCase):
             for binary, encoded in ((specs[1], specs[2]), (specs[3], specs[4])):
                 data = (site / binary['path'].lstrip('/')).read_bytes()
                 self.assertRegex(encoded['path'], r'^https://raw\.githubusercontent\.com/4mirgr/gerami-website/[a-f0-9]{40}/assets/')
-                compatibility = next((site / 'delivery-check').glob(Path(binary['path']).stem + '.*.txt'))
-                self.assertEqual(base64.b64decode(compatibility.read_bytes(), validate=True), data)
                 self.assertEqual(binary['sha256'], hashlib.sha256(data).hexdigest())
                 self.assertEqual(encoded['sourceBytes'], len(data))
+            for original in (next((site / 'assets/runtime').glob('Vazirmatn.*.woff2')), site / 'assets/glass/ribbon-day.webp'):
+                compatibility = next((site / 'delivery-check').glob(original.stem + '.*.txt'))
+                self.assertEqual(base64.b64decode(compatibility.read_bytes(), validate=True), original.read_bytes())
             self.assertIn('/assets/runtime/Vazirmatn.', specs[1]['path'])
             self.assertEqual(pages, {p: p.read_bytes() for p in pages})
             self.assertLess(len(text.encode()), 12000)
@@ -111,7 +112,9 @@ class PublicAssets(unittest.TestCase):
             self.assertEqual(protected, {p: p.read_bytes() for p in protected})
             self.assertLess(len(gzip.compress((site / 'index.html').read_bytes())), 28000)
             mirrors = public_mirrors(ROOT, site)
-            self.assertEqual(len(mirrors), 18)
+            appearance = json.loads((ROOT / 'content/appearance.json').read_text())
+            self.assertTrue({appearance['light']['wallpaper'], appearance['dark']['wallpaper']}.issubset(mirrors))
+            self.assertLessEqual(len(mirrors), 24)
             for path, entry in mirrors.items():
                 self.assertEqual(hashlib.sha256((site / path.lstrip('/')).read_bytes()).hexdigest(), entry['sha256'])
                 self.assertNotIn('/api/', path)

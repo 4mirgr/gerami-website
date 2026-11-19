@@ -1,9 +1,70 @@
 {
-  "bio_fa": "",
-  "bio_en": "",
-  "cv": [],
-  "email": "",
+  "bio_fa": "دکتر امیرهوشنگ گرامی، پزشک با سابقهٔ آموزش و فعالیت بالینی در طب داخلی، اورژانس و مراقبت‌های ویژه است. مسیر حرفه‌ای او مراقبت از بیمار، آموزش پزشکی و پژوهش بالینی را به هم پیوند می‌دهد.",
+  "bio_en": "Dr. Amir Houshang Gerami is a physician with training and clinical experience in internal medicine, emergency care and intensive care. His work brings together patient care, medical education and clinical research.",
+  "cv": [
+    {
+      "title_fa": "پزشکی عمومی — دانشگاه علوم پزشکی شهید بهشتی",
+      "title_en": "MD — Shahid Beheshti University of Medical Sciences",
+      "detail_fa": "دورهٔ دکتری حرفه‌ای پزشکی عمومی از ۱۳۹۲ تا ۱۳۹۹؛ کارآموزی و کارورزی در بیمارستان‌های لقمان حکیم، امام حسین، آیت‌الله طالقانی و مفید.",
+      "detail_en": "MD program, 1392–1399 SH. Clinical clerkships and internship at Loghman Hakim, Imam Hossein, Ayatollah Taleghani and Mofid hospitals."
+    },
+    {
+      "title_fa": "آموزش دستیاری بیماری‌های داخلی",
+      "title_en": "Internal medicine residency training",
+      "detail_fa": "دورهٔ دستیاری بیماری‌های داخلی در دانشگاه علوم پزشکی جندی‌شاپور اهواز و دانشگاه علوم پزشکی شهید بهشتی.",
+      "detail_en": "Internal medicine residency training at Ahvaz Jundishapur University of Medical Sciences and Shahid Beheshti University of Medical Sciences."
+    },
+    {
+      "title_fa": "تجربه در بخش‌های طب داخلی",
+      "title_en": "Experience across internal medicine departments",
+      "detail_fa": "فعالیت بالینی و آموزشی در بخش‌های گوارش و کبد، کلیه و فشار خون، روماتولوژی، خون و سرطان، ریه، داخلی عمومی و غدد و متابولیسم؛ همراه با مشاوره‌های بین‌رشته‌ای.",
+      "detail_en": "Clinical and training experience in gastroenterology and hepatology, nephrology and hypertension, rheumatology, hematology–oncology, pulmonology, general internal medicine, endocrinology and metabolism, with interdisciplinary consultations."
+    },
+    {
+      "title_fa": "بیمارستان‌ها و محیط‌های آموزش بالینی",
+      "title_en": "Hospitals and clinical training settings",
+      "detail_fa": "تهران: لقمان حکیم، شهدای تجریش، آیت‌الله طالقانی، مسیح دانشوری، لبافی‌نژاد و امام حسین. اهواز: امام خمینی، گلستان، رازی و شهید بقایی.",
+      "detail_en": "Tehran: Loghman Hakim, Shohadaye Tajrish, Ayatollah Taleghani, Masih Daneshvari, Labbafinejad and Imam Hossein. Ahvaz: Imam Khomeini, Golestan, Razi and Shahid Baghaei."
+    },
+    {
+      "title_fa": "اورژانس، مسمومیت‌ها و مراقبت‌های ویژه",
+      "title_en": "Emergency medicine, toxicology and intensive care",
+      "detail_fa": "تجربه در بخش بستری، اورژانس و ICU مسمومیت‌های لقمان حکیم؛ بخش عفونی و ICU بیماران مبتلا به سل در مسیح دانشوری؛ و بخش داخلی، ICU، درمانگاه و اورژانس بیمارستان زعیم پاکدشت.",
+      "detail_en": "Experience in inpatient, emergency and toxicology intensive care at Loghman Hakim; infectious diseases and tuberculosis ICU at Masih Daneshvari; and internal medicine, ICU, outpatient and emergency care at Zaeem Hospital in Pakdasht."
+    },
+    {
+      "title_fa": "مراقبت‌های اولیه و خدمات درمانی",
+      "title_en": "Primary care and medical services",
+      "detail_fa": "پزشک عمومی اورژانس بیمارستان سلیمانی شهر قدس با آغاز همکاری در مهر ۱۴۰۰؛ پزشک خانواده و مرکز ارجاع روستایی در همکاری با دانشگاه علوم پزشکی یاسوج در ۱۴۰۰؛ فعالیت درمانگاهی و مسئولیت فنی در شهر قدس، خدمات پزشکی در منزل با هومکا و ویزیت‌های سازمانی.",
+      "detail_en": "General practice in the emergency department of Soleimani Hospital, Shahr-e Qods, beginning in Mehr 1400 SH; family medicine and rural referral services with Yasuj University of Medical Sciences in 1400 SH; outpatient practice and clinic technical responsibility, home medical care with Homeca and organizational medical visits."
+    },
+    {
+      "title_fa": "تدریس و آموزش پزشکی",
+      "title_en": "Teaching and medical education",
+      "detail_fa": "تدریس آناتومی و تشریح در مقطع علوم پایهٔ دانشکدهٔ پزشکی دانشگاه علوم پزشکی شهید بهشتی؛ نزدیک به پنج سال تدریس زیست‌شناسی دبیرستان و آمادگی کنکور در مدارس، آموزشگاه‌ها و کلاس‌های خصوصی، از جمله مجموعه مدارس سلام.",
+      "detail_en": "Teaching anatomy and dissection in the basic medical sciences program at Shahid Beheshti University of Medical Sciences. Approximately five years teaching high-school biology and entrance-exam preparation in schools, institutes and private classes, including Salam schools."
+    },
+    {
+      "title_fa": "مهارت‌های بالینی و مدیریت",
+      "title_en": "Clinical and management skills",
+      "detail_fa": "فعالیت در بخش‌های داخلی، قلب، عفونی، ICU و CCU؛ تعبیهٔ کاتتر شالدون و ورید مرکزی، اکوکاردیوگرافی، تفسیر تصاویر پزشکی و لام خون محیطی. برنامه‌ریزی امور درمانی و آموزشی، هماهنگی تیم، مدیریت منابع و بحران و بهبود فرایندها.",
+      "detail_en": "Experience in internal medicine, cardiology, infectious diseases, ICU and CCU; Shaldon and central venous catheter placement, echocardiography, medical imaging and peripheral blood smear interpretation. Planning clinical and educational services, team coordination, resource and crisis management, and process improvement."
+    },
+    {
+      "title_fa": "پژوهش و زمینه‌های همکاری",
+      "title_en": "Research and collaboration interests",
+      "detail_fa": "پایان‌نامهٔ پزشکی عمومی دربارهٔ یافته‌های بالینی، آزمایشگاهی و نوار قلب در مسمومیت با کلشی‌سین، با مقالهٔ منتشرشده در Frontiers in Medicine در ۲۰۲۲. زمینه‌های مورد علاقه: محورهای قلبی، کلیوی و متابولیک (CKM)، سم‌شناسی بالینی، پیامدهای بیماران بستری و آموزش مهارت‌های بالینی.",
+      "detail_en": "MD thesis on clinical, laboratory and electrocardiographic findings in colchicine poisoning, with a paper published in Frontiers in Medicine in 2022. Collaboration interests include cardiovascular–kidney–metabolic (CKM), cardiometabolic and cardiorenal topics, clinical toxicology, inpatient outcomes and clinical-skills education."
+    },
+    {
+      "title_fa": "ثبت حرفه‌ای و آموزش تکمیلی",
+      "title_en": "Professional registration and further training",
+      "detail_fa": "شمارهٔ نظام پزشکی ایران: ۱۹۰۹۴۷، با مدرک ثبت‌شدهٔ دکتری حرفه‌ای پزشکی. پذیرش راستی‌آزمایی مدرک نهایی پزشکی عمومی در EPIC در ۱۹ دسامبر ۲۰۲۲. دورهٔ درمان نگهدارنده با متادون در مرکز ملی مطالعات اعتیاد دانشگاه علوم پزشکی تهران، دی ۱۴۰۱.",
+      "detail_en": "Iran Medical Council registration no. 190947, with the MD qualification recorded. Acceptance of final MD diploma verification in EPIC on 19 December 2022. Methadone maintenance treatment course at the Iranian National Center for Addiction Studies, Tehran University of Medical Sciences, Dey 1401 SH."
+    }
+  ],
+  "email": "Dr.Gerami.MD@gmail.com",
   "phone": "",
-  "linkedin": "",
+  "linkedin": "https://www.linkedin.com/in/amir-houshang-gerami-2424a9b5/",
   "appointment": ""
 }

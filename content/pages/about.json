@@ -5,8 +5,8 @@
       "en": "About | Dr. Amir Houshang Gerami"
     },
     "text-002": {
-      "fa": "آشنایی با دکتر امیرهوشنگ گرامی و مسیر تکمیل معرفی و سوابق حرفه‌ای.",
-      "en": "Get to know Dr. Amir Houshang Gerami and his professional profile."
+      "fa": "سوابق تحصیلی، تجربهٔ بالینی، تدریس و پژوهش دکتر امیرهوشنگ گرامی.",
+      "en": "Education, clinical experience, teaching and research of Dr. Amir Houshang Gerami."
     },
     "text-003": {
       "fa": "رفتن به محتوای اصلی",
@@ -45,12 +45,12 @@
       "en": "Dr. Amir Houshang Gerami"
     },
     "text-024": {
-      "fa": "این وب‌سایت محل معرفی من و انتشار مطالب آموزشی پزشکی است. پروژهٔ IntMed به آماده‌سازی و سامان‌دهی آموزش پزشکی کمک می‌کند.",
-      "en": "This website brings together my profile and medical educational writing. IntMed supports the preparation and organization of medical education."
+      "fa": "مسیر حرفه‌ای من در کنار مراقبت از بیمار، بر آموزش پزشکی و پژوهش بالینی استوار است. در این صفحه می‌توانید با تحصیلات، محیط‌های فعالیت و زمینه‌های همکاری من آشنا شوید.",
+      "en": "My professional work combines patient care with medical education and clinical research. Explore my training, clinical experience and areas of collaboration below."
     },
     "text-025": {
-      "fa": "نسخهٔ کامل سوابق، مدارک و فعالیت‌ها پس از تکمیل اطلاعات این صفحه در دسترس قرار می‌گیرد.",
-      "en": "A full account of my background, qualifications, and activities will be available once this profile is complete."
+      "fa": "شرح سوابق حرفه‌ای و آموزشی در ادامه آمده است.",
+      "en": "Professional and educational background is detailed below."
     },
     "text-026": {
       "fa": "پروفایل لینکدین",
@@ -131,9 +131,27 @@
     "text-053": {
       "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
       "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    },
+    "text-054": {
+      "fa": "پژوهش منتشرشده",
+      "en": "Published research"
+    },
+    "text-055": {
+      "fa": "یافته‌های بالینی، آزمایشگاهی و نوار قلب در مسمومیت با کلشی‌سین: تجربهٔ ۱۰ ساله",
+      "en": "Clinical, Laboratory, and Electrocardiographic Findings in Colchicine Toxicity: 10 Years of Experience"
+    },
+    "text-056": {
+      "fa": "مشاهدهٔ مقاله",
+      "en": "Read the paper"
+    },
+    "text-057": {
+      "fa": "مشاهده در PubMed",
+      "en": "View on PubMed"
     }
   },
   "links": {
-    "link-001": "/index.html"
+    "link-001": "/index.html",
+    "link-002": "https://doi.org/10.3389/fmed.2022.872528",
+    "link-003": "https://pubmed.ncbi.nlm.nih.gov/35665351/"
   }
 }

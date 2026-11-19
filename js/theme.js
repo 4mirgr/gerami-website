@@ -11,7 +11,7 @@
       if (img.getAttribute('src') !== source) img.setAttribute('src', source);
     });
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === 'dark' ? '#0d1918' : '#f1f8f5';
+    if (meta) meta.content = theme === 'dark' ? '#161620' : '#eeeae4';
     const button = document.querySelector('[data-theme-toggle]');
     if (button) {
       button.hidden = false;

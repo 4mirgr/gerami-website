@@ -13,12 +13,12 @@ const imageSource=src=>previewAssets[src]||src;
  function renderProfile(){
   if(!profile)return;window.dispatchEvent(new CustomEvent('site-profile',{detail:profile}));
   if(!['/about','/contact','/appointments'].some(p=>path.endsWith(p)))return;
-  if(!profileHost){profileHost=el('section','','cms-profile container');main.append(profileHost);}profileHost.replaceChildren();
+  if(!profileHost){profileHost=main.querySelector('[data-profile-host]');if(!profileHost){profileHost=el('section','','cms-profile container');main.append(profileHost);}}profileHost.replaceChildren();
   if(path.endsWith('/about')){
    if(profile['bio_'+lang()])profileHost.append(el('p',profile['bio_'+lang()]));const entries=Array.isArray(profile.cv)?profile.cv:[];
    document.querySelectorAll('[data-cv-placeholder]').forEach(node=>{node.hidden=entries.length>0;});
    if(entries.length)profileHost.append(el('h2',text('رزومه و سوابق','CV and experience')));
-   for(const item of entries){const card=el('article','','card');card.append(el('h3',item['title_'+lang()]),el('p',item['detail_'+lang()]));profileHost.append(card);}
+   for(const item of entries){const card=el('article','','cv-card card glass-surface');card.append(el('h3',item['title_'+lang()]),el('p',item['detail_'+lang()]));profileHost.append(card);}
   }else{
    const contact=[];
    if(typeof profile.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email))contact.push([profile.email,'mailto:'+profile.email]);
