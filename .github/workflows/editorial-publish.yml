@@ -1,0 +1,40 @@
+name: Publish physician-approved website post
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3-58/5 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: gerami-editorial-publisher
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == '4mirgr/gerami-website' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Claim exact approved revision with GitHub identity
+        id: claim
+        run: node scripts/editorial-publisher.mjs claim
+      - uses: ./.github/actions/setup-checks
+        if: steps.claim.outputs.claimed == 'true'
+      - name: Verify populated public site before commit
+        if: steps.claim.outputs.claimed == 'true'
+        run: |
+          python scripts/check_site.py --browser
+          python scripts/build_cloudflare.py --output "$RUNNER_TEMP/editorial-public-build"
+          node scripts/test_public_assets_browser.mjs "$RUNNER_TEMP/editorial-public-build"
+      - name: Commit approved public content without force
+        if: steps.claim.outputs.claimed == 'true'
+        run: node scripts/editorial-publisher.mjs commit
+      - name: Record failed checks privately
+        if: failure()
+        run: node scripts/editorial-publisher.mjs failure

@@ -117,3 +117,31 @@ Public delivery recovery expands only by these two owner-approved, non-sensitive
 Final source/combined-build/CI/live evidence is recorded in annotated tag `release/intmed-posters-2026-11-20` only after successful production verification. The source of truth for this stage is this media section plus the tag; older stage receipts remain historical. No Auth/Supabase/Clinic/native, upstream pins, DNS or billing changes are part of this task.
 
 Local final evidence for this media stage: full source/browser suite, fresh pinned combined build (487 public files) and full assembled-artifact suite passed. Root HTML is 124,515 B raw / 27,772 B gzip, below the unchanged 28,000-B ceiling. Cold homepage retained 28 resources and no poster downloads before scroll in the focused mobile check. Both active posters decode after fingerprinting; under held primary image requests, recovered Blob bytes match the selected FA/EN SHA exactly. No-JS and corrupt-mirror tests pass. Independent review confirmed all 22 pinned assets, unchanged previous 20 assets, and the root-language/Blob-preservation integration. Screenshots of the full-frame FA/EN section were reviewed. This evidence is controlled Chromium testing, not a new measurement on the owner's Iranian mobile network.
+
+## Daily editorial automation — implementation checkpoint 2026-11-20
+
+Owner wants one daily private public-health draft from already published IntMed
+lessons/flashcards, natural Persian (3–5 paragraphs), editable cover/tags and explicit
+Telegram publication approval. Owner selected the **existing IntMed bot**, shared
+Supabase and configured Gemini; no new account/project/billing. Design/plan live in
+`docs/superpowers/{specs,plans}/2026-11-20-editorial-automation*`.
+
+Private backend source is `backend/editorial/`; no drafts enter public JSON or
+SiteStore. `/api/editorial/*` requires a live app-admin session and same-origin POST;
+Edge API verifies the session again. New `/admin/#auto-posts` inbox edits text and
+metadata, replaces image and sends the saved revision to Telegram. Publication
+approval binds current revision, private chat/sender, message, expiring capability
+and live enabled owner role. Existing IntMed bot adds only `webpost:` callbacks,
+before intake state processing; existing menu/webhook are preserved.
+
+GitHub scheduled main workflow uses signed OIDC (fixed repo ID/workflow/audience,
+main, event, expiry), serial claims and run-bound lease; no new PAT/service key.
+Checks and assembled build run before non-force content commit. Pending/uncertain
+publication is immutable, explicitly retryable as the same approved snapshot, and
+reported published only after deployed full article and cover SHA match. Scheduling
+is 09:00 Tehran by default, editable/disableable; manual generation is explicit.
+Public Actions schedule is best-effort, not a promised five-minute SLA.
+
+Checkpoint status: tests and independent review in progress; no migration/function/
+cron/deployment is claimed by this paragraph. First real draft and live bot routing
+must be recorded after activation. Clinic remains synthetic and unchanged.

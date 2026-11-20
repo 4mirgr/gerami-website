@@ -1,3 +1,4 @@
+import {editorialEditor} from './editorial.mjs';
 import {topicEditor} from './topic-editor.mjs';
 import {flattenTopics} from '../js/topics.mjs';
 import {GitHubSession,repository} from './github-session.mjs';
@@ -8,7 +9,7 @@ const node=(tag,text,className)=>{const element=document.createElement(tag);if(t
 const button=(label,handler,className='tool-button')=>{const b=node('button',label,className);b.type='button';b.addEventListener('click',handler);return b;};
 const session=new GitHubSession();const store=new SiteStore(session);const view=$('studio-fields');const preview=$('site-preview');
 let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false,imageSaving=false;
-const routes={pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانهٔ رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
+const routes={'auto-posts':'پیشنهادهای خودکار',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانهٔ رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
 const appearancePath='content/appearance.json';const menuPath='content/navigation.json';const extraPath='content/extra-pages.json';
 let previewLanguage='fa',previewTheme='light',previewSize=1280;
 function notice(message,error=false){$('studio-notice').textContent=message;$('studio-notice').classList.toggle('error',error);}
@@ -103,6 +104,7 @@ function articleEditor(){
   const coverURL=field(cover,'تصویر مقاله',item.image,value=>{item.image=value;edit(path,data);clearTimeout(coverTimer);coverTimer=setTimeout(()=>{if(cover.isConnected)showCover();},350);},{help:'لینک مستقیم HTTPS تصویر را بچسبانید یا همین‌جا فایل انتخاب کنید. لینک صفحهٔ وب، تصویر مستقیم نیست.'});coverURL.dir='ltr';
   const upload=node('input');upload.type='file';upload.accept='image/png,image/jpeg,image/webp,image/avif';upload.addEventListener('change',attempt(async()=>{const file=upload.files[0];upload.value='';if(!file)return;const slug=item.slug;await openImage(file,image=>{const current=clone(store.documents[path]),target=current.articles.find(article=>article.slug===slug);if(!target)throw Error('مقاله تغییر کرده است؛ تصویر در رسانه‌ها نگهداری شد. دوباره مقاله را انتخاب کنید.');target.image=image;edit(path,current);});}));cover.append(label('بارگذاری تصویر مقاله',upload,'پس از برش یا تنظیم نور، «استفاده در مقاله» را بزنید. فایل همراه مقاله منتشر می‌شود.'));
   const removeCover=button('حذف تصویر مقاله',()=>{item.image='';edit(path,data);coverURL.value='';showCover();});cover.append(coverImage,coverStatus,removeCover);box.append(cover);showCover();
+  for(const key of ['tags','hashtags'])field(box,key==='tags'?'تگ‌ها با ویرگول':'هشتگ‌ها با ویرگول',(item[key]||[]).join('، '),value=>{item[key]=value.split(/[,،]/).map(s=>s.trim()).filter(Boolean);edit(path,data);});
   const sources=node('div',undefined,'sources-editor');sources.append(node('h4','منابع'));box.append(sources);
   for(const [sourceIndex,source] of (item.sources||[]).entries()){const row=node('div',undefined,'source-row');field(row,'عنوان منبع',source.title,value=>{source.title=value;edit(path,data);});field(row,'پیوند منبع',source.url,value=>{source.url=value;edit(path,data);},{type:'url'});row.append(button('حذف منبع',()=>{item.sources.splice(sourceIndex,1);edit(path,data);render();}));sources.append(row);}
   sources.append(button('افزودن منبع',()=>{(item.sources??=[]).push({title:'',url:'https://'});edit(path,data);render();}));
@@ -203,7 +205,7 @@ async function historyEditor(){const section=group('تاریخچه و بازیا
  section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',new Date(commit.commit.author.date).toLocaleString('fa-IR')));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخهٔ انتخابی در پیش‌نویس آمادهٔ بررسی است.');render();})));rows.append(row);}})));
 }
 function render(){if(!loaded)return;view.replaceChildren();const route=location.hash.slice(1);if(!Object.hasOwn(routes,route))return;
- if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
+ if(route==='auto-posts')editorialEditor(view);if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
 }
 function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Object.hasOwn(routes,route);$('publish-bar').hidden=!loaded;if(loaded&&Object.hasOwn(routes,route)){render();const target=({articles:'blog',topics:'home',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[route]||previewPage;if(target!==previewPage||!preview.getAttribute('src'))setPreview(target);if(route==='pages')focusBlock();}}
 window.addEventListener('hashchange',route);
