@@ -22,3 +22,5 @@ const signature=Buffer.from(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',keys.pr
 const fetcher=async()=>Response.json({keys:[jwk]});assert.equal((await verifyOIDC(unsigned+'.'+signature,fetcher)).run_id,'123');
 await assert.rejects(verifyOIDC(unsigned+'.'+signature.slice(0,-8)+'aaaaaaaa',fetcher),/publisher_denied/);
 console.log('Editorial publisher verifies GitHub signature, fixed issuer/audience/repository/workflow/main/event and expiry.');
+
+const {articleImage}=await import('../js/site-model.mjs');assert(articleImage('/assets/optimized/heart.012d14fb0e841a4f.webp'));assert(!articleImage('/assets/optimized/../../private.jpg'));

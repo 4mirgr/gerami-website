@@ -62,8 +62,8 @@ async function generate(job){
  const copy=validateCopy(JSON.parse(raw)),[publicTopic,icon]=mapping[category.id];
  const imageFile=icons.images?.['/assets/topics/'+icon+'.webp']?.split('/').pop();
  if(!imageFile)throw Error('source_unavailable');
- const d={job_id:job.id,slug:'health-'+job.day.replaceAll('-','')+'-'+topic.id,content:copy,category:category.label,topic:publicTopic,image:SITE+'/assets/optimized/'+imageFile,source:{default_image:SITE+'/assets/optimized/'+imageFile,telegram_image:SITE+'/assets/editorial/'+icon+'.jpg',commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'ارجاع مستقیم در فرادادهٔ این مبحث ثبت نشده است؛ تطبیق با مرجع پیش از تأیید بر عهدهٔ پزشک است.',sources:canonical.sources||[],model,indirect:true}};
- d.source.image_sha=await sha(new Uint8Array(await(await remote(d.image)).arrayBuffer()));
+ const d={job_id:job.id,slug:'health-'+job.day.replaceAll('-','')+'-'+topic.id,content:copy,category:category.label,topic:publicTopic,image:'/assets/optimized/'+imageFile,source:{default_image:'/assets/optimized/'+imageFile,telegram_image:SITE+'/assets/editorial/'+icon+'.jpg',commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'ارجاع مستقیم در فرادادهٔ این مبحث ثبت نشده است؛ تطبیق با مرجع پیش از تأیید بر عهدهٔ پزشک است.',sources:canonical.sources||[],model,indirect:true}};
+ d.source.image_sha=await sha(new Uint8Array(await(await remote(new URL(d.image,SITE).href)).arrayBuffer()));
  d.snapshot_hash=await snapshot(d);const rows=await db('gerami_editorial_drafts',d);return rows[0];
 }
 async function reconcile(){
@@ -118,8 +118,9 @@ Deno.serve(async req=>{
   }
   await admin(req);
   if(action==='list'){
-   const [drafts,jobs,settings]=await Promise.all([db('gerami_editorial_drafts?select=id,slug,status,revision,content,category,topic,image,media_path,source,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at&order=created_at.desc&limit=100'),db('gerami_editorial_jobs?select=id,day,status,attempts,error_code,updated_at&order=day.desc&limit=10'),db('gerami_editorial_settings')]);
-   for(const d of drafts)d.preview=await preview(d);return reply({drafts,jobs,settings:settings[0]});
+   const offset=Number.isInteger(body.offset)&&body.offset>=0&&body.offset<=100000?body.offset:0;
+   const [drafts,jobs,settings]=await Promise.all([db('gerami_editorial_drafts?select=id,slug,status,revision,content,category,topic,image,media_path,source,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at&order=created_at.desc,id.desc&limit=25&offset='+offset),db('gerami_editorial_jobs?select=id,day,status,attempts,error_code,updated_at&order=day.desc&limit=10'),db('gerami_editorial_settings')]);
+   for(const d of drafts)d.preview=await preview(d);return reply({drafts,jobs,settings:settings[0],next:drafts.length===25});
   }
   if(action==='settings'){
    if(typeof body.enabled!=='boolean'||!Number.isInteger(body.hour)||body.hour<0||body.hour>23||!Array.isArray(body.categories)||!body.categories.length||body.categories.some(c=>!mapping[c]))return reply({error:'invalid_settings'},400);

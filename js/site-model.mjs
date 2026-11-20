@@ -33,7 +33,7 @@ export function safeLink(value){
  try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}
 }
 export const asset=value=>typeof value==='string'&&/^\/assets\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif|gif|svg)$/i.test(value)&&!value.includes('..');
-export const articleImage=value=>typeof value==='string'&&(asset(value)&&value.startsWith('/assets/uploads/')||/^https:\/\//i.test(value)&&safeLink(value));
+export const articleImage=value=>typeof value==='string'&&(asset(value)&&/^\/assets\/(?:uploads\/|optimized\/[a-z-]+\.[a-f0-9]{16}\.webp$)/.test(value)||/^https:\/\//i.test(value)&&safeLink(value));
 export const pageSlug=value=>typeof value==='string'&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(value)&&!['index','page','admin','api','intmed','aus',...Object.keys(pages)].includes(value);
 function must(ok,message){if(!ok)throw Error(message);}
 const string=(s,max=20000)=>typeof s==='string'&&s.length<=max;
