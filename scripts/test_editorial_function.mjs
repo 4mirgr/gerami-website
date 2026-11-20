@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';
-let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,jobStatus;
+let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus;
 const topic={lesson:[{paragraphs:[{text:'متن آموزشی منتشرشده دربارهٔ فشار خون و مراقبت از آن. '.repeat(30)}]}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
 const copy={title:'فشار خون را جدی بگیریم',summary:'اندازه‌گیری منظم کمک‌کننده است.',paragraphs:[paragraph,paragraph,paragraph],tags:['فشار خون','قلب'],hashtags:['فشار خون','سلامت']};
@@ -31,7 +31,7 @@ const fakeFetch=async(url,options={})=>{
  if(url.endsWith('assets/optimized/manifest.json'))return Response.json({images:{'/assets/topics/heart.webp':'/assets/optimized/heart.012d14fb0e841a4f.webp'}});
  if(url.endsWith('/intmed/content/topics/cardio-htn.json'))return new Response(bytes);
  if(url.endsWith('/cardio/cardio-htn/data.json'))return Response.json({sourceNote:'بر پایهٔ بانک سؤال؛ بررسی مستقل هاریسون ادعا نمی‌شود.'});
- if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(copy)}]}}]});}
+ if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
  if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
  if(url.includes('api.telegram.org')){sent.push({method:url.split('/').pop(),...JSON.parse(options.body)});return Response.json({ok:true,result:{message_id:sent.length+1}});}
  throw Error('Unexpected network '+url);
@@ -50,4 +50,6 @@ assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'comp
 // Changed deployed manifest is rejected before any provider call or second draft.
 drafts=[];hashMismatch=true;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'error');
 hashMismatch=false;receiptFailure=true;pending=[];await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,2,'Receipt outage blocked new daily generation');assert.equal(jobStatus,'complete');
+drafts=[];pending=[];receiptFailure=false;clinicalRemaining=1;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,4);assert.equal(jobStatus,'complete','One editorial rewrite should produce plain public copy');
+const sentBefore=sent.length;drafts=[];pending=[];clinicalRemaining=2;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,6);assert.equal(jobStatus,'error','Persistently specialist copy must stop after one rewrite');assert.equal(sent.length,sentBefore,'Rejected specialist copy was sent as a ready draft');
 console.log('Editorial Edge integration: live roles, private callbacks/job capabilities, verified published source, natural-copy validation, image/full-text review, and fail-closed source mismatch passed.');
