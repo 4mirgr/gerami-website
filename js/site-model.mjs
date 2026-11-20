@@ -5,13 +5,17 @@ export const pages={home:'صفحهٔ اصلی',about:'دربارهٔ من',servi
 export const fonts={Vazirmatn:'وزیرمتن',Tahoma:'Tahoma',Arial:'Arial',system:'فونت سیستم'};
 export const sections={hero:'معرفی و کارت‌های اصلی',explore:'کاروسل موضوعات',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'نقشهٔ شاخه‌ها و زیرشاخه‌ها',articles:'تازه‌ترین مطالب'};
 export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json','content/topics.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
-let publicSnapshot;
+let publicSnapshot,articleDelivery;
 export async function readPublicDocument(path){
  if(!managedPaths.includes(path))throw Error('Unknown public document');
  if(publicSnapshot===undefined){
-  try{const data=JSON.parse(globalThis.document?.getElementById('site-public-data')?.textContent||'null');publicSnapshot=data?.version===1&&data.documents&&typeof data.documents==='object'?data.documents:null;}catch{publicSnapshot=null;}
+  try{const data=JSON.parse(globalThis.document?.getElementById('site-public-data')?.textContent||'null');articleDelivery=data?.articleDelivery;publicSnapshot=data?.version===1&&data.documents&&typeof data.documents==='object'?data.documents:null;}catch{publicSnapshot=null;}
  }
  if(publicSnapshot&&Object.hasOwn(publicSnapshot,path))return publicSnapshot[path];
+ if(path==='content/articles.json'&&articleDelivery&&/^[a-f0-9]{40}$/.test(articleDelivery.revision)&&/^[a-f0-9]{64}$/.test(articleDelivery.sha256)&&articleDelivery.bytes<=750000){
+  const verified=async(url,timeout)=>{const r=await fetch(url,{credentials:'omit',referrerPolicy:'no-referrer',redirect:'error',signal:AbortSignal.timeout(timeout)});if(!r.ok)throw Error('Unavailable');const reader=r.body.getReader(),parts=[];let size=0;for(;;){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>articleDelivery.bytes){await reader.cancel();throw Error('Feed size');}parts.push(value);}const bytes=new Uint8Array(size);let at=0;for(const p of parts){bytes.set(p,at);at+=p.length;}const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');if(size!==articleDelivery.bytes||hash!==articleDelivery.sha256)throw Error('Feed integrity');return JSON.parse(new TextDecoder().decode(bytes));};
+  try{return await verified('/content/articles.json',1800);}catch{return verified('https://raw.githubusercontent.com/4mirgr/gerami-website/'+articleDelivery.revision+'/content/articles.json',6000);}
+ }
  const response=await fetch(new URL('../'+path,import.meta.url),{cache:'no-store',signal:AbortSignal.timeout(10000)});
  if(!response.ok)throw Error('Unavailable');return response.json();
 }
@@ -73,6 +77,7 @@ export function validateDocument(path,data){
    for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&(item.status==='draft'||key==='reviewed_at'))||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,key==='published_at'?'تاریخ انتشار انتخاب‌شده معتبر نیست؛ آن را خالی بگذارید تا خودکار ثبت شود.':'تاریخ بازبینی انتخاب‌شده معتبر نیست؛ این فیلد اختیاری است.');}
    must(item.topic===undefined||item.topic===''||typeof item.topic==='string'&&item.topic.length<=80&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(item.topic),'موضوع مقاله معتبر نیست.');
    must(!item.image||articleImage(item.image),'برای تصویر مقاله فایل بارگذاری کنید یا لینک مستقیم HTTPS معتبر وارد کنید.');
+   for(const key of ['tags','hashtags'])must(item[key]===undefined||Array.isArray(item[key])&&item[key].length<=8&&item[key].every(t=>typeof t==='string'&&t.length<=50&&/^[#\p{L}\p{N} _‌-]+$/u.test(t)),'تگ‌های مقاله معتبر نیستند.');
    must(!item.sources||Array.isArray(item.sources)&&item.sources.length<=100,'منابع معتبر نیستند.');for(const source of item.sources||[])must(string(source.title)&&source.url?.startsWith('https://')&&safeLink(source.url),'منبع نیاز به عنوان و پیوند HTTPS دارد.');
   }
  }else{

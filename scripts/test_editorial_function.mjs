@@ -1,0 +1,53 @@
+import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';
+let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,jobStatus;
+const topic={lesson:[{paragraphs:[{text:'متن آموزشی منتشرشده دربارهٔ فشار خون و مراقبت از آن. '.repeat(30)}]}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
+const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
+const copy={title:'فشار خون را جدی بگیریم',summary:'اندازه‌گیری منظم کمک‌کننده است.',paragraphs:[paragraph,paragraph,paragraph],tags:['فشار خون','قلب'],hashtags:['فشار خون','سلامت']};
+const env={SUPABASE_SERVICE_ROLE_KEY:'private-service',SUPABASE_ANON_KEY:'public-key',TELEGRAM_BOT_TOKEN:'private-bot',GEMINI_API_KEY:'private-gemini'};
+const fakeFetch=async(url,options={})=>{
+ if(url.includes('/auth/v1/user'))return Response.json({id:'owner',email_confirmed_at:'2026-01-01'});
+ if(url.includes('/rpc/gerami_account'))return Response.json({id:'owner',role:enabledRole});
+ if(url.includes('/rest/v1/')){
+  const path=url.split('/rest/v1/')[1],body=options.body?JSON.parse(options.body):null;
+  if(path==='rpc/gerami_editorial_claim_job')return Response.json(body.p_hash===await core.sha('a'.repeat(64))?{id:body.p_id,day:'2026-11-20'}:null);
+  if(path==='rpc/gerami_editorial_mutate')return Response.json(drafts.find(d=>d.id===body.p_id));
+  if(path.startsWith('gerami_editorial_settings'))return Response.json([{categories:['cardio'],enabled:true,hour:9}]);
+  if(path.startsWith('intmed_notification_settings'))return Response.json([{chat_id:'123'}]);
+  if(path.startsWith('gerami_editorial_jobs')){if(options.method==='PATCH')jobStatus=body.status;return Response.json([]);}
+  if(path==='gerami_editorial_drafts'&&options.method==='POST'){inserted++;const d={...body,id:'00000000-0000-4000-8000-000000000002',revision:1,status:'draft',notification_attempts:0,next_notification_at:'2020-01-01'};drafts.push(d);return Response.json([d]);}
+  if(path.startsWith('gerami_editorial_drafts')){
+   if(path.includes('status=eq.draft')){assert(path.includes('notified_revision=is.null')&&path.includes('notification_attempts=lt.3')&&path.includes('next_notification_at=lte.'),'Three older notified drafts would starve the next notification');return Response.json(drafts);}
+   if(path.includes('status=in.')||path.includes('or=(')){if(receiptFailure)return new Response('{}',{status:503});return Response.json([]);}
+   if(path.includes('select=source'))return Response.json(drafts.map(d=>({source:d.source})));
+   if(path.includes('job_id=eq.'))return Response.json(drafts.map(d=>({id:d.id})));
+   return Response.json(drafts);
+  }
+  throw Error('Unexpected REST '+path);
+ }
+ if(url.includes('/gerami-website/main/deploy/projects.json'))return Response.json({intmed:{commit:'c'.repeat(40)}});
+ if(url.includes('manifest.json')&&url.includes('/intMed-study-plan/'))return Response.json(manifest);
+ if(url.endsWith('/intmed/content/manifest.json'))return Response.json({...manifest,buildId:hashMismatch?'wrong':manifest.buildId});
+ if(url.endsWith('content/taxonomy.json'))return Response.json({categories:[{id:'cardio',label:'قلب',topics:[{id:'cardio-htn',label:'فشار خون'}]}]});
+ if(url.endsWith('assets/optimized/manifest.json'))return Response.json({images:{'/assets/topics/heart.webp':'/assets/optimized/heart.012d14fb0e841a4f.webp'}});
+ if(url.endsWith('/intmed/content/topics/cardio-htn.json'))return new Response(bytes);
+ if(url.endsWith('/cardio/cardio-htn/data.json'))return Response.json({sourceNote:'بر پایهٔ بانک سؤال؛ بررسی مستقل هاریسون ادعا نمی‌شود.'});
+ if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(copy)}]}}]});}
+ if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
+ if(url.includes('api.telegram.org')){sent.push({method:url.split('/').pop(),...JSON.parse(options.body)});return Response.json({ok:true,result:{message_id:sent.length+1}});}
+ throw Error('Unexpected network '+url);
+};
+const source=(await fs.readFile('backend/editorial/functions/gerami-editorial/index.ts','utf8')).replace(/^import[^\n]+\n/,'');
+const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(core),source);
+run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(core));
+const post=(action,body={},authorization='Bearer valid.session.token.value')=>handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/'+action,{method:'POST',headers:{Authorization:authorization},body:JSON.stringify(body)}));
+assert.equal((await handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/list'))).status,405);
+for(enabledRole of ['user','secretary'])assert.equal((await post('list')).status,403);enabledRole='admin';assert.equal((await post('list')).status,200);
+assert.equal((await post('callback',{callback_query:{from:{id:999},message:{chat:{id:123,type:'private'}},data:'webpost:a:'+'b'.repeat(32)}},'Bearer private-service')).status,403);
+assert.equal((await post('job',{id:'00000000-0000-4000-8000-000000000001',capability:'b'.repeat(64)})).status,403);
+const payload={id:'00000000-0000-4000-8000-000000000001',capability:'a'.repeat(64)};
+assert.equal((await post('job',payload)).status,200);await Promise.all(pending);pending=[];
+assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'complete');assert.equal(sent[0].method,'sendPhoto');assert(sent[0].photo.endsWith('/assets/editorial/heart.jpg'));assert(sent.at(-1).text.includes('تگ‌ها:'));assert(sent.at(-1).reply_markup.inline_keyboard[0][0].callback_data.startsWith('webpost:a:'));
+// Changed deployed manifest is rejected before any provider call or second draft.
+drafts=[];hashMismatch=true;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'error');
+hashMismatch=false;receiptFailure=true;pending=[];await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,2,'Receipt outage blocked new daily generation');assert.equal(jobStatus,'complete');
+console.log('Editorial Edge integration: live roles, private callbacks/job capabilities, verified published source, natural-copy validation, image/full-text review, and fail-closed source mismatch passed.');

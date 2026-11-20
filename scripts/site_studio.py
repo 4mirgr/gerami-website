@@ -1,5 +1,6 @@
 """Validate owner-editable settings and generate safe static custom pages."""
 import html
+import hashlib
 import json
 import re
 import subprocess
@@ -126,6 +127,14 @@ def home_bootstrap(root, text, ident="home"):
         value = json.loads((root / path).read_text())
         if path == 'content/site.json' and ident != 'about':
             value = {**value, 'cv': []}  # Detailed CV is rendered only by About.
+        # A growing feed must not turn the initial HTML into a database dump.
+        # Empty feed stays inline; published feeds load after the static first paint.
+        if path == 'content/articles.json' and value.get('articles'):
+            revision = subprocess.run(['git', '-C', str(root), 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()
+            if re.fullmatch('[a-f0-9]{40}', revision):
+                raw = (root / path).read_bytes()
+                snapshot['articleDelivery'] = {'revision': revision, 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+            continue
         snapshot['documents'][path] = value
         if len(serialize(snapshot).encode('utf-8')) > 65536:
             del snapshot['documents'][path]

@@ -88,6 +88,10 @@ def validate(root=ROOT):
             uploads = (root / 'assets/uploads').resolve()
             if not image.startswith('/assets/uploads/') or '..' in image or not target.is_relative_to(uploads) or not target.is_file():
                 raise ValueError('Article image must exist within assets/uploads')
+        for key in ('tags', 'hashtags'):
+            tags = item.get(key, [])
+            if not isinstance(tags, list) or len(tags) > 8 or any(not isinstance(t, str) or not re.fullmatch(r'[#\w \u200c-]{1,50}', t) for t in tags):
+                raise ValueError('Invalid article tags')
         if not isinstance(item.get('sources', []), list):
             raise ValueError('Article sources must be a list')
         for source in item.get('sources', []):
