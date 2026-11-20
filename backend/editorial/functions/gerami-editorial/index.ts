@@ -44,7 +44,7 @@ async function generate(job){
  const base='https://raw.githubusercontent.com/4mirgr/intMed-study-plan/'+commit+'/';
  const [manifest,taxonomy,settings,previous,icons]=await Promise.all([
   remote(base+'docs/content/manifest.json').then(r=>r.json()),remote(base+'content/taxonomy.json').then(r=>r.json()),
-  db('gerami_editorial_settings?singleton=eq.true'),db('gerami_editorial_drafts?select=source&order=created_at.desc&limit=100'),remote(SITE+'/assets/optimized/manifest.json').then(r=>r.json())
+  db('gerami_editorial_settings?singleton=eq.true'),db('gerami_editorial_drafts?select=source&order=created_at.desc&limit=100'),remote('https://raw.githubusercontent.com/4mirgr/gerami-website/main/assets/optimized/manifest.json').then(r=>r.json())
  ]);
  const live=await(await remote(SITE+'/intmed/content/manifest.json')).json();if(live.buildId!==manifest.buildId)throw Error('source_changed');
  const used=new Set(previous.map(d=>d.source.topic_id));let choice;
