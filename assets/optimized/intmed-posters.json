@@ -1,0 +1,24 @@
+{
+  "source": "Owner-provided Archive.zip, 2026-11-20",
+  "conversion": "Full original frame, WebP quality86, no text/content edits",
+  "images": {
+    "en": {
+      "source": "1586D364-833E-4B74-A361-7E52ED639910.PNG",
+      "sourceSha256": "ab5a16afd7d436e150c34d0bde33d6436a5e9e1db62a8dea4f3f1c88e578979d",
+      "path": "/assets/optimized/intmed-poster-en.0827f8605019ca9d.webp",
+      "sha256": "0827f8605019ca9dd7b694d691b986f3e5d5236ff69c85cde86b2ed646edfc7e",
+      "bytes": 253604,
+      "width": 1199,
+      "height": 1312
+    },
+    "fa": {
+      "source": "D0360C06-597B-414B-B1A7-C0D6F7FE5FD5.PNG",
+      "sourceSha256": "7d4b602efcbf56110fac40aabaabbb95b4bbc1c8265527ef382ddc1c7e3990b4",
+      "path": "/assets/optimized/intmed-poster-fa.e0b786e1529138e3.webp",
+      "sha256": "e0b786e1529138e33cbb28bd55527259ffdf26e8255693db6d337fe5f8bff0ce",
+      "bytes": 227166,
+      "width": 1199,
+      "height": 1312
+    }
+  }
+}

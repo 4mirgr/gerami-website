@@ -8,6 +8,16 @@
     language = localStorage.getItem('ahg-lang') === 'en' ? 'en' : 'fa';
   } catch (_) { /* Storage is optional (private browsing and restricted contexts). */ }
 
+  function applyLanguageImages() {
+    const selected=root.lang==='en'?'en':'fa';
+    document.querySelectorAll('img[data-src-fa][data-src-en]').forEach(image=>{
+      const src=image.dataset[selected==='fa'?'srcFa':'srcEn'];
+      if(image.dataset.activeLanguage!==selected){if(image.getAttribute('src')!==src)image.src=src;image.dataset.activeLanguage=selected;}
+      image.alt=image.dataset[selected==='fa'?'altFa':'altEn']||'';
+    });
+  }
+  new MutationObserver(applyLanguageImages).observe(root,{attributes:true,attributeFilter:['lang']});
+
   function applyLanguage(next) {
     language = next === 'en' ? 'en' : 'fa';
     root.lang = language;
@@ -18,6 +28,7 @@
     document.querySelectorAll('[data-label-fa][data-label-en]').forEach(element => {
       element.setAttribute('aria-label', element.dataset[language === 'fa' ? 'labelFa' : 'labelEn']);
     });
+    applyLanguageImages();
     const title = document.querySelector('title');
     document.title = title.dataset[language] || title.textContent;
     const description = document.querySelector('meta[name="description"]');

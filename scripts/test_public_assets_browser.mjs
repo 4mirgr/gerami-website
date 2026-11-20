@@ -88,13 +88,22 @@ try{
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
  assert.deepEqual(normalMirrors,[],'healthy primary delivery must not download alternate copies');
  console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:after-before,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
+ const posters=JSON.parse(await readFile(resolve(root,'assets/optimized/intmed-posters.json'))).images;
+ for(const language of ['fa','en']){
+  if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
+  const poster=page.locator('[data-intmed-poster]');await poster.scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>document.querySelector('[data-intmed-poster]').complete&&document.querySelector('[data-intmed-poster]').naturalWidth===1199);
+  assert.equal(await poster.getAttribute('src'),posters[language].path);
+ }
+ console.log('PASS built localized IntMed posters: selected asset decodes and language swaps after fingerprinting.');
+
  // Reproduce the carrier failure: same-origin font/art never send headers.
  // Only a pinned public mirror may recover them; executable code stays local.
  async function serveMirror(route,corruptFont=false){
   const url=new URL(route.request().url());
   assert.equal(route.request().headers().cookie,undefined);
   assert.equal(route.request().headers().referer,undefined);
-  assert.match(url.pathname,/^\/4mirgr\/gerami-website\/8b5b6579572dfc865f8b894800ec10ca336ad8c2\/assets\//);
+  assert.match(url.pathname,/^\/4mirgr\/gerami-website\/528d9d06c2e60b944c3cb332dbb5fd8798b52904\/assets\//);
   const relative=url.pathname.split('/').slice(4).join('/'),file=resolve(root,relative);
   assert.ok(file.startsWith(root+'/assets/'));
   const body=await readFile(file);
@@ -134,6 +143,14 @@ try{
   await failed.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:')&&document.querySelector('.brand-logo').src.startsWith('blob:')&&document.querySelector('.brand-logo').naturalWidth>0,{},{timeout:3000});
   await failed.locator('[data-theme-toggle]').click();
   await failed.waitForFunction(()=>document.documentElement.dataset.theme==='light'&&getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:'),{},{timeout:3000});
+
+  for(const language of ['en','fa']){
+   if(await failed.locator('html').getAttribute('lang')!==language)await failed.locator('[data-language-toggle]').click();
+   await failed.locator('[data-intmed-poster]').scrollIntoViewIfNeeded();
+   await failed.waitForFunction(()=>{const i=document.querySelector('[data-intmed-poster]');return i.src.startsWith('blob:')&&i.complete&&i.naturalWidth===1199;},{},{timeout:9000});
+   const digest=await failed.evaluate(async()=>{const data=await(await fetch(document.querySelector('[data-intmed-poster]').src)).arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data)),b=>b.toString(16).padStart(2,'0')).join('');});
+   assert.equal(digest,posters[language].sha256,'Recovered poster must match its active language byte for byte');
+  }
   assert.deepEqual(recoveryErrors,[]);
   console.log('PASS carrier fault reproduction: blocked primary font/art recover from byte-identical public mirror; theme remains usable.');
  }finally{await Promise.all(held.map(release=>release()));await broken.close();}
