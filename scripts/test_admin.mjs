@@ -3,6 +3,7 @@ const require=createRequire(import.meta.url);const {chromium}=require('playwrigh
 try{
 const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'light'});
 await page.route('**/api/cms/status',r=>r.fulfill({json:{configured:false}}));
+await page.route('**/content/articles.json',r=>r.fulfill({json:{articles:[]}}));
 await page.goto('http://127.0.0.1:4173/admin/');await page.waitForFunction(()=>document.querySelector('#total').textContent!=='—');
 assert.equal(await page.locator('#total').textContent(),'۰');assert.match(await page.locator('#content-message').textContent(),/هنوز مقاله/);await page.screenshot({path:'/tmp/gerami-admin-day.png',fullPage:true});
 await page.locator('#theme').click();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.reload();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.screenshot({path:'/tmp/gerami-admin-night.png',fullPage:true});

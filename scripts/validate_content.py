@@ -1,5 +1,6 @@
 """Validate public CMS content and immutable integration boundaries before build."""
 import json
+import hashlib
 import re
 from datetime import date
 from pathlib import Path
@@ -81,7 +82,11 @@ def validate(root=ROOT):
                     raise ValueError('Article dates must use YYYY-MM-DD')
                 date.fromisoformat(value)
         image = item.get('image', '')
-        if image and not remote_article_image(image):
+        if image and re.fullmatch(r'/assets/optimized/[a-z-]+\.[a-f0-9]{16}\.webp', image):
+            target = root / image.lstrip('/')
+            if not target.is_file() or hashlib.sha256(target.read_bytes()).hexdigest()[:16] != image.split('.')[-2]:
+                raise ValueError('Reviewed article artwork must match its fingerprint')
+        elif image and not remote_article_image(image):
             if not isinstance(image, str) or not re.fullmatch(r'/assets/uploads/(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_.-]+\.(?:webp|png|jpe?g|avif|gif|svg)', image, re.I):
                 raise ValueError('Article image needs an uploaded file or a direct HTTPS URL')
             target = (root / image.lstrip('/')).resolve()

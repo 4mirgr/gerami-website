@@ -27,7 +27,7 @@ not a way to ignore disabled automatic scheduling. Maximum three automatic attem
 per day; provider quota errors are visible and do not activate another paid model.
 Notifications get at most three automatic attempts per saved revision; explicit
 admin resend invalidates previous buttons. Status/errors are safe codes, not raw
-provider responses. GitHub schedule is best effort, so approval does not promise
+provider responses. The exact main workflow also polls on its own installation/change to verify OIDC; this bootstrap does not prove scheduled execution. GitHub schedule is best effort, so approval does not promise
 instant publication. All publisher checks run before push; unknown/pushed states
 remain immutable until live article+cover verification or retry of the same content.
 

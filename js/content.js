@@ -10,6 +10,7 @@ const json=file=>readPublicDocument('content/'+file);
 let profile=null,articles=[],catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
 const path=publicPath(location.pathname),isHome=path==='/',isBlog=path.endsWith('/blog');
 const imageSource=src=>previewAssets[src]||src;
+const clear=host=>{for(const img of host.querySelectorAll('img'))img.removeAttribute('src');host.replaceChildren();};
  function renderProfile(){
   if(!profile)return;window.dispatchEvent(new CustomEvent('site-profile',{detail:profile}));
   if(!['/about','/contact','/appointments'].some(p=>path.endsWith(p)))return;
@@ -37,7 +38,7 @@ function renderTopics(){
  const rows=published(),flat=flattenTopics(catalog);
  const total=id=>{const ids=topicIds(catalog,id);return rows.filter(a=>ids.has(a.topic)).length;};
  for(const host of document.querySelectorAll('[data-topic-rail],[data-topic-directory]')){
-  host.replaceChildren();
+  clear(host);
   for(const topic of catalog.topics){
    const directory=host.hasAttribute('data-topic-directory');
    const wrap=el(directory?'article':'li','','topic-tile glass-surface');wrap.dataset.topicId=topic.id;
@@ -97,11 +98,11 @@ function renderArticles(){
  const size=isHome?6:12,pages=Math.max(1,Math.ceil(matches.length/size));filter.page=Math.min(filter.page,pages);const selected=isHome?matches.slice(0,size):matches.slice((filter.page-1)*size,filter.page*size);
  if(!heading.dataset.contentKey)heading.textContent=filter.topic&&byId.has(filter.topic)?byId.get(filter.topic)[lang()]:text('تازه‌ترین مطالب','Latest posts');
  count.textContent=matches.length?text(matches.length+' مقاله',matches.length+' articles')+(isHome?'':text(' · صفحهٔ '+filter.page+' از '+pages,' · Page '+filter.page+' of '+pages)):all.length?text('مقاله‌ای با این انتخاب پیدا نشد.','No posts match these filters.'):text('مطالب آموزشی در حال آماده‌سازی‌اند؛ موضوع موردنظر را انتخاب کنید.','Educational posts are being prepared. Explore a topic to get started.');
- const opened=new Set([...list.querySelectorAll('details[open]')].map(n=>n.id));list.replaceChildren();pagination.replaceChildren();
+ const opened=new Set([...list.querySelectorAll('details[open]')].map(n=>n.id));clear(list);pagination.replaceChildren();
  for(const item of selected){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
-  if(articleImage(item.image)){const img=el('img');img.referrerPolicy='no-referrer';img.src=imageSource(item.image);img.alt=copy.title;img.loading='lazy';img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
+  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=imageSource(item.image);img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
   tile.append(el('p',[topic?.[lang()]||item.category,item.author,item.published_at,item.reviewed_at?text('بازبینی: ','Reviewed: ')+item.reviewed_at:''].filter(Boolean).join(' · '),'post-meta'),card);
   const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,copy.body,imageSource);card.append(body);
   const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);

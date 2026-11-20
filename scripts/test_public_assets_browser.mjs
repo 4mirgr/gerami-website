@@ -44,7 +44,7 @@ try{
  const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[],bad=[],jsonRequests=[],normalMirrors=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});
- page.on('request',r=>{if(r.url().includes('/content/')&&r.url().endsWith('.json'))jsonRequests.push(r.url());if(new URL(r.url()).hostname==='raw.githubusercontent.com')normalMirrors.push(r.url());});
+ page.on('request',r=>{if(r.url().includes('/content/')&&r.url().endsWith('.json')&&!r.url().endsWith('/content/articles.json'))jsonRequests.push(r.url());if(new URL(r.url()).hostname==='raw.githubusercontent.com')normalMirrors.push(r.url());});
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.waitForSelector('[data-topic-card]');
  assert.equal(jsonRequests.length,0);
@@ -122,14 +122,16 @@ try{
   return route.continue();
  });
  try{
-  const failed=await broken.newPage();
+  const failed=await broken.newPage(),pendingPublic=new Set();
+  failed.on('request',r=>{if(r.url().startsWith(origin+'/assets/'))pendingPublic.add(r.url());});
+  for(const name of ['requestfinished','requestfailed'])failed.on(name,r=>pendingPublic.delete(r.url()));
   failed.on('pageerror',error=>recoveryErrors.push(error.message));
   await failed.goto(origin,{waitUntil:'domcontentloaded'});
   await failed.locator('#hero-title').waitFor({state:'visible'});
   await failed.waitForFunction(()=>window.recoveryEvents.some(event=>event.path.endsWith('.woff2')&&event.outcome==='installed'),{},{timeout:9000});
   await failed.waitForFunction(()=>document.querySelector('.brand-logo').src.startsWith('blob:')&&document.querySelector('.brand-logo').naturalWidth>0,{},{timeout:9000});
   await failed.waitForFunction(()=>getComputedStyle(document.documentElement).getPropertyValue('--glass-art').includes('blob:'),{},{timeout:9000});
-  await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});
+  try{await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});}catch(error){console.error('Held-resource diagnostic',JSON.stringify({pending:[...pendingPublic].map(u=>new URL(u).pathname),state:await failed.evaluate(()=>({ready:document.readyState,fonts:document.fonts.status,images:[...document.images].map(i=>({src:i.getAttribute('src'),complete:i.complete,loading:i.loading,width:i.naturalWidth})),events:window.recoveryEvents}))}));throw error;}
   const fontCDP=await failed.context().newCDPSession(failed);await fontCDP.send('DOM.enable');await fontCDP.send('CSS.enable');
   const {root:rootNode}=await fontCDP.send('DOM.getDocument');const {nodeId:heading}=await fontCDP.send('DOM.querySelector',{nodeId:rootNode.nodeId,selector:'#hero-title'});
   const recoveredFont=await fontCDP.send('CSS.getPlatformFontsForNode',{nodeId:heading});
@@ -163,9 +165,12 @@ try{
   return route.continue();
  });
  try{
-  const failed=await corrupt.newPage();await failed.goto(origin,{waitUntil:'domcontentloaded'});
+  const failed=await corrupt.newPage(),pendingPublic=new Set();
+  failed.on('request',r=>{if(r.url().startsWith(origin+'/assets/'))pendingPublic.add(r.url());});
+  for(const name of ['requestfinished','requestfailed'])failed.on(name,r=>pendingPublic.delete(r.url()));
+  await failed.goto(origin,{waitUntil:'domcontentloaded'});
   await failed.waitForFunction(()=>window.recoveryEvents.some(event=>event.path.endsWith('.woff2')&&event.outcome==='unavailable'),{},{timeout:9000});
-  await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});
+  try{await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});}catch(error){console.error('Held-resource diagnostic',JSON.stringify({pending:[...pendingPublic].map(u=>new URL(u).pathname),state:await failed.evaluate(()=>({ready:document.readyState,fonts:document.fonts.status,images:[...document.images].map(i=>({src:i.getAttribute('src'),complete:i.complete,loading:i.loading,width:i.naturalWidth})),events:window.recoveryEvents}))}));throw error;}
   const cdp=await failed.context().newCDPSession(failed);await cdp.send('DOM.enable');await cdp.send('CSS.enable');
   const {root:documentNode}=await cdp.send('DOM.getDocument');
   const {nodeId}=await cdp.send('DOM.querySelector',{nodeId:documentNode.nodeId,selector:'#hero-title'});

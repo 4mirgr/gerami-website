@@ -22,6 +22,7 @@ class ContentValidation(unittest.TestCase):
         (self.root / name).write_text(json.dumps(data))
 
     def test_empty_site_is_valid_without_invented_content(self):
+        self.write('content/articles.json', {'articles': []})
         self.assertEqual(validate(self.root), 0)
 
     def test_missing_translations_and_bad_links_block_publication(self):

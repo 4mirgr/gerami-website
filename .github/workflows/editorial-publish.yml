@@ -1,5 +1,8 @@
 name: Publish physician-approved website post
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/editorial-publish.yml]
   workflow_dispatch:
   schedule:
     - cron: '3-58/5 * * * *'
