@@ -165,7 +165,10 @@ try{
   return route.continue();
  });
  try{
-  const failed=await corrupt.newPage();await failed.goto(origin,{waitUntil:'domcontentloaded'});
+  const failed=await corrupt.newPage(),pendingPublic=new Set();
+  failed.on('request',r=>{if(r.url().startsWith(origin+'/assets/'))pendingPublic.add(r.url());});
+  for(const name of ['requestfinished','requestfailed'])failed.on(name,r=>pendingPublic.delete(r.url()));
+  await failed.goto(origin,{waitUntil:'domcontentloaded'});
   await failed.waitForFunction(()=>window.recoveryEvents.some(event=>event.path.endsWith('.woff2')&&event.outcome==='unavailable'),{},{timeout:9000});
   try{await failed.waitForFunction(()=>document.readyState==='complete',{},{timeout:4000});}catch(error){console.error('Held-resource diagnostic',JSON.stringify({pending:[...pendingPublic].map(u=>new URL(u).pathname),state:await failed.evaluate(()=>({ready:document.readyState,fonts:document.fonts.status,images:[...document.images].map(i=>({src:i.getAttribute('src'),complete:i.complete,loading:i.loading,width:i.naturalWidth})),events:window.recoveryEvents}))}));throw error;}
   const cdp=await failed.context().newCDPSession(failed);await cdp.send('DOM.enable');await cdp.send('CSS.enable');
