@@ -62,25 +62,25 @@ async function generate(job){
  const copy=validateCopy(JSON.parse(raw)),[publicTopic,icon]=mapping[category.id];
  const imageFile=icons.images?.['/assets/topics/'+icon+'.webp']?.split('/').pop();
  if(!imageFile)throw Error('source_unavailable');
- const d={job_id:job.id,slug:'health-'+job.day.replaceAll('-','')+'-'+topic.id,content:copy,category:category.label,topic:publicTopic,image:SITE+'/assets/optimized/'+imageFile,source:{default_image:SITE+'/assets/optimized/'+imageFile,telegram_image:SITE+'/assets/editorial/'+icon+'.jpg',commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'',sources:canonical.sources||[],model,indirect:true}};
+ const d={job_id:job.id,slug:'health-'+job.day.replaceAll('-','')+'-'+topic.id,content:copy,category:category.label,topic:publicTopic,image:SITE+'/assets/optimized/'+imageFile,source:{default_image:SITE+'/assets/optimized/'+imageFile,telegram_image:SITE+'/assets/editorial/'+icon+'.jpg',commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'ارجاع مستقیم در فرادادهٔ این مبحث ثبت نشده است؛ تطبیق با مرجع پیش از تأیید بر عهدهٔ پزشک است.',sources:canonical.sources||[],model,indirect:true}};
  d.source.image_sha=await sha(new Uint8Array(await(await remote(d.image)).arrayBuffer()));
  d.snapshot_hash=await snapshot(d);const rows=await db('gerami_editorial_drafts',d);return rows[0];
 }
 async function reconcile(){
  const rows=await db('gerami_editorial_drafts?or=(status.in.(verifying,publishing,publish_error),and(status.eq.published,published_notified.eq.false))&select=*');if(!rows.length)return;
  const data=await(await remote(SITE+'/content/articles.json?editorial-check='+Math.floor(Date.now()/300000))).json();
- for(const d of rows){const found=data.articles?.find(a=>a.slug===d.slug);if(!found||stable(found)!==stable(publicArticle(d)))continue;
+ for(const d of rows){try{const found=data.articles?.find(a=>a.slug===d.slug);if(!found||stable(found)!==stable(publicArticle(d)))continue;
  const image=new Uint8Array(await(await remote(new URL(d.image,SITE).href)).arrayBuffer());const expected=d.media_path?/editorial-([a-f0-9]{64})/.exec(d.image)?.[1]:d.source.image_sha;if(!expected||image.length>650000||await sha(image)!==expected)continue;
  await db('gerami_editorial_drafts?id=eq.'+d.id+'&status=eq.'+d.status,{status:'published',error_code:null,updated_at:new Date().toISOString()},'PATCH');
- await telegram('sendMessage',{chat_id:await chat(),text:'✅ پست تأییدشده روی سایت منتشر شد:\n'+d.content.title+'\n'+SITE+'/pages/blog.html#article-'+d.slug});await db('gerami_editorial_drafts?id=eq.'+d.id,{published_notified:true},'PATCH');}
+ await telegram('sendMessage',{chat_id:await chat(),text:'✅ پست تأییدشده روی سایت منتشر شد:\n'+d.content.title+'\n'+SITE+'/pages/blog.html#article-'+d.slug});await db('gerami_editorial_drafts?id=eq.'+d.id,{published_notified:true},'PATCH');}catch{await db('gerami_editorial_drafts?id=eq.'+d.id,{error_code:'live_verification_pending'},'PATCH').catch(()=>{});}}
 }
 async function jobRun(job){
  try{
-  await reconcile();
+  await reconcile().catch(()=>{});
   if(job.day!=='2000-01-01'){
    const existing=await db('gerami_editorial_drafts?job_id=eq.'+job.id+'&select=id');if(!existing.length)await generate(job);
   }
-  const pending=await db('gerami_editorial_drafts?status=eq.draft&select=*&order=created_at.asc&limit=3');for(const d of pending)await notify(d);
+  const pending=await db('gerami_editorial_drafts?status=eq.draft&notified_revision=is.null&notification_attempts=lt.3&next_notification_at=lte.'+encodeURIComponent(new Date().toISOString())+'&select=*&order=created_at.asc&limit=3');for(const d of pending)await notify(d);
   await db('gerami_editorial_jobs?id=eq.'+job.id,{status:'complete',error_code:null,updated_at:new Date().toISOString()},'PATCH');
  }catch(e){await db('gerami_editorial_jobs?id=eq.'+job.id,{status:e.message==='provider_quota'?'waiting_provider':'error',error_code:safeError(e),next_attempt_at:new Date(Date.now()+900000).toISOString(),updated_at:new Date().toISOString()},'PATCH');}
 }
@@ -113,7 +113,7 @@ Deno.serve(async req=>{
    }
    if(body.action==='receipt'&&uuid(body.id)&&/^[a-f0-9]{32}$/.test(body.capability||'')&&(!body.commit_sha||/^[a-f0-9]{40}$/.test(body.commit_sha))){
     const d=(await db('gerami_editorial_drafts?id=eq.'+body.id+'&select=*'))[0];if(!d)throw Error('stale_revision');
-    await mutate(d,'receipt',{lease_hash:await sha(body.capability),run:String(claims.run_id),commit_sha:body.commit_sha||null,error:body.error?'publication_checks_failed':null});await reconcile();return reply({ok:true});
+    await mutate(d,'receipt',{lease_hash:await sha(body.capability),run:String(claims.run_id),commit_sha:body.commit_sha||null,error:body.error?'publication_checks_failed':null});await reconcile().catch(()=>{});return reply({ok:true});
    }return reply({error:'invalid_action'},400);
   }
   await admin(req);

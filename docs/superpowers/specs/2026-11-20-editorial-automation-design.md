@@ -37,8 +37,9 @@ the cover with a bounded private upload before approval. Tags/hashtags are edita
 
 ## Performance and verification
 
-No public runtime framework or model calls. Homepage snapshot includes bounded
-published article metadata/excerpts only, with full bodies loaded on article pages.
+No public runtime framework or model calls. Populated homepage/blog snapshots include only a bounded delivery descriptor;
+article bodies load after static paint with exact SHA/length verification and a
+pinned public Git mirror after a 1.8-second primary deadline.
 Keep existing Iran asset recovery, first-response limits, auth and Clinic gates.
 Test authorization, stale approval, concurrent claims, source hashes, retries,
 provider failures, upload signatures and populated article delivery. Verify the

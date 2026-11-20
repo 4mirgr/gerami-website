@@ -1,0 +1,5 @@
+# Handler validates its own live app session, cron capability, service callback,
+# or signed GitHub OIDC identity. Supabase's legacy gateway JWT check cannot
+# validate the latter two public ingress mechanisms.
+[functions.gerami-editorial]
+verify_jwt = false

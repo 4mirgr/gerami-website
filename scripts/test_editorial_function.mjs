@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';
-let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,jobStatus;
+let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,jobStatus;
 const topic={lesson:[{paragraphs:[{text:'متن آموزشی منتشرشده دربارهٔ فشار خون و مراقبت از آن. '.repeat(30)}]}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
 const copy={title:'فشار خون را جدی بگیریم',summary:'اندازه‌گیری منظم کمک‌کننده است.',paragraphs:[paragraph,paragraph,paragraph],tags:['فشار خون','قلب'],hashtags:['فشار خون','سلامت']};
@@ -16,7 +16,8 @@ const fakeFetch=async(url,options={})=>{
   if(path.startsWith('gerami_editorial_jobs')){if(options.method==='PATCH')jobStatus=body.status;return Response.json([]);}
   if(path==='gerami_editorial_drafts'&&options.method==='POST'){inserted++;const d={...body,id:'00000000-0000-4000-8000-000000000002',revision:1,status:'draft',notification_attempts:0,next_notification_at:'2020-01-01'};drafts.push(d);return Response.json([d]);}
   if(path.startsWith('gerami_editorial_drafts')){
-   if(path.includes('status=in.')||path.includes('or=('))return Response.json([]);
+   if(path.includes('status=eq.draft')){assert(path.includes('notified_revision=is.null')&&path.includes('notification_attempts=lt.3')&&path.includes('next_notification_at=lte.'),'Three older notified drafts would starve the next notification');return Response.json(drafts);}
+   if(path.includes('status=in.')||path.includes('or=(')){if(receiptFailure)return new Response('{}',{status:503});return Response.json([]);}
    if(path.includes('select=source'))return Response.json(drafts.map(d=>({source:d.source})));
    if(path.includes('job_id=eq.'))return Response.json(drafts.map(d=>({id:d.id})));
    return Response.json(drafts);
@@ -48,4 +49,5 @@ assert.equal((await post('job',payload)).status,200);await Promise.all(pending);
 assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'complete');assert.equal(sent[0].method,'sendPhoto');assert(sent[0].photo.endsWith('/assets/editorial/heart.jpg'));assert(sent.at(-1).text.includes('تگ‌ها:'));assert(sent.at(-1).reply_markup.inline_keyboard[0][0].callback_data.startsWith('webpost:a:'));
 // Changed deployed manifest is rejected before any provider call or second draft.
 drafts=[];hashMismatch=true;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'error');
+hashMismatch=false;receiptFailure=true;pending=[];await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,2,'Receipt outage blocked new daily generation');assert.equal(jobStatus,'complete');
 console.log('Editorial Edge integration: live roles, private callbacks/job capabilities, verified published source, natural-copy validation, image/full-text review, and fail-closed source mismatch passed.');
