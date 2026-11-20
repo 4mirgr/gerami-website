@@ -8,6 +8,7 @@ export function validateCopy(value){
  const title=clean(value.title,140),paragraphs=value.paragraphs;
  if(!Array.isArray(paragraphs)||paragraphs.length<3||paragraphs.length>5)throw Error('paragraph_count');
  const body=paragraphs.map(p=>clean(p,850));if(body.join('\n\n').length>2900||body.some(p=>p.length<70))throw Error('body_length');
+ if(body.some(p=>/!\[/.test(p)))throw Error('inline_image_not_allowed');
  if(!/[\u0600-\u06ff]/.test(title+body.join('')))throw Error('persian_required');
  if(/به عنوان (?:یک )?(?:مدل|هوش مصنوعی)|در دنیای (?:امروز|پرتلاطم)|در این مقاله (?:قصد داریم|خواهیم پرداخت)/.test(body.join(' ')))throw Error('robotic_copy');
  const list=(items,hash=false)=>{if(!Array.isArray(items)||items.length<2||items.length>8)throw Error('invalid_tags');return [...new Set(items.map(t=>{t=clean(t,45).replace(/^#/,'');if(!/^[\p{L}\p{N} _‌-]+$/u.test(t))throw Error('invalid_tag');return hash?'#'+t.replace(/[ -]+/g,'_'):t;}))];};
@@ -24,7 +25,7 @@ export function sourceText(topic){
 }
 export function validImage(bytes,mime){return bytes.length>100&&bytes.length<=650000&&((mime==='image/jpeg'&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255)||(mime==='image/webp'&&new TextDecoder().decode(bytes.slice(0,4))==='RIFF'&&new TextDecoder().decode(bytes.slice(8,12))==='WEBP'));}
 export function oidcClaims(claims,now=Date.now()/1000){
- return claims.iss==='https://token.actions.githubusercontent.com'&&claims.aud===AUDIENCE&&claims.repository==='4mirgr/gerami-website'&&claims.repository_id==='1265850508'&&claims.repository_owner_id==='208800626'&&claims.ref==='refs/heads/main'&&claims.workflow_ref==='4mirgr/gerami-website/.github/workflows/editorial-publish.yml@refs/heads/main'&&['schedule','workflow_dispatch'].includes(claims.event_name)&&claims.sub==='repo:4mirgr/gerami-website:ref:refs/heads/main'&&/^\d{1,25}$/.test(String(claims.run_id))&&claims.exp>now&&claims.iat<=now+30&&claims.exp-claims.iat<=600;
+ return claims.iss==='https://token.actions.githubusercontent.com'&&claims.aud===AUDIENCE&&claims.repository==='4mirgr/gerami-website'&&claims.repository_id==='1265850508'&&claims.repository_owner_id==='208800626'&&claims.ref==='refs/heads/main'&&claims.workflow_ref==='4mirgr/gerami-website/.github/workflows/editorial-publish.yml@refs/heads/main'&&['schedule','workflow_dispatch','push'].includes(claims.event_name)&&claims.sub==='repo:4mirgr/gerami-website:ref:refs/heads/main'&&/^\d{1,25}$/.test(String(claims.run_id))&&claims.exp>now&&claims.iat<=now+30&&claims.exp-claims.iat<=600;
 }
 export async function verifyOIDC(token,fetcher=fetch){
  const decode=s=>Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')),c=>c.charCodeAt(0));

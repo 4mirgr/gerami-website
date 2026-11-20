@@ -10,7 +10,7 @@ assert.throws(()=>sourceText({lesson:[]}),/insufficient/);
 assert.equal(validImage(new Uint8Array(200),'image/svg+xml'),false);
 assert.equal(await sha(stable({b:2,a:1})),await sha(stable({a:1,b:2})));
 const c={run_id:'123',iss:'https://token.actions.githubusercontent.com',aud:'gerami-editorial-publisher',repository:'4mirgr/gerami-website',repository_id:'1265850508',repository_owner_id:'208800626',ref:'refs/heads/main',workflow_ref:'4mirgr/gerami-website/.github/workflows/editorial-publish.yml@refs/heads/main',event_name:'schedule',sub:'repo:4mirgr/gerami-website:ref:refs/heads/main',iat:100,exp:400};
-assert(oidcClaims(c,200));for(const patch of [{event_name:'pull_request'},{repository_id:'3'},{ref:'refs/heads/fork'},{exp:150},{aud:'other'}])assert(!oidcClaims({...c,...patch},200));
+assert(oidcClaims(c,200));assert(oidcClaims({...c,event_name:'push'},200));assert.throws(()=>validateCopy({...value,paragraphs:[paragraph+' ![hidden](https://example.test/a.jpg)',paragraph,paragraph]}),/inline_image/);for(const patch of [{event_name:'pull_request'},{repository_id:'3'},{ref:'refs/heads/fork'},{exp:150},{aud:'other'}])assert(!oidcClaims({...c,...patch},200));
 console.log('Editorial content, media and publisher identity contracts passed');
 // Signed OIDC verification rejects a forged signature even with otherwise valid claims.
 const {verifyOIDC}=await import('../backend/editorial/functions/gerami-editorial/core.mjs');
