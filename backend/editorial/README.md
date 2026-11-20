@@ -35,3 +35,12 @@ No automatic post is public before doctor approval. Inspect actual first draft a
 Telegram receipt on activation. Do not fabricate a doctor approval to test production.
 Private upload/revision retention should be reviewed before the storage quota fills;
 no patient data or textbook figures are permitted in this workflow.
+
+Live acceptance2026-11-20: existing botv19 and editorial functionv4, daily cron active.
+A real private preview and revised plain-language version were delivered. Signed
+GitHub main-workflow empty claim succeeded after installing the narrow private
+owner boolean helper. Service-role SQL tests must stay realistic: service_role
+has no SELECT on auth.users; do not solve that by broadening managed Auth grants.
+Language checks allow at most one extra provider rewrite per generation attempt.
+Actual doctor approval/public article publication is intentionally not simulated.
+Final release receipt is recorded in the repository's annotated release tag.

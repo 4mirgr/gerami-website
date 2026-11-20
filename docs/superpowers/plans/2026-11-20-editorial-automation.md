@@ -8,9 +8,9 @@
 - [x] Extend existing bot only with namespaced website callbacks; regression test.
 - [x] Add approved-content OIDC publisher, safe Git workflow and deployment receipt.
 - [x] Add public tag/hashtag support and bounded populated homepage snapshots.
-- [ ] Run complete source and assembled checks; obtain independent code review.
+- [x] Run complete source and assembled checks; obtain independent code review.
 - [ ] Commit/push PRs, apply reviewed migration/functions, merge after CI and verify.
-- [ ] Produce first private draft notification; report owner actions and exact state.
+- [x] Produce first private draft notification; report owner actions and exact state.
 
 Primary paths: backend/editorial/schema.sql,
 backend/editorial/functions/gerami-editorial/{index.ts,core.mjs},

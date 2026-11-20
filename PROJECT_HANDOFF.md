@@ -142,6 +142,60 @@ reported published only after deployed full article and cover SHA match. Schedul
 is 09:00 Tehran by default, editable/disableable; manual generation is explicit.
 Public Actions schedule is best-effort, not a promised five-minute SLA.
 
-Checkpoint status: tests and independent review in progress; no migration/function/
-cron/deployment is claimed by this paragraph. First real draft and live bot routing
-must be recorded after activation. Clinic remains synthetic and unchanged.
+Verified activation 2026-11-20: private migrations
+`gerami_editorial_private_drafts_20261120`,
+`gerami_editorial_daily_schedule_20261120` and
+`gerami_editorial_owner_check_privilege_20261120` applied. Four editorial tables
+have RLS with no anon/authenticated access; media bucket is private. Existing bot
+is version19; editorial function is version4, with its own ingress authentication
+and gateway verify_jwt=false. Cron `gerami-editorial-daily` is active every5minutes;
+settings select one daily draft at09:00 Tehran. First real provider run completed
+and delivered a private preview; a simpler four-paragraph revision was delivered
+and the previous approval invalidated. Never put unpublished copy, chat/message
+identifiers or private preview URLs in this public repository.
+
+Real caller-role acceptance exposed that service_role cannot read auth.users.
+Do not grant broad Auth-table SELECT. The service-only
+`gerami_editorial_private.owner_enabled(uuid)` boolean definer checks the current
+verified enabled owner; mutation/claim functions remain invoker-bound. Tests run
+those RPCs as service_role and prove direct Auth reads remain denied. Live rollback
+probe and signed GitHub main-workflow empty-claim preflight both succeeded after
+this fix (workflow44733906017, successful job136289437430). This proves publisher
+identity/queue access, not a doctor approval or a real public article commit.
+
+Public copy must be written for patients/families, with everyday words and short
+sentences. The configured Gemini gets at most one additional editorial rewrite per
+attempt when jargon, unnecessary statistics or clinical treatment instructions
+remain; continued failure stays private with a safe error code. No medication-dose
+advice, invented experiences or independently verified book-page claims. Owner still
+reviews each exact saved version. Provider quota errors never enable another paid
+model automatically.
+
+Release source/production evidence: website PR40 followed by PR41; main595342de9bb0c2129beb142e34343c9e067eaec9 deployed as
+6eca1b14-ce5f-4b07-b721-e802b1ab5976 at12:14:02Z. Private language/owner-check
+follow-up is PR42. Final merge/deployment receipts belong in the annotated release
+tag after CI, not inferred from these checkpoints. IntMed callback PR5 merged as
+5d91b7fc8754eb620b6e977838fb2236f0eadc95; website keeps the existing content pin
+because educational public bytes did not change.
+
+Complete source/browser and fresh assembled checks passed with both empty and
+synthetic populated article data. Source budget is171,321B raw/57,295B gzip;
+populated first response remains below28,000B gzip. Growing feeds use an exact
+commit/length/SHA descriptor, bounded1.8s primary delivery and6s pinned public Git
+fallback. CI also found detached topic/post image requests could keep loading open:
+configure lazy loading before src, clear old src before replacing lists. Keep the
+load-completion assertion, source budgets, hash checks and public-only mirror scope.
+
+The publisher polls on schedule/manual dispatch and on changes to its own exact
+workflow file on main (installation preflight only). GitHub scheduling is best effort;
+a successful bootstrap alone does not prove future scheduled execution. Claims are
+restricted to signed fixed repository/workflow/main identities and run-bound leases.
+Pending or uncertain publication stays immutable, with explicit retry of the same
+approved snapshot. A real article is marked published only after deployed article
+and cover bytes match. Do not simulate owner approval to test production.
+
+Clinic remains synthetic and unchanged. No new bot, Supabase project, PAT or billing
+upgrade was needed. Owner actions: review/approve saved previews, optionally change
+time/categories, and monitor provider/storage quotas. Existing Google OAuth/SMTP
+and future Clinic actions remain in the separate checklist; they are not prerequisites
+for this Telegram review flow.
