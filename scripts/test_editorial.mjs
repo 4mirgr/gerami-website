@@ -24,3 +24,5 @@ await assert.rejects(verifyOIDC(unsigned+'.'+signature.slice(0,-8)+'aaaaaaaa',fe
 console.log('Editorial publisher verifies GitHub signature, fixed issuer/audience/repository/workflow/main/event and expiry.');
 
 const {articleImage}=await import('../js/site-model.mjs');assert(articleImage('/assets/optimized/heart.012d14fb0e841a4f.webp'));assert(!articleImage('/assets/optimized/../../private.jpg'));
+
+const {publicStyleIssues}=await import('../backend/editorial/functions/gerami-editorial/core.mjs');assert.equal(publicStyleIssues(value).length,0);assert(publicStyleIssues({...value,paragraphs:['درمان با کورتیکواستروئید و ICS؛ نیمی از موارد نیازمند استفاده مکرر از دارو است.']}).length>=2);

@@ -1,5 +1,18 @@
 -- Private editorial data. No anonymous/authenticated table access; APIs validate live roles.
 begin;
+-- A narrow boolean helper can inspect managed Auth rows without granting the
+-- API service role SELECT on auth.users. Keep all state transitions invoker-bound.
+create schema if not exists gerami_editorial_private;
+revoke all on schema gerami_editorial_private from public,anon,authenticated;
+grant usage on schema gerami_editorial_private to service_role;
+create or replace function gerami_editorial_private.owner_enabled(p_user uuid)
+returns boolean language sql stable security definer set search_path='' as $$
+ select exists(select 1 from public.gerami_accounts a join auth.users u on u.id=a.user_id
+ where a.user_id=p_user and a.role='admin' and a.enabled and u.email_confirmed_at is not null
+ and u.deleted_at is null and (u.banned_until is null or u.banned_until<=now()))
+$$;
+revoke all on function gerami_editorial_private.owner_enabled(uuid) from public,anon,authenticated;
+grant execute on function gerami_editorial_private.owner_enabled(uuid) to service_role;
 create table if not exists public.gerami_editorial_settings (
  singleton boolean primary key default true check(singleton), enabled boolean not null default true,
  hour smallint not null default 9 check(hour between 0 and 23),
@@ -58,7 +71,7 @@ begin
   if d.status<>'draft' or d.approval_hash is null or d.approval_hash<>p_data->>'hash'
     or d.approval_expires_at<now() or d.telegram_message_id<>(p_data->>'message_id')::bigint
     or d.telegram_message_id is null or d.notified_revision<>d.revision then raise exception 'stale_approval'; end if;
-  if not exists(select 1 from public.gerami_accounts a join auth.users u on u.id=a.user_id where a.user_id=(p_data->>'owner')::uuid and a.role='admin' and a.enabled and u.email_confirmed_at is not null and u.deleted_at is null and (u.banned_until is null or u.banned_until<=now())) then raise exception 'owner_disabled'; end if;
+  if not gerami_editorial_private.owner_enabled((p_data->>'owner')::uuid) then raise exception 'owner_disabled'; end if;
   update public.gerami_editorial_drafts set status=case when p_action='approve' then 'approved' else 'rejected' end,
    approval_hash=null,approved_by=(p_data->>'owner')::uuid,approved_at=now(),publication_date=(now() at time zone 'Asia/Tehran')::date,updated_at=now() where id=p_id returning * into d;
  elsif p_action='retry' then
@@ -77,7 +90,7 @@ begin
  perform pg_advisory_xact_lock(742110,1);
  update public.gerami_editorial_drafts set status='publish_error',error_code='publisher_interrupted',updated_at=now() where status='publishing' and lease_expires_at<now();
  if exists(select 1 from public.gerami_editorial_drafts where status='publishing') then return null; end if;
- select * into d from public.gerami_editorial_drafts where status='approved' and publication_attempts<3 and exists(select 1 from public.gerami_accounts a join auth.users u on u.id=a.user_id where a.user_id=approved_by and a.role='admin' and a.enabled and u.email_confirmed_at is not null and u.deleted_at is null and (u.banned_until is null or u.banned_until<=now())) order by approved_at limit 1 for update skip locked;
+ select * into d from public.gerami_editorial_drafts where status='approved' and publication_attempts<3 and gerami_editorial_private.owner_enabled(approved_by) order by approved_at limit 1 for update skip locked;
  if not found then return null; end if;
  update public.gerami_editorial_drafts set status='publishing',lease_hash=p_hash,lease_run=p_run,lease_expires_at=now()+interval '30 minutes',publication_attempts=publication_attempts+1,updated_at=now() where id=d.id returning * into d;
  return to_jsonb(d)-array['approval_hash','lease_hash'];

@@ -1,9 +1,9 @@
-import {SITE,PROJECT,PROMPT,sha,stable,validateCopy,sourceText,validImage,publicArticle,verifyOIDC} from './core.mjs';
+import {SITE,PROJECT,PROMPT,sha,stable,validateCopy,publicStyleIssues,sourceText,validImage,publicArticle,verifyOIDC} from './core.mjs';
 const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anon=Deno.env.get('SUPABASE_ANON_KEY')||'';
 const token=Deno.env.get('TELEGRAM_BOT_TOKEN')||'';
 const uuid=v=>typeof v==='string'&&/^[a-f0-9-]{36}$/.test(v);
 const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
-const safeError=e=>['stale_revision','draft_locked','stale_approval','owner_disabled','publisher_denied','invalid_image','insufficient_source','provider_quota','provider_unavailable','source_changed','source_unavailable','no_topic'].includes(e.message)?e.message:'editorial_failed';
+const safeError=e=>['stale_revision','draft_locked','stale_approval','owner_disabled','publisher_denied','invalid_image','insufficient_source','provider_quota','provider_unavailable','source_changed','source_unavailable','no_topic','copy_style_review_required'].includes(e.message)?e.message:'editorial_failed';
 async function remote(url,options={}){const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(15000),...options});if(!r.ok)throw Error('source_unavailable');return r;}
 async function db(path,body,method=body===undefined?'GET':'POST'){
  const r=await fetch(PROJECT+'/rest/v1/'+path,{method,headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'application/json',Prefer:'return=representation'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(12000)});
@@ -56,10 +56,15 @@ async function generate(job){
  const canonical=await(await remote(base+'content/'+category.id+'/'+topic.id+'/data.json')).json();
  const apiKey=Deno.env.get('GEMINI_API_KEY');if(!apiKey)throw Error('provider_unavailable');
  const model=Deno.env.get('INTMED_GEMINI_MODEL')||'gemini-3.1-flash-lite';if(!/^[a-z0-9.-]{1,80}$/.test(model))throw Error('provider_unavailable');
- const generated=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({systemInstruction:{parts:[{text:PROMPT}]},contents:[{role:'user',parts:[{text:JSON.stringify({topic:topic.label,sourceNote:canonical.sourceNote||'',publishedMaterial:input})}]}],generationConfig:{temperature:0.6,maxOutputTokens:5000,responseMimeType:'application/json'}}),signal:AbortSignal.timeout(75000)});
- if(!generated.ok)throw Error(generated.status===429?'provider_quota':'provider_unavailable');
- const output=await generated.json();const raw=(output.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');
- const copy=validateCopy(JSON.parse(raw)),[publicTopic,icon]=mapping[category.id];
+ const modelCopy=async material=>{
+  const generated=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({systemInstruction:{parts:[{text:PROMPT}]},contents:[{role:'user',parts:[{text:JSON.stringify(material)}]}],generationConfig:{temperature:0.6,maxOutputTokens:5000,responseMimeType:'application/json'}}),signal:AbortSignal.timeout(55000)});
+  if(!generated.ok)throw Error(generated.status===429?'provider_quota':'provider_unavailable');
+  const output=await generated.json(),raw=(output.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');return validateCopy(JSON.parse(raw));
+ };
+ const material={topic:topic.label,sourceNote:canonical.sourceNote||'',publishedMaterial:input};
+ let copy=await modelCopy(material),issues=publicStyleIssues(copy);
+ if(issues.length){copy=await modelCopy({...material,editorialTask:'این پیش‌نویس هنوز برای عموم زیادی تخصصی است. آن را با جمله‌های کوتاه، واژه‌های آشنا و مراقبت‌های عملیِ عمومی بازنویسی کن؛ هیچ اطلاعات تازه‌ای نساز.',issues,previousDraft:copy});if(publicStyleIssues(copy).length)throw Error('copy_style_review_required');}
+ const [publicTopic,icon]=mapping[category.id];
  const imageFile=icons.images?.['/assets/topics/'+icon+'.webp']?.split('/').pop();
  if(!imageFile)throw Error('source_unavailable');
  const d={job_id:job.id,slug:'health-'+job.day.replaceAll('-','')+'-'+topic.id,content:copy,category:category.label,topic:publicTopic,image:'/assets/optimized/'+imageFile,source:{default_image:'/assets/optimized/'+imageFile,telegram_image:SITE+'/assets/editorial/'+icon+'.jpg',commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'ارجاع مستقیم در فرادادهٔ این مبحث ثبت نشده است؛ تطبیق با مرجع پیش از تأیید بر عهدهٔ پزشک است.',sources:canonical.sources||[],model,indirect:true}};
