@@ -3,7 +3,9 @@ import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 const {chromium}=createRequire(import.meta.url)('playwright');
-const html=execFileSync('python3',['-c',"import sys;sys.path.insert(0,'scripts');from site_studio import ROOT,bake_settings;print(bake_settings(ROOT,(ROOT/'index.html').read_text(),'home'))"],{encoding:'utf8'});
+let html=execFileSync('python3',['-c',"import sys;sys.path.insert(0,'scripts');from site_studio import ROOT,bake_settings;print(bake_settings(ROOT,(ROOT/'index.html').read_text(),'home'))"],{encoding:'utf8'});
+// Isolate the zero-feed contract from the real site's published content.
+html=html.replace(/(<script id="site-public-data" type="application\/json">)(.*?)(<\/script>)/,(_,a,b,c)=>{const snapshot=JSON.parse(b);snapshot.documents['content/articles.json']={articles:[]};delete snapshot.articleDelivery;return a+JSON.stringify(snapshot)+c;});
 const topicCount=JSON.parse(readFileSync(new URL('../content/topics.json',import.meta.url),'utf8')).topics.length;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
@@ -25,6 +27,7 @@ try{
  assert.deepEqual(errors,[]);
  // The unassembled development template keeps its existing network fallback.
  await page.unroute('**/content/**/*.json');await page.unroute('http://127.0.0.1:4173/');
+ await page.route('**/content/articles.json',r=>r.fulfill({json:{articles:[]}}));
  await page.goto('http://127.0.0.1:4173/');await page.waitForSelector('.reading-empty');
  assert.equal(await page.locator('[data-topic-card]').count(),topicCount);
  console.log('PASS: built home needs zero JSON requests; translation, theme, preview updates and raw-template fallback remain functional.');

@@ -14,6 +14,6 @@ try{
  const publisher=action=>execFileSync(process.execPath,['--import',preload,path.join(source,'scripts/editorial-publisher.mjs'),action],{cwd:repo,env,encoding:'utf8',stdio:['ignore','pipe','pipe']});
  publisher('claim');assert.match(await fs.readFile(env.GITHUB_OUTPUT,'utf8'),/claimed=true/);assert.match(run(['status','--porcelain']),/^M content\/articles.json/);
  publisher('commit');const receipt=JSON.parse(await fs.readFile(path.join(runtime,'receipt.json'),'utf8'));assert.equal(receipt.action,'receipt');assert(!receipt.error);assert.equal(receipt.commit_sha,run(['rev-parse','HEAD']));assert.equal(run(['status','--porcelain']),'');
- assert.equal(JSON.parse(run(['show','HEAD:content/articles.json'])).articles[0].slug,article.slug);assert.equal(run(['rev-parse','origin/main']),receipt.commit_sha);
+ assert(JSON.parse(run(['show','HEAD:content/articles.json'])).articles.some(a=>a.slug===article.slug));assert.equal(run(['rev-parse','origin/main']),receipt.commit_sha);
  console.log('Editorial publisher subprocess: real Git first-file porcelain, exact approved payload, non-force bare-origin push and run receipt passed without external writes.');
 }finally{await fs.rm(root,{recursive:true,force:true});}

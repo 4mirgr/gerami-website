@@ -21,9 +21,13 @@ class HomeLoading(unittest.TestCase):
         text = self.render()
         snapshot = self.snapshot(text)
         self.assertEqual(snapshot['version'], 1)
-        self.assertEqual(set(snapshot['documents']), {
+        expected_paths = {
             'content/appearance.json', 'content/navigation.json', 'content/pages/home.json',
-            'content/site.json', 'content/topics.json', 'content/articles.json'})
+            'content/site.json', 'content/topics.json', 'content/articles.json'}
+        if json.loads((ROOT / 'content/articles.json').read_text())['articles']:
+            expected_paths.remove('content/articles.json')
+            self.assertIn('articleDelivery', snapshot)
+        self.assertEqual(set(snapshot['documents']), expected_paths)
         for path, data in snapshot['documents'].items():
             expected = json.loads((ROOT / path).read_text())
             if path == 'content/site.json': expected['cv'] = []
@@ -56,7 +60,9 @@ class HomeLoading(unittest.TestCase):
                 documents = self.snapshot(text)['documents']
                 expected = {'content/appearance.json', 'content/navigation.json', 'content/site.json', 'content/pages/' + ident + '.json'}
                 if ident == 'blog':
-                    expected.update({'content/topics.json', 'content/articles.json'})
+                    expected.add('content/topics.json')
+                    if not json.loads((ROOT / 'content/articles.json').read_text())['articles']:
+                        expected.add('content/articles.json')
                 self.assertEqual(set(documents), expected)
                 self.assertIn('<script id="site-theme-bootstrap">', text)
                 self.assertNotRegex(text, r'<script[^>]+src="[^"]*js/theme\.js')

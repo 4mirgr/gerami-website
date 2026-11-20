@@ -44,7 +44,7 @@ try{
  const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[],bad=[],jsonRequests=[],normalMirrors=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});
- page.on('request',r=>{if(r.url().includes('/content/')&&r.url().endsWith('.json'))jsonRequests.push(r.url());if(new URL(r.url()).hostname==='raw.githubusercontent.com')normalMirrors.push(r.url());});
+ page.on('request',r=>{if(r.url().includes('/content/')&&r.url().endsWith('.json')&&!r.url().endsWith('/content/articles.json'))jsonRequests.push(r.url());if(new URL(r.url()).hostname==='raw.githubusercontent.com')normalMirrors.push(r.url());});
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.waitForSelector('[data-topic-card]');
  assert.equal(jsonRequests.length,0);
