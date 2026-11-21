@@ -46,12 +46,14 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
  }
  async function wake(force=false){
   if(!await rpc('claim_signal',{p_force:force}))return {requested:false};
-  const credential=githubToken();let code='github_token_missing';
-  if(credential){try{const r=await fetcher('https://api.github.com/repos/4mirgr/gerami-website/actions/workflows/editorial-publish.yml/dispatches',{method:'POST',headers:{Authorization:'Bearer '+credential,Accept:'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'gerami-editorial'},body:JSON.stringify({ref:'main'}),redirect:'error',signal:AbortSignal.timeout(10000)});if(r.status===204)code=null;else code='github_dispatch_'+r.status;}catch{code='github_dispatch_unavailable';}}
-  await db('gerami_editorial_publisher_signal?singleton=eq.true',{last_error:code},'PATCH');return {requested:!code,error:code};
+  const credential=githubToken();let code='github_token_missing',diagnostic=null;
+  if(credential){try{const r=await fetcher('https://api.github.com/repos/4mirgr/gerami-website/actions/workflows/editorial-publish.yml/dispatches',{method:'POST',headers:{Authorization:'Bearer '+credential,Accept:'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'gerami-editorial'},body:JSON.stringify({ref:'main'}),redirect:'error',signal:AbortSignal.timeout(10000)});if(r.status===204)code=null;else{code='github_dispatch_'+r.status;const problem=await r.json().catch(()=>({}));diagnostic={github_response:r.headers.has('x-github-request-id'),reason:/Resource not accessible/.test(problem.message||'')?'token_permission_denied':problem.message==='Bad credentials'?'invalid_token':/rate limit/i.test(problem.message||'')?'rate_limited':'unclassified',rate_remaining:Number(r.headers.get('x-ratelimit-remaining')||-1)};}}catch{code='github_dispatch_unavailable';}}
+  await db('gerami_editorial_publisher_signal?singleton=eq.true',{last_error:code},'PATCH');return {requested:!code,error:code,...(diagnostic?{diagnostic}:{})};
  }
+ async function wakeAndReport(){const result=await wake();if(result.error)await say('تأیید شما محفوظ است، اما شروع فوری انتشار انجام نشد. پیگیری اتصال انتشار لازم است؛ پست بدون تأیید تازه تغییر نمی‌کند.',{inline_keyboard:[[{text:'پیشنهادها',callback_data:'webpost:list'}]]});}
  async function showState(d){
   const markup={inline_keyboard:[[{text:'تازه‌سازی وضعیت',callback_data:'webpost:status:'+d.id},{text:'پیشنهادهای آماده',callback_data:'webpost:list'}]]};
+  if(d.status==='approved')markup.inline_keyboard.unshift([{text:'شروع انتشار نسخهٔ تأییدشده',callback_data:'webpost:retry:'+d.id}]);
   if(d.status==='publish_error')markup.inline_keyboard.unshift([{text:'تلاش دوبارهٔ انتشار نسخهٔ تأییدشده',callback_data:'webpost:retry:'+d.id}]);
   await say('وضعیت پست «'+d.content.title+'»\n'+(stateLabels[d.status]||d.status)+(d.status==='published'?'\n'+SITE+'/pages/blog.html#article-'+d.slug:''),markup);
  }
@@ -61,7 +63,7 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   if(c.data==='webpost:list'){await listing();return {outcome:'previews_sent'};}
   if(/^webpost:(status|retry):[a-f0-9-]{36}$/.test(c.data||'')){
    const id=c.data.split(':')[2],d=await current(id);if(!d)return {outcome:'not_found'};
-   if(c.data.startsWith('webpost:retry:')&&d.status==='publish_error'&&d.approved_by===actor){await mutate(d,'retry');background(wake());}
+   if(c.data.startsWith('webpost:retry:')&&['approved','publish_error'].includes(d.status)&&d.approved_by===actor){if(d.status==='publish_error')await mutate(d,'retry');background(wakeAndReport());}
    await showState(await current(id));return {outcome:'status',draft_id:id,revision:d.revision};
   }
   if(!/^webpost:[aertc]:[a-f0-9]{32}$/.test(c.data||''))return {outcome:'unsupported'};
@@ -69,10 +71,10 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   if(!p||p.retired_at){await say('این دکمه مربوط به پیام قدیمی است. برای بازبینی، پیشنهاد فعلی را با تصویر و دکمه‌های تازه می‌فرستم.');await listing();return {outcome:'stale_preview'};}
   let d=await current(p.draft_id);if(!d||d.revision!==p.revision||d.snapshot_hash!==p.snapshot_hash){await say('این نسخه ویرایش شده است؛ دکمهٔ قبلی اجازهٔ انتشار متن جدید را ندارد.');if(d?.status==='draft')await notify(d,{force:true});return {outcome:'stale_revision',draft_id:p.draft_id,revision:p.revision};}
   const action=({a:'approve',r:'reject',e:'body',t:'title',c:'image'})[c.data[8]];
-  if(['approved','publishing','verifying','published','publish_error'].includes(d.status)){await showState(d);if(d.status==='approved')background(wake());return {outcome:'already_approved',draft_id:d.id,revision:d.revision};}
+  if(['approved','publishing','verifying','published','publish_error'].includes(d.status)){await showState(d);if(d.status==='approved')background(wakeAndReport());return {outcome:'already_approved',draft_id:d.id,revision:d.revision};}
   const result=await rpc('preview_action',{p_hash:hash,p_message:c.message.message_id,p_owner:actor,p_action:action,p_chat:await chat()});
   await retire(d);
-  if(action==='approve'){await say('✅ تأیید شما برای پست «'+d.content.title+'» ثبت شد. بررسی انتشار شروع می‌شود؛ پس از نمایش روی سایت، لینک نهایی را می‌فرستم.',{inline_keyboard:[[{text:'وضعیت انتشار',callback_data:'webpost:status:'+d.id}]]});background(wake());return {outcome:'approved',draft_id:d.id,revision:d.revision};}
+  if(action==='approve'){await say('✅ تأیید شما برای پست «'+d.content.title+'» ثبت شد. بررسی انتشار شروع می‌شود؛ پس از نمایش روی سایت، لینک نهایی را می‌فرستم.',{inline_keyboard:[[{text:'وضعیت انتشار',callback_data:'webpost:status:'+d.id}]]});background(wakeAndReport());return {outcome:'approved',draft_id:d.id,revision:d.revision};}
   if(action==='reject'){await say('پیش‌نویس «'+d.content.title+'» کنار گذاشته شد.');return {outcome:'rejected',draft_id:d.id,revision:d.revision};}
   const instructions=action==='body'?'متن کامل جدید را در ۳ تا ۵ پاراگراف با یک خط خالی بین آن‌ها بفرستید.':action==='title'?'عنوان جدید را بفرستید.':'تصویر جدید را به‌صورت عکس بفرستید (نه فایل).';
   const prompt=await say(marker+'\n«'+d.content.title+'» · نسخهٔ '+d.revision+'\n'+instructions+'\nپاسخ بعدی فقط ویرایش همین پست است و آن را منتشر نمی‌کند. برای لغو /cancel را بفرستید.',{force_reply:true,selective:true});

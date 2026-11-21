@@ -248,3 +248,19 @@ claim and fixed wake/backoff. Existing Edge, IntMed ingest/core/auth and fresh c
 build pass. Source/public JS/assets are unchanged:171,321B raw/57,295B gzip. Full
 browser checks and actual deployment/empty-dispatch/preview receipts are recorded
 at release, not inferred from mocks. Never simulate the owner's publication approval.
+
+Live controls checkpoint: PR43 merged as3b6acf6e1f9cf190f26e5943c7781e13056a2126;
+production Pages1dbe5b66-2aaa-4e92-8ad0-9585ca1db496 succeeded. IntMed PR7 merged
+d1030fa9dfedaeced2d35e97b019b29fa0a774bc; live botv20 and editorialv6. Controls
+migration applied. Both existing private drafts received real uploaded-photo controls,
+verified image hashes and full-text replies; old controls retired. Owner has been
+asked to test Edit, never asked to approve synthetic content. Full browser, fresh
+combined artifact and carrier-fault/integrity tests passed; both repositories' CI green.
+
+Actual fixed-workflow dispatch preflight returned403; do not mark immediate wake
+working. Public workflow remains active and real scheduled empty claims succeeded,
+but schedule gaps were hours. Follow-up records only an allowlisted GitHub error
+classification/request-header presence, adds persistent wake-failure guidance and
+retry for the same approved version. No raw API payload/credential is logged. Final
+production dispatch outcome/any remaining owner permissions action belongs in the
+release receipt, not an assumed success.
