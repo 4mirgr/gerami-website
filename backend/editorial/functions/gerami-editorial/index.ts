@@ -99,6 +99,16 @@ Deno.serve(async req=>{
    const j=await rpc('claim_job',{p_id:body.id,p_hash:await sha(body.capability)});if(!j)return reply({error:'denied'},403);
    EdgeRuntime.waitUntil(jobRun(j));return reply({queued:true});
   }
+  if(action==='operation'){
+   if(!uuid(body.id)||!/^[a-f0-9]{64}$/.test(body.capability||''))return reply({error:'denied'},403);
+   const op=await rpc('claim_operation',{p_id:body.id,p_hash:await sha(body.capability)});if(!op)return reply({error:'denied'},403);
+   try{
+    if(op.kind!=='telegram_health')throw Error('operation_not_ready');
+    const hook=await telegram('getWebhookInfo',{});
+    const result={webhook_active:hook.url===PROJECT+'/functions/v1/intmed-telegram-bot',has_webhook:!!hook.url,callbacks_enabled:!hook.allowed_updates||hook.allowed_updates.includes('callback_query'),messages_enabled:!hook.allowed_updates||hook.allowed_updates.includes('message'),pending_updates:Number(hook.pending_update_count||0),last_error_date:hook.last_error_date||null,webhook_error:!!hook.last_error_message,webhook_secret_configured:!!Deno.env.get('TELEGRAM_WEBHOOK_SECRET'),publisher_wake_configured:!!Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')};
+    await db('gerami_editorial_operations?id=eq.'+op.id,{status:'complete',result,updated_at:new Date().toISOString()},'PATCH');return reply({ok:true});
+   }catch{await db('gerami_editorial_operations?id=eq.'+op.id,{status:'error',result:{error:'operation_failed'}},'PATCH');return reply({error:'operation_failed'},503);}
+  }
   if(action==='callback'){
    if(req.headers.get('Authorization')!=='Bearer '+service)return reply({error:'denied'},403);
    const c=body.callback_query,m=c?.message,target=await chat();
