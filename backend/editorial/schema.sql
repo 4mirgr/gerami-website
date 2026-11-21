@@ -65,10 +65,10 @@ begin
   -- Invalidate any older button before sending a new message.
   update public.gerami_editorial_drafts set approval_hash=p_data->>'hash',approval_expires_at=now()+interval '7 days',telegram_message_id=null,notified_revision=null,notification_attempts=notification_attempts+1,next_notification_at=now()+interval '15 minutes' where id=p_id returning * into d;
  elsif p_action='notified' then
-  if d.status<>'draft' or d.approval_hash<>p_data->>'hash' then raise exception 'stale_approval'; end if;
+  if d.status<>'draft' or d.approval_hash is distinct from p_data->>'hash' then raise exception 'stale_approval'; end if;
   update public.gerami_editorial_drafts set telegram_message_id=(p_data->>'message_id')::bigint,notified_revision=revision where id=p_id returning * into d;
  elsif p_action in ('approve','reject') then
-  if d.status<>'draft' or d.approval_hash is null or d.approval_hash<>p_data->>'hash'
+  if d.status<>'draft' or d.approval_hash is null or d.approval_hash is distinct from p_data->>'hash'
     or d.approval_expires_at<now() or d.telegram_message_id<>(p_data->>'message_id')::bigint
     or d.telegram_message_id is null or d.notified_revision<>d.revision then raise exception 'stale_approval'; end if;
   if not gerami_editorial_private.owner_enabled((p_data->>'owner')::uuid) then raise exception 'owner_disabled'; end if;
@@ -112,7 +112,7 @@ begin
  select * into j from public.gerami_editorial_jobs where (p_force or exists(select 1 from public.gerami_editorial_settings where singleton and enabled)) and status in ('queued','error','waiting_provider') and attempts<3 and next_attempt_at<=now() and day=(now() at time zone 'Asia/Tehran')::date order by created_at limit 1 for update skip locked;
  if not found then
   -- Reconcile actual deployment and retry pending notifications, without AI calls.
-  if not exists(select 1 from public.gerami_editorial_drafts where status in ('verifying','publishing') or (status='draft' and notified_revision is distinct from revision and notification_attempts<3 and next_notification_at<=now()) or (status='published' and not published_notified)) then return null; end if;
+  if not exists(select 1 from public.gerami_editorial_drafts where status in ('approved','verifying','publishing') or (status='draft' and notified_revision is distinct from revision and notification_attempts<3 and next_notification_at<=now()) or (status='published' and not published_notified)) then return null; end if;
   insert into public.gerami_editorial_jobs(day,status,attempts) values('2000-01-01','queued',0) on conflict(day) do update set status='queued',next_attempt_at=now() returning * into j;
  end if;
  capability=replace(gen_random_uuid()::text||gen_random_uuid()::text,'-','');

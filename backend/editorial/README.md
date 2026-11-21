@@ -44,3 +44,13 @@ has no SELECT on auth.users; do not solve that by broadening managed Auth grants
 Language checks allow at most one extra provider rewrite per generation attempt.
 Actual doctor approval/public article publication is intentionally not simulated.
 Final release receipt is recorded in the repository's annotated release tag.
+
+Telegram controls2026-11-21: also apply `telegram-controls.sql` (including its narrow
+mutation/tick fixes), and `operations.sql`; deploy `telegram.mjs` beside index/core.
+Keep service-only grants and empty search_path. The bot must deploy its matching
+immediate-ack/ForceReply namespace routing patch. Use one-use operation capability
+requests for redacted health, resending current previews and empty publisher wake.
+No credentials or unpublished previews belong in public Git. Immediate wake reuses
+existing server-only INTMED_GITHUB_ACTIONS_TOKEN; it cannot approve or alter a draft.
+Only an exact active photo control may approve. Edits require Reply to the current
+15-minute prompt plus its session UUID/revision, and invalidate previous approval.
