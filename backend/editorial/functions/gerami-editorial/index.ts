@@ -1,13 +1,14 @@
 import {SITE,PROJECT,PROMPT,sha,stable,validateCopy,publicStyleIssues,sourceText,validImage,publicArticle,verifyOIDC} from './core.mjs';
+import {createTelegramEditorial} from './telegram.mjs';
 const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anon=Deno.env.get('SUPABASE_ANON_KEY')||'';
 const token=Deno.env.get('TELEGRAM_BOT_TOKEN')||'';
 const uuid=v=>typeof v==='string'&&/^[a-f0-9-]{36}$/.test(v);
 const reply=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
-const safeError=e=>['stale_revision','draft_locked','stale_approval','owner_disabled','publisher_denied','invalid_image','insufficient_source','provider_quota','provider_unavailable','source_changed','source_unavailable','no_topic','copy_style_review_required'].includes(e.message)?e.message:'editorial_failed';
+const safeError=e=>['stale_revision','draft_locked','stale_approval','owner_disabled','publisher_denied','invalid_image','insufficient_source','provider_quota','provider_unavailable','source_changed','source_unavailable','no_topic','copy_style_review_required','telegram_sender_denied','invalid_update'].includes(e.message)?e.message:'editorial_failed';
 async function remote(url,options={}){const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(15000),...options});if(!r.ok)throw Error('source_unavailable');return r;}
 async function db(path,body,method=body===undefined?'GET':'POST'){
  const r=await fetch(PROJECT+'/rest/v1/'+path,{method,headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'application/json',Prefer:'return=representation'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(12000)});
- if(!r.ok){let e;try{e=await r.json();}catch{};throw Error(['stale_revision','draft_locked','stale_approval','owner_disabled'].find(c=>e?.message?.includes(c))||'database_failed');}return r.status===204?null:r.json();
+ if(!r.ok){let e;try{e=await r.json();}catch{};throw Error(['stale_revision','draft_locked','stale_approval','owner_disabled','edit_expired','wrong_edit_prompt'].find(c=>e?.message?.includes(c))||'database_failed');}return r.status===204?null:r.json();
 }
 const rpc=(name,body={})=>db('rpc/gerami_editorial_'+name,body);
 const mutate=(d,action,data={})=>rpc('mutate',{p_id:d.id,p_revision:d.revision,p_action:action,p_data:data});
@@ -18,23 +19,23 @@ async function admin(req){
  const [u,a]=await Promise.all([fetch(PROJECT+'/auth/v1/user',{headers:h,signal:AbortSignal.timeout(12000)}),fetch(PROJECT+'/rest/v1/rpc/gerami_account',{method:'POST',headers:h,body:'{}',signal:AbortSignal.timeout(12000)})]);
  if(!u.ok||!a.ok)throw Error('sign_in_required');const user=await u.json(),account=await a.json();if(!user.email_confirmed_at||account.id!==user.id||account.role!=='admin')throw Error('admin_required');return user.id;
 }
-async function telegram(method,body){const r=await fetch('https://api.telegram.org/bot'+token+'/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});const result=await r.json();if(!r.ok||!result.ok)throw Error('telegram_failed');return result.result;}
+async function telegram(method,body){
+ if(method==='downloadFile'){
+  if(!/^[A-Za-z0-9_./-]{1,240}$/.test(body.path||'')||body.path.includes('..'))throw Error('invalid_image');
+  const r=await fetch('https://api.telegram.org/file/bot'+token+'/'+body.path,{redirect:'error',signal:AbortSignal.timeout(15000)});
+  if(!r.ok||Number(r.headers.get('Content-Length')||0)>650000)throw Error('invalid_image');
+  const reader=r.body.getReader(),parts=[];let size=0;try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>650000)throw Error('invalid_image');parts.push(value);}}finally{await reader.cancel().catch(()=>{});}
+  return new Response(new Blob(parts),{headers:{'Content-Type':'image/jpeg'}});
+ }
+ const multipart=body instanceof FormData;
+ const r=await fetch('https://api.telegram.org/bot'+token+'/'+method,{method:'POST',...(!multipart?{headers:{'Content-Type':'application/json'}}:{}),body:multipart?body:JSON.stringify(body),signal:AbortSignal.timeout(15000)});const result=await r.json();if(!r.ok||!result.ok)throw Error('telegram_failed');return result.result;
+}
 async function chat(){const rows=await db('intmed_notification_settings?key=eq.telegram&select=chat_id');const v=String(rows[0]?.chat_id||'');if(!/^\d{1,18}$/.test(v))throw Error('telegram_not_configured');return v;}
 async function storage(path,options={}){const r=await fetch(PROJECT+'/storage/v1/'+path,{headers:{apikey:service,Authorization:'Bearer '+service,...options.headers},...Object.fromEntries(Object.entries(options).filter(([k])=>k!=='headers')),signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('media_failed');return r;}
 async function preview(d){if(!d.media_path)return d.image;const data=await(await storage('object/sign/gerami-editorial/'+d.media_path,{method:'POST',body:JSON.stringify({expiresIn:3600}),headers:{'Content-Type':'application/json'}})).json();return PROJECT+'/storage/v1'+data.signedURL;}
 const snapshot=d=>sha(stable({content:d.content,topic:d.topic,category:d.category,image:d.image,media_path:d.media_path||null,source:d.source}));
-async function notify(d){
- if(d.status!=='draft'||d.notified_revision===d.revision||d.notification_attempts>=3||Date.parse(d.next_notification_at)>Date.now())return;
- const capability=crypto.randomUUID().replaceAll('-',''),hash=await sha(capability),target=await chat();
- await mutate(d,'notification',{hash});
- const image=d.media_path?await preview(d):d.source.telegram_image;
- // Photo transport is independent of the approval text. Never put buttons before full text.
- await telegram('sendPhoto',{chat_id:target,photo:image,caption:'پیشنهاد پست سایت · نسخهٔ '+d.revision+'\n'+d.content.title});
- const text=d.content.title+'\n\n'+d.content.paragraphs.join('\n\n')+'\n\nخلاصه: '+d.content.summary+'\nتگ‌ها: '+d.content.tags.join('، ')+'\n'+d.content.hashtags.join(' ')+'\n\nدسته: '+d.category+'\nمنبع: هاریسون؛ بازنویسی آموزشی از IntMed.\nپیش‌نویس است؛ پیش از انتشار متن و تصویر را بازبینی کنید.';
- const segments=[];let rest=text;while(rest.length>3600){const cut=rest.lastIndexOf('\n',3600);segments.push(rest.slice(0,cut>1500?cut:3600));rest=rest.slice(cut>1500?cut:3600);}segments.push(rest);
- let sent;for(let i=0;i<segments.length;i++)sent=await telegram('sendMessage',{chat_id:target,text:segments[i],...(i===segments.length-1?{reply_markup:{inline_keyboard:[[{text:'✅ انتشار همین نسخه',callback_data:'webpost:a:'+capability},{text:'کنار گذاشتن',callback_data:'webpost:r:'+capability}],[{text:'ویرایش در مدیریت سایت',url:SITE+'/admin/#auto-posts'}]]}}:{})});
- await mutate(d,'notified',{hash,message_id:sent.message_id});
-}
+const controls=createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,storage,remote,snapshot,githubToken:()=>Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')||'',background:p=>EdgeRuntime.waitUntil(p.catch(()=>{}))});
+const notify=(d,options={})=>controls.notify(d,options);
 const mapping={cardio:['cardiology','heart'],pulm:['pulmonology','lungs'],nephro:['nephrology','kidneys'],gi:['gastroenterology','digestive'],endo:['endocrinology','pancreas'],heme:['hematology','blood-cells'],rheum:['rheumatology','joint'],id:['infectious-diseases','infection'],general:['internal-medicine','stethoscope']};
 async function generate(job){
  const pins=await(await remote('https://raw.githubusercontent.com/4mirgr/gerami-website/main/deploy/projects.json')).json();
@@ -82,6 +83,7 @@ async function reconcile(){
 async function jobRun(job){
  try{
   await reconcile().catch(()=>{});
+  await controls.wake().catch(()=>{});
   if(job.day!=='2000-01-01'){
    const existing=await db('gerami_editorial_drafts?job_id=eq.'+job.id+'&select=id');if(!existing.length)await generate(job);
   }
@@ -99,15 +101,24 @@ Deno.serve(async req=>{
    const j=await rpc('claim_job',{p_id:body.id,p_hash:await sha(body.capability)});if(!j)return reply({error:'denied'},403);
    EdgeRuntime.waitUntil(jobRun(j));return reply({queued:true});
   }
+  if(action==='operation'){
+   if(!uuid(body.id)||!/^[a-f0-9]{64}$/.test(body.capability||''))return reply({error:'denied'},403);
+   const op=await rpc('claim_operation',{p_id:body.id,p_hash:await sha(body.capability)});if(!op)return reply({error:'denied'},403);
+   EdgeRuntime.waitUntil((async()=>{try{
+    let result;
+    if(op.kind==='telegram_health'){
+     const hook=await telegram('getWebhookInfo',{});
+     result={webhook_active:hook.url===PROJECT+'/functions/v1/intmed-telegram-bot',has_webhook:!!hook.url,callbacks_enabled:!hook.allowed_updates||hook.allowed_updates.includes('callback_query'),messages_enabled:!hook.allowed_updates||hook.allowed_updates.includes('message'),pending_updates:Number(hook.pending_update_count||0),last_error_date:hook.last_error_date||null,webhook_error:!!hook.last_error_message,webhook_secret_configured:!!Deno.env.get('TELEGRAM_WEBHOOK_SECRET'),publisher_wake_configured:!!Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')};
+    }else if(op.kind==='resend_previews'){
+     const rows=await db('gerami_editorial_drafts?status=eq.draft&select=*&order=created_at.desc&limit=3');let sent=0;for(const d of rows)if(await notify(d,{force:true}))sent++;result={sent};
+    }else if(op.kind==='publisher_wake')result=await controls.wake(true);
+    else throw Error('operation_not_ready');
+    await db('gerami_editorial_operations?id=eq.'+op.id,{status:'complete',result,updated_at:new Date().toISOString()},'PATCH');
+   }catch{await db('gerami_editorial_operations?id=eq.'+op.id,{status:'error',result:{error:'operation_failed'}},'PATCH');}})());return reply({queued:true});
+  }
   if(action==='callback'){
    if(req.headers.get('Authorization')!=='Bearer '+service)return reply({error:'denied'},403);
-   const c=body.callback_query,m=c?.message,target=await chat();
-   if(!c||String(c.from?.id)!==target||String(m?.chat?.id)!==target||m.chat.type!=='private'||!/^webpost:[ar]:[a-f0-9]{32}$/.test(c.data||''))return reply({error:'denied'},403);
-   const hash=await sha(c.data.slice(10));const rows=await db('gerami_editorial_drafts?approval_hash=eq.'+hash+'&select=*');const d=rows[0];
-   if(!d){await telegram('answerCallbackQuery',{callback_query_id:c.id,text:'این دکمه منقضی یا مربوط به نسخهٔ قبلی است.',show_alert:true});return reply({stale:true});}
-   const result=await mutate(d,c.data[8]==='a'?'approve':'reject',{hash,message_id:m.message_id,owner:await owner()});
-   await telegram('answerCallbackQuery',{callback_query_id:c.id,text:result.status==='approved'?'تأیید شد؛ پس از بررسی‌های انتشار روی سایت قرار می‌گیرد.':'پیش‌نویس کنار گذاشته شد.'});
-   await telegram('editMessageReplyMarkup',{chat_id:target,message_id:m.message_id,reply_markup:{inline_keyboard:[]}});return reply({ok:true});
+   return reply(await controls.handle(body));
   }
   if(action==='publisher'){
    const claims=await verifyOIDC((req.headers.get('Authorization')||'').replace(/^Bearer /,''));
@@ -134,7 +145,7 @@ Deno.serve(async req=>{
   if(action==='run'){await db('gerami_editorial_jobs?day=eq.'+new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tehran'}).format(new Date())+'&status=in.(error,waiting_provider)',{attempts:0,status:'queued',next_attempt_at:new Date().toISOString()},'PATCH');await rpc('tick',{p_force:true});return reply({queued:true});}
   if(!uuid(body.id)||!Number.isInteger(body.revision))return reply({error:'invalid_draft'},400);
   const d=(await db('gerami_editorial_drafts?id=eq.'+body.id+'&select=*'))[0];if(!d||d.revision!==body.revision)throw Error('stale_revision');
-  if(action==='retry'){await mutate(d,'retry');return reply({ok:true});}
+  if(action==='retry'){await mutate(d,'retry');EdgeRuntime.waitUntil(controls.wake().catch(()=>{}));return reply({ok:true});}
   if(action==='notify'){if(d.status!=='draft')throw Error('draft_locked');await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notification_attempts:0,next_notification_at:new Date().toISOString()},'PATCH');await notify({...d,notified_revision:null,notification_attempts:0,next_notification_at:new Date().toISOString()});return reply({ok:true});}
   if(action==='edit'||action==='image'){
    let next={...d};
@@ -148,5 +159,5 @@ Deno.serve(async req=>{
    next.snapshot_hash=await snapshot(next);const result=await mutate(d,'edit',{content:next.content,image:next.image,media_path:next.media_path||null,snapshot_hash:next.snapshot_hash});return reply({draft:result});
   }
   return reply({error:'not_found'},404);
- }catch(e){const code=e.message;return reply({error:['sign_in_required','admin_required'].includes(code)?code:safeError(e)},code==='sign_in_required'?401:code==='admin_required'?403:['stale_revision','draft_locked','stale_approval'].includes(code)?409:400);}
+ }catch(e){const code=e.message;return reply({error:['sign_in_required','admin_required'].includes(code)?code:safeError(e)},code==='sign_in_required'?401:['admin_required','telegram_sender_denied'].includes(code)?403:['stale_revision','draft_locked','stale_approval'].includes(code)?409:400);}
 });

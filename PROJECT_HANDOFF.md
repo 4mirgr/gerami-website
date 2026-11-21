@@ -199,3 +199,52 @@ upgrade was needed. Owner actions: review/approve saved previews, optionally cha
 time/categories, and monitor provider/storage quotas. Existing Google OAuth/SMTP
 and future Clinic actions remain in the separate checklist; they are not prerequisites
 for this Telegram review flow.
+
+## Telegram review controls repair — 2026-11-21
+
+Owner reports publication button spins/returns no visible answer and requests text
+editing and a visible selected cover in Telegram. Live webhook health confirmed
+callbacks/messages enabled, no backlog/error; no accepted publication approval was
+stored. Two prior callbacks returned HTTP200 before approval. Old source used only
+transient callback alerts and left superseded keyboards active; logs cannot prove
+which particular historical card the owner clicked. Do not report a disabled webhook
+or pretend a real doctor approval/public article was tested.
+
+Canonical additions: `backend/editorial/telegram-controls.sql`, `operations.sql` and
+`functions/gerami-editorial/telegram.mjs` (deploy all three function source files).
+Service-only RLS preview ledger binds active control/photo, saved revision, snapshot,
+expiry and live owner. Retire old keyboards; stale clicks receive a persistent
+explanation and current cards. Telegram receives multipart cover bytes, followed by
+full text/tags/source as replies; arm photo controls only after full delivery and
+atomic preview registration. Failed arming remains retryable. Every text segment has
+a namespace marker so late replies cannot enter IntMed source intake.
+
+Editing uses private ForceReply prompts for body (3–5 paragraphs), title and photo;
+15-minute sessions carry a new UUID for every prompt. Save binds expected session,
+exact reply prompt, revision and live owner atomically. Unthreaded, expired/replaced
+or historical responses cannot change another draft; `/cancel` preserves saved copy.
+Any save makes a new revision requiring fresh approval. Telegram update deduplication
+and safe persistent outcomes make delivery failures diagnosable without raw text,
+chat IDs, capabilities or tokens in logs/public Git.
+
+The bot acknowledges callback immediately, then forwards in an Edge background task
+with durable failure guidance. This is in the separate IntMed repository. Its intake,
+menu, webhook secret and user alerts remain. No webhook re-registration was needed.
+Immediate publication wake uses the existing server-only INTMED_GITHUB_ACTIONS_TOKEN
+already used by IntMed host CI: fixed website/workflow/main dispatch only, no user
+input. Actual article claim/publication still requires fixed signed GitHub OIDC and
+an immutable owner-approved snapshot. Two-minute wake backoff plus the existing
+five-minute cron retries approved work; do not rely on GitHub schedule punctuality.
+
+Operations use short-lived one-use hashed capabilities and store only redacted
+health/results. `telegram_health`, `resend_previews`, `publisher_wake` are available
+via service-only request_operation; no bot/service credential export is needed.
+The earlier `telegram_repair` reserved kind is intentionally not implemented.
+
+Local focused evidence: actual service_role PGlite + notification-generated controls
+cover multipart ordering, stale/retired controls, owner revocation, body/title/image
+edits, wrong/expired/replaced prompts, cancel, duplicate updates, immutable publisher
+claim and fixed wake/backoff. Existing Edge, IntMed ingest/core/auth and fresh combined
+build pass. Source/public JS/assets are unchanged:171,321B raw/57,295B gzip. Full
+browser checks and actual deployment/empty-dispatch/preview receipts are recorded
+at release, not inferred from mocks. Never simulate the owner's publication approval.

@@ -1,0 +1,57 @@
+import {PGlite} from '@electric-sql/pglite';import fs from 'node:fs/promises';import assert from 'node:assert/strict';
+import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {sha,stable} from '../backend/editorial/functions/gerami-editorial/core.mjs';
+const pg=new PGlite(),owner='00000000-0000-4000-8000-000000000001',id='00000000-0000-4000-8000-000000000002',chat='123';let serial=100,failText=false,githubStatus=204;const sent=[],tasks=[],dispatches=[];
+const snapshot=d=>sha(stable({content:d.content,topic:d.topic,category:d.category,image:d.image,media_path:d.media_path||null,source:d.source}));
+const service=(sql,args=[])=>pg.transaction(async tx=>{await tx.exec('set local role service_role');return tx.query(sql,args);});
+const row=async()=>(await service('select * from gerami_editorial_drafts where id=$1',[id])).rows[0];
+async function db(path,body,method=body===undefined?'GET':'POST'){
+ const [table,query]=path.split('?'),params=new URLSearchParams(query),args=[],where=[];
+ assert(/^[a-z_]+$/.test(table));for(const [key,value] of params){if(['select','order','limit'].includes(key))continue;assert(/^[a-z_]+$/.test(key));if(value==='is.null')where.push(key+' is null');else{assert(value.startsWith('eq.'));args.push(value.slice(3));where.push(key+'=$'+args.length);}}
+ let sql;if(method==='PATCH'){const sets=Object.entries(body).map(([k,v])=>{assert(/^[a-z_]+$/.test(k));args.push(v);return k+'=$'+args.length;});sql='update '+table+' set '+sets.join(',');}else sql='select * from '+table;
+ if(where.length)sql+=' where '+where.join(' and ');if(method==='GET'&&params.has('order'))sql+=' order by created_at desc';if(method==='GET'&&params.has('limit'))sql+=' limit '+Number(params.get('limit'));
+ return (await service(sql,args)).rows;
+}
+const rpc=async(name,args={})=>{const entries=Object.entries(args),values=entries.map(([k,v])=>Array.isArray(v)?'{'+v.join(',')+'}':v&&typeof v==='object'?JSON.stringify(v):v);return(await service('select gerami_editorial_'+name+'('+entries.map(([k],i)=>k+'=> $'+(i+1)).join(',')+') as d',values)).rows[0].d;};
+const mutate=(d,action,data={})=>rpc('mutate',{p_id:d.id,p_action:action,p_revision:d.revision,p_data:data});
+const art=new Uint8Array([255,216,255,...new Uint8Array(197)]),artHash=await sha(art);
+async function telegram(method,body){if(method==='sendMessage'&&failText&&body.reply_parameters)throw Error('network');if(method==='downloadFile')return new Response(art);if(method==='getFile')return {file_path:'photos/safe.jpg'};const value=body instanceof FormData?Object.fromEntries(body):structuredClone(body);const message_id=++serial;sent.push({method,...value,...(!('message_id' in value)?{message_id}:{})});return {message_id};}
+const ctl=createTelegramEditorial({db,rpc,mutate,telegram,chat:async()=>chat,owner:async()=>owner,storage:async(path,o)=>new Response(art,{headers:{'Content-Type':'image/jpeg'}}),remote:async()=>new Response(art,{headers:{'Content-Type':'image/jpeg'}}),snapshot,githubToken:()=> 'server-token',background:p=>tasks.push(p),fetcher:async(url,o)=>{dispatches.push({url,...o});return new Response(null,{status:githubStatus});}});
+const paragraph='پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم. برای مراقبت از خودمان لازم است درباره نشانه‌های تازه با پزشک صحبت کنیم و برنامه روزانه را به‌آرامی تنظیم کنیم.';
+const content={title:'مراقبت روزانه از سلامت',summary:'مراقبت ساده و پیگیری نشانه‌ها.',paragraphs:[paragraph,paragraph,paragraph],tags:['سلامت','مراقبت'],hashtags:['سلامت','مراقبت']};
+let update=1;const click=async(data,message_id)=>ctl.handle({acknowledged:true,callback_query:{id:'callback'+update++,from:{id:123},data,message:{message_id,chat:{id:123,type:'private'}}}});
+const message=async(text,extra={})=>ctl.handle({update_id:update++,message:{message_id:update,from:{id:123},chat:{id:123,type:'private'},text,...extra}});
+const active=()=>{const m=sent.findLast(s=>s.method==='editMessageReplyMarkup'&&s.reply_markup.inline_keyboard.length);return {id:m.message_id,buttons:m.reply_markup.inline_keyboard.flat()};};
+try{
+ await pg.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;create schema net;
+ create table auth.users(id uuid primary key,email_confirmed_at timestamptz,deleted_at timestamptz,banned_until timestamptz);create table gerami_accounts(user_id uuid,role text,enabled boolean);
+ create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;
+ insert into auth.users values('${owner}',now(),null,null);insert into gerami_accounts values('${owner}','admin',true);`);
+ await pg.exec(await fs.readFile('backend/editorial/schema.sql','utf8'));await pg.exec(await fs.readFile('backend/editorial/telegram-controls.sql','utf8'));
+ for(const role of ['anon','authenticated']){await pg.exec('set role '+role);for(const t of ['previews','telegram_sessions','telegram_updates','publisher_signal'])await assert.rejects(pg.query('select * from gerami_editorial_'+t),/permission denied/);await assert.rejects(pg.query("select gerami_editorial_claim_signal(true)"),/permission denied/);await pg.exec('reset role');}
+ await assert.rejects(service('select * from auth.users'),/permission denied/);
+ const d={content,topic:'cardiology',category:'قلب',image:'/assets/optimized/test.webp',media_path:null,source:{default_image:'/assets/optimized/test.webp',telegram_image:'https://drgerami-md.ir/assets/editorial/heart.jpg',image_sha:artHash}};
+ await pg.query('insert into gerami_editorial_drafts(id,slug,content,topic,category,image,source,snapshot_hash) values($1,$2,$3,$4,$5,$6,$7,$8)',[id,'test-only',JSON.stringify(content),d.topic,d.category,d.image,JSON.stringify(d.source),await snapshot(d)]);
+ // Production SQL and actual notification-created capability, not a fabricated acceptance.
+ await ctl.notify(await row());let a=active(),first=a;assert(sent[0].photo instanceof Blob);assert(sent[1].text.includes('تگ‌ها:'));assert.equal(sent[1].reply_parameters.message_id,a.id);assert.equal((await row()).telegram_message_id,a.id);
+ await ctl.notify(await row(),{force:true});a=active();assert(sent.some(s=>s.message_id===first.id&&s.reply_markup?.inline_keyboard.length===0));
+ // Retired keyboards never approve, even on an identical revision.
+ let result=await click(a.buttons.find(b=>b.text.includes('ویرایش متن')).callback_data,a.id);assert.equal(result.outcome,'editing_body');let prompt=sent.findLast(s=>s.reply_markup?.force_reply);
+ assert.equal((await row()).approval_hash,null);await assert.rejects(rpc('save_telegram',{p_chat:chat,p_owner:owner,p_session:'00000000-0000-4000-8000-000000000099',p_reply:prompt.message_id,p_data:{content,image:d.image,snapshot_hash:'foreign'}}),/edit_expired/);result=await message(paragraph);assert.equal(result.outcome,'wrong_edit_prompt');await assert.rejects(rpc('register_preview',{p_id:id,p_revision:1,p_snapshot:(await row()).snapshot_hash,p_hash:'raced',p_photo:999,p_text:[998],p_photo_hash:artHash}),/stale_approval/);
+ await assert.rejects(rpc('begin_preview',{p_id:id,p_revision:1,p_hash:'raced'}),/draft_locked/);
+ result=await message('متن کوتاه',{reply_to_message:{message_id:prompt.message_id}});assert.equal(result.outcome,'edit_validation_failed');assert.equal((await row()).revision,1);
+ result=await message([paragraph,paragraph,paragraph,paragraph].join('\n\n'),{reply_to_message:{message_id:prompt.message_id-1}});assert.equal(result.outcome,'wrong_edit_prompt');assert.equal((await row()).revision,1);
+ result=await message([paragraph,paragraph,paragraph,paragraph].join('\n\n'),{reply_to_message:{message_id:prompt.message_id}});assert.equal(result.outcome,'edit_saved');assert.equal((await row()).revision,2);assert.equal((await row()).content.paragraphs.length,4);assert.equal((await row()).status,'draft');
+ result=await click(first.buttons[0].callback_data,first.id);assert.equal(result.outcome,'stale_preview');assert.equal((await row()).status,'draft');
+ a=active();await click(a.buttons.find(b=>b.text==='ویرایش عنوان').callback_data,a.id);prompt=sent.findLast(s=>s.reply_markup?.force_reply);await message('عنوان اصلاح‌شده',{reply_to_message:{message_id:prompt.message_id}});assert.equal((await row()).revision,3);
+ a=active();await click(a.buttons.find(b=>b.text.includes('تغییر تصویر')).callback_data,a.id);prompt=sent.findLast(s=>s.reply_markup?.force_reply);result=await message('',{reply_to_message:{message_id:prompt.message_id},photo:[{file_id:'large',file_size:900000},{file_id:'small',file_size:200}]});assert.equal(result.outcome,'edit_saved');assert.match((await row()).media_path,/\.jpg$/);assert.equal((await row()).revision,4);
+ a=active();await click(a.buttons.find(b=>b.text.includes('ویرایش متن')).callback_data,a.id);await pg.exec("update gerami_editorial_telegram_sessions set expires_at=now()-interval '1 minute'");result=await message(paragraph);assert.equal(result.outcome,'edit_expired');assert.equal((await row()).revision,4);
+ a=active();await click(a.buttons.find(b=>b.text.includes('ویرایش متن')).callback_data,a.id);result=await message('/cancel');assert.equal(result.outcome,'edit_cancelled');assert.equal((await row()).revision,4);
+ // Retryable delivery failures never attach approval controls to incomplete text.
+ const armedBefore=sent.filter(s=>s.reply_markup?.inline_keyboard?.[0]?.[0]?.callback_data?.startsWith('webpost:a:')).length;failText=true;await assert.rejects(ctl.notify(await row(),{force:true}),/network/);failText=false;assert.equal(sent.filter(s=>s.reply_markup?.inline_keyboard?.[0]?.[0]?.callback_data?.startsWith('webpost:a:')).length,armedBefore);
+ await ctl.notify(await row(),{force:true});a=active();await pg.exec('update gerami_accounts set enabled=false');await assert.rejects(click(a.buttons[0].callback_data,a.id),/owner_disabled/);await pg.exec('update gerami_accounts set enabled=true');
+ const approval={acknowledged:true,callback_query:{id:'same-approval',from:{id:123},data:a.buttons[0].callback_data,message:{message_id:a.id,chat:{id:123,type:'private'}}}};
+ result=await ctl.handle(approval);await Promise.all(tasks);assert.equal(result.outcome,'approved');assert.equal((await row()).status,'approved');assert.equal((await row()).approved_by,owner);assert.equal((await ctl.handle(approval)).duplicate,true);assert.equal(dispatches.length,1);assert.equal(dispatches[0].url,'https://api.github.com/repos/4mirgr/gerami-website/actions/workflows/editorial-publish.yml/dispatches');assert.deepEqual(JSON.parse(dispatches[0].body),{ref:'main'});
+ assert.equal((await ctl.wake()).requested,false);githubStatus=403;assert.equal((await ctl.wake(true)).error,'github_dispatch_403');assert(!JSON.stringify(sent).includes('server-token'));
+ const claimed=await rpc('claim',{p_hash:'lease',p_run:'test-run'});assert.equal(claimed.id,id);assert.equal(claimed.revision,4);assert.equal(claimed.content.title,'عنوان اصلاح‌شده');assert.equal((await rpc('claim',{p_hash:'another',p_run:'other-run'})),null);
+ console.log('Telegram integration + real service-role PostgreSQL passed: uploaded photo/full-text/arm ordering, retired resends, owner binding, atomic body/title/image editing, wrong/expired prompts, cancel, duplicate approval, immutable publisher claim and fixed-repository wake/backoff.');
+}finally{await pg.close();}
