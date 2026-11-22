@@ -64,6 +64,8 @@ def render_page(template, page):
 
 def generate(root, output):
     apply_static_settings(root, output)
+    from editorial_seo import generate as generate_editorial
+    generate_editorial(root, output)
     template = (root / 'pages/services.html').read_text()
     data = json.loads((root / 'content/extra-pages.json').read_text())
     for page in data['pages']:

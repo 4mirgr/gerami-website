@@ -67,7 +67,7 @@ def optimize_public_assets(site):
         (site/url.lstrip('/')).write_bytes(data);mapping[path]=url;visiting.remove(path);return url
 
     for path in sources:emit(path)
-    pages=[site/'index.html',*sorted((site/'pages').glob('*.html'))]
+    pages=[site/'index.html',*sorted((site/'pages').glob('*.html')),*sorted((site/'topics').rglob('*.html')),*sorted((site/'articles').rglob('*.html'))]
     preloads=[mapping[p] for p in sources if p.suffix=='.mjs']
     inline_css_max_bytes=0
     for page in pages:

@@ -32,6 +32,9 @@ class SiteStudioBuild(unittest.TestCase):
                 shutil.copytree(ROOT / 'content', target / 'content')
                 shutil.copytree(ROOT / 'pages', target / 'pages')
                 shutil.copy2(ROOT / 'index.html', target / 'index.html')
+            taxonomy = root / 'backend/editorial/functions/gerami-editorial/taxonomy.json'
+            taxonomy.parent.mkdir(parents=True)
+            shutil.copy2(ROOT / 'backend/editorial/functions/gerami-editorial/taxonomy.json', taxonomy)
             path = root / 'content/pages/home.json'
             data = json.loads(path.read_text())
             data['blocks']['text-001']['fa'] = 'عنوان <script>bad()</script> \\g<1>'

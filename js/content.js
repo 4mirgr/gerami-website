@@ -35,7 +35,7 @@ const published=()=>articles.filter(a=>(a.status==='published'||previewDrafts)&&
 const topicURL=id=>'/pages/blog.html?topic='+encodeURIComponent(id);
 function renderTopics(){
  if(!catalog)return;
- const rows=published(),flat=flattenTopics(catalog);
+ const rows=published();
  const total=id=>{const ids=topicIds(catalog,id);return rows.filter(a=>ids.has(a.topic)).length;};
  for(const host of document.querySelectorAll('[data-topic-rail],[data-topic-directory]')){
   clear(host);
@@ -107,7 +107,7 @@ function renderArticles(){
   const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,copy.body,imageSource);card.append(body);
   const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
   if(item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
-  const share=el('a',text('پیوند این مطلب','Link to this post'),'post-permalink');share.href='/pages/blog.html#'+card.id;tile.append(el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_>`~]/g,'').slice(0,145),'post-excerpt'),share);list.append(tile);
+  const share=el('a',text('پیوند این مطلب','Link to this post'),'post-permalink');share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/pages/blog.html#'+card.id;tile.append(el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_>`~]/g,'').slice(0,145),'post-excerpt'),share);list.append(tile);
  }
  if(!selected.length){const empty=el('div','','reading-empty glass-surface');empty.append(topicIcon('medicine'),el('p',all.length?text('موضوع یا عبارت جست‌وجو را تغییر دهید.','Try a different topic or search.'):text('این بخش با انتشار مطالب تکمیل می‌شود.','This space will fill as posts are published.')));list.append(empty);}
  if(isBlog&&(filter.q||filter.topic||filter.audience)){const clear=el('button',text('پاک‌کردن فیلترها','Clear filters'),'button button-secondary');clear.type='button';clear.dataset.clearFilters='';clear.onclick=()=>{filter={q:'',topic:'',audience:'',page:1};saveFilter(true);};pagination.append(clear);}

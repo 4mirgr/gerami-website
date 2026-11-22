@@ -287,3 +287,56 @@ saved preview. Never simulate owner approval to turn this successful empty-queue
 probe into a publication test. A final article still requires the existing full
 checks, non-force Git commit, deployed article+cover verification and Telegram link.
 No website/Auth/Clinic/public-content/source-pin changes were needed for this probe.
+
+## Two topic-matched covers, exact source hierarchy and SEO — 2026-11-22
+
+Owner requests two independent clinical/paraclinical/illustrative covers per draft,
+choice in Telegram, source display exactly `Harrison 2025`, matching IntMed parent/
+child placement, repeat posts within one topic, and trend-aware SEO. Owner further
+specifies hashtags beginning with# only; no visible separate tags. Native plan/spec
+and long-term SEO/owner measurement actions are in `docs/superpowers/` and
+`docs/seo-editorial-2026-11-22.md`. This checkpoint is implementation, not activation.
+
+Pinned taxonomy149 leaves lives beside the Edge function as `taxonomy.json`; catalog
+maps existing aliases (notably asthma), and publisher admits exact child nodes before
+public validation. Static generator builds a complete topic directory and per-post
+canonical nested URLs, Article/Breadcrumb data, social metadata, related links and
+sitemap entries. Empty leaves are noindex; private drafts never enter static output.
+Homepage active catalog stays compact. Keep old hash/archive entry paths working.
+
+`cover-choice.sql` extends private RLS ledgers/library, serial owner selection and
+selected-cover gates in approval AND publisher claim. Both images/full text precede
+arming; chosen-only approval binds bytes, metadata, photo, snapshot and saved revision.
+Library refresh cannot change approved options. Custom owner uploads survive preparing
+new options. Actual publisher additionally verifies bytes against the content-hash
+filename. Deploy index/core/telegram/media/trends/catalog/publication and taxonomy.json together.
+Operation import_covers uploads a private pair without exporting credentials and
+clears the large payload on completion. resend_previews walks all pending drafts in
+bounded batches with per-draft failure isolation and continuation, not a three-card cap.
+
+Daily selection caches bounded RSS signals forIR/US/global with honest provenance;
+only already published verified IntMed topics qualify. Signals are ranking data and
+never prompt instructions/medical evidence. Failure/staleness falls back to rotation;
+seven-day cooldown replaces permanent exclusion. Library/public-domain Commons
+fallback never substitutes generic category badges: missing media remains private
+image_options_pending. No paid image API/new account/bot/hosting was enabled.
+
+Six original private JPEGs for the three existing topics are outside public Git and
+must be imported only through the reviewed deployed operation. Owner approval is not
+simulated. Final CI/build/deployment/backfill/Telegram receipts must be recorded after
+activation. Search Console connection currently lists no properties; owner connection
+is required for actual query/CTR/impression measurement, not technical SEO generation.
+
+
+Fresh independent final review found seven release blockers, corrected in one fix
+pass with focused PostgreSQL/media/delivery regressions: notification-attempt nonce
+and narrowly scoped retirement, atomic edit/reject invalidation, pre-migration owner
+JPEG/WebP preservation, complete medical discovery terms for short source IDs, exact
+parent labels, serialized active library pairs, resilient trend cache and actual
+clock, and canonical HTML/snapshot verification before a publication success link.
+Approved but unclaimed admin re-selection resets approval; any existing publisher
+lease/commit locks edits even after retry. Later-topic media discovery fails private
+when two related public-domain photos are unavailable; it never uses category badges.
+Two minor follow-ups remain: cover-specific alt is available in the article model but
+static cover uses title; manually authored source-less posts are not inferred into
+IntMed leaf listings. Neither expands the publication authority or leaks a draft.

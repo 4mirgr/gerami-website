@@ -54,3 +54,13 @@ No credentials or unpublished previews belong in public Git. Immediate wake reus
 existing server-only INTMED_GITHUB_ACTIONS_TOKEN; it cannot approve or alter a draft.
 Only an exact active photo control may approve. Edits require Reply to the current
 15-minute prompt plus its session UUID/revision, and invalidate previous approval.
+
+
+Topic-specific choices2026-11-22: apply `cover-choice.sql` after previous migrations;
+deploy index/core/telegram/media/trends/catalog/publication plus taxonomy.json as one
+bundle. Private import_covers admits two immutable original/topic-matched JPEGs;
+resend_previews backfills pending drafts as new unapproved revisions, preserving
+verified old owner JPEG/WebP uploads. Notification attempts have their own nonce;
+retirement cannot invalidate a later attempt. Only selected image/current owner/photo/
+revision can approve. Publication success requires actual canonical HTML+snapshot and
+selected image bytes on the public domain. See the native spec/plan and SEO roadmap.
