@@ -85,16 +85,16 @@
       "en": "Go from a broad subject to a specific question. These categories organize educational writing."
     },
     "text-111": {
-      "fa": "نگاه کلی و آشنایی بیشتر",
-      "en": "Overview & introduction"
+      "fa": "متخصص بیماری‌های داخلی",
+      "en": "Internal medicine specialist"
     },
     "text-112": {
-      "fa": "مسیر حرفه ای و معرفی - تشکیل پرونده و ویزیت",
-      "en": "Professional background · Health records & visits"
+      "fa": "دکتر امیرهوشنگ گرامی",
+      "en": "Dr. Amir Houshang Gerami"
     },
     "text-113": {
-      "fa": "با مسیر حرفه‌ای و حوزه فعالیت من آشنا شوید. پرونده شخصی خود را بسازید و مسیر سلامت خود را رصد کنید.",
-      "en": "Explore my professional background and focus areas. Build your personal record and follow your health journey."
+      "fa": "از مراقبت از بیماران بستری در لقمان حکیم و مسیح دانشوری تا ویزیت در درمانگاه زعیم پاکدشت، بخش مهمی از کار من دنبال‌کردن سیر بیماری است. در طب داخلی، به ارتباط دیابت، فشار خون و سلامت قلب و کلیه توجه ویژه دارم.",
+      "en": "My clinical experience spans inpatient care at Loghman Hakim and Masih Daneshvari hospitals and outpatient visits at Zaeem Hospital in Pakdasht. In internal medicine, I take a particular interest in how diabetes and blood pressure affect the heart and kidneys."
     },
     "text-114": {
       "fa": "یادگیری ساختارمند با IntMed",
@@ -107,6 +107,34 @@
     "text-116": {
       "fa": "امکانات این بخش شامل پنل اختصاصی و سازمان یافته ی خصوصی شما برای برنامه ریزی و مطالعه دروس داخلی و قلب با منبع هاریسون ۲۰۲۵ شامل درسنامه های خلاصه - فلش کارت - آزمون های چهار گزینه ای ارتقا٫بورد های تخصصی و فوق تخصصی و آزمون های تالیفی - آزمون های شبیه ساز KF PMP - قابلیت هایلایت کردن و یادداشت برداری - تحلیل آزمون ها با پاسخ تشریحی و آزمون گیری مجدد و بررسی درصد ها و نمرات - تصاویر و الگوریتم های هاریسون با طبقه بندی دروس - بانک تصاویر لام خون محیطی و بسیاری امکانات آموزشی متنوع.",
       "en": "Features include a private, organized study panel for internal medicine and cardiology based on Harrison 2025: concise lessons, flashcards, specialty and subspecialty board and promotion questions, original questions, KF and PMP simulations, highlighting and notes, explained answers, retesting and score analysis, categorized Harrison images and algorithms, a peripheral blood smear image bank, and more."
+    },
+    "text-117": {
+      "fa": "دربارهٔ من و سوابق بالینی",
+      "en": "About me & my clinical work"
+    },
+    "text-118": {
+      "fa": "پنل بیماران",
+      "en": "Patient portal"
+    },
+    "text-119": {
+      "fa": "برای ویزیت آماده شوید",
+      "en": "Prepare for your visit"
+    },
+    "text-120": {
+      "fa": "از چه زمانی علائم شروع شد؟ کدام دارو را با چه دوزی مصرف می‌کنید؟ با ساختن حساب می‌توانید نمونهٔ پرونده را ببینید و با بخش‌های شرح حال، داروها و آزمایش‌ها آشنا شوید. مرور این موارد پیش از ویزیت کمک می‌کند چیزی از قلم نیفتد.",
+      "en": "When did your symptoms start? Which medicines do you take, and at what dose? Create an account to explore a sample record with a medical history, medicine list and test results. Reviewing these before a visit helps you remember what to discuss."
+    },
+    "text-121": {
+      "fa": "اکنون پنل نمایشی است. پس از فعال‌شدن پروندهٔ شخصی می‌توانید شرح حال خود را پیش از ویزیت تکمیل کنید. برای نوبت حضوری یا مشاورهٔ آنلاین، راهنمای پذیرش۲۴ و اسنپ‌دکتر را ببینید.",
+      "en": "The portal is a preview. Once personal records are available, you will be able to enter your history before your visit. For in-person or online visits, see the guide to Paziresh24 and SnappDoctor."
+    },
+    "text-122": {
+      "fa": "ورود یا ساخت حساب",
+      "en": "Sign in or register"
+    },
+    "text-123": {
+      "fa": "راهنمای نوبت‌گیری",
+      "en": "Visit options"
     }
   },
   "links": {}

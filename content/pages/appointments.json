@@ -83,10 +83,24 @@
     "text-038": {
       "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
       "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    },
+    "text-039": {
+      "fa": "در پذیرش۲۴ نام پزشک و شهر را جست‌وجو کنید تا نوبت‌های حضوری یا آنلاینِ موجود را ببینید. برای مشاورهٔ غیرحضوری، اسنپ‌دکتر فهرست پزشکان و روش ارتباط را نشان می‌دهد. زمان و هزینهٔ ویزیت را پیش از تأیید در همان سرویس بررسی کنید.",
+      "en": "Search by physician and city on Paziresh24 to see available in-person or online visits. SnappDoctor lists clinicians and remote consultation options. Check the fee and time on the service before confirming."
+    },
+    "text-040": {
+      "fa": "جست‌وجو در پذیرش۲۴",
+      "en": "Search Paziresh24"
+    },
+    "text-041": {
+      "fa": "مشاوره در اسنپ‌دکتر",
+      "en": "Explore SnappDoctor"
     }
   },
   "links": {
     "link-001": "/index.html",
-    "link-002": "/pages/contact.html"
+    "link-002": "/pages/contact.html",
+    "link-003": "https://www.paziresh24.com/s/ir/doctor",
+    "link-004": "https://snapp.doctor/consultation"
   }
 }

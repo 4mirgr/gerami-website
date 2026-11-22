@@ -1,0 +1,43 @@
+/* The biography reads as a single feature, from the portrait to the research citation. */
+.profile-page {
+  padding-block: clamp(24px,5vw,64px);
+  --profile-paper: #f8f5ef;
+  --portrait-light: #f5e6cb;
+  --portrait-shadow: #b8a58a;
+}
+[data-theme=dark] .profile-page {
+  --profile-paper: #282832;
+  --portrait-light: #78707d;
+  --portrait-shadow: #3b3b4a;
+}
+.profile-page .breadcrumb { width:fit-content; margin-block:0 18px; padding:3px 14px; border-radius:18px; background:var(--white); }
+.profile-hero {
+  display:grid; grid-template-columns: minmax(0,1.45fr) minmax(210px,.7fr);
+  align-items:end; gap:clamp(20px,5vw,72px); padding-inline:clamp(22px,5vw,72px);
+  background:linear-gradient(125deg,var(--profile-paper) 38%,var(--portrait-light));
+  border-radius:var(--radius) var(--radius) 0 0; overflow:hidden;
+}
+.profile-intro { padding-block:clamp(30px,5vw,78px); }
+.profile-intro h1 { margin-block:12px 20px; font-size:clamp(2rem,4.7vw,4.2rem); line-height:1.38; letter-spacing:normal; }
+.profile-lead { font-size:clamp(1rem,1.45vw,1.17rem); line-height:2; }
+.profile-byline { display:flex; align-items:center; flex-wrap:wrap; gap:8px 24px; margin-block-start:24px; border-block-start:1px solid var(--line); padding-block-start:15px; font-size:.86rem; }
+.profile-portrait { position:relative; isolation:isolate; align-self:end; }
+.profile-portrait::before { content:""; position:absolute; inset:8% 0 0; border-radius:50% 50% 0 0; background:linear-gradient(155deg,var(--portrait-light),var(--portrait-shadow)); z-index:-1; }
+.profile-portrait img { display:block; width:100%; max-width:390px; height:auto; margin-inline:auto; }
+.profile-paper { background:var(--profile-paper); padding:clamp(24px,5vw,74px); border-radius:0 0 var(--radius) var(--radius); }
+.profile-paper .cms-profile { display:block; margin:0; }
+.cms-profile>p:first-child { max-width:72ch; font-size:1.1rem; line-height:2.05; margin:0; }
+.cms-profile>h2 { margin-block:clamp(30px,5vw,64px) 20px; font-size:clamp(1.45rem,2.7vw,2rem); }
+.career-entry { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:clamp(16px,4vw,64px); padding-block:24px; border-block-start:1px solid var(--line); }
+.career-entry h3 { margin:0; font-size:1.02rem; }
+.career-entry p { margin:0; line-height:2; }
+.publication-panel { margin-block:28px; padding-inline-start:clamp(16px,3vw,32px); border-inline-start:3px solid var(--portrait-shadow); }
+.publication-panel h2 { font-size:1.3rem; margin-block:12px; }
+.publication-panel p { overflow-wrap:anywhere; }
+.profile-project { margin-block-end:0; }
+@media(max-width:700px) {
+  .profile-hero { grid-template-columns:1fr; gap:0; }
+  .profile-portrait { width:min(220px,80%); margin-inline:auto; }
+  .profile-intro { padding-block-end:12px; }
+  .career-entry { grid-template-columns:1fr; gap:8px; }
+}
