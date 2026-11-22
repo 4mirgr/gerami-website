@@ -3,3 +3,6 @@ jsonschema==4.26.0
 
 # Build-only CSS compaction keeps public inline styles within the first-response budget.
 rcssmin==1.3.0
+
+# Build-only previews for approved post cards; originals remain unchanged.
+Pillow==12.3.0

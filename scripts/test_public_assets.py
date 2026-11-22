@@ -28,6 +28,35 @@ class PublicAssets(unittest.TestCase):
         (site / '_headers').write_text('/admin/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n')
         return site
 
+    def test_six_approved_covers_have_bounded_previews_and_unchanged_originals(self):
+        import io, random
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as folder:
+            site = self.stage(folder)
+            uploads = site / 'assets/uploads'; uploads.mkdir(exist_ok=True)
+            data = json.loads((site / 'content/articles.json').read_text())
+            originals = {}
+            for i in range(6):
+                image = Image.frombytes('RGB', (1200, 800), random.Random(i).randbytes(1200 * 800 * 3))
+                encoded = io.BytesIO(); image.save(encoded, 'JPEG', quality=88)
+                raw = encoded.getvalue(); source = '/assets/uploads/editorial-' + hashlib.sha256(raw).hexdigest() + '.jpg'
+                (site / source.lstrip('/')).write_bytes(raw); originals[source] = raw
+                data['articles'].append({'slug': 'synthetic-cover-' + str(i), 'status': 'published', 'image': source})
+            (site / 'content/articles.json').write_text(json.dumps(data))
+            optimize_public_assets(site)
+            previews = list((site / 'assets/optimized').glob('post-*.webp'))
+            self.assertEqual(len(previews), 6, 'Published cards must not request full-size originals')
+            self.assertLessEqual(sum(p.stat().st_size for p in previews), 60000)
+            for p in previews:
+                with Image.open(p) as im:
+                    self.assertLessEqual(max(im.size), 480)
+                    self.assertAlmostEqual(im.width / im.height, 1.5, places=1)
+            runtime = next((site / 'assets/runtime').glob('content.*.js')).read_text()
+            for source, original in originals.items():
+                self.assertEqual((site / source.lstrip('/')).read_bytes(), original)
+                self.assertIn(source, runtime)
+            self.assertIn('/assets/optimized/post-', runtime)
+
     def test_cache_identity_and_relocated_dependency_graph(self):
         with tempfile.TemporaryDirectory() as folder:
             site = self.stage(folder)
