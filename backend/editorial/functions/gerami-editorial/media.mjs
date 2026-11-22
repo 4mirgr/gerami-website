@@ -61,5 +61,5 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
  }
  async function load(o){const bytes=await boundedBytes(await storage('object/gerami-editorial/'+o.media_path));const mime=o.media_path.endsWith('.webp')?'image/webp':'image/jpeg';if(!validImage(bytes,mime)||await sha(bytes)!==o.sha256)throw Error('invalid_image');return {bytes,mime,hash:o.sha256};}
  async function choose(d,o,owner,cap=null){const next=selectedDraft(d,o);next.snapshot_hash=await snapshot(next);if(cap)return rpc('select_cover',{p_hash:cap.hash,p_message:cap.message,p_owner:owner,p_snapshot:next.snapshot_hash});return rpc('mutate',{p_id:d.id,p_action:'choose',p_revision:d.revision,p_data:{candidate_id:o.id,owner,snapshot_hash:next.snapshot_hash}});}
- return {ensure,options,load,choose,saveLibrary};
+ return {discover,ensure,options,load,choose,saveLibrary};
 }

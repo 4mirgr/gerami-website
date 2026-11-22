@@ -1,6 +1,7 @@
+import {clinicalEdition} from '../backend/editorial/functions/gerami-editorial/clinical.mjs';
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {verifyPublicDelivery} from '../backend/editorial/functions/gerami-editorial/publication.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
-let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus;
-const topic={lesson:[{paragraphs:[{text:'متن آموزشی منتشرشده دربارهٔ فشار خون و مراقبت از آن. '.repeat(30)}]}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
+let audience,handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus;
+const topic={lesson:[{id:'bp',heading:'ارزیابی فشار خون',paragraphs:[1,2,3].map(n=>({id:'bp-'+n,text:'اندازه‌گیری فشار خون در شرایط استاندارد و مقایسه با ثبت‌های پیشین در ارزیابی اهمیت دارد. '.repeat(3)+n}))}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
 const copy={title:'فشار خون را جدی بگیریم',summary:'اندازه‌گیری منظم کمک‌کننده است.',paragraphs:[paragraph,paragraph,paragraph],tags:['فشار خون','قلب'],hashtags:['فشار خون','سلامت']};
 const photo1=new Uint8Array([255,216,255,...new Uint8Array(197).fill(1)]),photo2=new Uint8Array([255,216,255,...new Uint8Array(197).fill(2)]);const covers=await Promise.all([photo1,photo2].map(async(bytes,i)=>({id:'00000000-0000-4000-8000-00000000000'+(i+4),source_topic:'cardio-htn',ordinal:i+1,label:'تصویر بالینی '+i,media_path:'library/test/'+i+'.jpg',image:'/assets/uploads/editorial-'+await core.sha(bytes)+'.jpg',sha256:await core.sha(bytes),provenance:{kind:'original-illustration'},active:true})));let coverOptions=[];
@@ -10,7 +11,7 @@ const fakeFetch=async(url,options={})=>{
  if(url.includes('/rpc/gerami_account'))return Response.json({id:'owner',role:enabledRole});
  if(url.includes('/rest/v1/')){
   const path=url.split('/rest/v1/')[1],body=options.body?JSON.parse(options.body):null;
-  if(path==='rpc/gerami_editorial_claim_job')return Response.json(body.p_hash===await core.sha('a'.repeat(64))?{id:body.p_id,day:'2026-11-20'}:null);
+  if(path==='rpc/gerami_editorial_claim_job')return Response.json(body.p_hash===await core.sha('a'.repeat(64))?{id:body.p_id,day:'2026-11-20',audience}:null);
   if(path==='rpc/gerami_editorial_claim_signal')return Response.json(false);
   if(path==='rpc/gerami_editorial_telegram_owner')return Response.json(true);
   if(path.startsWith('gerami_accounts'))return Response.json([{user_id:'owner'}]);
@@ -51,7 +52,7 @@ const fakeFetch=async(url,options={})=>{
  throw Error('Unexpected network '+url);
 };
 const source=(await fs.readFile('backend/editorial/functions/gerami-editorial/index.ts','utf8')).replace(/^import[^\n]+\n/gm,'');
-const bindings={createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
+const bindings={clinicalEdition,createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
 run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(bindings),...Object.values(core));
 const post=(action,body={},authorization='Bearer valid.session.token.value')=>handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/'+action,{method:'POST',headers:{Authorization:authorization},body:JSON.stringify(body)}));
 assert.equal((await handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/list'))).status,405);
@@ -67,3 +68,22 @@ hashMismatch=false;receiptFailure=true;pending=[];await post('job',payload);awai
 drafts=[];pending=[];receiptFailure=false;clinicalRemaining=1;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,4);assert.equal(jobStatus,'complete','One editorial rewrite should produce plain public copy');
 const sentBefore=sent.length;drafts=[];pending=[];clinicalRemaining=2;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,6);assert.equal(jobStatus,'error','Persistently specialist copy must stop after one rewrite');assert.equal(sent.length,sentBefore,'Rejected specialist copy was sent as a ready draft');
 console.log('Editorial Edge integration: live roles, private callbacks/job capabilities, verified published source, natural-copy validation, image/full-text review, and fail-closed source mismatch passed.');
+
+drafts=[];sent=[];pending=[];audience='professional';delete env.GEMINI_API_KEY;
+await post('job',payload);await Promise.all(pending);
+assert.equal(jobStatus,'complete');assert.equal(modelCalls,6);
+const specialist=drafts[0];
+assert.equal(specialist.source.audience,'professional');
+assert(specialist.slug.startsWith('clinical-'));
+assert.deepEqual(specialist.source.excerpt.item_ids,['bp-1','bp-2','bp-3']);
+assert.deepEqual(specialist.content.paragraphs,topic.lesson[0].paragraphs.map(p=>p.text));
+assert.equal(sent.filter(s=>s.method==='sendPhoto'&&s.caption.includes('ویژه پزشکان')).length,2);
+assert(sent.some(s=>s.method==='sendMessage'&&s.text.includes(specialist.content.paragraphs[2])));
+const article=core.publicArticle({...specialist,cover_selected:true,media_path:covers[0].media_path,cover_sha256:covers[0].sha256});
+assert.equal(article.audience,'professional');assert.equal(article.body_fa,specialist.content.paragraphs.join('\n\n'));
+assert.equal(article.sources[0].title,'Harrison 2025');
+const cardData={flashcards:[1,2,3].map(n=>({id:'fc-'+n,front:'سؤال بالینی '+n+'؟',back:paragraph}))};
+const cards=clinicalEdition(cardData,sourceTopic('cardio-htn'));
+assert.equal(cards.excerpt.kind,'flashcards');
+assert.deepEqual(cards.copy.paragraphs,cardData.flashcards.map(c=>c.front+'\n'+c.back));
+assert.equal(clinicalEdition({lesson:[{id:'empty',heading:'ناقص',paragraphs:[]}]},sourceTopic('cardio-htn')),null);

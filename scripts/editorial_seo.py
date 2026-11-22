@@ -37,7 +37,8 @@ def generate(root,output):
    text=text.replace('</head>','<link rel="stylesheet" href="/css/catalog.css"></head>',1)
   if article:
    trail='<nav aria-label="مسیر مطلب"><a href="/">خانه</a>'+''.join('<span aria-hidden="true">/</span><a href="'+escape(u)+'">'+escape(n)+'</a>' for n,u in crumbs[:-1])+'</nav>'
-   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+escape(article.get('author',''))+' · <time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
+   audience_label='<span data-fa="ویژه پزشکان" data-en="For clinicians">ویژه پزشکان</span> · ' if article.get('audience')=='professional' else ''
+   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+audience_label+escape(article.get('author',''))+' · <time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
    discussion='<section class="discussion" data-discussion="'+escape(article['slug'])+'" id="discussion"><h2 data-fa="دیدگاه خوانندگان" data-en="Reader discussion">دیدگاه خوانندگان</h2><div data-discussion-ui></div><noscript>برای ثبت دیدگاه یا پسندیدن، جاوااسکریپت را فعال کنید.</noscript></section>'
    main='<main class="reader" id="main" tabindex="-1"><article class="reader-sheet">'+header+body+'</article>'+discussion+'</main>'
    text=text.replace('</head>','<link rel="stylesheet" href="/css/article.css"><script type="module" src="/js/discussion.js"></script></head>',1)

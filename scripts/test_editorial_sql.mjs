@@ -8,6 +8,15 @@ try{
  create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;
  insert into auth.users values('${owner}',now(),null,null);insert into public.gerami_accounts values('${owner}','admin',true);`);
  await db.exec(await fs.readFile('backend/editorial/schema.sql','utf8'));
+ // Upgrade with a pre-existing public job and rerun the scheduler inside its dispatch window.
+ await db.exec(`insert into public.gerami_editorial_jobs(day,status) values((now() at time zone 'Asia/Tehran')::date,'complete');`);
+ await db.exec(await fs.readFile('backend/editorial/daily-audiences.sql','utf8'));
+ await db.query('select public.gerami_editorial_tick(true)');
+ await db.query('select public.gerami_editorial_tick(true)');
+ const jobs=(await db.query('select audience,status,attempts from public.gerami_editorial_jobs order by audience')).rows;
+ assert.deepEqual(jobs,[{audience:'patients',status:'complete',attempts:0},{audience:'professional',status:'queued',attempts:1}]);
+ await db.exec('delete from public.gerami_editorial_jobs');
+ await assert.rejects(db.exec("insert into public.gerami_editorial_jobs(day,audience) values(current_date,'invalid')"),/check constraint/);
  for(const role of ['anon','authenticated']){await db.exec('set role '+role);for(const table of ['drafts','jobs','settings','revisions'])await assert.rejects(db.query('select * from public.gerami_editorial_'+table),/permission denied/);await assert.rejects(db.query("select public.gerami_editorial_tick()"),/permission denied/);await db.exec('reset role');}
  await db.query(`insert into public.gerami_editorial_drafts(id,slug,content,category,topic,image,source,snapshot_hash) values($1,'health-test','{}','قلب','cardiology','https://example.test/a.jpg','{}','snapshot1')`,[id]);
  const serviceQuery=(sql,args=[])=>db.transaction(async tx=>{await tx.exec('set local role service_role');return tx.query(sql,args);});
@@ -30,9 +39,11 @@ try{
  assert.equal((await db.query('select count(*)::int as n from public.gerami_editorial_revisions')).rows[0].n,1);
  await db.exec("update public.gerami_editorial_settings set enabled=false;insert into public.gerami_editorial_jobs(day) values((now() at time zone 'Asia/Tehran')::date);");
  await serviceQuery('select public.gerami_editorial_tick()');
- assert.equal((await db.query("select attempts from public.gerami_editorial_jobs where day=(now() at time zone 'Asia/Tehran')::date")).rows[0].attempts,0,'Disabled generation retried a queued job');
+ assert.equal((await db.query("select attempts from public.gerami_editorial_jobs where day=(now() at time zone 'Asia/Tehran')::date and audience='patients'")).rows[0].attempts,0,'Disabled generation retried a queued job');
+ // The disabled schedule can still dispatch the independent receipt worker.
+ await db.exec("update public.gerami_editorial_jobs set status='complete',token_hash=null where day='2000-01-01'");
  await serviceQuery('select public.gerami_editorial_tick(true)');
- assert.equal((await db.query("select attempts from public.gerami_editorial_jobs where day=(now() at time zone 'Asia/Tehran')::date")).rows[0].attempts,1,'Explicit manual generation failed while schedule disabled');
+ assert.equal((await db.query("select attempts from public.gerami_editorial_jobs where day=(now() at time zone 'Asia/Tehran')::date and audience='patients'")).rows[0].attempts,1,'Explicit manual generation failed while schedule disabled');
  await db.exec("update public.gerami_editorial_drafts set status='publish_error'");
  await assert.rejects(call('edit',2,{content:{},image:'x',snapshot_hash:'x'}),/draft_locked/);
  await call('retry',2);assert.equal((await db.query('select status,publication_attempts from public.gerami_editorial_drafts')).rows[0].status,'approved');
