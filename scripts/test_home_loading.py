@@ -30,7 +30,7 @@ class HomeLoading(unittest.TestCase):
         self.assertEqual(set(snapshot['documents']), expected_paths)
         for path, data in snapshot['documents'].items():
             expected = json.loads((ROOT / path).read_text())
-            if path == 'content/site.json': expected['cv'] = []
+            if path == 'content/site.json': expected.update(cv=[], bio_fa='', bio_en='')
             self.assertEqual(data, expected)
         self.assertLessEqual(len(json.dumps(snapshot, ensure_ascii=False).encode()), 65536)
         self.assertIn('<script id="site-theme-bootstrap">', text)
@@ -48,8 +48,8 @@ class HomeLoading(unittest.TestCase):
             value['bio_fa'] = '</script><script>window.pwned=true</script>&\u2028'
             path.write_text(json.dumps(value, ensure_ascii=False))
             before = {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()}
-            text = self.render(root)
-            self.assertEqual(self.snapshot(text)['documents']['content/site.json'], {**value, 'cv': []})
+            text = bake_settings(root, (ROOT / 'pages/about.html').read_text(), 'about')
+            self.assertEqual(self.snapshot(text)['documents']['content/site.json'], value)
             self.assertNotIn('<script>window.pwned=true</script>', text)
             self.assertEqual(before, {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()})
 

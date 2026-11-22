@@ -128,7 +128,7 @@ def home_bootstrap(root, text, ident="home"):
     for path in paths:
         value = json.loads((root / path).read_text())
         if path == 'content/site.json' and ident != 'about':
-            value = {**value, 'cv': []}  # Detailed CV is rendered only by About.
+            value = {**value, 'cv': [], 'bio_fa': '', 'bio_en': ''}  # Only About renders the profile narrative.
         # A growing feed must not turn the initial HTML into a database dump.
         # Empty feed stays inline; published feeds load after the static first paint.
         if path == 'content/articles.json' and value.get('articles'):
