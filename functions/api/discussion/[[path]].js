@@ -15,9 +15,12 @@ export async function onRequest({request}){
   const reader=request.body?.getReader();if(!reader)return error(400,'payload');
   const chunks=[];let length=0;
   for(;;){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>12000){await reader.cancel();return error(413,'payload');}chunks.push(value);}
+  const body=new Uint8Array(length);let offset=0;
+  for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.length;}
   const response=await fetch(AUTH_URL+'/functions/v1/gerami-discussion/'+action,{method:'POST',headers:{
    'Content-Type':'application/json',apikey:AUTH_PUBLIC_KEY,Authorization:'Bearer '+(token||AUTH_PUBLIC_KEY)
-  },body:new Blob(chunks),redirect:'error',signal:AbortSignal.timeout(20000)});
+  },body,redirect:'manual',signal:AbortSignal.timeout(20000)});
+  if(response.status>=300&&response.status<400)return error(502,'upstream_redirect');
   return new Response(response.body,{status:response.status,headers});
- }catch{return error(503,'discussion_unavailable');}
+ }catch{return error(503,'discussion_proxy_unavailable');}
 }
