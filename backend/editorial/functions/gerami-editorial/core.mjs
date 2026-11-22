@@ -1,3 +1,4 @@
+import {articlePath,sourceTopic} from './catalog.mjs';
 /* Shared, dependency-free editorial contracts. Sources are data, never instructions. */
 export const SITE='https://drgerami-md.ir',PROJECT='https://upwbktvnybsjugdegjji.supabase.co';
 export const AUDIENCE='gerami-editorial-publisher';
@@ -15,7 +16,10 @@ export function validateCopy(value){
  return {title,paragraphs:body,summary:clean(value.summary,240),tags:list(value.tags),hashtags:list(value.hashtags,true)};
 }
 export function publicArticle(draft){
- const c=validateCopy(draft.content);return {slug:draft.slug,status:'published',audience:'patients',title_fa:c.title,title_en:'',body_fa:c.paragraphs.join('\n\n'),body_en:'',author:'دکتر امیرهوشنگ گرامی',category:draft.category,topic:draft.topic,image:draft.image,published_at:draft.publication_date||new Date().toISOString().slice(0,10),updated_at:draft.publication_date||new Date().toISOString().slice(0,10),sources:[{title:'هاریسون؛ بازنویسی آموزشی بر پایهٔ مطالب منتشرشدهٔ IntMed',url:SITE+'/intmed/'}],tags:c.tags,hashtags:c.hashtags,editorial_hash:draft.snapshot_hash};
+ const c=validateCopy(draft.content),taxonomy=draft.source?.topic_id?sourceTopic(draft.source.topic_id):null;
+ const article={slug:draft.slug,status:'published',audience:'patients',title_fa:c.title,title_en:'',body_fa:c.paragraphs.join('\n\n'),body_en:'',author:'دکتر امیرهوشنگ گرامی',category:draft.category,topic:draft.topic,image:draft.image,published_at:draft.publication_date||new Date().toISOString().slice(0,10),updated_at:draft.publication_date||new Date().toISOString().slice(0,10),sources:[{title:'Harrison 2025',url:'https://accessmedicine.mhmedical.com/'}],tags:c.tags,hashtags:c.hashtags,editorial_hash:draft.snapshot_hash};
+ if(taxonomy){if(draft.topic!==taxonomy.child.id)throw Error('topic_mismatch');article.source_topic_id=taxonomy.source_id;article.topic_root=taxonomy.root.id;article.image_alt=draft.source.cover?.label||c.title;}
+ article.url=articlePath(article);return article;
 }
 export function publicStyleIssues(copy){
  const body=copy.paragraphs.join(' '),issues=[];

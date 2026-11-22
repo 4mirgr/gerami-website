@@ -1,0 +1,1665 @@
+{
+  "version": 1,
+  "source_commit": "c9c7a5b7d41bcc076dcfaa0b74bd0b64eae2674c",
+  "source_sha256": "d00d64eae1c38d1e20f08cef5835d37bb9b691fe0d0cb08c10b0ea283b8494c8",
+  "categories": [
+    {
+      "source_id": "general",
+      "source_label": "جنرال",
+      "root": {
+        "id": "internal-medicine",
+        "fa": "فرهنگ و اصول مراجعه به مراکز درمانی و پیگیری درمان",
+        "en": "Navigating healthcare & following up on treatment",
+        "icon": "medicine",
+        "description_fa": "پیشگیری و سلامت، آموزش بالینی",
+        "description_en": "Prevention, Clinical education"
+      },
+      "topics": [
+        {
+          "id": "general-fluid-electrolyte",
+          "source_id": "general-fluid-electrolyte",
+          "fa": "اختلالات مایعات، الکترولیت و اسید-باز",
+          "en": "اختلالات مایعات، الکترولیت و اسید-باز",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "general-csf",
+          "source_id": "general-csf",
+          "fa": "اختلالات مایع مغزی-نخاعی (CSF)",
+          "en": "اختلالات مایع مغزی-نخاعی (CSF)",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "general-pocus",
+          "source_id": "general-pocus",
+          "fa": "سونوگرافی نقطه‌محور (POCUS)",
+          "en": "سونوگرافی نقطه‌محور (POCUS)",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "cardio",
+      "source_label": "قلب و عروق",
+      "root": {
+        "id": "cardiology",
+        "fa": "قلب و عروق",
+        "en": "Cardiology",
+        "icon": "heart",
+        "description_fa": "عروق کرونر، نارسایی قلب، اختلالات ریتم",
+        "description_en": "Coronary disease, Heart failure, Heart rhythm"
+      },
+      "topics": [
+        {
+          "id": "cardio-hf",
+          "source_id": "cardio-hf",
+          "fa": "نارسایی قلبی (Heart Failure)",
+          "en": "نارسایی قلبی (Heart Failure)",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-cardiomyopathy",
+          "source_id": "cardio-cardiomyopathy",
+          "fa": "کاردیومیوپاتی و میوکاردیت",
+          "en": "کاردیومیوپاتی و میوکاردیت",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-acs",
+          "source_id": "cardio-acs",
+          "fa": "سندروم کرونری حاد / ایسکمی",
+          "en": "سندروم کرونری حاد / ایسکمی",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-arrhythmia",
+          "source_id": "cardio-arrhythmia",
+          "fa": "برادی‌آریتمی و اختلالات گره سینوسی/دهلیزی‌بطنی",
+          "en": "برادی‌آریتمی و اختلالات گره سینوسی/دهلیزی‌بطنی",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-vt",
+          "source_id": "cardio-vt",
+          "fa": "تاکی‌آریتمی‌ها و آریتمی‌های بطنی",
+          "en": "تاکی‌آریتمی‌ها و آریتمی‌های بطنی",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-vt-sustained",
+          "source_id": "cardio-vt-sustained",
+          "fa": "VT مونومورفیک پایدار و بیماری ساختاری قلب",
+          "en": "VT مونومورفیک پایدار و بیماری ساختاری قلب",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-vt-polymorphic",
+          "source_id": "cardio-vt-polymorphic",
+          "fa": "VT پلی‌مورفیک، VF، و سندرم‌های کانالوپاتی ژنتیک",
+          "en": "VT پلی‌مورفیک، VF، و سندرم‌های کانالوپاتی ژنتیک",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-svt",
+          "source_id": "cardio-svt",
+          "fa": "تاکی‌کاردی‌های فوق‌بطنی (SVT)",
+          "en": "تاکی‌کاردی‌های فوق‌بطنی (SVT)",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-afib",
+          "source_id": "cardio-afib",
+          "fa": "فیبریلاسیون دهلیزی (AFib)",
+          "en": "فیبریلاسیون دهلیزی (AFib)",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-ecg",
+          "source_id": "cardio-ecg",
+          "fa": "خواندن و تفسیر ECG",
+          "en": "خواندن و تفسیر ECG",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-valve",
+          "source_id": "cardio-valve",
+          "fa": "بیماری‌های دریچه‌ای",
+          "en": "بیماری‌های دریچه‌ای",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-pericard",
+          "source_id": "cardio-pericard",
+          "fa": "پریکاردیت و تامپوناد",
+          "en": "پریکاردیت و تامپوناد",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-htn",
+          "source_id": "cardio-htn",
+          "fa": "فشار خون بالا",
+          "en": "فشار خون بالا",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-pulm-htn",
+          "source_id": "cardio-pulm-htn",
+          "fa": "پرفشاری خون ریوی",
+          "en": "پرفشاری خون ریوی",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "cardio-aorta",
+          "source_id": "cardio-aorta",
+          "fa": "بیماری‌های آئورت و عروق محیطی",
+          "en": "بیماری‌های آئورت و عروق محیطی",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "pulm",
+      "source_label": "ریه",
+      "root": {
+        "id": "pulmonology",
+        "fa": "ریه و تنفس",
+        "en": "Pulmonology",
+        "icon": "lungs",
+        "description_fa": "آسم، بیماری انسدادی ریه، خواب و تنفس",
+        "description_en": "Asthma, COPD, Sleep and breathing"
+      },
+      "topics": [
+        {
+          "id": "asthma",
+          "source_id": "pulm-asthma",
+          "fa": "آسم",
+          "en": "Asthma",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "copd",
+          "source_id": "pulm-copd",
+          "fa": "COPD",
+          "en": "COPD",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "pulm-ild",
+          "source_id": "pulm-ild",
+          "fa": "بیماری‌های بینابینی ریه (ILD)",
+          "en": "بیماری‌های بینابینی ریه (ILD)",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "pulm-pe",
+          "source_id": "pulm-pe",
+          "fa": "آمبولی ریه / ترومبوآمبولی وریدی",
+          "en": "آمبولی ریه / ترومبوآمبولی وریدی",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "pulm-ards",
+          "source_id": "pulm-ards",
+          "fa": "نارسایی تنفسی و ARDS",
+          "en": "نارسایی تنفسی و ARDS",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "pulm-sleep",
+          "source_id": "pulm-sleep",
+          "fa": "اختلالات خواب و آپنه",
+          "en": "اختلالات خواب و آپنه",
+          "icon": "lungs",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "nephro",
+      "source_label": "کلیه",
+      "root": {
+        "id": "nephrology",
+        "fa": "نفرولوژی - کلیه و فشار خون",
+        "en": "Nephrology · Kidneys & blood pressure",
+        "icon": "kidney",
+        "description_fa": "سلامت کلیه، فشار خون، آب و الکترولیت",
+        "description_en": "Kidney health, Blood pressure, Fluids and electrolytes"
+      },
+      "topics": [
+        {
+          "id": "nephro-approach",
+          "source_id": "nephro-approach",
+          "fa": "اپروچ به بیماری‌های کلیه و مجاری ادراری",
+          "en": "اپروچ به بیماری‌های کلیه و مجاری ادراری",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "azotemia",
+          "source_id": "nephro-azotemia",
+          "fa": "ازوتمی و اختلالات ادراری",
+          "en": "Azotemia and urinary abnormalities",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-aki",
+          "source_id": "nephro-aki",
+          "fa": "آسیب حاد کلیه (AKI)",
+          "en": "آسیب حاد کلیه (AKI)",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-ckd",
+          "source_id": "nephro-ckd",
+          "fa": "بیماری مزمن کلیه (CKD)",
+          "en": "بیماری مزمن کلیه (CKD)",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-dialysis",
+          "source_id": "nephro-dialysis",
+          "fa": "دیالیز در درمان بیماری‌های کلیوی",
+          "en": "دیالیز در درمان بیماری‌های کلیوی",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-interventional",
+          "source_id": "nephro-interventional",
+          "fa": "نفرولوژی مداخله‌ای",
+          "en": "نفرولوژی مداخله‌ای",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-transplant",
+          "source_id": "nephro-transplant",
+          "fa": "پیوند کلیه",
+          "en": "پیوند کلیه",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-gn",
+          "source_id": "nephro-gn",
+          "fa": "گلومرولونفریت‌ها",
+          "en": "گلومرولونفریت‌ها",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-pkd",
+          "source_id": "nephro-pkd",
+          "fa": "بیماری کلیه پلی‌کیستیک و سایر بیماری‌های مادرزادی رشد و تکامل",
+          "en": "بیماری کلیه پلی‌کیستیک و سایر بیماری‌های مادرزادی رشد و تکامل",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-tin",
+          "source_id": "nephro-tin",
+          "fa": "بیماری‌های توبولواینترستیشیال کلیه",
+          "en": "بیماری‌های توبولواینترستیشیال کلیه",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-vascular",
+          "source_id": "nephro-vascular",
+          "fa": "اختلالات ترومبوتیک عروق کلیه",
+          "en": "اختلالات ترومبوتیک عروق کلیه",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-stone",
+          "source_id": "nephro-stone",
+          "fa": "سنگ‌های کلیوی",
+          "en": "سنگ‌های کلیوی",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-obstruction",
+          "source_id": "nephro-obstruction",
+          "fa": "انسداد مجرای ادراری",
+          "en": "انسداد مجرای ادراری",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-bladder-pain",
+          "source_id": "nephro-bladder-pain",
+          "fa": "سندرم درد مثانه / سیستیت بینابینی",
+          "en": "سندرم درد مثانه / سیستیت بینابینی",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-lytes",
+          "source_id": "nephro-lytes",
+          "fa": "اختلالات الکترولیت و اسید-باز",
+          "en": "اختلالات الکترولیت و اسید-باز",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-candiduria",
+          "source_id": "nephro-candiduria",
+          "fa": "کاندیدوری",
+          "en": "کاندیدوری",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "nephro-catheter-infection",
+          "source_id": "nephro-catheter-infection",
+          "fa": "عفونت کاتتر دیالیز (PD و HD)",
+          "en": "عفونت کاتتر دیالیز (PD و HD)",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rhabdo-myopathy",
+          "source_id": "rhabdo-myopathy",
+          "fa": "رابدومیولیز و میوپاتی",
+          "en": "رابدومیولیز و میوپاتی",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "gi",
+      "source_label": "گوارش و کبد",
+      "root": {
+        "id": "gastroenterology",
+        "fa": "گوارش٫ کبد ٫ کیسه صفرا و مجاری صفراوی و پانکراس",
+        "en": "Digestive system, liver, gallbladder, bile ducts & pancreas",
+        "icon": "digestive",
+        "description_fa": "سلامت گوارش، کبد، بیماری‌های التهابی روده",
+        "description_en": "Digestive health, Liver, Inflammatory bowel disease"
+      },
+      "topics": [
+        {
+          "id": "dysphagia",
+          "source_id": "gi-dysphagia",
+          "fa": "دیسفاژی",
+          "en": "Dysphagia",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-weight-loss",
+          "source_id": "gi-weight-loss",
+          "fa": "کاهش وزن غیر ارادی",
+          "en": "کاهش وزن غیر ارادی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-bleed",
+          "source_id": "gi-bleed",
+          "fa": "خونریزی گوارشی",
+          "en": "خونریزی گوارشی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-jaundice",
+          "source_id": "gi-jaundice",
+          "fa": "زردی",
+          "en": "زردی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-approach",
+          "source_id": "gi-approach",
+          "fa": "اپروچ به بیمار مبتلا به بیماری گوارشی",
+          "en": "اپروچ به بیمار مبتلا به بیماری گوارشی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-esophagus",
+          "source_id": "gi-esophagus",
+          "fa": "بیماری‌های مری",
+          "en": "بیماری‌های مری",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-ibs",
+          "source_id": "gi-ibs",
+          "fa": "سندرم روده تحریک‌پذیر",
+          "en": "سندرم روده تحریک‌پذیر",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-diverticular-anorectal",
+          "source_id": "gi-diverticular-anorectal",
+          "fa": "بیماری دیورتیکولی و اختلالات شایع آنورکتال",
+          "en": "بیماری دیورتیکولی و اختلالات شایع آنورکتال",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-mesenteric-ischemia",
+          "source_id": "gi-mesenteric-ischemia",
+          "fa": "نارسایی عروق مزانتر",
+          "en": "نارسایی عروق مزانتر",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-bowel-obstruction",
+          "source_id": "gi-bowel-obstruction",
+          "fa": "انسداد حاد روده",
+          "en": "انسداد حاد روده",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-appendicitis",
+          "source_id": "gi-appendicitis",
+          "fa": "آپاندیسیت حاد",
+          "en": "آپاندیسیت حاد",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-liver-approach",
+          "source_id": "gi-liver-approach",
+          "fa": "اپروچ به بیمار مبتلا به بیماری کبدی",
+          "en": "اپروچ به بیمار مبتلا به بیماری کبدی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-lft",
+          "source_id": "gi-lft",
+          "fa": "ارزیابی آزمایشگاهی عملکرد کبد (LFTs)",
+          "en": "ارزیابی آزمایشگاهی عملکرد کبد (LFTs)",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-hyperbilirubinemia",
+          "source_id": "gi-hyperbilirubinemia",
+          "fa": "هایپربیلی‌روبینمی",
+          "en": "هایپربیلی‌روبینمی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-hepatitis",
+          "source_id": "gi-hepatitis",
+          "fa": "هپاتیت‌های ویروسی",
+          "en": "هپاتیت‌های ویروسی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-hepatitis-toxic",
+          "source_id": "gi-hepatitis-toxic",
+          "fa": "هپاتیت توکسیک و دارویی",
+          "en": "هپاتیت توکسیک و دارویی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-hepatitis-chronic",
+          "source_id": "gi-hepatitis-chronic",
+          "fa": "هپاتیت مزمن",
+          "en": "هپاتیت مزمن",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-liver-alcoholic",
+          "source_id": "gi-liver-alcoholic",
+          "fa": "بیماری کبد الکلی",
+          "en": "بیماری کبد الکلی",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-mafld",
+          "source_id": "gi-mafld",
+          "fa": "بیماری کبد چرب مرتبط با اختلال متابولیک و استئاتوهپاتیت",
+          "en": "بیماری کبد چرب مرتبط با اختلال متابولیک و استئاتوهپاتیت",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-cirrhosis",
+          "source_id": "gi-cirrhosis",
+          "fa": "سیروز و عوارض آن",
+          "en": "سیروز و عوارض آن",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-ibd",
+          "source_id": "gi-ibd",
+          "fa": "بیماری‌های التهابی روده (IBD)",
+          "en": "بیماری‌های التهابی روده (IBD)",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-pancreatitis-acute",
+          "source_id": "gi-pancreatitis-acute",
+          "fa": "پانکراتیت حاد",
+          "en": "پانکراتیت حاد",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "gi-pancreatitis-chronic",
+          "source_id": "gi-pancreatitis-chronic",
+          "fa": "پانکراتیت مزمن",
+          "en": "پانکراتیت مزمن",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "endo",
+      "source_label": "غدد و متابولیسم",
+      "root": {
+        "id": "endocrinology",
+        "fa": "غدد و متابولیسم",
+        "en": "Endocrinology",
+        "icon": "endocrine",
+        "description_fa": "دیابت، تیروئید، اختلالات متابولیک",
+        "description_en": "Diabetes, Thyroid, Metabolic conditions"
+      },
+      "topics": [
+        {
+          "id": "endo-thyroid-physio",
+          "source_id": "endo-thyroid-physio",
+          "fa": "فیزیولوژی غده تیروئید",
+          "en": "فیزیولوژی غده تیروئید",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-hypothyroid",
+          "source_id": "endo-hypothyroid",
+          "fa": "هیپوتیروئیدی",
+          "en": "هیپوتیروئیدی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-hyperthyroid",
+          "source_id": "endo-hyperthyroid",
+          "fa": "هایپرتیروئیدی",
+          "en": "هایپرتیروئیدی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-thyroid-nodule-cancer",
+          "source_id": "endo-thyroid-nodule-cancer",
+          "fa": "بیماری ندولار تیروئید و کانسر تیروئید",
+          "en": "بیماری ندولار تیروئید و کانسر تیروئید",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-diabetes-dx",
+          "source_id": "endo-diabetes-dx",
+          "fa": "تشخیص، طبقه‌بندی و پاتوفیزیولوژی دیابت",
+          "en": "تشخیص، طبقه‌بندی و پاتوفیزیولوژی دیابت",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-diabetes-tx",
+          "source_id": "endo-diabetes-tx",
+          "fa": "مدیریت و درمان دیابت",
+          "en": "مدیریت و درمان دیابت",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-diabetes-complications",
+          "source_id": "endo-diabetes-complications",
+          "fa": "عوارض دیابت",
+          "en": "عوارض دیابت",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-cushing",
+          "source_id": "endo-cushing",
+          "fa": "کوشینگ",
+          "en": "کوشینگ",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-mineralocorticoid-excess",
+          "source_id": "endo-mineralocorticoid-excess",
+          "fa": "افزایش مینرالوکورتیکوئیدها",
+          "en": "افزایش مینرالوکورتیکوئیدها",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-incidentaloma",
+          "source_id": "endo-incidentaloma",
+          "fa": "اینسیدنتالوما",
+          "en": "اینسیدنتالوما",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-adrenal-insufficiency",
+          "source_id": "endo-adrenal-insufficiency",
+          "fa": "نارسایی آدرنال",
+          "en": "نارسایی آدرنال",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-osteoporosis",
+          "source_id": "endo-osteoporosis",
+          "fa": "استئوپروز",
+          "en": "استئوپروز",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-bone-metabolism",
+          "source_id": "endo-bone-metabolism",
+          "fa": "متابولیسم استخوان و مواد معدنی",
+          "en": "متابولیسم استخوان و مواد معدنی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-parathyroid-calcium",
+          "source_id": "endo-parathyroid-calcium",
+          "fa": "بیماری‌های پاراتیروئید و اختلالات کلسیم",
+          "en": "بیماری‌های پاراتیروئید و اختلالات کلسیم",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-hypoglycemia",
+          "source_id": "endo-hypoglycemia",
+          "fa": "هیپوگلایسمی",
+          "en": "هیپوگلایسمی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-pituitary-insufficiency-tumors",
+          "source_id": "endo-pituitary-insufficiency-tumors",
+          "fa": "نارسایی هیپوفیز و سندرم تومورهای هیپوفیز قدامی",
+          "en": "نارسایی هیپوفیز و سندرم تومورهای هیپوفیز قدامی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-neurohypophysis",
+          "source_id": "endo-neurohypophysis",
+          "fa": "نوروهیپوفیز",
+          "en": "نوروهیپوفیز",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-obesity",
+          "source_id": "endo-obesity",
+          "fa": "ارزیابی و درمان چاقی",
+          "en": "ارزیابی و درمان چاقی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-lipoprotein",
+          "source_id": "endo-lipoprotein",
+          "fa": "اختلالات متابولیسم لیپوپروتئین",
+          "en": "اختلالات متابولیسم لیپوپروتئین",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-female-puberty",
+          "source_id": "endo-female-puberty",
+          "fa": "اختلالات بلوغ در جنس مونث",
+          "en": "اختلالات بلوغ در جنس مونث",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-sexual-development",
+          "source_id": "endo-sexual-development",
+          "fa": "اختلالات نمو جنسی",
+          "en": "اختلالات نمو جنسی",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-hirsutism",
+          "source_id": "endo-hirsutism",
+          "fa": "هیرسوتیسم",
+          "en": "هیرسوتیسم",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-menopause-infertility",
+          "source_id": "endo-menopause-infertility",
+          "fa": "یائسگی و ناباروری",
+          "en": "یائسگی و ناباروری",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-male-reproductive",
+          "source_id": "endo-male-reproductive",
+          "fa": "اختلالات بیضه و دستگاه تولید مثل مذکر",
+          "en": "اختلالات بیضه و دستگاه تولید مثل مذکر",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-pheo",
+          "source_id": "endo-pheo",
+          "fa": "فئوکروموسیتوما",
+          "en": "فئوکروموسیتوما",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-aps",
+          "source_id": "endo-aps",
+          "fa": "سندروم‌های پلی‌اندوکرین اتوایمیون (APS)",
+          "en": "سندروم‌های پلی‌اندوکرین اتوایمیون (APS)",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-men",
+          "source_id": "endo-men",
+          "fa": "نئوپلازی‌های متعدد اندوکرین (MEN)",
+          "en": "نئوپلازی‌های متعدد اندوکرین (MEN)",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-wilson",
+          "source_id": "endo-wilson",
+          "fa": "ویلسون",
+          "en": "ویلسون",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "endo-hemochromatosis",
+          "source_id": "endo-hemochromatosis",
+          "fa": "هموکروماتوز",
+          "en": "هموکروماتوز",
+          "icon": "endocrine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "heme",
+      "source_label": "هماتولوژی و آنکولوژی",
+      "root": {
+        "id": "hematology",
+        "fa": "هماتولوژی - خون",
+        "en": "Hematology · Blood",
+        "icon": "blood",
+        "description_fa": "کم‌خونی، انعقاد خون",
+        "description_en": "Anemia, Clotting"
+      },
+      "topics": [
+        {
+          "id": "heme-iron-anemia",
+          "source_id": "heme-iron-anemia",
+          "fa": "آنمی فقر آهن و سایر آنمی‌های هیپوپرولیفراتیو",
+          "en": "آنمی فقر آهن و سایر آنمی‌های هیپوپرولیفراتیو",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-hemolytic-anemia",
+          "source_id": "heme-hemolytic-anemia",
+          "fa": "آنمی‌های همولیتیک",
+          "en": "آنمی‌های همولیتیک",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-aml",
+          "source_id": "heme-aml",
+          "fa": "لوسمی‌های حاد (AML/ALL)",
+          "en": "لوسمی‌های حاد (AML/ALL)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-cll",
+          "source_id": "heme-cll",
+          "fa": "لوسمی لنفوئیدی مزمن (CLL)",
+          "en": "لوسمی لنفوئیدی مزمن (CLL)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-cml",
+          "source_id": "heme-cml",
+          "fa": "لوسمی میلوئیدی مزمن (CML)",
+          "en": "لوسمی میلوئیدی مزمن (CML)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-mpn",
+          "source_id": "heme-mpn",
+          "fa": "نئوپلاسم‌های میلوپرولیفراتیو: PV، ET و PMF",
+          "en": "نئوپلاسم‌های میلوپرولیفراتیو: PV، ET و PMF",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-lymphoma",
+          "source_id": "heme-lymphoma",
+          "fa": "لنفوم‌ها (Lymphoma)",
+          "en": "لنفوم‌ها (Lymphoma)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-coag",
+          "source_id": "heme-coag",
+          "fa": "اختلالات انعقادی و ترومبوز",
+          "en": "اختلالات انعقادی و ترومبوز",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-mds",
+          "source_id": "heme-mds",
+          "fa": "آنمی آپلاستیک و سندرم‌های میلودیسپلاستیک (MDS)",
+          "en": "آنمی آپلاستیک و سندرم‌های میلودیسپلاستیک (MDS)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-mm",
+          "source_id": "heme-mm",
+          "fa": "مولتیپل میلوم",
+          "en": "مولتیپل میلوم",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-breast-ca",
+          "source_id": "heme-breast-ca",
+          "fa": "کانسر پستان",
+          "en": "کانسر پستان",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-lower-gi-cancer",
+          "source_id": "heme-lower-gi-cancer",
+          "fa": "کنسرهای دستگاه گوارش تحتانی",
+          "en": "کنسرهای دستگاه گوارش تحتانی",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-upper-gi-cancer",
+          "source_id": "heme-upper-gi-cancer",
+          "fa": "کنسرهای دستگاه گوارش فوقانی",
+          "en": "کنسرهای دستگاه گوارش فوقانی",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-cancer-symptom-control",
+          "source_id": "heme-cancer-symptom-control",
+          "fa": "کنترل علائم در بیماران مبتلا به سرطان (فصل ۷۴)",
+          "en": "کنترل علائم در بیماران مبتلا به سرطان (فصل ۷۴)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-cancer-prevention-screening",
+          "source_id": "heme-cancer-prevention-screening",
+          "fa": "پیشگیری و تشخیص زودرس سرطان (فصل ۷۵)",
+          "en": "پیشگیری و تشخیص زودرس سرطان (فصل ۷۵)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-cancer-infection",
+          "source_id": "heme-cancer-infection",
+          "fa": "عفونت در بیماران مبتلا به کنسر",
+          "en": "عفونت در بیماران مبتلا به کنسر",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-lung-cancer",
+          "source_id": "heme-lung-cancer",
+          "fa": "نئوپلاسم‌های ریه (سرطان ریه)",
+          "en": "نئوپلاسم‌های ریه (سرطان ریه)",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "heme-pbs",
+          "source_id": "heme-pbs",
+          "fa": "لام خون محیطی (PBS): اطلس مورفولوژی",
+          "en": "لام خون محیطی (PBS): اطلس مورفولوژی",
+          "icon": "blood",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "rheum",
+      "source_label": "روماتولوژی و ایمونولوژی",
+      "root": {
+        "id": "rheumatology",
+        "fa": "روماتولوژی و بیماری های خودایمن",
+        "en": "Rheumatology & autoimmune diseases",
+        "icon": "joint",
+        "description_fa": "التهاب مفاصل، بیماری‌های خودایمنی",
+        "description_en": "Arthritis, Autoimmune conditions"
+      },
+      "topics": [
+        {
+          "id": "rheum-ra",
+          "source_id": "rheum-ra",
+          "fa": "آرتریت روماتوئید (RA)",
+          "en": "آرتریت روماتوئید (RA)",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-sle",
+          "source_id": "rheum-sle",
+          "fa": "لوپوس (SLE)",
+          "en": "لوپوس (SLE)",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-gout",
+          "source_id": "rheum-gout",
+          "fa": "نقرس و بیماری‌های کریستالی",
+          "en": "نقرس و بیماری‌های کریستالی",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-vasculitis",
+          "source_id": "rheum-vasculitis",
+          "fa": "واسکولیت‌ها",
+          "en": "واسکولیت‌ها",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-igg4",
+          "source_id": "rheum-igg4",
+          "fa": "بیماری‌های مرتبط با IgG4",
+          "en": "بیماری‌های مرتبط با IgG4",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-spa",
+          "source_id": "rheum-spa",
+          "fa": "اسپوندیلوآرتروپاتی‌ها",
+          "en": "اسپوندیلوآرتروپاتی‌ها",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-sarcoidosis",
+          "source_id": "rheum-sarcoidosis",
+          "fa": "سارکوئیدوز",
+          "en": "سارکوئیدوز",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-systemic-arthritis",
+          "source_id": "rheum-systemic-arthritis",
+          "fa": "آرتریت همراه بیماری‌های سیستمیک و سایر آرتریت‌ها",
+          "en": "آرتریت همراه بیماری‌های سیستمیک و سایر آرتریت‌ها",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "rheum-aps",
+          "source_id": "rheum-aps",
+          "fa": "سندرم آنتی‌فسفولیپید (APS)",
+          "en": "سندرم آنتی‌فسفولیپید (APS)",
+          "icon": "joint",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "id",
+      "source_label": "عفونی",
+      "root": {
+        "id": "infectious-diseases",
+        "fa": "بیماری های عفونی و نقص ایمنی",
+        "en": "Infectious diseases & immunodeficiency",
+        "icon": "microbe",
+        "description_fa": "عفونت‌ها، واکسیناسیون",
+        "description_en": "Infections, Vaccination"
+      },
+      "topics": [
+        {
+          "id": "id-sepsis",
+          "source_id": "id-sepsis",
+          "fa": "سپسیس و شوک سپتیک",
+          "en": "سپسیس و شوک سپتیک",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-hiv",
+          "source_id": "id-hiv",
+          "fa": "HIV/AIDS",
+          "en": "HIV/AIDS",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-tb",
+          "source_id": "id-tb",
+          "fa": "سل (TB)",
+          "en": "سل (TB)",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-hai",
+          "source_id": "id-hai",
+          "fa": "عفونت‌های بیمارستانی",
+          "en": "عفونت‌های بیمارستانی",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-empiric",
+          "source_id": "id-empiric",
+          "fa": "آنتی‌بیوتیک‌درمانی تجربی",
+          "en": "آنتی‌بیوتیک‌درمانی تجربی",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-cns-meningoencephalitis",
+          "source_id": "id-cns-meningoencephalitis",
+          "fa": "مننژیت و انسفالیت",
+          "en": "مننژیت و انسفالیت",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-brain-abscess-empyema",
+          "source_id": "id-brain-abscess-empyema",
+          "fa": "آبسه مغزی و امپیم داخل جمجمه",
+          "en": "آبسه مغزی و امپیم داخل جمجمه",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "id-cns-opportunistic",
+          "source_id": "id-cns-opportunistic",
+          "fa": "عفونت‌های فرصت‌طلب و مزمن دستگاه عصبی",
+          "en": "عفونت‌های فرصت‌طلب و مزمن دستگاه عصبی",
+          "icon": "microbe",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "neuro",
+      "source_label": "اعصاب",
+      "root": {
+        "id": "neurology",
+        "fa": "اعصاب",
+        "en": "Neurology",
+        "icon": "medicine",
+        "description_fa": "",
+        "description_en": ""
+      },
+      "topics": [
+        {
+          "id": "neuro-stroke",
+          "source_id": "neuro-stroke",
+          "fa": "سکته مغزی (Stroke)",
+          "en": "سکته مغزی (Stroke)",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "neuro-seizure",
+          "source_id": "neuro-seizure",
+          "fa": "تشنج و صرع",
+          "en": "تشنج و صرع",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "neuro-headache",
+          "source_id": "neuro-headache",
+          "fa": "سردرد",
+          "en": "سردرد",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "neuro-dementia",
+          "source_id": "neuro-dementia",
+          "fa": "دمانس",
+          "en": "دمانس",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "neuro-neuropathy",
+          "source_id": "neuro-neuropathy",
+          "fa": "نوروپاتی‌های محیطی",
+          "en": "نوروپاتی‌های محیطی",
+          "icon": "medicine",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "crit",
+      "source_label": "مراقبت ویژه و اورژانس داخلی",
+      "root": {
+        "id": "critical-care",
+        "fa": "مراقبت ویژه و اورژانس داخلی",
+        "en": "Critical care",
+        "icon": "shield",
+        "description_fa": "",
+        "description_en": ""
+      },
+      "topics": [
+        {
+          "id": "crit-shock",
+          "source_id": "crit-shock",
+          "fa": "انواع شوک",
+          "en": "انواع شوک",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "crit-abg",
+          "source_id": "crit-abg",
+          "fa": "تفسیر ABG و اسید-باز پیشرفته",
+          "en": "تفسیر ABG و اسید-باز پیشرفته",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "crit-vent",
+          "source_id": "crit-vent",
+          "fa": "اصول اولیهٔ ونتیلاتور",
+          "en": "اصول اولیهٔ ونتیلاتور",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "source_id": "poison",
+      "source_label": "مسمومیت",
+      "root": {
+        "id": "toxicology",
+        "fa": "مسمومیت",
+        "en": "Toxicology",
+        "icon": "shield",
+        "description_fa": "",
+        "description_en": ""
+      },
+      "topics": [
+        {
+          "id": "poison-general",
+          "source_id": "poison-general",
+          "fa": "اصول کلی مسمومیت و اوردوز دارویی",
+          "en": "اصول کلی مسمومیت و اوردوز دارویی",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-opioid",
+          "source_id": "poison-opioid",
+          "fa": "مسمومیت با اپیوئیدها",
+          "en": "مسمومیت با اپیوئیدها",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-opioid-dependence",
+          "source_id": "poison-opioid-dependence",
+          "fa": "وابستگی به مواد افیونی در کودکان و نوجوانان",
+          "en": "وابستگی به مواد افیونی در کودکان و نوجوانان",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-heavy-metal",
+          "source_id": "poison-heavy-metal",
+          "fa": "مسمومیت با فلزات سنگین",
+          "en": "مسمومیت با فلزات سنگین",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-snakebite",
+          "source_id": "poison-snakebite",
+          "fa": "نیش مار و جانوران سمی دریایی",
+          "en": "نیش مار و جانوران سمی دریایی",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-arthropod",
+          "source_id": "poison-arthropod",
+          "fa": "اکتوپارازیت‌ها و نیش/گزش بندپایان",
+          "en": "اکتوپارازیت‌ها و نیش/گزش بندپایان",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-rhabdo-myopathy",
+          "source_id": "poison-rhabdo-myopathy",
+          "fa": "رابدومیولیز و میوپاتی",
+          "en": "رابدومیولیز و میوپاتی",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-alcohols",
+          "source_id": "poison-alcohols",
+          "fa": "مسمومیت با الکل‌های شایع (اتانول، متانول، اتیلن‌گلیکول، ایزوپروپانول)",
+          "en": "مسمومیت با الکل‌های شایع (اتانول، متانول، اتیلن‌گلیکول، ایزوپروپانول)",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-aluminum-phosphide",
+          "source_id": "poison-aluminum-phosphide",
+          "fa": "مسمومیت حاد با فسفید آلومینیوم (قرص برنج)",
+          "en": "مسمومیت حاد با فسفید آلومینیوم (قرص برنج)",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-hallucinogens",
+          "source_id": "poison-hallucinogens",
+          "fa": "مسمومیت با مواد توهم‌زا",
+          "en": "مسمومیت با مواد توهم‌زا",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-antidotes",
+          "source_id": "poison-antidotes",
+          "fa": "راهنمای آنتی‌دوت‌ها در مسمومیت‌ها",
+          "en": "راهنمای آنتی‌دوت‌ها در مسمومیت‌ها",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "poison-beta-blocker",
+          "source_id": "poison-beta-blocker",
+          "fa": "مسمومیت با بتابلوکرها",
+          "en": "مسمومیت با بتابلوکرها",
+          "icon": "shield",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        }
+      ]
+    }
+  ]
+}

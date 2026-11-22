@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {validateSite,managedPaths} from '../js/site-model.mjs';
+import {sourceTopic,ensureArticleTopic,articlePath} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';
 import {sha,stable} from '../backend/editorial/functions/gerami-editorial/core.mjs';
 const endpoint='https://upwbktvnybsjugdegjji.supabase.co/functions/v1/gerami-editorial/publisher';
 async function oidc(){const url=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);url.searchParams.set('audience','gerami-editorial-publisher');const r=await fetch(url,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('OIDC unavailable');return (await r.json()).value;}
@@ -16,6 +17,8 @@ if(action==='claim'){
  const {article,media}=result.draft;
  if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(article.slug)||article.status!=='published'||!/^[a-f0-9]{64}$/.test(article.editorial_hash))throw Error('Invalid publication payload');
  const documents={};for(const p of managedPaths)documents[p]=JSON.parse(await fs.readFile(p,'utf8'));
+ if(article.url!==articlePath(article))throw Error('Invalid canonical article URL');
+ if(article.source_topic_id)ensureArticleTopic(documents,sourceTopic(article.source_topic_id));
  const existing=documents['content/articles.json'].articles.find(a=>a.slug===article.slug);
  if(existing&&stable(existing)!==stable(article))throw Error('Article slug conflict');
  if(!existing)documents['content/articles.json'].articles.push(article);
@@ -25,13 +28,13 @@ if(action==='claim'){
   const bytes=Buffer.from(media.base64,'base64');if(bytes.length>650000||await sha(bytes)!==media.sha256)throw Error('Invalid media hash');
   await fs.mkdir('assets/uploads',{recursive:true});await fs.writeFile(media.path,bytes,{flag:'w'});
  }
- await fs.writeFile('content/articles.json',JSON.stringify(documents['content/articles.json'],null,2)+'\n');
+ for(const path of ['content/topics.json','content/articles.json'])await fs.writeFile(path,JSON.stringify(documents[path],null,2)+'\n');
  await fs.appendFile(process.env.GITHUB_OUTPUT,'claimed=true\n');
 }else if(action==='commit'){
  const {draft,capability}=JSON.parse(await fs.readFile(state,'utf8'));
  try{
   git('fetch','origin','main');if(git('rev-parse','HEAD')!==git('rev-parse','origin/main'))throw Error('Main changed; review again');
-  const allowed=['content/articles.json',...(draft.media?[draft.media.path]:[])];
+  const allowed=['content/articles.json','content/topics.json',...(draft.media?[draft.media.path]:[])];
   const changed=execFileSync('git',['status','--porcelain','--untracked-files=all'],{encoding:'utf8'}).trimEnd().split('\n').filter(Boolean).map(l=>l.slice(3));
   if(changed.some(p=>!allowed.includes(p)))throw Error('Unexpected modified file');
   git('add','--',...allowed);
