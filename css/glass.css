@@ -46,34 +46,17 @@ a,button,summary { touch-action:manipulation; }
 .hero-emphasis { color:var(--teal); }
 .signature-description { color:var(--muted); font-size:.96rem; max-width:58ch; margin:22px auto 0; }
 .signature-copy .actions { justify-content:center; margin-top:28px; gap:12px; }
-.button,.hero-profile-link { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:48px; border-radius:99px; padding:11px 23px; font-size:.85rem; text-decoration:none; border:1px solid var(--line); }
+.button { display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:48px; border-radius:99px; padding:11px 23px; font-size:.85rem; text-decoration:none; border:1px solid var(--line); }
 .button-primary { border-color:transparent; box-shadow:0 4px 14px #172e5510; }
 .button-primary:hover { background:var(--button); color:var(--buttonText); filter:brightness(1.05); }
-.button-secondary,.hero-profile-link { background:var(--white); color:var(--ink); }
-.explore-section { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; padding-block:36px 48px; }
-.explore-section>a { position:relative; text-decoration:none; border:1px solid var(--line); background:var(--white); border-radius:var(--radius); padding:28px; box-shadow:var(--glass-shadow); }
-.explore-icon { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--line); border-radius:14px; background:var(--wash); color:var(--teal); margin-bottom:24px; }
-.explore-icon svg { width:23px; height:23px; }
-.explore-section h2 { font-size:1.13rem; padding-inline-end:20px; }
-.explore-section p { color:var(--muted); font-size:.85rem; margin-top:9px; }
-.explore-arrow { position:absolute; inset-inline-end:25px; top:27px; display:grid; place-items:center; width:32px; height:32px; border:1px solid var(--line); border-radius:50%; }
+.button-secondary { background:var(--white); color:var(--ink); }
 .section { padding-block:64px; }
 .section-heading { margin-bottom:30px; }
 .section-heading p { max-width:43ch; }
 .section-wash { background:var(--wash); border:0; }
-.topic-list { list-style:none; padding:0; margin:0; }
-.topic-list li { display:flex; gap:20px; padding:25px 0; border-bottom:1px solid var(--line); }
-.topic-list li:last-child { border-bottom:0; }
-.topic-list .number { font-size:.75rem; color:var(--teal); padding-top:6px; }
-.topic-list h3 { font-size:1.1rem; }
-.topic-list p { color:var(--muted); font-size:.85rem; margin-block:8px; }
 .card,.project-card { background:var(--white); border:1px solid var(--line); border-radius:var(--radius); padding:32px; box-shadow:var(--glass-shadow); }
 .project-card:only-child { grid-column:1/-1; }
-.project-watermark { display:none; }
 .project-bottom { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:26px; padding-top:20px; border-top:1px solid var(--line); font-size:.8rem; }
-.projects-showcase { position:relative; }
-.projects-showcase .project-card { background:var(--white) var(--glass-art) left center/cover no-repeat; padding-inline-end:40%; }
-.projects-showcase .project-card p,.projects-showcase .project-bottom { background:var(--white); border-radius:12px; padding:14px; }
 .card-icon { border:1px solid var(--line); border-radius:16px; width:52px; height:52px; }
 .page-intro { position:relative; background:var(--paper) var(--glass-art) center/cover no-repeat; border-bottom:1px solid var(--line); padding-block:64px; }
 .page-intro>.container { background:var(--white); border:1px solid var(--line); border-radius:var(--radius); padding:32px; box-shadow:var(--glass-shadow); }
@@ -91,7 +74,7 @@ a,button,summary { touch-action:manipulation; }
 .site-footer p,.footer-bottom { color:#cdccd9; }
 .site-footer .nav-submenu { background:#262630; color:#f4f4fa; }
 @supports ((backdrop-filter:blur(20px)) or (-webkit-backdrop-filter:blur(20px))) {
-  .site-header,.signature-copy,.explore-section>a,.card,.page-intro>.container {
+  .site-header,.signature-copy,.card,.page-intro>.container {
     background-color:color-mix(in srgb,var(--white) 82%,transparent);
     -webkit-backdrop-filter:blur(22px); backdrop-filter:blur(22px);
   }
@@ -110,12 +93,7 @@ a,button,summary { touch-action:manipulation; }
   .signature-copy h1 { font-size:clamp(1.85rem,6.8vw,2.7rem); }
   .signature-copy .eyebrow { font-size:.65rem; }
   .signature-description { font-size:.9rem; }
-  .explore-section { grid-template-columns:1fr; gap:12px; padding-block:24px; }
-  .explore-section>a { padding:24px; }
-  .explore-icon { margin-bottom:16px; }
-  .explore-section h2 { padding-inline-end:38px; }
   .section { padding-block:40px; }
-  .projects-showcase .project-card { padding:26px; }
   .page-intro { padding-block:30px; }
   .page-intro>.container { padding:25px; }
   .footer-grid { gap:28px; }
@@ -129,10 +107,10 @@ a,button,summary { touch-action:manipulation; }
   .signature-copy .actions>a { width:100%; }
 }
 @media (prefers-reduced-motion:no-preference) {
-  .explore-section>a,.card,.project-card { transition:box-shadow .2s,border-color .2s; }
-  .explore-section>a:hover,.card:hover,.project-card:hover { border-color:var(--teal); box-shadow:0 18px 40px #172e5512; }
+  .card,.project-card { transition:box-shadow .2s,border-color .2s; }
+  .card:hover,.project-card:hover { border-color:var(--teal); box-shadow:0 18px 40px #172e5512; }
 }
-@media (forced-colors:active) { .signature-copy,.card,.explore-section>a { border:1px solid CanvasText; background:Canvas; } }
+@media (forced-colors:active) { .signature-copy,.card { border:1px solid CanvasText; background:Canvas; } }
 
 /* Topic-first liquid glass: actual artwork behind every translucent surface. */
 :root { --header-clearance:120px; --glass-depth:0 18px 50px #26365420, inset 1px 1px 0 #ffffffc9, inset -1px -1px 0 #ffffff38; }
@@ -426,6 +404,8 @@ body::before { background:var(--glass-art) center/cover no-repeat; background-co
 .feature-portrait { border-radius:50% 50% 14px 14px; background:linear-gradient(145deg,#eddcc5,#958c80); overflow:hidden; width:min(100%,245px); justify-self:center; }
 .feature-panel img { display:block; width:100%; height:auto; }
 .patient-panel { grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); }
+.booking-links { display:flex; flex-wrap:wrap; gap:0 1.2rem; }
+.booking-links a { display:inline-flex; align-items:center; min-height:44px; }
 .feature-poster { overflow:hidden; border-radius:16px; background:#122235; }
 @media(max-width:700px) {
  .feature-panel { grid-template-columns:1fr; gap:20px; }

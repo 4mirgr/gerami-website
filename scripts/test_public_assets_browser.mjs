@@ -102,11 +102,13 @@ try{
 
  // Reproduce the carrier failure: same-origin font/art never send headers.
  // Only a pinned public mirror may recover them; executable code stays local.
+ const mirrorConfig=JSON.parse(await readFile(new URL('../deploy/public-asset-mirror.json',import.meta.url)));
  async function serveMirror(route,corruptFont=false){
   const url=new URL(route.request().url());
   assert.equal(route.request().headers().cookie,undefined);
   assert.equal(route.request().headers().referer,undefined);
-  assert.match(url.pathname,/^\/4mirgr\/gerami-website\/528d9d06c2e60b944c3cb332dbb5fd8798b52904\/assets\//);
+  assert.equal(url.hostname,'raw.githubusercontent.com');
+  assert.ok(url.pathname.startsWith('/4mirgr/gerami-website/'+mirrorConfig.commit+'/assets/'));
   const relative=url.pathname.split('/').slice(4).join('/'),file=resolve(root,relative);
   assert.ok(file.startsWith(root+'/assets/'));
   const body=await readFile(file);

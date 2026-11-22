@@ -80,10 +80,6 @@ nav a[aria-current="page"] { color: var(--teal); text-decoration: underline; }
 .badge { display: inline-block; color: #5b654e; background: #f0f2e6; border-radius: 20px; padding: 3px 11px; font-size: .71rem; }
 .project-bottom { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-top: 25px; color: var(--teal); font-size: .82rem; }
 .project-bottom code { font: .8rem Arial, sans-serif; color: var(--muted); }
-.topic-list { display: grid; gap: 0; padding: 0; margin: 0; list-style: none; border-top: 1px solid var(--line); }
-.topic-list li { display: flex; align-items: start; gap: 18px; padding: 20px 0; border-bottom: 1px solid var(--line); }
-.topic-list .number { font: .8rem Arial, sans-serif; color: var(--accent); padding-top: 7px; }
-.topic-list p { font-size: .86rem; margin-top: 4px; color: var(--muted); }
 .notice { border-inline-start: 3px solid var(--teal); padding: 18px 22px; background: var(--wash); border-radius: 8px; color: var(--muted); font-size: .88rem; }
 .notice h2, .notice h3 { color: var(--ink); margin-bottom: 8px; }
 .notice + .notice { margin-top: 20px; }

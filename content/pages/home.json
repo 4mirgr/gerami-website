@@ -121,12 +121,12 @@
       "en": "Prepare for your visit"
     },
     "text-120": {
-      "fa": "از چه زمانی علائم شروع شد؟ کدام دارو را با چه دوزی مصرف می‌کنید؟ با ساختن حساب می‌توانید نمونهٔ پرونده را ببینید و با بخش‌های شرح حال، داروها و آزمایش‌ها آشنا شوید. مرور این موارد پیش از ویزیت کمک می‌کند چیزی از قلم نیفتد.",
-      "en": "When did your symptoms start? Which medicines do you take, and at what dose? Create an account to explore a sample record with a medical history, medicine list and test results. Reviewing these before a visit helps you remember what to discuss."
+      "fa": "از چه زمانی علائم شروع شد؟ کدام دارو را با چه دوزی مصرف می‌کنید؟ با ساختن حساب، در پنل نمایشی با بخش‌های شرح حال، داروها و آزمایش‌ها آشنا شوید. مرور این موارد پیش از ویزیت کمک می‌کند چیزی از قلم نیفتد.",
+      "en": "When did your symptoms start? Which medicines do you take, and at what dose? Create an account to explore the demo portal’s history, medicines and test results. Reviewing these before a visit helps you remember what to discuss."
     },
     "text-121": {
-      "fa": "اکنون پنل نمایشی است. پس از فعال‌شدن پروندهٔ شخصی می‌توانید شرح حال خود را پیش از ویزیت تکمیل کنید. برای نوبت حضوری یا مشاورهٔ آنلاین، راهنمای پذیرش۲۴ و اسنپ‌دکتر را ببینید.",
-      "en": "The portal is a preview. Once personal records are available, you will be able to enter your history before your visit. For in-person or online visits, see the guide to Paziresh24 and SnappDoctor."
+      "fa": "امروز می‌توانید پروندهٔ نمونه را ببینید و پس از فعال‌شدن پروندهٔ شخصی، شرح حالتان را تکمیل کنید. برای ویزیت حضوری یا آنلاین، نوبت‌های من را در این سرویس‌ها ببینید.",
+      "en": "Explore a sample record today. Once personal records are enabled, you can fill in your own history. For in-person or online visits, check my availability on these services."
     },
     "text-122": {
       "fa": "ورود یا ساخت حساب",
@@ -135,7 +135,23 @@
     "text-123": {
       "fa": "راهنمای نوبت‌گیری",
       "en": "Visit options"
+    },
+    "text-124": {
+      "fa": "پذیرش۲۴",
+      "en": "Paziresh24"
+    },
+    "text-125": {
+      "fa": "اسنپ‌دکتر",
+      "en": "SnappDoctor"
+    },
+    "text-126": {
+      "fa": "دکترنکست",
+      "en": "DrNext"
     }
   },
-  "links": {}
+  "links": {
+    "link-120": "https://www.paziresh24.com/dr/دکتر-امیرهوشنگ-گرامی/",
+    "link-121": "https://snapp.doctor/specialist/82526/",
+    "link-122": "https://drnext.ir/doctor/general-practitioner-amirhoushang-gerami-2d69rn"
+  }
 }

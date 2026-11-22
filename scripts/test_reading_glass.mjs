@@ -19,5 +19,10 @@ try{
  assert.equal(await p.locator('[data-topic-rail]').count(),0);
  assert.deepEqual(await p.locator('main>[data-site-section]').evaluateAll(es=>es.slice(0,3).map(e=>e.dataset.siteSection)),['hero','education','articles']);
  assert.ok(await p.locator('#topics .subtopic-links a').count()>0);
+ const providerLinks=page=>page.locator('a[data-link-key]').evaluateAll(links=>links.map(a=>new URL(a.href)).filter(u=>['snapp.doctor','www.paziresh24.com','drnext.ir'].includes(u.hostname)).map(u=>decodeURI(u.href)).sort());
+ const external=await providerLinks(p);
+ assert.equal(external.length,3);
+ assert.ok(external.every(url=>url.includes('گرامی')||url.endsWith('/specialist/82526/')||url.endsWith('gerami-2d69rn')));
+ await p.goto('http://127.0.0.1:4173/pages/appointments.html');assert.deepEqual(await providerLinks(p),external);
  console.log('PASS floating navigation, responsive anchors and single topic directory.');
 }finally{await b.close();}
