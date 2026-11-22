@@ -1,3 +1,4 @@
+import {discussionEditor} from './discussion.mjs';
 import {editorialEditor} from './editorial.mjs';
 import {topicEditor} from './topic-editor.mjs';
 import {flattenTopics} from '../js/topics.mjs';
@@ -9,7 +10,7 @@ const node=(tag,text,className)=>{const element=document.createElement(tag);if(t
 const button=(label,handler,className='tool-button')=>{const b=node('button',label,className);b.type='button';b.addEventListener('click',handler);return b;};
 const session=new GitHubSession();const store=new SiteStore(session);const view=$('studio-fields');const preview=$('site-preview');
 let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false,imageSaving=false;
-const routes={'auto-posts':'پیشنهادهای خودکار',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانهٔ رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
+const routes={discussion:'دیدگاه‌ها و پسندها','auto-posts':'پیشنهادهای خودکار',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانهٔ رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
 const appearancePath='content/appearance.json';const menuPath='content/navigation.json';const extraPath='content/extra-pages.json';
 let previewLanguage='fa',previewTheme='light',previewSize=1280;
 function notice(message,error=false){$('studio-notice').textContent=message;$('studio-notice').classList.toggle('error',error);}
@@ -205,9 +206,9 @@ async function historyEditor(){const section=group('تاریخچه و بازیا
  section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',new Date(commit.commit.author.date).toLocaleString('fa-IR')));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخهٔ انتخابی در پیش‌نویس آمادهٔ بررسی است.');render();})));rows.append(row);}})));
 }
 function render(){if(!loaded)return;view.replaceChildren();const route=location.hash.slice(1);if(!Object.hasOwn(routes,route))return;
- if(route==='auto-posts')editorialEditor(view);if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
+ if(route==='discussion')discussionEditor(view);if(route==='auto-posts')editorialEditor(view);if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
 }
-function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Object.hasOwn(routes,route);$('publish-bar').hidden=!loaded;if(loaded&&Object.hasOwn(routes,route)){render();const target=({articles:'blog',topics:'home',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[route]||previewPage;if(target!==previewPage||!preview.getAttribute('src'))setPreview(target);if(route==='pages')focusBlock();}}
+function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Object.hasOwn(routes,route);$('publish-bar').hidden=!loaded||route==='discussion';document.querySelector('.preview-panel').hidden=route==='discussion';if(loaded&&Object.hasOwn(routes,route)){render();const target=({articles:'blog',topics:'home',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[route]||previewPage;if(route!=='discussion'&&(target!==previewPage||!preview.getAttribute('src')))setPreview(target);if(route==='pages')focusBlock();}}
 window.addEventListener('hashchange',route);
 window.addEventListener('beforeunload',event=>{if(store.storageError&&store.count||store.busy){event.preventDefault();event.returnValue='';}});
 try{await store.load();loaded=true;route();status();if(session.state==='connected')await synchronize();}catch(error){notice(error.message,true);}

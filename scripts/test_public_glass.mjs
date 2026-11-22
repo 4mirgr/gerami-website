@@ -29,7 +29,7 @@ try {
           }
           await page.keyboard.press('Escape');
         }
-        const rectangles=await page.locator('[data-topic-rail]>li').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
+        const rectangles=await page.locator('[data-topic-directory]>article').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));
         for(let i=0;i<rectangles.length;i++)for(let j=i+1;j<rectangles.length;j++) {
           const a=rectangles[i],b=rectangles[j];assert.ok(a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top,'Navigation cards must not overlap');
         }
@@ -76,7 +76,7 @@ try {
   await fallback.route('**/css/glass.css*',route=>route.fulfill({contentType:'text/css',body:css+'\n* {backdrop-filter:none!important;-webkit-backdrop-filter:none!important}'}));
   await fallback.goto(origin);
   assert.equal(await fallback.locator('h1').isVisible(),true);
-  assert.equal(await fallback.locator('.signature-copy .actions>a').count(),2);
+  assert.equal(await fallback.locator('.signature-copy .actions>a').count(),4);
   await fallback.locator('.mobile-menu summary').click();
   assert.equal(await fallback.locator('.mobile-menu').getAttribute('open'),'');
   assert.equal(await fallback.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);

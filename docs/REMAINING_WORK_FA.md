@@ -108,3 +108,6 @@
 
 - نتیجهٔ نهایی ساعت۱۱:۵۰UTC: هر سه مطلب واقعاً روی دامنه منتشر و متن/تصویر تأییدشده تطبیق داده شد؛ وضعیت هر سه `published`، بدون خطا و پیام موفقیت هر سه در تلگرام ثبت شد.
 - پیوندها: [آسم](https://drgerami-md.ir/articles/pulmonology/asthma/health-20261120-pulm-asthma/)، [ازوتمی و کلیه](https://drgerami-md.ir/articles/nephrology/azotemia/health-20261121-nephro-azotemia/)، [اختلال بلع](https://drgerami-md.ir/articles/gastroenterology/dysphagia/health-20261122-gi-dysphagia/).
+
+### دیدگاه‌ها و پسندهای سایت
+مدیر در `/admin/#discussion` نظرها و پسندها را بررسی می‌کند. تأیید نظر، ایمیل همان حساب را در صف ارسال قرار می‌دهد. برای فعال‌کردن ارسال واقعی، دامنهٔ فرستنده را در Resend تأیید و در Edge Function Secrets پروژهٔ IntMed، کلید ارسال را در `GERAMI_RESEND_API_KEY` و ایمیل فرستنده را در `GERAMI_COMMENT_FROM` ذخیره کنید. صف هر پنج دقیقه بررسی می‌شود. وضعیت «پذیرفته‌شده توسط فرستنده» پاسخ سرویس ایمیل است. دریافت در صندوق ورودی را با یک دیدگاه واقعی از ایمیل خودتان بررسی کنید.

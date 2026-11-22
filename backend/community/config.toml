@@ -1,0 +1,3 @@
+[functions.gerami-discussion]
+# Public reads, verified user JWTs on writes and single-use database wake tickets.
+verify_jwt = false
