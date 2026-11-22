@@ -150,8 +150,8 @@
     },
     {
       "id": "nephrology",
-      "fa": "نفرولوژی - کلیه و فشار خون",
-      "en": "Nephrology · Kidneys & blood pressure",
+      "fa": "کلیه",
+      "en": "Nephrology",
       "icon": "kidney",
       "description_fa": "سلامت کلیه، فشار خون، آب و الکترولیت",
       "description_en": "Kidney health, Blood pressure, Fluids and electrolytes",
@@ -178,6 +178,15 @@
           "id": "electrolytes",
           "fa": "آب و الکترولیت",
           "en": "Fluids and electrolytes",
+          "icon": "kidney",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "azotemia",
+          "fa": "ازوتمی و اختلالات ادراری",
+          "en": "Azotemia and urinary abnormalities",
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
