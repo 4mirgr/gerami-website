@@ -50,7 +50,7 @@ export function validateDocument(path,data){
   }
   if(Array.isArray(data.sections))data.sections=data.sections.filter(s=>s.id!=='explore');
   must(Array.isArray(data.sections)&&data.sections.length===Object.keys(sections).length&&new Set(data.sections.map(s=>s.id)).size===Object.keys(sections).length&&data.sections.every(s=>Object.hasOwn(sections,s.id)&&typeof s.visible==='boolean'),'بخش‌های صفحهٔ اصلی معتبر نیستند.');
-  must(data.sections[0].id==='hero'&&data.sections[0].visible,'معرفی اصلی باید اولین بخش و قابل نمایش باشد.');
+  must(data.sections.some(s=>s.id==='hero'&&s.visible),'معرفی سایت باید قابل نمایش باشد.');
  }else if(path==='content/navigation.json'){
   let count=0;
   function list(items,depth){must(Array.isArray(items)&&depth<=3,'منو حداکثر سه سطح دارد.');for(const item of items){count++;must(count<=60,'حداکثر ۶۰ گزینه در منو مجاز است.');must(string(item.fa,120)&&item.fa.trim()&&string(item.en,120)&&item.en.trim(),'عنوان فارسی و انگلیسی منو لازم است.');must(safeLink(item.url),'آدرس منو باید مسیر سایت یا HTTPS معتبر باشد.');if(item.children?.length)list(item.children,depth+1);}}

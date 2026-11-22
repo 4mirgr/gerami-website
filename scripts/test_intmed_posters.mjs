@@ -17,5 +17,13 @@ try {
  await page.locator('[data-language-toggle]').click();await page.reload();assert.equal(await image.getAttribute('src'),images.en.path,'Stored English language selects the English poster');
  await page.evaluate(()=>document.documentElement.lang='fa');await page.waitForFunction(()=>document.querySelector('[data-intmed-poster]').getAttribute('src')===document.querySelector('[data-intmed-poster]').dataset.srcFa,{},{timeout:1500});
  const nojs=await browser.newPage({javaScriptEnabled:false,viewport:{width:390,height:844}});await nojs.goto('http://127.0.0.1:4173/');assert.equal(await nojs.locator('[data-intmed-poster]').getAttribute('src'),images.fa.path);
+ await page.goto('http://127.0.0.1:4173/pages/projects.html');
+ const project=page.locator('.project-feature#intmed');
+ assert.equal(await project.locator('[data-app-entry]').getAttribute('href'),'https://drgerami-md.ir/intmed/');
+ for(const language of ['fa','en']){
+  if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
+  const poster=project.locator('[data-intmed-poster]');await poster.scrollIntoViewIfNeeded();await poster.evaluate(img=>img.decode());
+  assert.equal(await poster.getAttribute('src'),images[language].path);
+ }
  console.log('PASS IntMed posters: one active language, localized alt, lazy delivery, full-frame responsive layout, persistence, real entry and no-JS Persian fallback.');
 }finally{await browser.close();}

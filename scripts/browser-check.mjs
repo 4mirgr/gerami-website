@@ -131,7 +131,7 @@ try {
   }
   assert.equal(await evaluate("document.querySelector('[data-destination=intmed]').pathname"),'/intmed/');
   assert.equal(await evaluate("document.querySelector('[data-destination=aus]').pathname"),'/aus/');
-  assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),true);
+  assert.equal(await evaluate("document.querySelector('#intmed [data-app-entry=intmed]').pathname"),'/intmed/');
   await navigate('pages/appointments.html');
   assert.equal(await evaluate("document.querySelector('[data-pending=appointment]').hidden"),false);
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:config.identifier});
@@ -139,13 +139,13 @@ try {
   const remoteConfig = await call('Page.addScriptToEvaluateOnNewDocument',{source:"addEventListener('DOMContentLoaded',()=>{window.SITE_LINKS={intmed:'https://external.example/intmed/',aus:'https://external.example/aus/'};const s=document.createElement('script');s.src='/js/main.js';document.head.append(s)},{once:true})"});
   await navigate('pages/projects.html');
   await evaluate("new Promise(resolve=>setTimeout(resolve,100))");
-  assert.equal(await evaluate("document.querySelector('[data-destination=intmed]')."+(combined?'pathname':'hash')),combined?'/intmed/':'#intmed');
+  assert.equal(await evaluate("document.querySelector('[data-destination=intmed]').href"),projectOrigin+'/intmed/');
   // AUS is deliberately absent from the public page. This synthetic link is
   // appended after its initial link pass, so an unsafe override must preserve
   // its original fragment rather than manufacture a public project entry.
   assert.equal(await evaluate("document.querySelector('[data-destination=aus]').hash"),'#aus');
   assert.equal(await evaluate("document.querySelector('[data-destination=aus]').host"),new URL(baseURL).host);
-  assert.equal(await evaluate("document.querySelector('[data-pending=intmed]').hidden"),false,'Unsafe configuration keeps its unavailable warning visible');
+
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:remoteConfig.identifier});
   await call('Page.removeScriptToEvaluateOnNewDocument',{identifier:fixture.identifier});
   // JavaScript disabled: content and native mobile menu still work.

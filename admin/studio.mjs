@@ -147,10 +147,10 @@ function appearanceEditor(){
   for(const [key,label] of [['logo','لوگوی سربرگ'],['wallpaper','تصویر کارت اصلی'],['background','تصویر پس‌زمینهٔ سایت (اختیاری)']])field(section,label,data[mode][key],value=>{data[mode][key]=value;change();},{help:'مسیر /assets/... را از کتابخانهٔ رسانه انتخاب کنید. پس‌زمینهٔ خالی یعنی رنگ زمینه.'});
   section.append(button('نمایش این حالت',()=>{previewTheme=mode;$('preview-theme').value=mode;sendPreview();}));
  }
- const section=group('بخش‌های صفحهٔ اصلی','نمایش و ترتیب بخش‌ها؛ معرفی اصلی همیشه ابتدای صفحه می‌ماند.');
+ const section=group('بخش‌های صفحهٔ اصلی','نمایش و ترتیب بخش‌ها را تنظیم کنید.');
  for(const [index,item] of data.sections.entries()){const row=node('div',undefined,'section-row');field(row,sections[item.id],item.visible,value=>{item.visible=value;change();},{type:'checkbox'}).disabled=item.id==='hero';
-  if(index>1)row.append(button('بالا',()=>{[data.sections[index-1],data.sections[index]]=[item,data.sections[index-1]];change();render();}));
-  if(index>0&&index<data.sections.length-1)row.append(button('پایین',()=>{[data.sections[index+1],data.sections[index]]=[item,data.sections[index+1]];change();render();}));section.append(row);
+  if(index>0)row.append(button('بالا',()=>{[data.sections[index-1],data.sections[index]]=[item,data.sections[index-1]];change();render();}));
+  if(index<data.sections.length-1)row.append(button('پایین',()=>{[data.sections[index+1],data.sections[index]]=[item,data.sections[index+1]];change();render();}));section.append(row);
  }
 }
 function menuEditor(){

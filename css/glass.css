@@ -42,7 +42,7 @@ a,button,summary { touch-action:manipulation; }
 .signature-copy { position:relative; width:min(810px,100%); text-align:center; background:var(--white); padding:48px 52px; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--glass-shadow); }
 .signature-copy .eyebrow { justify-content:center; margin-bottom:18px; }
 .hero-introduction { color:var(--muted); font-size:1.05rem; margin-bottom:16px; }
-.signature-copy h1 { font-size:clamp(2.1rem,4.3vw,4rem); line-height:1.55; font-weight:750; }
+.signature-copy #hero-title { font-size:clamp(2.1rem,4.3vw,4rem); line-height:1.55; font-weight:750; }
 .hero-emphasis { color:var(--teal); }
 .signature-description { color:var(--muted); font-size:.96rem; max-width:58ch; margin:22px auto 0; }
 .signature-copy .actions { justify-content:center; margin-top:28px; gap:12px; }
@@ -90,7 +90,7 @@ a,button,summary { touch-action:manipulation; }
   .brand-identity .brand-logo { width:36px; height:38px; }
   .signature-hero { padding-block:34px 42px; background-position:44% center; }
   .signature-copy { padding:32px 22px; }
-  .signature-copy h1 { font-size:clamp(1.85rem,6.8vw,2.7rem); }
+  .signature-copy #hero-title { font-size:clamp(1.85rem,6.8vw,2.7rem); }
   .signature-copy .eyebrow { font-size:.65rem; }
   .signature-description { font-size:.9rem; }
   .section { padding-block:40px; }
@@ -132,7 +132,7 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:n
 .reading-hero { background:transparent; border:0; min-height:0; padding:42px 0 24px; }
 .reading-hero .hero-art { opacity:.25; object-position:center; border-radius:32px; }
 .signature-copy { width:min(900px,100%); padding:36px 44px; }
-.signature-copy h1 { font-size:clamp(2rem,3.7vw,3.4rem); }
+.signature-copy #hero-title { font-size:clamp(2rem,3.7vw,3.4rem); }
 .signature-description { max-width:61ch; margin-top:14px; }
 .hero-introduction { font-size:.9rem; }
 .signature-copy .actions { margin-top:18px; }
@@ -206,7 +206,7 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:n
  .language-button,.theme-button { width:44px; min-width:44px; }
  .reading-hero { padding-top:24px; }
  .signature-copy { padding:30px 22px; }
- .signature-copy h1 { font-size:clamp(1.85rem,6.6vw,2.6rem); }
+ .signature-copy #hero-title { font-size:clamp(1.85rem,6.6vw,2.6rem); }
 
  .topic-section .section-heading { display:flex; align-items:center; gap:12px; }
  .topic-section h2 { font-size:1.35rem; }
@@ -366,12 +366,17 @@ body::before { background:var(--glass-art) center/cover no-repeat; background-co
 @media(forced-colors:active) {.toolbar-selection {background:Highlight;opacity:.2!important}.toolbar-search,.site-header .mobile-menu>nav.toolbar-ready {background:Canvas!important;border:1px solid CanvasText}.toolbar-icon {opacity:1}.desktop-nav a[aria-current] {outline:1px solid Highlight}}
 
 /* Full-width section dividers: folded glass rather than content cards. */
-.section-heading {position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;width:100%;box-sizing:border-box;padding:42px 28px 24px;margin-top:18px}
-.section-heading::before {content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:22px;background:linear-gradient(135deg,#ffffffc0,#ffffff30 65%);clip-path:polygon(0 22px,62% 22px,64% 19px,67% 2px,69% 0,100% 0,100% 100%,0 100%);box-shadow:inset 0 -1px 0 #fff9,inset 0 1px 0 #fff9;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-[dir=ltr] .section-heading::before {transform:scaleX(-1)}
-.section-heading::after {content:'';position:absolute;inset:27px 12px 8px;z-index:-1;border-top:1px solid #ffffffa8;border-radius:16px;pointer-events:none;background:linear-gradient(#ffffff24,transparent 70%)}
+.section-heading {--folder-edge:#746652;position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;width:100%;box-sizing:border-box;padding:42px 28px 24px;margin-top:18px}
+.section-heading::before {content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;border:2px solid var(--folder-edge);border-top:0;border-radius:22px;background:linear-gradient(135deg,#ffffffc0,#ffffff30 65%);clip-path:polygon(0 23px,58% 23px,60% 20px,63% 3px,65% 0,100% 0,100% 100%,0 100%);box-shadow:inset 0 -1px 0 #fff9,inset 0 1px 0 #fff9;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+[dir=ltr] .section-heading::before,[dir=ltr] .section-heading::after {transform:scaleX(-1)}
+.section-heading::after {
+ content:''; position:absolute; inset:0; pointer-events:none; border-radius:22px;
+ --folder-top:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 36' preserveAspectRatio='none'%3E%3Cpath d='M1 36V29Q1 23 8 23H348Q356 23 362 17L376 5Q381 1 390 1H586Q599 1 599 14V36M5 29H347Q358 29 366 22' fill='none' stroke='white' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+ background:var(--folder-edge); -webkit-mask:var(--folder-top) center top/100% 36px no-repeat; mask:var(--folder-top) center top/100% 36px no-repeat;
+}
+[data-theme=dark] .section-heading { --folder-edge:#d4c2a4; }
 .section-heading>div {min-width:0;width:100%;padding:0;background:none;border:0;border-radius:0;box-shadow:none;outline:0;backdrop-filter:none;-webkit-backdrop-filter:none}
-.section-heading h2 {margin:0}.section-heading>.button {justify-self:end;white-space:nowrap}.section-heading>p {grid-column:1/-1;margin:0;max-width:none}
+.section-heading :is(h1,h2) {margin:0;font-size:clamp(1.5rem,2.6vw,2.4rem)}.section-heading>.button {justify-self:end;white-space:nowrap}.section-heading>p {grid-column:1/-1;margin:0;max-width:none}
 [data-theme=dark] .section-heading::before {background:linear-gradient(135deg,#414151a0,#29293630);box-shadow:inset 0 -1px 0 #ffffff70,inset 0 1px 0 #ffffff70}
 @media(max-width:760px) {.section-heading,.topic-section .section-heading {display:grid;grid-template-columns:1fr;padding:38px 18px 20px;gap:12px}.section-heading>.button {justify-self:start;margin:0}.section-heading>p {max-width:none}}
 @media(forced-colors:active) {.section-heading::before {background:Canvas;border:1px solid CanvasText;clip-path:none}.section-heading::after {display:none}}
