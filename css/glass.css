@@ -403,7 +403,7 @@ body::before { background:var(--glass-art) center/cover no-repeat; background-co
 .care-features { display:grid; gap:24px; }
 .feature-panel { display:grid; grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr); align-items:center; gap:clamp(24px,4vw,56px); padding:clamp(20px,4vw,48px); }
 .feature-copy { min-width:0; }
-.feature-copy h2 { font-size:clamp(1.55rem,3vw,2.6rem); line-height:1.5; }
+.feature-copy :is(h1,h2) { font-size:clamp(1.55rem,3vw,2.6rem); line-height:1.5; }
 .feature-copy p:not(.eyebrow) { margin-block-start:12px; max-width:68ch; }
 .feature-copy .actions { flex-wrap:wrap; gap:10px; margin-block-start:20px; }
 .feature-portrait { border-radius:50% 50% 14px 14px; background:linear-gradient(145deg,#eddcc5,#958c80); overflow:hidden; width:min(100%,245px); justify-self:center; }

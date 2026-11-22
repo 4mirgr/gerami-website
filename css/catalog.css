@@ -12,7 +12,7 @@
 .atlas-heading nav { display:flex; align-items:center; flex-wrap:wrap; gap:5px 12px; font-size:.84rem; }
 .atlas-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; align-items:start; }
 .atlas-category { display:flex; align-items:center; gap:15px; }
-.atlas-category img,.atlas-heading img { width:64px; height:64px; flex:none; border-radius:50%; }
+.atlas-category img { width:64px; height:64px; flex:none; border-radius:50%; }
 .atlas-card h2,.atlas-listing h2 { font-size:clamp(1.1rem,2vw,1.45rem); }
 .atlas-card h2 a { color:inherit; text-decoration:none; }
 .atlas-card h2 a:hover { text-decoration:underline; }
@@ -27,7 +27,7 @@
  .project-feature,.atlas-grid { grid-template-columns:1fr; }
  .catalog-banner { gap:12px; }
  .section-emblem { width:70px; }
- .atlas-category img,.atlas-heading img { width:52px; height:52px; }
+ .atlas-category img { width:52px; height:52px; }
 }
 
 .contact-channel { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:clamp(14px,3vw,32px); align-items:center; color:var(--ink); text-decoration:none; }
