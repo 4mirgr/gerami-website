@@ -21,10 +21,10 @@ select cron.schedule('gerami-editorial-daily','*/5 * * * *',
   'select public.gerami_editorial_tick()');
 ```
 
-Unique daily rows and row locks prevent duplicate generation. Default09:00 Tehran,
+Unique rows per Tehran date and audience prevent duplicate generation. Default 09:00 Tehran,
 configurable/disableable in private admin. `tick(true)` is an explicit manual run,
 not a way to ignore disabled automatic scheduling. Maximum three automatic attempts
-per day; provider quota errors are visible and do not activate another paid model.
+per edition per day; provider quota errors are visible and do not activate another paid model.
 Notifications get at most three automatic attempts per saved revision; explicit
 admin resend invalidates previous buttons. Status/errors are safe codes, not raw
 provider responses. The exact main workflow also polls on its own installation/change to verify OIDC; this bootstrap does not prove scheduled execution. GitHub schedule is best effort, so approval does not promise
@@ -64,3 +64,18 @@ verified old owner JPEG/WebP uploads. Notification attempts have their own nonce
 retirement cannot invalidate a later attempt. Only selected image/current owner/photo/
 revision can approve. Publication success requires actual canonical HTML+snapshot and
 selected image bytes on the public domain. See the native spec/plan and SEO roadmap.
+
+## Daily public and clinician editions
+
+Deploy the complete gerami-editorial bundle, including clinical.mjs, then apply
+daily-audiences.sql after cover-choice.sql. Keep the existing five-minute cron.
+At the configured Tehran hour the scheduler enqueues one patients job and one
+professional job. It dispatches them individually. Legacy rows default to patients.
+A manual tick fills a missing edition for today and preserves existing approvals.
+
+The public edition uses the plain-language editor. The professional edition takes
+a whole published IntMed lesson section or three complete consecutive flashcards.
+It records the manifest hash, build, Git pin and source item IDs. If a text cannot
+fit, the selector tries another complete unit. It uses the same two-cover review
+and topic taxonomy. Sources and daily rotation are scoped to the selected audience.
+Each edition needs its own Telegram image choice and final approval.

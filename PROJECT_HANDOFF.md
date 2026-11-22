@@ -4,6 +4,10 @@ Updated 2026-11-22 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Two daily Telegram editions · 2026-11-22
+
+The existing private editorial queue produces one patient and one physician draft per Tehran date. Physician text is taken verbatim from the verified, published IntMed bundle. The private source record identifies the section or flashcards. Both audiences use the two topic-specific images, Telegram edits, a revision-bound owner approval, and the existing publisher. A repeat run fills only a missing edition. The dashboard shows audience on the job and draft, and the website audience filter reads the approved edition. Deployment order and the scheduler contract are in backend/editorial/README.md.
+
 ## Contact page · 2026-11-22
 
 The contact banner uses the emerald conversation emblem modeled on the projects badge. The LinkedIn and Apple Mail illustrations are local assets. The LinkedIn brand shape comes from the [LinkedIn icon](https://github.com/gilbarbara/logos/blob/main/logos/linkedin-icon.svg). The [Apple Mail artwork](https://github.com/raycast/extensions/blob/4de3eeb7b89719e955098595ada42c7e1e1fe317/extensions/mail/assets/mail.png) is the blue envelope. The entire card is a native link, including its image. Public email and LinkedIn targets come from Studio’s contact profile in `content/site.json`, both at build time and in the live preview. Keep the visit-information link below the two cards. The owner removed the messaging notice and duplicate contact list from this page.

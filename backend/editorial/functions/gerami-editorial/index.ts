@@ -1,4 +1,5 @@
 import {SITE,PROJECT,PROMPT,sha,stable,validateCopy,publicStyleIssues,sourceText,validImage,publicArticle,verifyOIDC,snapshotHash} from './core.mjs';
+import {clinicalEdition} from './clinical.mjs';
 import {createTelegramEditorial} from './telegram.mjs';
 import {createEditorialMedia} from './media.mjs';
 import {sourceTopic,sourceCategories} from './catalog.mjs';
@@ -42,7 +43,6 @@ const media=createEditorialMedia({db,rpc,storage,remote,snapshot});
 const controls=createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,storage,remote,snapshot,media,githubToken:()=>Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')||'',background:p=>EdgeRuntime.waitUntil(p.catch(()=>{}))});
 const notify=(d,options={})=>controls.notify(d,options);
 const trends=createTrendSelector({db,remote});
-const mapping={cardio:['cardiology','heart'],pulm:['pulmonology','lungs'],nephro:['nephrology','kidneys'],gi:['gastroenterology','digestive'],endo:['endocrinology','pancreas'],heme:['hematology','blood-cells'],rheum:['rheumatology','joint'],id:['infectious-diseases','infection'],general:['internal-medicine','stethoscope']};
 async function generate(job){
  const pins=await(await remote('https://raw.githubusercontent.com/4mirgr/gerami-website/main/deploy/projects.json')).json();
  const pin=pins.intmed;
@@ -56,10 +56,39 @@ async function generate(job){
  const live=await(await remote(SITE+'/intmed/content/manifest.json')).json();if(live.buildId!==manifest.buildId)throw Error('source_changed');
  const eligible=[];
  for(const category of taxonomy.categories||[]){if(!sourceCategories.includes(category.id)||!settings[0].categories.includes(category.id))continue;for(const topic of category.topics||[]){const m=manifest.topics[topic.id];if(m&&(m.counts.lesson>=1||m.counts.flashcards>=4)){const destination=sourceTopic(topic.id);if(destination.source_category!==category.id)throw Error('source_changed');eligible.push({id:topic.id,label:topic.label,category,topic,m});}}}
- const ranked=await trends.ranked(eligible,previous,job.day),choice=ranked[0];if(!choice)throw Error('no_topic');const {category,topic,m}=choice;
- const bytes=new Uint8Array(await(await remote(SITE+'/intmed/'+m.path)).arrayBuffer());if(bytes.length!==m.bytes||await sha(bytes)!==m.sha256)throw Error('source_changed');
- const topicData=JSON.parse(new TextDecoder().decode(bytes)),input=sourceText(topicData);
- const canonical=await(await remote(base+'content/'+category.id+'/'+topic.id+'/data.json')).json();
+ const audience=job.audience??'patients';
+ if(!['patients','professional'].includes(audience))throw Error('invalid_audience');
+ const history=previous.filter(row=>(row.source?.audience??'patients')===audience);
+ const ranked=await trends.ranked(eligible,history,job.day);
+ if(!ranked.length)throw Error('no_topic');
+ const library=await db('gerami_editorial_cover_library?active=eq.true&select=source_topic,ordinal');
+ const ready=new Map();
+ for(const row of library){if(!ready.has(row.source_topic))ready.set(row.source_topic,new Set());ready.get(row.source_topic).add(row.ordinal);}
+ // Try the top-ranked new topic; if discovery is unavailable, use a known illustrated topic.
+ const order=[...new Set([ranked[0],...ranked.filter(item=>ready.get(item.id)?.size===2),...ranked.slice(1,3)])];
+ let hasSource=false;
+ for(const choice of order){
+  const {category,topic,m}=choice,destination=sourceTopic(topic.id);
+  const bytes=new Uint8Array(await(await remote(SITE+'/intmed/'+m.path)).arrayBuffer());
+  if(bytes.length!==m.bytes||await sha(bytes)!==m.sha256)throw Error('source_changed');
+  const topicData=JSON.parse(new TextDecoder().decode(bytes));
+  const clinical=audience==='professional'?clinicalEdition(topicData,destination,history):null;
+  if(audience==='professional'&&!clinical)continue;
+  let input;
+  if(audience==='patients'){try{input=sourceText(topicData);}catch(e){if(e.message==='insufficient_source')continue;throw e;}}
+  hasSource=true;
+  if(ready.get(topic.id)?.size!==2){try{await media.discover(topic.id);}catch{continue;}}
+  const canonical=await(await remote(base+'content/'+category.id+'/'+topic.id+'/data.json')).json();
+  const generated=clinical?{copy:clinical.copy,model:'intmed-verbatim'}:await patientEdition(topic,canonical,input,history);
+  const path=destination.root.fa+' / '+destination.child.fa;
+  const d={job_id:job.id,slug:(clinical?'clinical-':'health-')+job.day.replaceAll('-','')+'-'+topic.id,content:generated.copy,category:path,topic:destination.child.id,image:'',cover_required:true,cover_selected:false,
+   source:{audience,reference:'Harrison 2025',taxonomy:{source_id:topic.id,root:destination.root.id,child:destination.child.id,path_fa:path},commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'تطبیق ارجاع با مرجع در بازبینی پزشک انجام می‌شود.',sources:canonical.sources||[],model:generated.model,indirect:true,selection:{reason:choice.reason,signal_count:choice.signal_count,cooldown:choice.cooldown},...(clinical?{excerpt:clinical.excerpt}:{})}};
+  d.snapshot_hash=await snapshot(d);
+  return (await db('gerami_editorial_drafts',d))[0];
+ }
+ throw Error(hasSource?'image_options_pending':'insufficient_source');
+}
+async function patientEdition(topic,canonical,input,previous){
  const apiKey=Deno.env.get('GEMINI_API_KEY');if(!apiKey)throw Error('provider_unavailable');
  const model=Deno.env.get('INTMED_GEMINI_MODEL')||'gemini-3.1-flash-lite';if(!/^[a-z0-9.-]{1,80}$/.test(model))throw Error('provider_unavailable');
  const modelCopy=async material=>{
@@ -70,9 +99,7 @@ async function generate(job){
  const angles=['تعریف و نشانه‌های قابل فهم برای بیمار','مراقبت روزانه و زمان مراجعه به پزشک','پرسش‌ها و نگرانی‌های رایج بیمار'];const material={topic:topic.label,editorialAngle:angles[previous.filter(p=>p.source?.topic_id===topic.id).length%angles.length]+'؛ فقط در محدودهٔ اطلاعات منبع بنویس.',sourceNote:canonical.sourceNote||'',publishedMaterial:input};
  let copy=await modelCopy(material),issues=publicStyleIssues(copy);
  if(issues.length){copy=await modelCopy({...material,editorialTask:'این پیش‌نویس هنوز برای عموم زیادی تخصصی است. آن را با جمله‌های کوتاه، واژه‌های آشنا و مراقبت‌های عملیِ عمومی بازنویسی کن؛ هیچ اطلاعات تازه‌ای نساز.',issues,previousDraft:copy});if(publicStyleIssues(copy).length)throw Error('copy_style_review_required');}
- const destination=sourceTopic(topic.id);
- const d={job_id:job.id,slug:'health-'+job.day.replaceAll('-','')+'-'+topic.id,content:copy,category:destination.root.fa+' / '+destination.child.fa,topic:destination.child.id,image:'',cover_required:true,cover_selected:false,source:{reference:'Harrison 2025',taxonomy:{source_id:topic.id,root:destination.root.id,child:destination.child.id,path_fa:destination.root.fa+' / '+destination.child.fa},commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'ارجاع مستقیم در فرادادهٔ این مبحث ثبت نشده است؛ تطبیق با مرجع پیش از تأیید بر عهدهٔ پزشک است.',sources:canonical.sources||[],model,indirect:true,selection:{reason:choice.reason,signal_count:choice.signal_count,cooldown:choice.cooldown}}};
- d.snapshot_hash=await snapshot(d);const rows=await db('gerami_editorial_drafts',d);return rows[0];
+ return {copy,model};
 }
 async function reconcile(){
  const rows=await db('gerami_editorial_drafts?or=(status.in.(verifying,publishing,publish_error),and(status.eq.published,published_notified.eq.false))&select=*');if(!rows.length)return;
@@ -143,7 +170,7 @@ Deno.serve(async req=>{
   const actor=await admin(req);
   if(action==='list'){
    const offset=Number.isInteger(body.offset)&&body.offset>=0&&body.offset<=100000?body.offset:0;
-   const [drafts,jobs,settings,trendStatus]=await Promise.all([db('gerami_editorial_drafts?select=id,slug,status,revision,content,category,topic,image,media_path,source,cover_required,cover_selected,selected_cover_id,cover_sha256,cover_pack,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at&order=created_at.desc,id.desc&limit=25&offset='+offset),db('gerami_editorial_jobs?select=id,day,status,attempts,error_code,updated_at&order=day.desc&limit=10'),db('gerami_editorial_settings'),db('gerami_editorial_trend_snapshots?select=day,source,region,observed_at,error_code&order=day.desc&limit=6')]);
+   const [drafts,jobs,settings,trendStatus]=await Promise.all([db('gerami_editorial_drafts?select=id,slug,status,revision,content,category,topic,image,media_path,source,cover_required,cover_selected,selected_cover_id,cover_sha256,cover_pack,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at&order=created_at.desc,id.desc&limit=25&offset='+offset),db('gerami_editorial_jobs?select=id,day,audience,status,attempts,error_code,updated_at&order=day.desc&limit=10'),db('gerami_editorial_settings'),db('gerami_editorial_trend_snapshots?select=day,source,region,observed_at,error_code&order=day.desc&limit=6')]);
    for(const d of drafts){d.preview=d.cover_required&&!d.cover_selected&&!d.media_path?null:await preview(d);d.options=[];if(d.cover_pack)for(const o of await media.options(d))d.options.push({id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview({...d,image:o.image,media_path:o.media_path})});}return reply({drafts,jobs,settings:settings[0],trendStatus,next:drafts.length===25});
   }
   if(action==='settings'){

@@ -2,6 +2,7 @@ import {SITE,PROJECT,sha,validateCopy,validImage,publicArticle} from './core.mjs
 const marker='✏️ ویرایش پست سایت';
 const uuid=v=>typeof v==='string'&&/^[a-f0-9-]{36}$/.test(v);
 const stateLabels={draft:'منتظر بازبینی',approved:'تأیید شما ثبت شده؛ در صف انتشار',publishing:'در حال بررسی و ثبت نسخه',verifying:'در انتظار تأیید نسخهٔ زنده',published:'منتشرشده',publish_error:'انتشار کامل نشده؛ نسخهٔ تأییدشده محفوظ است',rejected:'کنار گذاشته‌شده'};
+const readership=d=>d.source?.audience==='professional'?'ویژه پزشکان':'برای عموم';
 export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,storage,remote,snapshot,githubToken,background,media,fetcher=fetch}){
  const say=async(text,reply_markup)=>telegram('sendMessage',{chat_id:await chat(),text,...(reply_markup?{reply_markup}:{}),link_preview_options:{is_disabled:true}});
  const current=async id=>(await db('gerami_editorial_drafts?id=eq.'+id+'&select=*'))[0];
@@ -34,11 +35,11 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   const capability=crypto.randomUUID().replaceAll('-',''),hash=await sha(capability),target=await chat();
   await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:hash});
   const form=new FormData();form.append('chat_id',target);form.append('photo',new Blob([selected.bytes],{type:selected.mime}),'cover.'+(selected.mime==='image/jpeg'?'jpg':'webp'));
-  form.append('caption','📝 پیش‌نویس سایت · نسخهٔ '+d.revision+'\n'+d.content.title+'\n\n'+d.content.summary+'\n\nمتن کامل در پاسخ همین تصویر آمده است. انتشار فقط با تأیید شماست.');
+  form.append('caption','📝 پیش‌نویس سایت · '+readership(d)+' · نسخه '+d.revision+'\n'+d.content.title+'\n\n'+d.content.summary+'\n\nمتن کامل در پاسخ همین تصویر آمده است. انتشار فقط با تأیید شماست.');
   const photo=await telegram('sendPhoto',form);
   const text=d.content.title+'\n\n'+d.content.paragraphs.join('\n\n')+'\n\n'+d.content.hashtags.join(' ')+'\n\nدسته: '+d.category+'\nمنبع: Harrison 2025';
   const parts=[];let remaining=text;while(remaining.length>3600){const at=remaining.lastIndexOf('\n',3600),cut=at>1200?at:3600;parts.push(remaining.slice(0,cut));remaining=remaining.slice(cut);}parts.push(remaining);
-  const messages=[];for(const part of parts){const sent=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل پست سایت\n'+part,reply_parameters:{message_id:photo.message_id},link_preview_options:{is_disabled:true}});messages.push(sent.message_id);}
+  const messages=[];for(const part of parts){const sent=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل · '+readership(d)+'\n'+part,reply_parameters:{message_id:photo.message_id},link_preview_options:{is_disabled:true}});messages.push(sent.message_id);}
   await rpc('register_preview',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_hash:hash,p_photo:photo.message_id,p_text:messages,p_photo_hash:selected.hash});
   const keyboard={inline_keyboard:[[{text:'✅ انتشار همین نسخه',callback_data:'webpost:a:'+capability}],[{text:'✏️ ویرایش متن',callback_data:'webpost:e:'+capability},{text:'ویرایش عنوان',callback_data:'webpost:t:'+capability}],[{text:'🖼 تغییر تصویر',callback_data:'webpost:c:'+capability},{text:'کنار گذاشتن',callback_data:'webpost:r:'+capability}],[{text:'مدیریت سایت',url:SITE+'/admin/#auto-posts'}]]};
   try{await telegram('editMessageReplyMarkup',{chat_id:target,message_id:photo.message_id,reply_markup:keyboard});}catch(e){await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision+'&approval_hash=eq.'+hash,{notified_revision:null},'PATCH');throw e;}
@@ -51,11 +52,11 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   const attempt=(variants.find(v=>v.selected)||variants[0]).hash;await retire(d);await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:attempt});
   const target=await chat();for(let i=0;i<variants.length;i++){
    const v=variants[i],form=new FormData();form.append('chat_id',target);form.append('photo',new Blob([v.loaded.bytes],{type:v.loaded.mime}),'cover.'+(v.loaded.mime==='image/webp'?'webp':'jpg'));
-   form.append('caption','📝 پیش‌نویس سایت · نسخهٔ '+d.revision+'\nگزینهٔ '+(i+1)+(v.selected?' · ✅ تصویر انتخاب‌شده':'')+'\n'+v.o.label+'\n\n'+d.content.title+'\n'+d.content.summary+'\n\n'+d.category+'\nمنبع: Harrison 2025');
+   form.append('caption','📝 پیش‌نویس سایت · '+readership(d)+' · نسخه '+d.revision+'\nگزینهٔ '+(i+1)+(v.selected?' · ✅ تصویر انتخاب‌شده':'')+'\n'+v.o.label+'\n\n'+d.content.title+'\n'+d.content.summary+'\n\n'+d.category+'\nمنبع: Harrison 2025');
    v.photo=await telegram('sendPhoto',form);
   }
   const text=d.content.title+'\n\n'+d.content.paragraphs.join('\n\n')+'\n\n'+d.content.hashtags.join(' ')+'\n\nمسیر موضوع: '+d.category+'\nمنبع: Harrison 2025\nیکی از دو تصویر را انتخاب کنید؛ انتشار فقط با تأیید نسخهٔ انتخاب‌شده انجام می‌شود.';
-  const messages=[];for(let offset=0;offset<text.length;offset+=3500){const m=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل پست سایت\n'+text.slice(offset,offset+3500),reply_parameters:{message_id:variants[0].photo.message_id},link_preview_options:{is_disabled:true}});messages.push(m.message_id);}
+  const messages=[];for(let offset=0;offset<text.length;offset+=3500){const m=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل · '+readership(d)+'\n'+text.slice(offset,offset+3500),reply_parameters:{message_id:variants[0].photo.message_id},link_preview_options:{is_disabled:true}});messages.push(m.message_id);}
   try{await rpc('register_choices',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_entries:variants.map(v=>({message_id:v.photo.message_id,hash:v.hash,candidate_id:v.o.id,photo_hash:v.loaded.hash})),p_text:messages,p_attempt:attempt});
   for(const v of variants){const rows=[];
    if(v.selected)rows.push([{text:'✅ انتشار با همین تصویر و متن',callback_data:'webpost:a:'+v.capability}]);

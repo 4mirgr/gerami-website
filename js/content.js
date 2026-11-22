@@ -84,7 +84,7 @@ function renderArticles(){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
   if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
-  const meta=el('p',[topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
+  const meta=el('p',[item.audience==='professional'?text('ویژه پزشکان','For clinicians'):'',topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
   for(const [label,date] of [['',item.published_at],[text('بازبینی: ','Reviewed: '),item.reviewed_at]]){
    if(!date)continue;
    const time=el('time',date);time.dateTime=date;time.dir='ltr';
