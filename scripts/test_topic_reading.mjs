@@ -3,7 +3,7 @@ import {chromium} from 'playwright';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 const records=Array.from({length:27},(_,i)=>({slug:'lesson-'+(i+1),status:'published',audience:i%3===0?'professional':'patients',topic:i%2===0?'heart-failure':'diabetes',category:'Legacy',title_fa:'درس '+(i+1),title_en:'Lesson '+(i+1),body_fa:'متن آموزشی lesson-'+(i+1)+'\n\nپاراگراف دوم',body_en:'Education lesson-'+(i+1),author:'Synthetic',published_at:'2026-11-17',reviewed_at:'',sources:[]}));
 records[9].author='گروه آموزش بیماری‌های داخلی و پیگیری درمان بیمارستان';
-records[9].title_fa='یک عنوان طولانی برای بررسی هم‌ترازی کارت‌ها و پیوندهای مطالعه در صفحهٔ اصلی';
+records[9].title_fa='یک عنوان طولانی برای بررسی هم‌ترازی کارت‌ها و پیوندهای مطالعه در صفحه اصلی';
 records[9].image='/assets/optimized/heart.012d14fb0e841a4f.webp';
 async function checkRow(page) {
  const boxes=await page.locator('#recent-posts .post-card').evaluateAll(cards=>cards.slice(0,3).map(card=>{

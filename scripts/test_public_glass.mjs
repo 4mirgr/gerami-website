@@ -17,6 +17,7 @@ try {
       if(await page.locator('html').getAttribute('data-theme')!==theme)await page.locator('[data-theme-toggle]').click();
       for(const language of ['fa','en']) {
         if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
+        await page.locator('.signature-copy').scrollIntoViewIfNeeded();
         await page.waitForFunction(()=>{const img=document.querySelector('.hero-art');return img.complete&&img.naturalWidth>0;});
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}/${theme}/${language}`);
         assert.equal(await page.locator('.brand-identity img').count(),1);

@@ -1,0 +1,31 @@
+.catalog-banner { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:24px; }
+.section-emblem { display:block; width:clamp(76px,12vw,144px); height:auto; border-radius:50%; }
+.project-feature { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.85fr); gap:clamp(24px,5vw,64px); align-items:center; padding:clamp(20px,4vw,48px); }
+.project-feature-copy h2 { font-size:clamp(2.2rem,5vw,4rem); text-align:start; direction:inherit; }
+.project-feature-copy p:not(.eyebrow) { margin-block:14px; line-height:2; max-width:61ch; }
+.project-feature-copy .button { margin-block-start:16px; min-height:48px; }
+.project-feature .intmed-poster { display:block; width:100%; overflow:hidden; border-radius:16px; }
+.topic-atlas { padding-block:clamp(24px,4vw,50px); }
+.atlas-heading,.atlas-card,.atlas-listing { padding:clamp(18px,3vw,34px); }
+.atlas-heading { margin-block-end:24px; }
+.atlas-heading h1 { font-size:clamp(1.6rem,3.5vw,2.75rem); margin-block:12px; }
+.atlas-heading nav { display:flex; align-items:center; flex-wrap:wrap; gap:5px 12px; font-size:.84rem; }
+.atlas-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; align-items:start; }
+.atlas-category { display:flex; align-items:center; gap:15px; }
+.atlas-category img,.atlas-heading img { width:64px; height:64px; flex:none; border-radius:50%; }
+.atlas-card h2,.atlas-listing h2 { font-size:clamp(1.1rem,2vw,1.45rem); }
+.atlas-card h2 a { color:inherit; text-decoration:none; }
+.atlas-card h2 a:hover { text-decoration:underline; }
+.atlas-card details { border-block-start:1px solid var(--line); margin-block-start:16px; }
+.atlas-card summary { cursor:pointer; padding-block:10px; min-height:44px; color:var(--teal); }
+.atlas-listing { margin-block:18px; }
+.atlas-links { list-style:none; margin:0; padding:0; }
+.atlas-links li+li { border-block-start:1px solid var(--line); }
+.atlas-links a { display:block; padding:9px 6px; min-height:44px; line-height:1.7; color:inherit; text-decoration:none; overflow-wrap:anywhere; }
+.atlas-links a:hover,.atlas-links a:focus-visible { background:var(--wash); text-decoration:underline; }
+@media(max-width:700px) {
+ .project-feature,.atlas-grid { grid-template-columns:1fr; }
+ .catalog-banner { gap:12px; }
+ .section-emblem { width:70px; }
+ .atlas-category img,.atlas-heading img { width:52px; height:52px; }
+}

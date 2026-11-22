@@ -21,7 +21,7 @@ export function validateTopics(data){
  if(!Array.isArray(data?.topics))throw Error('فهرست موضوعات معتبر نیست.');
  const seen=new Set();let count=0;
  function walk(nodes,depth){if(!Array.isArray(nodes)||depth>2)throw Error('موضوعات حداکثر دو سطح دارند.');for(const t of nodes){
-  if(++count>250||!t||typeof t.id!=='string'||t.id.length>80||! /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(t.id)||seen.has(t.id))throw Error('شناسهٔ موضوع نامعتبر یا تکراری است.');seen.add(t.id);
+  if(++count>250||!t||typeof t.id!=='string'||t.id.length>80||! /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(t.id)||seen.has(t.id))throw Error('شناسه موضوع نامعتبر یا تکراری است.');seen.add(t.id);
   for(const key of ['fa','en'])if(typeof t[key]!=='string'||!t[key].trim()||t[key].length>100)throw Error('عنوان فارسی و انگلیسی موضوع لازم است.');
   for(const key of ['description_fa','description_en'])if(typeof t[key]!=='string'||t[key].length>300)throw Error('شرح موضوع معتبر نیست.');
   if(!Object.hasOwn(topicIcons,t.icon))throw Error('آیکون موضوع معتبر نیست.');

@@ -7,8 +7,10 @@ try {
  const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'dark'});
  await page.goto('http://127.0.0.1:4173/');
  assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
- assert.equal(await page.locator('.signature-copy h1').isVisible(),true);
- assert.equal(await page.locator('.hero-art').evaluate(img=>img.complete&&img.naturalWidth>0),true);
+ assert.equal(await page.locator('#hero-title').isVisible(),true);
+ await page.locator('#hero-title').scrollIntoViewIfNeeded();
+ await page.locator('.hero-art').evaluate(img=>img.decode());
+ await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:'/tmp/gerami-night.png',fullPage:true});
  await page.locator('[data-theme-toggle]').click();
  assert.equal(await page.locator('html').getAttribute('data-theme'),'light');
@@ -18,7 +20,7 @@ try {
  await page.locator('[data-theme-toggle]').click();
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.screenshot({path:'/tmp/gerami-night-mobile.png',fullPage:true});
- const article={slug:'first-article',status:'published',audience:'patients',category:'General',title_fa:'مقالهٔ آزمایشی',title_en:'Test article',body_fa:'<img src=x onerror=alert(1)>',body_en:'Education',author:'Test author',published_at:'2026-11-11',reviewed_at:'2026-11-11',sources:[{title:'Unsafe',url:'javascript:alert(1)'},{title:'Safe',url:'https://example.org'}]};
+ const article={slug:'first-article',status:'published',audience:'patients',category:'General',title_fa:'مقاله آزمایشی',title_en:'Test article',body_fa:'<img src=x onerror=alert(1)>',body_en:'Education',author:'Test author',published_at:'2026-11-11',reviewed_at:'2026-11-11',sources:[{title:'Unsafe',url:'javascript:alert(1)'},{title:'Safe',url:'https://example.org'}]};
  await page.route('**/content/articles.json',route=>route.fulfill({json:{articles:[article,{...article,slug:'secret-draft',status:'draft',title_fa:'پیش‌نویس'}]}}));
  await page.goto('http://127.0.0.1:4173/pages/blog.html');
  await page.waitForSelector('.cms-article');assert.equal(await page.locator('.cms-article').count(),1);

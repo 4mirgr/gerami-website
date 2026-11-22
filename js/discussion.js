@@ -1,10 +1,11 @@
+import {displayText} from './site-model.mjs';
 import {richText} from './rich-text.mjs';
 import {getSession} from './account-client.mjs';
 
 const host=document.querySelector('[data-discussion-ui]');
 const slug=host.closest('[data-discussion]').dataset.discussion;
 const t=(fa,en)=>document.documentElement.lang==='en'?en:fa;
-const make=(tag,text)=>{const node=document.createElement(tag);if(text)node.textContent=text;return node;};
+const make=(tag,text)=>{const node=document.createElement(tag);if(text)node.textContent=displayText(text);return node;};
 const button=(text,click)=>{const node=make('button',text);node.type='button';node.className='button button-secondary';node.onclick=click;return node;};
 const copyData=document.getElementById('article-copies');
 if(copyData){

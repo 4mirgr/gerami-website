@@ -264,12 +264,12 @@
       "fa": "انکولوژی - سرطان",
       "en": "Oncology · Cancer",
       "icon": "cell",
-      "description_fa": "آگاهی دربارهٔ سرطان، مراقبت در سرطان",
+      "description_fa": "آگاهی درباره سرطان، مراقبت در سرطان",
       "description_en": "Cancer awareness, Cancer care",
       "children": [
         {
           "id": "cancer-awareness",
-          "fa": "آگاهی دربارهٔ سرطان",
+          "fa": "آگاهی درباره سرطان",
           "en": "Cancer awareness",
           "icon": "cell",
           "description_fa": "",

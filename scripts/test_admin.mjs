@@ -7,7 +7,7 @@ await page.route('**/content/articles.json',r=>r.fulfill({json:{articles:[]}}));
 await page.goto('http://127.0.0.1:4173/admin/');await page.waitForFunction(()=>document.querySelector('#total').textContent!=='—');
 assert.equal(await page.locator('#total').textContent(),'۰');assert.match(await page.locator('#content-message').textContent(),/هنوز مقاله/);await page.screenshot({path:'/tmp/gerami-admin-day.png',fullPage:true});
 await page.locator('#theme').click();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.reload();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.screenshot({path:'/tmp/gerami-admin-night.png',fullPage:true});
-await page.locator('a[data-nav=articles]').click();await page.getByRole('button',{name:'نوشتن مقالهٔ جدید'}).waitFor();
+await page.locator('a[data-nav=articles]').click();await page.getByRole('button',{name:'نوشتن مقاله جدید'}).waitFor();
 await page.locator('a[data-nav=profile]').click();await page.getByLabel('معرفی فارسی',{exact:true}).waitFor();
 await page.locator('a[data-nav=editor]').click();await page.waitForSelector('iframe.editor-frame');assert.equal(await page.locator('iframe.editor-frame').count(),1);
 await page.locator('a[data-nav=dashboard]').click();await page.locator('a[data-nav=editor]').click();assert.equal(await page.locator('iframe.editor-frame').count(),1);

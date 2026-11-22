@@ -50,6 +50,22 @@ validateSite(Object.fromEntries(managedPaths.map(path=>[path,JSON.parse(readFile
     links(navigation['footer'])
 
 
+# Normalize display copy only. IDs, destinations and approved source bytes stay intact.
+_COPY_FIELD = re.compile(r'(?:fa|en|.+_(?:fa|en)|title|body|category|author|image_alt|hashtags|tags)\Z')
+_HEH = re.compile(r'\]\([^\s)]+\)|[هە]\u0654|[\u06c0\ufba4\ufba5]')
+
+def public_document(path):
+    def display(value, key=''):
+        if isinstance(value, dict):
+            return {k: display(v, k) for k, v in value.items()}
+        if isinstance(value, list):
+            return [display(v, key) for v in value]
+        if isinstance(value, str) and _COPY_FIELD.fullmatch(key):
+            return _HEH.sub(lambda m: m[0] if m[0].startswith(']') else 'ه', value)
+        return value
+    return display(json.loads(path.read_text()))
+
+
 def render_page(template, page):
     text = re.sub(r' data-(?:content|link)-key="[^"]+"', '', template)
     text = text.replace('data-page="services"', 'data-page="extra" data-extra-page="' + page['slug'] + '"')
@@ -67,7 +83,7 @@ def generate(root, output):
     from editorial_seo import generate as generate_editorial
     generate_editorial(root, output)
     template = (root / 'pages/services.html').read_text()
-    data = json.loads((root / 'content/extra-pages.json').read_text())
+    data = public_document(root / 'content/extra-pages.json')
     for page in data['pages']:
         if page['published']:
             (output / 'pages' / (page['slug'] + '.html')).write_text(bake_settings(root, render_page(template, page), 'extra'))
@@ -76,20 +92,22 @@ def generate(root, output):
     (output / 'pages/studio-preview.html').write_text(bake_settings(root, text, 'extra'))
 
 
+TOPIC_ART = dict(heart='heart', endocrine='pancreas', digestive='digestive', lungs='lungs', kidney='kidneys', joint='joint', blood='blood-cells', cell='blood-cells', microbe='infection', age='stethoscope', medicine='education', shield='stethoscope')
+
+
 def topic_markup(root, directory=False):
-    catalog = json.loads((root / 'content/topics.json').read_text())
-    articles = json.loads((root / 'content/articles.json').read_text())['articles']
+    catalog = public_document(root / 'content/topics.json')
+    articles = public_document(root / 'content/articles.json')['articles']
     escape = lambda value: html.escape(str(value), quote=True)
     label = lambda tag, fa, en: '<' + tag + ' data-fa="' + escape(fa) + '" data-en="' + escape(en) + '">' + escape(fa) + '</' + tag + '>'
     result = ''
-    art = dict(heart='heart', endocrine='pancreas', digestive='digestive', lungs='lungs', kidney='kidneys', joint='joint', blood='blood-cells', cell='blood-cells', microbe='infection', age='stethoscope', medicine='education')
     for topic in catalog['topics']:
         ident = topic['id']
         tag = 'article' if directory else 'li'
         result += '<' + tag + ' class="topic-tile glass-surface" data-topic-id="' + escape(ident) + '">'
         result += '<a class="topic-link"' + (' data-topic-card="' + escape(ident) + '"') + ' href="/pages/blog.html?topic=' + escape(ident) + '">'
-        if topic['icon'] in art:
-            result += '<span class="topic-icon"><img class="topic-art" src="/assets/topics/' + art[topic['icon']] + '.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async"></span>'
+        if topic['icon'] in TOPIC_ART:
+            result += '<span class="topic-icon"><img class="topic-art" src="/assets/topics/' + TOPIC_ART[topic['icon']] + '.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async"></span>'
         result += label('h3', topic['fa'], topic['en'])
         if not directory:
             result += label('p', topic['description_fa'], topic['description_en'])
@@ -126,7 +144,7 @@ def home_bootstrap(root, text, ident="home"):
             value = value.replace(char, '\\u' + format(ord(char), '04x'))
         return value
     for path in paths:
-        value = json.loads((root / path).read_text())
+        value = public_document(root / path)
         if path == 'content/site.json' and ident != 'about':
             value = {**value, 'cv': [], 'bio_fa': '', 'bio_en': ''}  # Only About renders the profile narrative.
         # A growing feed must not turn the initial HTML into a database dump.
@@ -161,7 +179,7 @@ def bake_settings(root, text, ident):
             text = re.sub(r'<!--' + marker + r':start-->.*?<!--' + marker + r':end-->', lambda _: '<!--' + marker + ':start-->' + topic_markup(root, directory) + '<!--' + marker + ':end-->', text, flags=re.S)
         # Ordinary links keep the latest articles reachable during a failed feed request
         # and without JS. The enhanced cards replace these once their data arrives.
-        articles = json.loads((root / 'content/articles.json').read_text())['articles']
+        articles = public_document(root / 'content/articles.json')['articles']
         ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: (a.get('published_at', ''), a['slug']), reverse=True)
         links = []
         for article in ordered[:7]:
@@ -171,10 +189,10 @@ def bake_settings(root, text, ident):
                 links.append('<li><a href="' + path + '">' + html.escape(title[:150]) + '</a></li>')
         text = text.replace('<!--recent-links-->', '<ul data-recent-links>' + ''.join(links) + '</ul>' if links else '')
     escape = lambda value: html.escape(str(value), quote=True)
-    appearance = json.loads((root / 'content/appearance.json').read_text())
-    navigation = json.loads((root / 'content/navigation.json').read_text())
+    appearance = public_document(root / 'content/appearance.json')
+    navigation = public_document(root / 'content/navigation.json')
     content_path = root / ('content/pages/' + ident + '.json')
-    data = json.loads(content_path.read_text()) if content_path.exists() else {'blocks': {}, 'links': {}}
+    data = public_document(content_path) if content_path.exists() else {'blocks': {}, 'links': {}}
 
     def attr(tag, key, value):
         pattern = re.compile(r'\b' + re.escape(key) + r'="[^"]*"')
@@ -198,7 +216,7 @@ def bake_settings(root, text, ident):
 
     text = re.sub(r'<meta\b[^>]*data-content-key="[^"]+"[^>]*>', metadata, text)
     text = re.sub(r'<a\b[^>]*data-link-key="([^"]+)"[^>]*>', lambda match: attr(match[0], 'href', data['links'][match[1]]) if match[1] in data['links'] else match[0], text)
-    profile = json.loads((root / 'content/site.json').read_text())
+    profile = public_document(root / 'content/site.json')
     if ident == 'about':
         def bilingual(tag, fa, en):
             return '<' + tag + ' data-fa="' + escape(fa) + '" data-en="' + escape(en) + '">' + escape(fa) + '</' + tag + '>'

@@ -5,7 +5,7 @@
       "en": "Projects | Dr. Amir Houshang Gerami"
     },
     "text-002": {
-      "fa": "آشنایی با پروژهٔ آموزش پزشکی IntMed و مسیر دسترسی به آن.",
+      "fa": "آشنایی با پروژه آموزش پزشکی IntMed و مسیر دسترسی به آن.",
       "en": "Explore the IntMed medical education project and its entry point."
     },
     "text-003": {
@@ -37,44 +37,24 @@
       "en": "My projects"
     },
     "text-022": {
-      "fa": "دسترسی مستقل، با هویت جداگانه",
-      "en": "Independent access, distinct identities"
-    },
-    "text-023": {
-      "fa": "ورود به",
-      "en": "Open"
-    },
-    "text-025": {
-      "fa": "پروژهٔ آموزشی IntMed از همین دامنه در دسترس است.",
-      "en": "The IntMed education project is accessible through this domain."
+      "fa": "ابزارهای مطالعه و آموزش پزشکی",
+      "en": "Tools for studying and teaching medicine"
     },
     "text-026": {
       "fa": "آموزش پزشکی",
       "en": "Medical education"
     },
     "text-027": {
-      "fa": "پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت.",
-      "en": "My medical project, informing the educational content selected for this website."
-    },
-    "text-028": {
-      "fa": "دربارهٔ پروژه",
-      "en": "About the project"
-    },
-    "text-032": {
-      "fa": "پروژهٔ intmed",
-      "en": "The intmed project"
+      "fa": "از درسنامه‌های طب داخلی و قلب تا فلش‌کارت‌ها و آزمون‌های شبیه‌سازی‌شده، IntMed کمک می‌کند هر مبحث را بخوانید، مرور کنید و دانسته‌هایتان را بسنجید.",
+      "en": "Read internal medicine and cardiology lessons, revisit them with flashcards and test your understanding with exam simulations."
     },
     "text-033": {
-      "fa": "این پروژه به آموزش پزشکی مرتبط است و مطالب منتخب آن مبنای بخش آموزشی وب‌سایت شخصی خواهند بود.",
-      "en": "This project relates to medical education. Selected material will inform the educational section of this personal website."
-    },
-    "text-034": {
-      "fa": "دسترسی مستقیم از این نسخه هنوز فعال نشده است؛ نشانی جدید پروژه پس از تکمیل انتقال اعلام می‌شود.",
-      "en": "Direct access is not enabled in this version yet. The new project address will be announced once migration is complete."
+      "fa": "مباحث بر پایه Harrison 2025 دسته‌بندی شده‌اند. می‌توانید مطالعه را از یک موضوع آغاز کنید و با مرور پاسخ‌های تشریحی ادامه دهید.",
+      "en": "Topics follow Harrison 2025. Start with a subject, then review the explanations behind your answers."
     },
     "text-035": {
-      "fa": "ورود به intmed",
-      "en": "Open intmed"
+      "fa": "ورود به پروژه IntMed",
+      "en": "Open IntMed"
     },
     "text-040": {
       "fa": "دکتر امیرهوشنگ گرامی",

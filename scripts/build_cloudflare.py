@@ -185,7 +185,7 @@ def assemble(sources, output):
         # Enable cards in the assembled artifact, where the actual apps now exist.
         with (stage / 'js/links.js').open('a', encoding='utf-8') as handle:
             handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/',aus:'/aus/'}));\n")
-        ready_fa = 'پروژهٔ آموزشی IntMed از زیرمسیر همین سایت در دسترس است.'
+        ready_fa = 'پروژه آموزشی IntMed از زیرمسیر همین سایت در دسترس است.'
         ready_en = 'The IntMed education project is available under this site’s own path.'
         for page in (stage / 'index.html', stage / 'pages/projects.html'):
             html = page.read_text()
@@ -199,7 +199,7 @@ def assemble(sources, output):
             page.write_text(html, encoding='utf-8')
         (stage / '_redirects').write_text('/intmed /intmed/ 308\n/aus /aus/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
         (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/*'], 'exclude': []}) + '\n', encoding='utf-8')
-        (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحهٔ اصلی</a></html>\n', encoding='utf-8')
+        (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحه اصلی</a></html>\n', encoding='utf-8')
         (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n', encoding='utf-8')
         from version_assets import version_assets
         version_assets(stage)
