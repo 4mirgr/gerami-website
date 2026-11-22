@@ -34,3 +34,19 @@ assert.equal(calls.find(c=>c.body?.p_action==='finish').body.p_error,null);
 mailJob=true;failDelivery=true;await invoke('mail',{ticket});assert.equal(calls.at(-1).body.p_error,'provider_503');
 delete env.GERAMI_RESEND_API_KEY;const at=calls.length;await invoke('mail',{ticket});assert.equal(calls.length-at,1);
 console.log('PASS actual discussion handler with isolated transport: published slug, live role, fixed recipient, idempotent provider payload, retry and unconfigured sender.');
+
+const {onRequest}=await import('../functions/api/discussion/[[path]].js');
+let redirected=false;
+const savedFetch=globalThis.fetch;
+try{
+ globalThis.fetch=async(url,options)=>{
+  assert.ok(url.endsWith('/gerami-discussion/read'));
+  assert.equal(options.redirect,'manual');
+  assert.equal(JSON.parse(new TextDecoder().decode(options.body)).slug,'posted');
+  return redirected?new Response(null,{status:302,headers:{Location:'https://example.test'}}):Response.json({likes:0,comments:[]});
+ };
+ const send=()=>onRequest({request:new Request('https://site.test/api/discussion/read',{method:'POST',headers:{Origin:'https://site.test','Content-Type':'application/json'},body:'{"slug":"posted"}'})});
+ assert.equal((await send()).status,200);redirected=true;
+ const blocked=await send();assert.equal(blocked.status,502);assert.equal(blocked.headers.get('Location'),null);
+ console.log('PASS Pages discussion transport with supported manual redirects and bounded request bytes.');
+}finally{globalThis.fetch=savedFetch;}
