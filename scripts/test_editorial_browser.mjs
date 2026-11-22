@@ -12,12 +12,12 @@ try{
  await page.goto('http://127.0.0.1:4173/admin/#auto-posts');await page.getByText('زمان و موضوعات',{exact:true}).waitFor();
  assert.equal(await page.locator('a[data-nav=auto-posts]').count(),1);
  await page.locator('#studio-fields details summary').click();
- assert.equal(await page.getByRole('button',{name:'انتخاب این تصویر',exact:true}).count(),2);assert.equal(await page.getByLabel('تگ‌ها با ویرگول',{exact:true}).count(),0);await page.getByRole('button',{name:'انتخاب این تصویر',exact:true}).nth(1).click();await page.waitForFunction(()=>document.querySelector('#studio-fields details summary')?.textContent.includes('نسخهٔ 2'));await page.locator('#studio-fields details summary').click();assert.equal(await page.getByRole('button',{name:'✅ تصویر انتخاب‌شده',exact:true}).count(),1);
- await page.getByLabel('عنوان',{exact:true}).fill('عنوان ویرایش‌شده');await page.getByRole('button',{name:'ذخیرهٔ ویرایش و باطل‌کردن تأیید قبلی',exact:true}).click();
- await page.waitForFunction(()=>document.querySelector('#studio-fields details summary')?.textContent.includes('نسخهٔ 3'));
+ assert.equal(await page.getByRole('button',{name:'انتخاب این تصویر',exact:true}).count(),2);assert.equal(await page.getByLabel('تگ‌ها با ویرگول',{exact:true}).count(),0);await page.getByRole('button',{name:'انتخاب این تصویر',exact:true}).nth(1).click();await page.waitForFunction(()=>document.querySelector('#studio-fields details summary')?.textContent.includes('نسخه 2'));await page.locator('#studio-fields details summary').click();assert.equal(await page.getByRole('button',{name:'✅ تصویر انتخاب‌شده',exact:true}).count(),1);
+ await page.getByLabel('عنوان',{exact:true}).fill('عنوان ویرایش‌شده');await page.getByRole('button',{name:'ذخیره ویرایش و باطل‌کردن تأیید قبلی',exact:true}).click();
+ await page.waitForFunction(()=>document.querySelector('#studio-fields details summary')?.textContent.includes('نسخه 3'));
  assert.equal(calls.find(c=>c.action==='edit').body.revision,2);assert.equal(calls.find(c=>c.action==='edit').body.content.title,'عنوان ویرایش‌شده');
- await page.locator('#studio-fields details summary').click();await page.getByRole('button',{name:'ارسال نسخهٔ ذخیره‌شده به تلگرام',exact:true}).click();
- await page.getByText('نسخهٔ ذخیره‌شده به تلگرام ارسال شد.',{exact:true}).waitFor();assert.equal(calls.find(c=>c.action==='notify').body.revision,3);
+ await page.locator('#studio-fields details summary').click();await page.getByRole('button',{name:'ارسال نسخه ذخیره‌شده به تلگرام',exact:true}).click();
+ await page.getByText('نسخه ذخیره‌شده به تلگرام ارسال شد.',{exact:true}).waitFor();assert.equal(calls.find(c=>c.action==='notify').body.revision,3);
  // Private drafts never enter the public editor's preview or public articles storage.
  const stored=await page.evaluate(()=>Object.values(localStorage).join(''));assert(!stored.includes('عنوان ویرایش‌شده'));
  await page.screenshot({path:'/tmp/gerami-editorial-inbox.png',fullPage:true});console.log('Private editorial UI: list/settings, revision edits, saved-version Telegram review and no public/local draft leakage passed.');
