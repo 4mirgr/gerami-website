@@ -14,7 +14,7 @@ The contact banner uses the emerald conversation emblem modeled on the projects 
 
 ## Topic directory, projects and reading order · 2026-11-22
 
-Homepage defaults to latest posts, topic directory, physician and visits, projects, then the health literacy introduction. The HTML and appearance settings carry the same order. Studio can move the introduction. Preserve full-width folder tabs with a contrasting contour in RTL, LTR and both themes.
+The homepage opens with the physician profile and patient portal panels, followed by latest posts, the topic directory, projects and the health literacy introduction. The physician copy covers the owner's specialties, coordinated care and hospital responsibilities. Personal record storage and printing are described as planned features of the current sample portal. The directory header uses the exact local learning-book.6cea0e7729990418.webp emblem. The HTML and appearance settings carry the same order. Studio can move the introduction. Preserve full-width folder tabs with a contrasting contour in RTL, LTR and both themes.
 
 The generated /topics/ index and its specialty and subtopic pages use the public font, medical illustrations, native disclosures and static crawlable links. Keep article and taxonomy paths stable. The projects and education banners have matching gear and book emblems based on the owner's stethoscope artwork. New project features follow the pattern in pages/projects.html: a localized, full-frame poster, existing project copy, and a prominent verified entry inside the same article. The IntMed posters come from the owner's archive. Verification uses the generated directory, project card and homepage order as well as the full combined build. The release receipt is recorded after deployment.
 

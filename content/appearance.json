@@ -35,15 +35,15 @@
   },
   "sections": [
     {
+      "id": "about",
+      "visible": true
+    },
+    {
       "id": "articles",
       "visible": true
     },
     {
       "id": "education",
-      "visible": true
-    },
-    {
-      "id": "about",
       "visible": true
     },
     {

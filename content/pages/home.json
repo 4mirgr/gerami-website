@@ -93,8 +93,8 @@
       "en": "Dr. Amir Houshang Gerami"
     },
     "text-113": {
-      "fa": "از مراقبت از بیماران بستری در لقمان حکیم و مسیح دانشوری تا ویزیت در درمانگاه زعیم پاکدشت، بخش مهمی از کار من دنبال‌کردن سیر بیماری است. در طب داخلی، به ارتباط دیابت، فشار خون و سلامت قلب و کلیه توجه ویژه دارم.",
-      "en": "My clinical experience spans inpatient care at Loghman Hakim and Masih Daneshvari hospitals and outpatient visits at Zaeem Hospital in Pakdasht. In internal medicine, I take a particular interest in how diabetes and blood pressure affect the heart and kidneys."
+      "fa": "حوزه مدیریت تشخیص و درمان و مشاوره های بیماری های گوارشی و کبد و کیسه صفرا - غدد و متابولیسم (تیروئید و دیابت...) - خون - ریه - بیماری های عفونی و تنظیم دارویی بیماری های قلبی و مدیریت یکپارچه افراد با چندین بیماری همزمان و تعیین برنامه و پلن تشخیصی و درمانی. سابقه فعالیت و مسئولیت های بالینی و درمانی در بیمارستان های فوق تخصصی و تخصصی دانشگاه های علوم پزشکی شهید بهشتی و جندی شاپور.",
+      "en": "I diagnose and treat digestive, liver, gallbladder, hormonal and metabolic disorders (including thyroid disease and diabetes), blood and lung disorders, and infections. I manage heart medicines and plan care for people with multiple conditions. I have held clinical roles in specialty and subspecialty hospitals at Shahid Beheshti and Jundishapur universities of medical sciences."
     },
     "text-114": {
       "fa": "یادگیری ساختارمند با IntMed",
@@ -117,16 +117,16 @@
       "en": "Patient portal"
     },
     "text-119": {
-      "fa": "برای ویزیت آماده شوید",
-      "en": "Prepare for your visit"
+      "fa": "پنل اختصاصی پرونده سلامت خود را بسازید و همیشه و همه جا برای مراجعه به مراکز درمانی در اختیار داشته باشید",
+      "en": "Create a personal health record to take to any visit"
     },
     "text-120": {
-      "fa": "از چه زمانی علائم شروع شد؟ کدام دارو را با چه دوزی مصرف می‌کنید؟ با ساختن حساب، در پنل نمایشی با بخش‌های شرح حال، داروها و آزمایش‌ها آشنا شوید. مرور این موارد پیش از ویزیت کمک می‌کند چیزی از قلم نیفتد.",
-      "en": "When did your symptoms start? Which medicines do you take, and at what dose? Create an account to explore the demo portal’s history, medicines and test results. Reviewing these before a visit helps you remember what to discuss."
+      "fa": "از چه زمانی علائم شروع شد؟ کدام دارو را با چه دوزی مصرف می‌کنید؟ پس از فعال‌شدن پرونده شخصی، می‌توانید این اطلاعات را همراه با سوابق بیماری، حساسیت‌ها، بیماری‌های خانوادگی و برنامه غربالگری یک‌جا ثبت کنید. پیش از ویزیت با هر پزشک، پرونده کامل خود را روی موبایل یا کامپیوتر خواهید داشت یا می‌توانید نسخه چاپی آن را همراه ببرید تا چیزی در روند درمان از قلم نیفتد.",
+      "en": "When did symptoms start? What medicines and doses do you take? Once personal records are available, keep these details, your medical and family history, allergies and screening plans together. Bring your record to any visit on your phone, on a computer or in print."
     },
     "text-121": {
-      "fa": "امروز می‌توانید پرونده نمونه را ببینید و پس از فعال‌شدن پرونده شخصی، شرح حالتان را تکمیل کنید. برای ویزیت حضوری یا آنلاین، نوبت‌های من را در این سرویس‌ها ببینید.",
-      "en": "Explore a sample record today. Once personal records are enabled, you can fill in your own history. For in-person or online visits, check my availability on these services."
+      "fa": "امروز با ورود یا ساختن حساب می‌توانید پرونده نمونه را ببینید. برای نوبت حضوری یا آنلاین، یکی از این سرویس‌ها را انتخاب کنید.",
+      "en": "Sign in or register to explore a sample record. Book an online or in-person visit below."
     },
     "text-122": {
       "fa": "ورود یا ساخت حساب",

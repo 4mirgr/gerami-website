@@ -18,6 +18,8 @@ class EditorialSEO(unittest.TestCase):
    self.assertEqual(index.count('class="atlas-card glass-surface"'),12)
    self.assertEqual(index.count('<details>'),12)
    self.assertIn('src="/assets/topics/lungs.webp"',topic)
+   banner=index.split('class="atlas-heading glass-surface"',1)[1].split('</header>',1)[0]
+   self.assertIn('src="/assets/optimized/learning-book.6cea0e7729990418.webp"',banner)
    self.assertIn('href="/css/catalog.css"',index)
    self.assertIn('src="/assets/optimized/medication.',index)
 if __name__=='__main__':unittest.main()

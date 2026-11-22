@@ -67,9 +67,13 @@ def generate(root,output):
   crumbs=[('خانه','Home','/'),*parents]
   trail=''.join('<a href="'+escape(url)+'">'+label(f,e)+'</a><span aria-hidden="true">/</span>' for f,e,url in crumbs)
   heading='<h1>'+label(fa,en)+'</h1>'
-  return ('<header class="atlas-heading glass-surface"><nav aria-label="مسیر صفحه" data-label-fa="مسیر صفحه" data-label-en="Breadcrumb">'+trail+
-          '<span aria-current="page">'+label(fa,en)+'</span></nav><div class="atlas-category">'+
-          (topic_image(category) if category else '')+heading+'</div>'+lead+'</header>')
+  content=('<nav aria-label="مسیر صفحه" data-label-fa="مسیر صفحه" data-label-en="Breadcrumb">'+trail+
+           '<span aria-current="page">'+label(fa,en)+'</span></nav><div class="atlas-category">'+
+           (topic_image(category) if category else '')+heading+'</div>'+lead)
+  if not category:
+   book='<img class="section-emblem" width="124" height="124" decoding="async" alt="" src="/assets/optimized/learning-book.6cea0e7729990418.webp">'
+   content='<div class="catalog-banner"><div>'+content+'</div>'+book+'</div>'
+  return '<header class="atlas-heading glass-surface">'+content+'</header>'
  def atlas_group(fa,en,body):
   return '<section class="atlas-listing glass-surface"><h2>'+label(fa,en)+'</h2>'+body+'</section>'
  def article_list(rows):
