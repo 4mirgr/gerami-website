@@ -52,3 +52,5 @@ Test repeat-source selection, unavailable signals/media, static pages/no draft l
 multiple posts per topic, unique canonicals/sitemap and unchanged performance recovery.
 PR/CI before merge/deployment; fresh assembled build; then apply migrations/deploy,
 backfill existing drafts as new revisions and resend with safe operational receipts.
+
+Owner steering during implementation: show hashtags beginning with# only; no visible separate tags list/input. Keep the original medical source audit privately.

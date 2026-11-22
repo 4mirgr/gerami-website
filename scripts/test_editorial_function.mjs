@@ -1,8 +1,9 @@
-import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';
+import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
 let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus;
 const topic={lesson:[{paragraphs:[{text:'متن آموزشی منتشرشده دربارهٔ فشار خون و مراقبت از آن. '.repeat(30)}]}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
 const copy={title:'فشار خون را جدی بگیریم',summary:'اندازه‌گیری منظم کمک‌کننده است.',paragraphs:[paragraph,paragraph,paragraph],tags:['فشار خون','قلب'],hashtags:['فشار خون','سلامت']};
+const photo1=new Uint8Array([255,216,255,...new Uint8Array(197).fill(1)]),photo2=new Uint8Array([255,216,255,...new Uint8Array(197).fill(2)]);const covers=await Promise.all([photo1,photo2].map(async(bytes,i)=>({id:'00000000-0000-4000-8000-00000000000'+(i+4),source_topic:'cardio-htn',ordinal:i+1,label:'تصویر بالینی '+i,media_path:'library/test/'+i+'.jpg',image:'/assets/uploads/editorial-'+await core.sha(bytes)+'.jpg',sha256:await core.sha(bytes),provenance:{kind:'original-illustration'},active:true})));let coverOptions=[];
 const env={SUPABASE_SERVICE_ROLE_KEY:'private-service',SUPABASE_ANON_KEY:'public-key',TELEGRAM_BOT_TOKEN:'private-bot',GEMINI_API_KEY:'private-gemini'};
 const fakeFetch=async(url,options={})=>{
  if(url.includes('/auth/v1/user'))return Response.json({id:'owner',email_confirmed_at:'2026-01-01'});
@@ -14,6 +15,11 @@ const fakeFetch=async(url,options={})=>{
   if(path==='rpc/gerami_editorial_telegram_owner')return Response.json(true);
   if(path.startsWith('gerami_accounts'))return Response.json([{user_id:'owner'}]);
   if(path.startsWith('gerami_editorial_previews')||path.startsWith('gerami_editorial_telegram_sessions'))return Response.json([]);
+  if(path.startsWith('gerami_editorial_trend_snapshots'))return Response.json([{signals:[]}]);
+  if(path.startsWith('gerami_editorial_cover_library'))return Response.json(covers);
+  if(path.startsWith('gerami_editorial_cover_options'))return Response.json(coverOptions);
+  if(path==='rpc/gerami_editorial_prepare_covers'){const d=drafts.find(d=>d.id===body.p_id);Object.assign(d,{source:body.p_source,topic:body.p_topic,category:body.p_category,cover_pack:body.p_pack,cover_selected:false,cover_required:true,selected_cover_id:null,cover_sha256:null,image:body.p_options[0].image,media_path:null,snapshot_hash:body.p_snapshot,revision:d.revision+1});coverOptions=body.p_options;return Response.json(d);}
+  if(path==='rpc/gerami_editorial_register_choices')return Response.json(true);
   if(path==='rpc/gerami_editorial_begin_preview')return Response.json(true);
   if(path==='rpc/gerami_editorial_register_preview')return Response.json(true);
   if(path==='rpc/gerami_editorial_mutate')return Response.json(drafts.find(d=>d.id===body.p_id));
@@ -40,12 +46,13 @@ const fakeFetch=async(url,options={})=>{
  if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
  if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
  if(url.endsWith('/assets/editorial/heart.jpg'))return new Response(new Uint8Array([255,216,255,...new Uint8Array(197)]),{headers:{'Content-Type':'image/jpeg'}});
+ if(url.includes('/storage/v1/object/gerami-editorial/'))return new Response(url.endsWith('/0.jpg')?photo1:photo2,{headers:{'Content-Type':'image/jpeg'}});
  if(url.includes('api.telegram.org')){sent.push({method:url.split('/').pop(),...(options.body instanceof FormData?Object.fromEntries(options.body):JSON.parse(options.body))});return Response.json({ok:true,result:{message_id:sent.length+1}});}
  throw Error('Unexpected network '+url);
 };
 const source=(await fs.readFile('backend/editorial/functions/gerami-editorial/index.ts','utf8')).replace(/^import[^\n]+\n/gm,'');
-const run=new Function('Deno','EdgeRuntime','fetch','createTelegramEditorial',...Object.keys(core),source);
-run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,createTelegramEditorial,...Object.values(core));
+const bindings={createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
+run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(bindings),...Object.values(core));
 const post=(action,body={},authorization='Bearer valid.session.token.value')=>handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/'+action,{method:'POST',headers:{Authorization:authorization},body:JSON.stringify(body)}));
 assert.equal((await handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/list'))).status,405);
 for(enabledRole of ['user','secretary'])assert.equal((await post('list')).status,403);enabledRole='admin';assert.equal((await post('list')).status,200);
@@ -53,7 +60,7 @@ assert.equal((await post('callback',{callback_query:{from:{id:999},message:{chat
 assert.equal((await post('job',{id:'00000000-0000-4000-8000-000000000001',capability:'b'.repeat(64)})).status,403);
 const payload={id:'00000000-0000-4000-8000-000000000001',capability:'a'.repeat(64)};
 assert.equal((await post('job',payload)).status,200);await Promise.all(pending);pending=[];
-assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'complete');assert.equal(sent[0].method,'sendPhoto');assert(sent[0].photo instanceof Blob);assert(sent.find(s=>s.text?.includes('تگ‌ها:')));assert(sent.find(s=>s.method==='editMessageReplyMarkup'&&s.reply_markup.inline_keyboard.length).reply_markup.inline_keyboard[0][0].callback_data.startsWith('webpost:a:'));
+assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'complete');assert.equal(sent[0].method,'sendPhoto');assert(sent[0].photo instanceof Blob);assert(sent.find(s=>s.text?.includes('#')));assert(!sent.some(s=>s.text?.includes('تگ‌ها:')));assert(sent.find(s=>s.method==='editMessageReplyMarkup'&&s.reply_markup.inline_keyboard.length).reply_markup.inline_keyboard[0][0].callback_data.startsWith('webpost:i:'));
 // Changed deployed manifest is rejected before any provider call or second draft.
 drafts=[];hashMismatch=true;await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,1);assert.equal(inserted,1);assert.equal(jobStatus,'error');
 hashMismatch=false;receiptFailure=true;pending=[];await post('job',payload);await Promise.all(pending);assert.equal(modelCalls,2,'Receipt outage blocked new daily generation');assert.equal(jobStatus,'complete');

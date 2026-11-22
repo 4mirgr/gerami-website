@@ -4,6 +4,7 @@ export const SITE='https://drgerami-md.ir',PROJECT='https://upwbktvnybsjugdegjji
 export const AUDIENCE='gerami-editorial-publisher';
 export const sha=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',typeof value==='string'?new TextEncoder().encode(value):value)),b=>b.toString(16).padStart(2,'0')).join('');
 export const stable=value=>JSON.stringify(value&&typeof value==='object'?(Array.isArray(value)?value.map(v=>JSON.parse(stable(v))):Object.fromEntries(Object.keys(value).sort().map(k=>[k,JSON.parse(stable(value[k]))]))):value);
+export const snapshotHash=d=>sha(stable({content:d.content,topic:d.topic,category:d.category,image:d.image,media_path:d.media_path||null,source:d.source,selected_cover_id:d.selected_cover_id||null,cover_sha256:d.cover_sha256||null,cover_selected:!!d.cover_selected}));
 export const clean=(v,max=1000)=>{if(typeof v!=='string'||!v.trim()||v.length>max||/[<>\u0000-\u0008]/.test(v))throw Error('invalid_text');return v.trim();};
 export function validateCopy(value){
  const title=clean(value.title,140),paragraphs=value.paragraphs;
@@ -16,8 +17,9 @@ export function validateCopy(value){
  return {title,paragraphs:body,summary:clean(value.summary,240),tags:list(value.tags),hashtags:list(value.hashtags,true)};
 }
 export function publicArticle(draft){
+ if(draft.cover_required&&(!draft.cover_selected||!draft.media_path||!draft.cover_sha256||!draft.image.includes(draft.cover_sha256)))throw Error('cover_required');
  const c=validateCopy(draft.content),taxonomy=draft.source?.topic_id?sourceTopic(draft.source.topic_id):null;
- const article={slug:draft.slug,status:'published',audience:'patients',title_fa:c.title,title_en:'',body_fa:c.paragraphs.join('\n\n'),body_en:'',author:'دکتر امیرهوشنگ گرامی',category:draft.category,topic:draft.topic,image:draft.image,published_at:draft.publication_date||new Date().toISOString().slice(0,10),updated_at:draft.publication_date||new Date().toISOString().slice(0,10),sources:[{title:'Harrison 2025',url:'https://accessmedicine.mhmedical.com/'}],tags:c.tags,hashtags:c.hashtags,editorial_hash:draft.snapshot_hash};
+ const article={slug:draft.slug,status:'published',audience:'patients',title_fa:c.title,title_en:'',body_fa:c.paragraphs.join('\n\n'),body_en:'',author:'دکتر امیرهوشنگ گرامی',category:draft.category,topic:draft.topic,image:draft.image,published_at:draft.publication_date||new Date().toISOString().slice(0,10),updated_at:draft.publication_date||new Date().toISOString().slice(0,10),sources:[{title:'Harrison 2025',url:'https://accessmedicine.mhmedical.com/'}],hashtags:c.hashtags,editorial_hash:draft.snapshot_hash};
  if(taxonomy){if(draft.topic!==taxonomy.child.id)throw Error('topic_mismatch');article.source_topic_id=taxonomy.source_id;article.topic_root=taxonomy.root.id;article.image_alt=draft.source.cover?.label||c.title;}
  article.url=articlePath(article);return article;
 }

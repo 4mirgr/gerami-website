@@ -25,7 +25,7 @@ if(action==='claim'){
  validateSite(documents);
  if(media){
   if(!/^assets\/uploads\/editorial-[a-f0-9]{64}\.(jpg|webp)$/.test(media.path)||article.image!=='/'+media.path)throw Error('Invalid media path');
-  const bytes=Buffer.from(media.base64,'base64');if(bytes.length>650000||await sha(bytes)!==media.sha256)throw Error('Invalid media hash');
+  const bytes=Buffer.from(media.base64,'base64');if(bytes.length>650000||await sha(bytes)!==media.sha256||/editorial-([a-f0-9]{64})/.exec(media.path)?.[1]!==media.sha256)throw Error('Invalid media hash');
   await fs.mkdir('assets/uploads',{recursive:true});await fs.writeFile(media.path,bytes,{flag:'w'});
  }
  for(const path of ['content/topics.json','content/articles.json'])await fs.writeFile(path,JSON.stringify(documents[path],null,2)+'\n');

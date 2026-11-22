@@ -11,6 +11,7 @@ def generate(root,output):
  posts=[p for p in json.loads((root/'content/articles.json').read_text())['articles'] if p.get('status')=='published']
  def topic_path(c,t=None):return '/topics/'+c['root']['id']+'/'+(t['id']+'/' if t else '')
  def post_path(p):
+  if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*',p.get('slug','')):raise ValueError('Invalid article slug')
   if p.get('source_topic_id'):
    c,t=topics[p['source_topic_id']]
    if p.get('topic')!=t['id']:raise ValueError('Article topic differs from pinned IntMed source')
@@ -57,7 +58,7 @@ def generate(root,output):
  for p in posts:
   title=p.get('title_fa') or p.get('title_en');body=p.get('body_fa') or p.get('body_en') or '';description=re.sub(r'[#*_>`]','',body.split('\n')[0])[:240];markup=''
   image=p.get('image','')
-  if image.startswith('/assets/') or urlsplit(image).scheme=='https':markup+='<img class="post-cover" src="'+escape(image)+'" alt="'+escape(title)+'" width="1200" height="800" decoding="async">'
+  if image.startswith('/assets/') or urlsplit(image).scheme=='https':markup+='<img class="post-cover" style="height:auto;max-width:1200px" src="'+escape(image)+'" alt="'+escape(title)+'" width="1200" height="800" decoding="async">'
   markup+='<div class="article-body" dir="'+('rtl' if p.get('body_fa') else 'ltr')+'">'+''.join('<p>'+escape(x).replace('\n','<br>')+'</p>' for x in body.split('\n\n') if x.strip())+'</div>'
   markup+='<p>'+escape(p.get('author',''))+' · '+escape(p.get('published_at',''))+'</p>'
   if p.get('source_topic_id'):markup+='<p>منبع: <span lang="en" dir="ltr">Harrison 2025</span></p>'

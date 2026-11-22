@@ -26,13 +26,13 @@ try{
  create table auth.users(id uuid primary key,email_confirmed_at timestamptz,deleted_at timestamptz,banned_until timestamptz);create table gerami_accounts(user_id uuid,role text,enabled boolean);
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;
  insert into auth.users values('${owner}',now(),null,null);insert into gerami_accounts values('${owner}','admin',true);`);
- await pg.exec(await fs.readFile('backend/editorial/schema.sql','utf8'));await pg.exec(await fs.readFile('backend/editorial/telegram-controls.sql','utf8'));
+ await pg.exec(await fs.readFile('backend/editorial/schema.sql','utf8'));await pg.exec(await fs.readFile('backend/editorial/telegram-controls.sql','utf8'));await pg.exec(await fs.readFile('backend/editorial/operations.sql','utf8'));
  for(const role of ['anon','authenticated']){await pg.exec('set role '+role);for(const t of ['previews','telegram_sessions','telegram_updates','publisher_signal'])await assert.rejects(pg.query('select * from gerami_editorial_'+t),/permission denied/);await assert.rejects(pg.query("select gerami_editorial_claim_signal(true)"),/permission denied/);await pg.exec('reset role');}
  await assert.rejects(service('select * from auth.users'),/permission denied/);
  const d={content,topic:'cardiology',category:'قلب',image:'/assets/optimized/test.webp',media_path:null,source:{default_image:'/assets/optimized/test.webp',telegram_image:'https://drgerami-md.ir/assets/editorial/heart.jpg',image_sha:artHash}};
  await pg.query('insert into gerami_editorial_drafts(id,slug,content,topic,category,image,source,snapshot_hash) values($1,$2,$3,$4,$5,$6,$7,$8)',[id,'test-only',JSON.stringify(content),d.topic,d.category,d.image,JSON.stringify(d.source),await snapshot(d)]);
  // Production SQL and actual notification-created capability, not a fabricated acceptance.
- await ctl.notify(await row());let a=active(),first=a;assert(sent[0].photo instanceof Blob);assert(sent[1].text.includes('تگ‌ها:'));assert.equal(sent[1].reply_parameters.message_id,a.id);assert.equal((await row()).telegram_message_id,a.id);
+ await ctl.notify(await row());let a=active(),first=a;assert(sent[0].photo instanceof Blob);assert(sent[1].text.includes('سلامت'));assert(!sent[1].text.includes('تگ‌ها:'));assert.equal(sent[1].reply_parameters.message_id,a.id);assert.equal((await row()).telegram_message_id,a.id);
  await ctl.notify(await row(),{force:true});a=active();assert(sent.some(s=>s.message_id===first.id&&s.reply_markup?.inline_keyboard.length===0));
  // Retired keyboards never approve, even on an identical revision.
  let result=await click(a.buttons.find(b=>b.text.includes('ویرایش متن')).callback_data,a.id);assert.equal(result.outcome,'editing_body');let prompt=sent.findLast(s=>s.reply_markup?.force_reply);
