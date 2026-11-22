@@ -76,8 +76,8 @@
     },
     {
       "id": "gastroenterology",
-      "fa": "گوارش٫ کبد ٫ کیسه صفرا و مجاری صفراوی و پانکراس",
-      "en": "Digestive system, liver, gallbladder, bile ducts & pancreas",
+      "fa": "گوارش و کبد",
+      "en": "Gastroenterology and hepatology",
       "icon": "digestive",
       "description_fa": "سلامت گوارش، کبد، بیماری‌های التهابی روده",
       "description_en": "Digestive health, Liver, Inflammatory bowel disease",
@@ -104,6 +104,15 @@
           "id": "ibd",
           "fa": "بیماری‌های التهابی روده",
           "en": "Inflammatory bowel disease",
+          "icon": "digestive",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
+        },
+        {
+          "id": "dysphagia",
+          "fa": "دیسفاژی",
+          "en": "Dysphagia",
           "icon": "digestive",
           "description_fa": "",
           "description_en": "",
