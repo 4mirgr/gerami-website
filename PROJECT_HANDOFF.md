@@ -266,3 +266,24 @@ classification/request-header presence, adds persistent wake-failure guidance an
 retry for the same approved version. No raw API payload/credential is logged. Final
 production dispatch outcome/any remaining owner permissions action belongs in the
 release receipt, not an assumed success.
+
+
+## Telegram publication connection verified — 2026-11-21 14:34 UTC
+
+This supersedes the earlier GitHub403/401 blocker. Owner rotated the GitHub token
+and saved it in the existing Supabase INTMED_GITHUB_ACTIONS_TOKEN secret. No
+credential was read/exported or stored in Git. The actual service-only publisher_wake
+operation completed with requested=true and error=null (the fixed workflow dispatch
+accepted204). GitHub workflow_dispatch run44914617082 at14:34:18Z on
+maina8bde347928d050f2e05fdc85c1f9eeb72365e2e completed successfully; job136877449956
+passed its signed GitHub identity/approved-revision claim. Build/commit steps were
+correctly skipped because both existing posts remained drafts. This proves the real
+Supabase-to-GitHub wake and publisher authentication, not a real doctor approval or
+a public article commit. The prior permissions/invalid-token blocker is resolved.
+
+Pending acceptance is the owner's normal review action on a fresh Telegram card:
+edit via Reply to its current prompt if needed, then explicitly approve the exact
+saved preview. Never simulate owner approval to turn this successful empty-queue
+probe into a publication test. A final article still requires the existing full
+checks, non-force Git commit, deployed article+cover verification and Telegram link.
+No website/Auth/Clinic/public-content/source-pin changes were needed for this probe.
