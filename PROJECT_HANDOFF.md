@@ -369,3 +369,8 @@ items cached. Availability/items are not search volumes or guaranteed fresh medi
 matches. SEO follow-up/owner Search Console connection remains in the roadmap.
 Pending acceptance is the owner's ordinary choice then explicit publication on the
 fresh Telegram version. We do not fabricate owner approval to test publication.
+
+Actual publisher_wake completed with requested=true/error=null. Main workflow_dispatch
+run45012915834 on9fb340588f0006978c6b7482098e8b5541d395ef succeeded. This is a real
+signed publisher connection/empty-queue probe; all current suggestions remained
+unapproved. It is not evidence of an article publication or owner acceptance.
