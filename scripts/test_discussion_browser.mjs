@@ -17,9 +17,19 @@ try{
   if(action==='review'){status=body.decision;return route.fulfill({json:{status}});}
   throw Error(action);
  });
+ if(posts.length){
+  for(const route of ['/','/pages/blog.html']){
+   await page.goto(origin+route);
+   const card=page.locator('.post-card').first();await card.locator('summary').click();
+   assert.equal(await card.locator('.post-actions a[href$="#discussion"]').textContent(),'دیدگاه و کامنت');
+   assert.equal(await card.locator('.article-body p').first().evaluate(p=>getComputedStyle(p).textAlign),'justify');
+  }
+ }
  for(const post of posts.slice(0,3)){
   await page.goto(origin+(post.url||'/articles/'+post.slug+'/'));await page.locator('.reader h1').waitFor();
-  assert.equal(await page.locator('.reader .article-body').isVisible(),true);
+  const paragraph=page.locator('.reader .article-body p').first();
+  assert.equal(await paragraph.isVisible(),true);
+  assert.equal(await paragraph.evaluate(p=>getComputedStyle(p).textAlign),'justify');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   if(post.image)await page.waitForFunction(()=>document.querySelector('.article-cover img')?.naturalWidth>0);
  }

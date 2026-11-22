@@ -88,6 +88,7 @@ a,button,summary { touch-action:manipulation; }
 .cms-article { border-radius:var(--radius); }
 .cms-article summary { min-height:44px; }
 .article-body { line-height:2; }
+.article-body :is(p,li,blockquote),.post-excerpt { text-align:justify; text-align-last:start; }
 .site-footer { background:#161620; color:#f4f4fa; padding-block:56px 24px; margin-top:32px; }
 .site-footer .text-link,.site-footer a { color:#ededf5; }
 .site-footer nav a[aria-current=page] { color:#f4f4fa; }
@@ -250,7 +251,7 @@ body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:n
  .topic-link { padding:22px; }
  .reading-about,.reading-project { flex-direction:column; align-items:stretch; padding:26px; }
  .reading-about .actions { margin-top:0; }
- .reading-about .button { flex:1; }
+ .reading-about .button { flex:1 0 auto; padding-inline:14px; }
 }
 @media(max-width:540px) { .topic-directory,.post-grid { grid-template-columns:1fr; } .brand-name { max-width:90px; } .signature-copy .actions>a { width:auto; padding-inline:16px; } }
 @media(max-width:360px) { .brand-name { max-width:54px; } .brand { gap:4px; } .site-header .header-inner { gap:5px; } .home-search { flex-wrap:wrap; } .home-search input { flex-basis:100%; } .home-search .button { width:100%; } }
@@ -431,9 +432,9 @@ body::before { background:var(--glass-art) center/cover no-repeat; background-co
 
 /* Owner-supplied posters keep their full frame; one language is active. */
 .reading-project {flex-wrap:wrap}.reading-project .intmed-poster {display:block;flex:0 0 100%;width:100%;max-width:960px;margin-inline:auto;border-radius:20px;overflow:hidden}.intmed-poster img {display:block;width:100%;height:auto}.intmed-poster:focus-visible {outline:3px solid var(--ink);outline-offset:5px}
-.signature-copy .feature-actions {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem}
-.feature-actions a {text-align:center;line-height:1.55}
-@media(max-width:700px){.signature-copy .feature-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.signature-copy .feature-actions { display:flex; flex-wrap:wrap; gap:.6rem; }
+.signature-copy .feature-actions>a { flex:1 0 auto; width:auto; text-align:center; line-height:1.55; }
+.feature-actions .button,.reading-about .button,.post-actions a { white-space:nowrap; }
 .post-actions {display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;border-block-start:1px solid var(--line);margin-block-start:.8rem}
 .post-actions a {display:inline-flex;align-items:center;min-height:44px;margin:0;font-size:.86rem;text-underline-offset:.25em}
 .post-actions .post-permalink {font-weight:700}
