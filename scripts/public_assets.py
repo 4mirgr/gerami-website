@@ -22,6 +22,14 @@ def optimize_public_assets(site):
     needle='export const topicImageSources={};'
     if original.count(needle)!=1:raise ValueError('Review topic-image adapter before building')
     topics.write_text(original.replace(needle,'export const topicImageSources='+json.dumps(urls,separators=(',',':'))+';'))
+    from article_previews import build_article_previews
+    article_images = build_article_previews(site)
+    content = site/'js/content.js'
+    code = content.read_text()
+    hook = 'const articleImageSources={};'
+    if code.count(hook) != 1:
+        raise ValueError('Review article-preview adapter before building')
+    content.write_text(code.replace(hook, 'const articleImageSources='+json.dumps(article_images,separators=(',',':'))+';'))
     (site/'assets/optimized/manifest.json').unlink()
     runtime=site/'assets/runtime';runtime.mkdir()
     fingerprint=lambda data:hashlib.sha256(data).hexdigest()[:16]

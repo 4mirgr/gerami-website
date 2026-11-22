@@ -1,4 +1,3 @@
-/* Public reading UI: published records only, safe DOM/Markdown, shareable topic filters. */
 import {richText} from './rich-text.mjs';
 import {articleImage,publicPath,readPublicDocument} from './site-model.mjs';
 import {validateTopics,flattenTopics,topicIds,topicIcon} from './topics.mjs';
@@ -9,6 +8,7 @@ function https(value){try{const u=new URL(value);return u.protocol==='https:'&&!
 const json=file=>readPublicDocument('content/'+file);
 let profile=null,articles=[],catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
 const path=publicPath(location.pathname),isHome=path==='/',isBlog=path.endsWith('/blog');
+const articleImageSources={};
 const imageSource=src=>previewAssets[src]||src;
 const clear=host=>{for(const img of host.querySelectorAll('img'))img.removeAttribute('src');host.replaceChildren();};
  function renderProfile(){
@@ -102,7 +102,7 @@ function renderArticles(){
  for(const item of selected){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
-  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=imageSource(item.image);img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
+  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
   tile.append(el('p',[topic?.[lang()]||item.category,item.author,item.published_at,item.reviewed_at?text('بازبینی: ','Reviewed: ')+item.reviewed_at:''].filter(Boolean).join(' · '),'post-meta'),card);
   const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,copy.body,imageSource);card.append(body);
   const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);

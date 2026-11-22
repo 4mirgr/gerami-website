@@ -374,3 +374,23 @@ Actual publisher_wake completed with requested=true/error=null. Main workflow_di
 run45012915834 on9fb340588f0006978c6b7482098e8b5541d395ef succeeded. This is a real
 signed publisher connection/empty-queue probe; all current suggestions remained
 unapproved. It is not evidence of an article publication or owner acceptance.
+
+
+## Approved publication transfer failure — 2026-11-22 follow-up
+
+The owner's three genuine Telegram approvals were recorded correctly. Actual signed
+publisher runs45015655053/45016296519/45016748764 claimed the saved versions and passed
+source/browser + combined builds, then failed assembled homepage transfer checks:
+457615/491793/468742 subresource bytes respectively. Commit steps never ran; drafts
+remain publish_error with approval/snapshot/selected image preserved. No token issue.
+Root cause: listing cards downloaded full approved1200px covers despite loading=lazy
+(the browser's lazy-loading distance includes these cards). The empty queue test did
+not cover populated-image cost. Never raise/skip the existing transfer gate.
+
+Fix generates bounded WebP listing previews at build time, only for published hashed
+local editorial covers: max480px and10000bytes each. Original bytes, public article
+image, source hash and publisher receipt stay unchanged. Runtime card mapping is build
+injected; six high-entropy images test preserves originals and caps aggregate60k.
+Pillow is build-only, pinned in requirements; no browser dependency/API change.
+The regression failed0/6 previews before implementation, passed6/6 after. Final
+CI, populated assembled verification and actual requeue/publication receipts follow.

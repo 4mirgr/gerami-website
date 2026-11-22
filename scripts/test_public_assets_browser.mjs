@@ -57,16 +57,19 @@ try{
  assert.equal(hits.filter(p=>p.includes('/assets/topics/')||p.endsWith('material-controls.png')).length,0,'full-resolution decorative originals must never be downloaded');
  assert.ok(await page.locator('img.topic-art').evaluateAll(images=>images.length>0&&images.filter(i=>i.complete).every(i=>i.naturalWidth===192)),'deployed badges use correctly decoded 192px derivatives');
  const cold=await page.evaluate(()=>({resources:performance.getEntriesByType('resource').length,bytes:performance.getEntriesByType('resource').reduce((n,r)=>n+r.transferSize,0),navigationBytes:performance.getEntriesByType('navigation')[0].transferSize,fcp:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,load:performance.getEntriesByType('navigation')[0].loadEventEnd}));
+ const cards=await page.locator('img.post-cover').evaluateAll(es=>es.map(e=>({src:e.getAttribute('src'),width:e.naturalWidth})));
+ assert.ok(cards.every(c=>!/^\/assets\/uploads\/editorial-/.test(c.src)),'listing cards must use bounded previews, not approved full-size originals');
+ assert.ok(cards.filter(c=>c.src.startsWith('/assets/optimized/post-')&&c.width).every(c=>c.width<=480));
  assert.ok(cold.bytes<450000,'public homepage transfer budget: '+JSON.stringify(cold));
  assert.ok(cold.bytes+cold.navigationBytes<550000,'HTML and subresources together must stay within the public transfer budget');
- const before=hits.filter(p=>/^\/assets\/(runtime|optimized)\//.test(p)).length;
+ const sharedBefore=new Set(hits.filter(p=>/^\/assets\/(runtime|optimized)\//.test(p))),before=hits.length;
  for(const path of ['/pages/about.html','/pages/blog.html','/pages/appointments.html','/pages/projects.html']){
   await page.goto(origin+path,{waitUntil:'networkidle'});
   assert.equal(await page.locator('.account-signin').count(),1);
  }
  assert.equal(jsonRequests.length,0,'built inner pages do not wait for late public JSON');
- const after=hits.filter(p=>/^\/assets\/(runtime|optimized)\//.test(p)).length;
- assert.ok(after-before<=1,'shared immutable assets must remain in browser cache across pages');
+ const added=hits.slice(before).filter(p=>/^\/assets\/(runtime|optimized)\//.test(p)),sharedReloads=added.filter(p=>sharedBefore.has(p));
+ assert.deepEqual(sharedReloads,[],'already-loaded immutable assets must remain in browser cache; page-specific previews may load once');
  await page.goto(origin,{waitUntil:'networkidle'});
  await page.locator('[data-language-toggle]').click();
  assert.equal(await page.locator('html').getAttribute('lang'),'en');
@@ -87,7 +90,7 @@ try{
  assert.equal(new URL(jsonRequests.at(-1)).pathname,'/content/site.json');
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
  assert.deepEqual(normalMirrors,[],'healthy primary delivery must not download alternate copies');
- console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:after-before,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
+ console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:sharedReloads.length,newPageAssetNetworkRequests:added.length,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
  const posters=JSON.parse(await readFile(resolve(root,'assets/optimized/intmed-posters.json'))).images;
  for(const language of ['fa','en']){
   if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
