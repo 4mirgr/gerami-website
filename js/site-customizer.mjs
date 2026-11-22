@@ -1,4 +1,4 @@
-import {validateDocument,pages,safeLink,asset,publicPath,readPublicDocument} from './site-model.mjs';
+import {displayDocument,validateDocument,pages,safeLink,asset,publicPath,readPublicDocument} from './site-model.mjs';
 import {richText} from './rich-text.mjs';
 import {enhanceToolbars} from './toolbar.mjs';
 const root=document.documentElement;
@@ -59,7 +59,7 @@ if(preview){
  window.addEventListener('message',event=>{
   if(event.origin!==location.origin||event.source!==parent||event.data?.type!=='studio-draft')return;
   try{
-   const next={};for(const [path,data] of Object.entries(event.data.documents||{})){try{next[path]=validateDocument(path,data);}catch{/* Incomplete forms stay in the manager until valid. */}}
+   const next={};for(const [path,data] of Object.entries(event.data.documents||{})){try{next[path]=displayDocument(validateDocument(path,data));}catch{/* Incomplete forms stay in the manager until valid. */}}
    documents={...documents,...next};previewAssets={};for(const [path,url] of Object.entries(event.data.assets||{}))if(asset(path)&&typeof url==='string'&&url.startsWith('blob:'+location.origin+'/'))previewAssets[path]=url;
    if(['fa','en'].includes(event.data.language)){root.lang=event.data.language;root.dir=root.lang==='fa'?'rtl':'ltr';}
    if(['light','dark'].includes(event.data.theme))root.dataset.theme=event.data.theme;

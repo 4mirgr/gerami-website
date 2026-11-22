@@ -25,11 +25,11 @@
       "en": "Topics"
     },
     "text-007": {
-      "fa": "همهٔ مطالب",
+      "fa": "همه مطالب",
       "en": "All posts"
     },
     "text-008": {
-      "fa": "دربارهٔ پزشک",
+      "fa": "درباره پزشک",
       "en": "About"
     },
     "text-009": {
@@ -49,11 +49,11 @@
       "en": "Topics"
     },
     "text-013": {
-      "fa": "همهٔ مطالب",
+      "fa": "همه مطالب",
       "en": "All posts"
     },
     "text-014": {
-      "fa": "دربارهٔ پزشک",
+      "fa": "درباره پزشک",
       "en": "About"
     },
     "text-015": {
@@ -77,7 +77,7 @@
       "en": "Account information"
     },
     "text-020": {
-      "fa": "برای ورود، نام، ایمیل و نام کاربری شما در سرویس احراز هویت Supabase پردازش می‌شود. رمز عبور در سامانهٔ احراز هویت به‌صورت هش نگهداری می‌شود. نقش حساب برای تعیین دسترسی مدیر، منشی یا کاربر استفاده می‌شود. در صورت فعال‌شدن ورود گوگل، اطلاعات پایهٔ حساب گوگل با اجازهٔ شما برای ورود دریافت می‌شود.",
+      "fa": "برای ورود، نام، ایمیل و نام کاربری شما در سرویس احراز هویت Supabase پردازش می‌شود. رمز عبور در سامانه احراز هویت به‌صورت هش نگهداری می‌شود. نقش حساب برای تعیین دسترسی مدیر، منشی یا کاربر استفاده می‌شود. در صورت فعال‌شدن ورود گوگل، اطلاعات پایه حساب گوگل با اجازه شما برای ورود دریافت می‌شود.",
       "en": "Supabase processes your name, email and username for authentication, and stores password hashes. Your account role determines administrator, secretary or user access. When Google sign-in is enabled, basic Google account information is requested with your consent for authentication."
     },
     "text-021": {
@@ -93,7 +93,7 @@
       "en": "Hosting and service providers"
     },
     "text-024": {
-      "fa": "Cloudflare میزبانی و حفاظت سایت را انجام می‌دهد و ممکن است اطلاعات فنی درخواست، مانند نشانی IP، نوع مرورگر و عملکرد شبکه را برای امنیت و سنجش عملکرد پردازش کند. فونت و تصاویر عمومی ممکن است هنگام اختلال از نسخهٔ عمومی و بررسی‌شدهٔ GitHub دریافت شوند؛ اطلاعات حساب و پرونده به این مسیر بازیابی ارسال نمی‌شود. انتشار محتوا توسط مدیر نیز از اتصال جداگانهٔ GitHub استفاده می‌کند.",
+      "fa": "Cloudflare میزبانی و حفاظت سایت را انجام می‌دهد و ممکن است اطلاعات فنی درخواست، مانند نشانی IP، نوع مرورگر و عملکرد شبکه را برای امنیت و سنجش عملکرد پردازش کند. فونت و تصاویر عمومی ممکن است هنگام اختلال از نسخه عمومی و بررسی‌شده GitHub دریافت شوند؛ اطلاعات حساب و پرونده به این مسیر بازیابی ارسال نمی‌شود. انتشار محتوا توسط مدیر نیز از اتصال جداگانه GitHub استفاده می‌کند.",
       "en": "Cloudflare hosts and protects the website and may process technical request information, including IP address, browser and network performance, for security and performance measurement. During delivery failures, reviewed public fonts and images may be fetched from GitHub; account and medical records are not sent through that recovery route. Administrator content publishing uses a separate GitHub connection."
     },
     "text-025": {
@@ -101,15 +101,15 @@
       "en": "Clinic status"
     },
     "text-026": {
-      "fa": "پنل کلینیک فعلاً پیش‌نمایش با داده‌های ساختگی است. در این نسخه ثبت پرونده، مدارک و نوبت واقعی فعال نیست. تا راه‌اندازی بخش خصوصی، اطلاعات پزشکی واقعی در پیش‌نمایش وارد نکنید. اتصال هویت مشترک به معنی ساخت خودکار پروندهٔ پزشکی نیست.",
+      "fa": "پنل کلینیک فعلاً پیش‌نمایش با داده‌های ساختگی است. در این نسخه ثبت پرونده، مدارک و نوبت واقعی فعال نیست. تا راه‌اندازی بخش خصوصی، اطلاعات پزشکی واقعی در پیش‌نمایش وارد نکنید. اتصال هویت مشترک به معنی ساخت خودکار پرونده پزشکی نیست.",
       "en": "The clinic is currently a preview with synthetic data. Real records, medical uploads and booking are inactive. Please keep real medical information out of the preview until the private service is launched. Shared authentication does not automatically create a medical record."
     },
     "text-027": {
-      "fa": "درخواست دربارهٔ اطلاعات شما",
+      "fa": "درخواست درباره اطلاعات شما",
       "en": "Requests about your information"
     },
     "text-028": {
-      "fa": "برای پرسش دربارهٔ اطلاعات حساب یا درخواست اصلاح و حذف آن با ایمیل زیر تماس بگیرید. پیش از اقدام، مالکیت حساب بررسی می‌شود.",
+      "fa": "برای پرسش درباره اطلاعات حساب یا درخواست اصلاح و حذف آن با ایمیل زیر تماس بگیرید. پیش از اقدام، مالکیت حساب بررسی می‌شود.",
       "en": "Contact the email below to ask about your account information or request correction or deletion. Account ownership is verified before taking action."
     },
     "text-029": {

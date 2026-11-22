@@ -83,9 +83,9 @@ export async function probe(label, url, kind, fetcher = fetch, timeoutMs = 8000)
 export async function runChecks(origin, fetcher = fetch, mode = 'parallel') {
   const specs = [
     ['فایل کوچک سایت', '/favicon.svg', 'asset'],
-    ['صفحهٔ IntMed', '/intmed/', 'intmed-html'],
+    ['صفحه IntMed', '/intmed/', 'intmed-html'],
     ['فهرست مباحث IntMed', '/intmed/content/manifest.json', 'json'],
-    ['صفحهٔ AUS', '/aus/', 'aus-html'],
+    ['صفحه AUS', '/aus/', 'aus-html'],
     ['پیکربندی ورود AUS', '/aus/api/public-config', 'aus-config'],
     ['درگاه API فعلی IntMed', 'https://api.drgerami-md.ir/auth/v1/health', 'health'],
     ['مسیر جایگزین فعلی IntMed', 'https://upwbktvnybsjugdegjji.supabase.co/auth/v1/health', 'health'],

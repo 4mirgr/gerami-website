@@ -8,7 +8,7 @@ try{
  await page.goto('http://127.0.0.1:4173/admin/#topics');
  assert.equal(await page.locator('a[data-nav=topics]').count(),1,'Topics must be reachable from the manager');
  const first=page.locator('.topic-editor-node').first();await first.getByLabel('عنوان فارسی',{exact:true}).first().fill('قلب، عنوان ویرایش‌شده');
- assert.equal(await first.getByLabel('شناسهٔ موضوع',{exact:true}).first().isEditable(),false,'Referenced identifiers remain stable');
+ assert.equal(await first.getByLabel('شناسه موضوع',{exact:true}).first().isEditable(),false,'Referenced identifiers remain stable');
  await first.getByRole('button',{name:'حذف موضوع',exact:true}).click();assert.match(await page.locator('#studio-notice').textContent(),/مقاله/);assert.equal(await page.locator('.topic-editor-node[data-topic-id=cardiology]').count(),1);
  await page.reload();await page.locator('.topic-editor-node').first().waitFor();assert.equal(await page.locator('.topic-editor-node').first().getByLabel('عنوان فارسی',{exact:true}).first().inputValue(),'قلب، عنوان ویرایش‌شده');
  await page.getByRole('button',{name:'افزودن موضوع اصلی',exact:true}).click();const added=page.locator('.topic-editor-node').last();await added.getByLabel('عنوان فارسی',{exact:true}).first().fill('موضوع آزمایشی');await added.getByRole('button',{name:'افزودن زیرموضوع',exact:true}).click();assert.equal(await added.locator('.topic-editor-child').count(),1);

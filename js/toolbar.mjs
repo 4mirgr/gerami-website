@@ -1,10 +1,10 @@
 // Horizontal adaptation of the owner's Liquid Glass Expandable Sidebar reference.
 // Material/interaction reference: MIT, Troy Lorents / Automate Flows. See docs/references/README.md.
-import {publicPath} from './site-model.mjs';
+import {displayText,publicPath} from './site-model.mjs';
 const states=new WeakMap(),fa=()=>document.documentElement.lang!=='en',t=(a,b)=>fa()?a:b;
 const paths={home:'M3 11 12 3l9 8M5 10v11h5v-7h4v7h5V10',topics:'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',blog:'M4 4h7c2 0 3 1 3 3v14c0-2-1-3-3-3H4zM14 7c0-2 1-3 3-3h4v14h-4c-2 0-3 1-3 3',about:'M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM4 21v-2a8 8 0 0 1 16 0v2',contact:'M3 5h18v14H3zM3 6l9 7 9-7',other:'M4 5h16v14H4zM4 10h16M9 10v9'};
 function icon(link){if(link.querySelector('.toolbar-icon'))return;const url=new URL(link.href,location.href),id=url.pathname==='/topics/'?'topics':url.pathname.includes('/blog')?'blog':url.pathname.includes('/about')?'about':url.pathname.includes('/contact')?'contact':publicPath(url.pathname)==='/'?'home':'other';const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.classList.add('toolbar-icon');const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d',paths[id]);svg.append(path);link.prepend(svg);}
-function normalized(value){return value.normalize('NFKC').replace(/ي/g,'ی').replace(/ك/g,'ک').toLowerCase().trim();}
+function normalized(value){return displayText(value).normalize('NFKC').replace(/ي/g,'ی').replace(/ك/g,'ک').toLowerCase().trim();}
 function topTarget(nav,target){const item=[...nav.children].find(child=>target&&child.contains(target));return item?.matches('a')?item:item?.querySelector(':scope>summary');}
 export function enhanceToolbars(){
  for(const nav of document.querySelectorAll('.site-header .desktop-nav,.site-header .mobile-menu>nav')){

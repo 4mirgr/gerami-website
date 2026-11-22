@@ -1,6 +1,7 @@
+import {displayText} from '../js/site-model.mjs';
 export function discussionEditor(host){
  const section=document.createElement('section');section.className='studio-group';host.append(section);
- const element=(tag,text)=>{const el=document.createElement(tag);el.textContent=text;return el;};
+ const element=(tag,text)=>{const el=document.createElement(tag);el.textContent=displayText(String(text??''));return el;};
  const button=(label,fn)=>{const b=element('button',label);b.type='button';b.className='tool-button';b.onclick=fn;return b;};
  const select=element('select','');select.setAttribute('aria-label','وضعیت بازبینی');
  for(const [value,label] of [['pending','در انتظار بازبینی'],['approved','تأییدشده'],['rejected','ردشده']]){
@@ -24,7 +25,7 @@ export function discussionEditor(host){
    sender.textContent=data.senderReady?'':'ایمیل‌های تأیید پس از اتصال فرستنده ارسال می‌شوند.';
    for(const item of data.items){
     const row=element('article','');row.className='panel';
-    const link=element('a','مشاهدهٔ مطلب');link.href=item.path;
+    const link=element('a','مشاهده مطلب');link.href=item.path;
     row.append(element('h3',item.kind==='comment'?'دیدگاه · '+item.display_name:'پسند'),link,element('p',item.body),element('small',new Date(item.created_at).toLocaleString('fa-IR')));
     if(item.email)row.append(element('p','ایمیل تأیید · '+(item.email==='sent'?'پذیرفته‌شده توسط فرستنده':item.email==='queued'?'در صف ارسال':'نیازمند بررسی ارسال')));
     if(item.status==='pending')for(const [decision,label] of [['approved','تأیید'],['rejected','رد']]){

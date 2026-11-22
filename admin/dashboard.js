@@ -23,7 +23,7 @@
   if(editing){
    const fragment=page==='articles'?'#/collections/website/entries/articles':['profile','contact'].includes(page)?'#/collections/website/entries/profile':'#/';
    $('direct-editor').href='editor.html'+fragment;
-   $('editor-description').textContent=page==='contact'?'ویرایش ایمیل، تلفن، لینکدین و راه مراجعه در فرم اطلاعات تماس.':'ویرایشگر پیشرفتهٔ مقاله، منابع، رزومه و پیش‌نویس‌ها؛ اتصال از کنترل سراسری بالای پنل انجام می‌شود.';
+   $('editor-description').textContent=page==='contact'?'ویرایش ایمیل، تلفن، لینکدین و راه مراجعه در فرم اطلاعات تماس.':'ویرایشگر پیشرفته مقاله، منابع، رزومه و پیش‌نویس‌ها؛ اتصال از کنترل سراسری بالای پنل انجام می‌شود.';
    if(!frame){frame=document.createElement('iframe');frame.className='editor-frame';frame.title='ویرایشگر امن محتوای سایت';frame.src='editor.html'+fragment;$('editor-slot').append(frame);}
    else {try{frame.contentWindow.location.hash=fragment;}catch(_){/* The independent editor link remains available. */}}
   }

@@ -1,11 +1,11 @@
 {
   "blocks": {
     "text-001": {
-      "fa": "دربارهٔ من | دکتر امیرهوشنگ گرامی",
+      "fa": "درباره من | دکتر امیرهوشنگ گرامی",
       "en": "About | Dr. Amir Houshang Gerami"
     },
     "text-002": {
-      "fa": "سوابق تحصیلی، تجربهٔ بالینی، تدریس و پژوهش دکتر امیرهوشنگ گرامی.",
+      "fa": "سوابق تحصیلی، تجربه بالینی، تدریس و پژوهش دکتر امیرهوشنگ گرامی.",
       "en": "Education, clinical experience, teaching and research of Dr. Amir Houshang Gerami."
     },
     "text-003": {
@@ -29,7 +29,7 @@
       "en": "Home"
     },
     "text-020": {
-      "fa": "دربارهٔ من",
+      "fa": "درباره من",
       "en": "About me"
     },
     "text-021": {
@@ -41,11 +41,11 @@
       "en": "Internal medicine specialist"
     },
     "text-023": {
-      "fa": "شمارهٔ نظام پزشکی ۱۹۰۹۴۷",
+      "fa": "شماره نظام پزشکی ۱۹۰۹۴۷",
       "en": "Iran Medical Council no. 190947"
     },
     "text-024": {
-      "fa": "برای من، طب داخلی از شنیدن داستان بیمار شروع می‌شود. زمان شروع یک علامت، تغییر یک دارو یا نتیجهٔ آزمایشی قدیمی گاهی به اندازهٔ معاینهٔ امروز به فهم مسئله کمک می‌کند. همین نگاه، کار من در درمانگاه، آموزش پزشکی و پژوهش را به هم پیوند می‌دهد.",
+      "fa": "برای من، طب داخلی از شنیدن داستان بیمار شروع می‌شود. زمان شروع یک علامت، تغییر یک دارو یا نتیجه آزمایشی قدیمی گاهی به اندازه معاینه امروز به فهم مسئله کمک می‌کند. همین نگاه، کار من در درمانگاه، آموزش پزشکی و پژوهش را به هم پیوند می‌دهد.",
       "en": "For me, internal medicine starts with listening. When a symptom began, a change in medication or an old test result can be as helpful as today’s examination. That perspective connects my clinical work, teaching and research."
     },
     "text-026": {
@@ -53,7 +53,7 @@
       "en": "LinkedIn profile"
     },
     "text-039": {
-      "fa": "پروژهٔ آموزش پزشکی من، IntMed",
+      "fa": "پروژه آموزش پزشکی من، IntMed",
       "en": "My medical education project, IntMed"
     },
     "text-043": {
@@ -85,11 +85,11 @@
       "en": "Published research"
     },
     "text-055": {
-      "fa": "یافته‌های بالینی، آزمایشگاهی و نوار قلب در مسمومیت با کلشی‌سین: تجربهٔ ۱۰ ساله",
+      "fa": "یافته‌های بالینی، آزمایشگاهی و نوار قلب در مسمومیت با کلشی‌سین: تجربه ۱۰ ساله",
       "en": "Clinical, Laboratory, and Electrocardiographic Findings in Colchicine Toxicity: 10 Years of Experience"
     },
     "text-056": {
-      "fa": "مشاهدهٔ مقاله",
+      "fa": "مشاهده مقاله",
       "en": "Read the paper"
     },
     "text-057": {

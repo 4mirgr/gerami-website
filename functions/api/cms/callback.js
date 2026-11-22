@@ -38,7 +38,7 @@ try{if(window.opener){
 setTimeout(()=>{
  if(delivered)return;
  if(stored){location.replace(origin+'/admin/editor.html');}
- else{document.getElementById('status').textContent='مرورگر ذخیره‌سازی ورود را مسدود کرده است. ویرایشگر را در یک صفحهٔ مستقل باز کنید و دوباره وارد شوید.';}
+ else{document.getElementById('status').textContent='مرورگر ذخیره‌سازی ورود را مسدود کرده است. ویرایشگر را در یک صفحه مستقل باز کنید و دوباره وارد شوید.';}
 },1200);
 </script></html>`,{headers});
   } catch (_) { return fail('Login provider unavailable. Please retry.',502); }

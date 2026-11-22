@@ -20,7 +20,7 @@ try {
  await page.locator('[data-theme-toggle]').click();
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.screenshot({path:'/tmp/gerami-night-mobile.png',fullPage:true});
- const article={slug:'first-article',status:'published',audience:'patients',category:'General',title_fa:'مقالهٔ آزمایشی',title_en:'Test article',body_fa:'<img src=x onerror=alert(1)>',body_en:'Education',author:'Test author',published_at:'2026-11-11',reviewed_at:'2026-11-11',sources:[{title:'Unsafe',url:'javascript:alert(1)'},{title:'Safe',url:'https://example.org'}]};
+ const article={slug:'first-article',status:'published',audience:'patients',category:'General',title_fa:'مقاله آزمایشی',title_en:'Test article',body_fa:'<img src=x onerror=alert(1)>',body_en:'Education',author:'Test author',published_at:'2026-11-11',reviewed_at:'2026-11-11',sources:[{title:'Unsafe',url:'javascript:alert(1)'},{title:'Safe',url:'https://example.org'}]};
  await page.route('**/content/articles.json',route=>route.fulfill({json:{articles:[article,{...article,slug:'secret-draft',status:'draft',title_fa:'پیش‌نویس'}]}}));
  await page.goto('http://127.0.0.1:4173/pages/blog.html');
  await page.waitForSelector('.cms-article');assert.equal(await page.locator('.cms-article').count(),1);

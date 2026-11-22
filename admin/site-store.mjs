@@ -51,7 +51,7 @@ export class SiteStore extends EventTarget{
  get dirty(){return Object.keys(this.drafts).filter(path=>managedPaths.includes(path));}
  get count(){return this.dirty.length+this.media.size;}
  async publish(message){
-  if(this.busy||!this.remoteReady||this.session.state!=='connected')throw Error('ابتدا اتصال را تأیید و آخرین نسخهٔ مخزن را دریافت کنید.');
+  if(this.busy||!this.remoteReady||this.session.state!=='connected')throw Error('ابتدا اتصال را تأیید و آخرین نسخه مخزن را دریافت کنید.');
   if(this.conflicts.size)throw Error('تعارض نسخه‌ها را پیش از انتشار برطرف کنید.');
   if(!this.count)throw Error('تغییری برای انتشار وجود ندارد.');
   const dirty=this.dirty,sourceSnapshot=Object.fromEntries(dirty.map(path=>[path,clone(this.documents[path])])),snapshot=clone(sourceSnapshot);

@@ -4,11 +4,11 @@ from pathlib import Path
 from urllib.parse import urlsplit
 SITE='https://drgerami-md.ir'
 def generate(root,output):
- from site_studio import TOPIC_ART, bake_settings
+ from site_studio import TOPIC_ART, bake_settings, public_document
  root,output=Path(root),Path(output);escape=lambda s:html.escape(str(s),quote=True)
- data=json.loads((root/'backend/editorial/functions/gerami-editorial/taxonomy.json').read_text())
+ data=public_document(root/'backend/editorial/functions/gerami-editorial/taxonomy.json')
  topics={t['source_id']:(c,t) for c in data['categories'] for t in c['topics']}
- posts=[p for p in json.loads((root/'content/articles.json').read_text())['articles'] if p.get('status')=='published']
+ posts=[p for p in public_document(root/'content/articles.json')['articles'] if p.get('status')=='published']
  def topic_path(c,t=None):return '/topics/'+c['root']['id']+'/'+(t['id']+'/' if t else '')
  def post_path(p):
   if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*',p.get('slug','')):raise ValueError('Invalid article slug')
@@ -112,7 +112,7 @@ def generate(root,output):
   if p.get('source_topic_id'):markup+='<p class="article-source">منبع: <span lang="en" dir="ltr">Harrison 2025</span></p>'
   else:markup+=''.join('<p class="article-source"><a rel="noopener noreferrer" href="'+escape(s['url'])+'">'+escape(s.get('title') or s['url'])+'</a></p>' for s in p.get('sources',[]) if urlsplit(s.get('url','')).scheme=='https')
   if p.get('hashtags'):markup+='<p class="article-tags">'+escape(' '.join(p['hashtags']))+'</p>'
-  crumbs=[('همهٔ مطالب','/pages/blog.html')]
+  crumbs=[('همه مطالب','/pages/blog.html')]
   if p.get('source_topic_id'):
    c,t=topics[p['source_topic_id']];crumbs=[('موضوعات','/topics/'),(c['root']['fa'],topic_path(c)),(t['fa'],topic_path(c,t))]
    related=[x for x in posts if x.get('source_topic_id')==p['source_topic_id'] and x['slug']!=p['slug']]

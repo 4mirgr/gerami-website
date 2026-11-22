@@ -10,7 +10,7 @@ export function topicEditor({store,group,node,field,button,edit,render,notice}){
  function draw(items,parent,child=false){
   for(const [index,item] of items.entries()){
    const box=node('details',undefined,child?'topic-editor-child':'topic-editor-node');box.dataset.topicId=item.id;box.open=index===0||item.id===expandedTopic||item.children.some(c=>c.id===expandedTopic);const summary=node('summary',item.fa);box.append(summary);
-   const id=field(box,'شناسهٔ موضوع',item.id,value=>{item.id=value;save();},{help:'حروف انگلیسی کوچک، عدد و خط تیره؛ تغییر شناسه، نشانی آرشیو را تغییر می‌دهد.'});id.dir='ltr';id.readOnly=referenced(item.id);
+   const id=field(box,'شناسه موضوع',item.id,value=>{item.id=value;save();},{help:'حروف انگلیسی کوچک، عدد و خط تیره؛ تغییر شناسه، نشانی آرشیو را تغییر می‌دهد.'});id.dir='ltr';id.readOnly=referenced(item.id);
    field(box,'عنوان فارسی',item.fa,value=>{item.fa=value;summary.textContent=value;save();});field(box,'English title',item.en,value=>{item.en=value;save();}).dir='ltr';
    field(box,'شرح فارسی',item.description_fa,value=>{item.description_fa=value;save();},{large:true});field(box,'English description',item.description_en,value=>{item.description_en=value;save();},{large:true}).dir='ltr';
    field(box,'آیکون',item.icon,value=>{item.icon=value;save();},{options:iconLabels});

@@ -5,7 +5,7 @@
       "en": "Visit information | Dr. Amir Houshang Gerami"
     },
     "text-002": {
-      "fa": "وضعیت نوبت‌دهی و اطلاعات تأییدشدهٔ مراجعه به دکتر گرامی.",
+      "fa": "وضعیت نوبت‌دهی و اطلاعات تأییدشده مراجعه به دکتر گرامی.",
       "en": "Appointment availability and confirmed visit information for Dr. Gerami."
     },
     "text-003": {
@@ -49,11 +49,11 @@
       "en": "Choose one of my profiles to view appointment options."
     },
     "text-025": {
-      "fa": "مشاهدهٔ نوبت‌ها و رزرو",
+      "fa": "مشاهده نوبت‌ها و رزرو",
       "en": "View availability & book"
     },
     "text-026": {
-      "fa": "برای ویزیت حضوری، نشانی محل مراجعه را از تأییدیهٔ نوبت بخوانید. برای ویزیت آنلاین، روش تماس را در همان سرویس بررسی کنید.",
+      "fa": "برای ویزیت حضوری، نشانی محل مراجعه را از تأییدیه نوبت بخوانید. برای ویزیت آنلاین، روش تماس را در همان سرویس بررسی کنید.",
       "en": "For an in-person visit, check the address in your booking confirmation. For an online visit, check the contact instructions from the service."
     },
     "text-027": {
@@ -85,7 +85,7 @@
       "en": "© Dr. Amir Houshang Gerami. All rights reserved."
     },
     "text-039": {
-      "fa": "نوع ویزیت، نزدیک‌ترین زمان آزاد و هزینه را در صفحهٔ پزشک بررسی کنید. نوبت پس از تأیید در همان سرویس ثبت می‌شود.",
+      "fa": "نوع ویزیت، نزدیک‌ترین زمان آزاد و هزینه را در صفحه پزشک بررسی کنید. نوبت پس از تأیید در همان سرویس ثبت می‌شود.",
       "en": "Open a profile to see the visit format, next available time and fee. The service confirms your booking."
     },
     "text-040": {

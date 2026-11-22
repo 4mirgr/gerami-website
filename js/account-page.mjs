@@ -42,7 +42,7 @@ for(const form of document.querySelectorAll('form[data-account-form]'))form.addE
   form.querySelectorAll('input[type=password]').forEach(el=>el.value='');
   if(result.authenticated){account=result.account;changed(account);status.textContent='';render();
    const next=new URLSearchParams(location.search).get('next');if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
-  }else{status.textContent=t('ایمیل و پوشهٔ اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
+  }else{status.textContent=t('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
 document.querySelector('#google-signin').addEventListener('click',()=>action(async()=>{
@@ -58,7 +58,7 @@ addEventListener('account:changed',event=>{account=event.detail;render();});
 async function initialize(){try{
  account=await getSession();render();
  const params=new URLSearchParams(location.search);
- if(params.has('logout')&&account)status.textContent=t('برای خروج، دکمهٔ خروج از حساب را بزنید.','Use Sign out to end your session.');
+ if(params.has('logout')&&account)status.textContent=t('برای خروج، دکمه خروج از حساب را بزنید.','Use Sign out to end your session.');
  if(params.has('reauth')&&account)status.textContent=t('برای ادامه، از حساب خارج شوید و دوباره وارد شوید.','To continue, sign out and sign in again.');
  if(['invalid_callback','account_unavailable'].includes(params.get('error')))message({message:params.get('error')});
  if(account&&/^\/clinic\/(?:portal\/)?$/.test(params.get('next')||'')&&!['error','reauth','logout'].some(key=>params.has(key)))location.replace(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');
