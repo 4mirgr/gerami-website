@@ -394,3 +394,43 @@ injected; six high-entropy images test preserves originals and caps aggregate60k
 Pillow is build-only, pinned in requirements; no browser dependency/API change.
 The regression failed0/6 previews before implementation, passed6/6 after. Final
 CI, populated assembled verification and actual requeue/publication receipts follow.
+
+
+### Actual approved publication recovery — 2026-11-22
+
+PR49 head a352ff0143d21bd61010f8adcbeaf13153fb7e49 passed both CI workflows;
+exact merge6a6f40f6ebd5250e5aa13446f97071db2a5fccbd deployed successfully. Real
+three-post source/browser and fresh pinned combined668-file artifact suites passed.
+All3 listing previews total25948B; selected originals match their approved SHA256.
+Source171336B/57283B gzip; three-post root27905B gzip; hard budgets unchanged.
+The cache regression measures re-fetch of already-loaded immutable resources (zero)
+separately from first loads of new page-specific post previews. No gate was skipped.
+
+The existing retry mutation requeued the three genuine approved snapshots; queries
+confirmed unchanged revision, content, selected image hash, approval owner and full
+snapshot. No new approval was created and no copy/image/hashtag was edited.
+Existing cron serialized the remaining queue. Actual signed workflow successes:
+
+-45018253747/job137195187833 →1f6f832ce236a1f74f933e1b6f38be38e95c7bc2 (asthma).
+-45018437145/job137196096845 →af99c81a3eeb4408d2cca8c663dec5abbdaff5af (azotemia).
+-45018838293/job137197023551 →0dbefa06ad603e3b3c1c49b7d04769cb3630eaf5 (dysphagia).
+
+Each ran full populated source/browser + combined build + assembled checks before
+its non-force content commit. Actual three-post publisher transfer352926B plus
+125162B HTML; zero repeated shared immutable assets and zero bootstrap public JSON
+requests (the bounded approved-article feed is separately fetched as designed).
+Cloudflare first/second deployments7656ab7f and3eb1dbcd succeeded; final deployment
+0ad08a05-7eca-404c-917f-217759df3f28 is checked against third commit above.
+
+Public-only verification fetches the public feed, then only article/image URLs it
+actually contains. Returned public snapshot/image hashes are compared locally with
+owner-approved private records; unpublished paths/hashes are never supplied to a
+third-party browser tool. Supabase functionv9/botv20/Auth/Clinic/AUS unchanged.
+
+
+Final live acceptance at11:50UTC: third deployment0ad08a05 succeeded on0dbefa0;
+all3 canonical article pages returned200 and exactly matched each genuine approved
+snapshot and original image SHA256. All3 database statuses are published, error=null,
+published_notified=true. Public-only checks confirmed Harrison 2025. The existing
+normal cron completed link notifications; no synthetic approval/publication marker,
+backend deployment, credential export or owner re-approval was needed.
