@@ -1,6 +1,6 @@
 {
   "repository": "4mirgr/gerami-website",
-  "commit": "528d9d06c2e60b944c3cb332dbb5fd8798b52904",
+  "commit": "50c41180b8ef66a942fc80e0599550e9c7cdba54",
   "assets": {
     "/assets/fonts/Vazirmatn.woff2": "4e3fa217d38fdafc1fea4414ceb58ca5e662cf0ab5fa735a8c8c20e8b42cad92",
     "/assets/glass/ribbon-day.webp": "b722cf5791f180499dfaae18a5d743f9a9d0bb7df15ad316148f7567cd2a16b7",
@@ -23,6 +23,8 @@
     "/assets/glass/golden-gate-day.webp": "c90a54ebb0af5f437f2f52fa6bada131759a26c74e6dbd86b314f101ba5be321",
     "/assets/glass/golden-gate-night.webp": "6643355a4c32928519ef626909d8781c33f8ab982d83ffc4da250f6a952c94ed",
     "/assets/optimized/intmed-poster-en.0827f8605019ca9d.webp": "0827f8605019ca9dd7b694d691b986f3e5d5236ff69c85cde86b2ed646edfc7e",
-    "/assets/optimized/intmed-poster-fa.e0b786e1529138e3.webp": "e0b786e1529138e33cbb28bd55527259ffdf26e8255693db6d337fe5f8bff0ce"
+    "/assets/optimized/intmed-poster-fa.e0b786e1529138e3.webp": "e0b786e1529138e33cbb28bd55527259ffdf26e8255693db6d337fe5f8bff0ce",
+    "/assets/optimized/patient-portal.2f4af27e1bd2ceef.webp": "2f4af27e1bd2ceef63a27646b7b7ddb6f19e463bfdce461d0326360e03dd68a1",
+    "/assets/optimized/gerami-portrait.e236052487cb3fc1.webp": "e236052487cb3fc18b3b47e39e422ef3cf18e368a503e37bea275a3d2e45b014"
   }
 }

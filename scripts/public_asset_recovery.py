@@ -50,11 +50,15 @@ def add_public_asset_recovery(root, site):
     code = code.replace(marker, 'const assets=' + json.dumps(mirrors, separators=(',', ':')))
     if len(code.encode()) > 18000:
         raise ValueError('Public recovery must fit the small first response')
-    no_script = ':root{' + ''.join(entry['variable'] + ':url("' + path + '");' for path, entry in mirrors.items() if entry['type'] == 'image/webp') + '}'
     font = next(path for path, entry in mirrors.items() if entry['type'] == 'font/woff2')
-    no_script += '@font-face{font-family:Vazirmatn;src:url("' + font + '") format("woff2");font-weight:100 900;font-display:swap}'
+    font_face = '@font-face{font-family:Vazirmatn;src:url("' + font + '") format("woff2");font-weight:100 900;font-display:swap}'
     for page in [site / 'index.html', *sorted((site / 'pages').glob('*.html')), *sorted((site / 'articles').rglob('index.html')), *sorted((site / 'topics').rglob('index.html'))]:
         text = page.read_text()
         if text.count('</body>') != 1:
             raise ValueError('Public recovery requires reviewed document boundary')
+        # Inline images retain a normal src. Only CSS art referenced on this page
+        # needs a native fallback variable when JavaScript is disabled.
+        variables = [entry['variable'] + ':url("' + path + '");' for path, entry in mirrors.items()
+                     if entry['type'] == 'image/webp' and 'var(' + entry['variable'] + ',' in text]
+        no_script = ':root{' + ''.join(variables) + '}' + font_face
         page.write_text(text.replace('</body>', '<noscript><style>' + no_script + '</style></noscript><script data-public-asset-recovery>' + code + '</script></body>'))

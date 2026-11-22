@@ -33,80 +33,28 @@
       "en": "About me"
     },
     "text-021": {
-      "fa": "دربارهٔ من",
-      "en": "About me"
-    },
-    "text-022": {
-      "fa": "معرفی، مسیر حرفه‌ای و فعالیت‌ها",
-      "en": "Profile, professional journey, and activities"
-    },
-    "text-023": {
       "fa": "دکتر امیرهوشنگ گرامی",
       "en": "Dr. Amir Houshang Gerami"
     },
-    "text-024": {
-      "fa": "مسیر حرفه‌ای من در کنار مراقبت از بیمار، بر آموزش پزشکی و پژوهش بالینی استوار است. در این صفحه می‌توانید با تحصیلات، محیط‌های فعالیت و زمینه‌های همکاری من آشنا شوید.",
-      "en": "My professional work combines patient care with medical education and clinical research. Explore my training, clinical experience and areas of collaboration below."
+    "text-022": {
+      "fa": "متخصص بیماری‌های داخلی",
+      "en": "Internal medicine specialist"
     },
-    "text-025": {
-      "fa": "شرح سوابق حرفه‌ای و آموزشی در ادامه آمده است.",
-      "en": "Professional and educational background is detailed below."
+    "text-023": {
+      "fa": "شمارهٔ نظام پزشکی ۱۹۰۹۴۷",
+      "en": "Iran Medical Council no. 190947"
+    },
+    "text-024": {
+      "fa": "برای من، طب داخلی از شنیدن داستان بیمار شروع می‌شود. زمان شروع یک علامت، تغییر یک دارو یا نتیجهٔ آزمایشی قدیمی گاهی به اندازهٔ معاینهٔ امروز به فهم مسئله کمک می‌کند. همین نگاه، کار من در درمانگاه، آموزش پزشکی و پژوهش را به هم پیوند می‌دهد.",
+      "en": "For me, internal medicine starts with listening. When a symptom began, a change in medication or an old test result can be as helpful as today’s examination. That perspective connects my clinical work, teaching and research."
     },
     "text-026": {
       "fa": "پروفایل لینکدین",
       "en": "LinkedIn profile"
     },
-    "text-027": {
-      "fa": "تحصیلات و مدارک",
-      "en": "Education & qualifications"
-    },
-    "text-028": {
-      "fa": "جزئیات تحصیلات و عنوان حرفه‌ای در حال تکمیل است.",
-      "en": "Details of education and professional title are being completed."
-    },
-    "text-029": {
-      "fa": "تجربه و سوابق بالینی",
-      "en": "Clinical background"
-    },
-    "text-030": {
-      "fa": "سوابق و محل‌های فعالیت پس از تأیید اطلاعات درج می‌شوند.",
-      "en": "Background and practice locations will be listed once confirmed."
-    },
-    "text-031": {
-      "fa": "فعالیت‌های آموزشی",
-      "en": "Educational work"
-    },
-    "text-032": {
-      "fa": "آماده‌سازی مطالب آموزشی با استفاده از پروژهٔ intmed.",
-      "en": "Preparing educational writing informed by the intmed project."
-    },
-    "text-033": {
-      "fa": "مهارت‌ها و زمینه‌های فعالیت",
-      "en": "Skills & focus areas"
-    },
-    "text-034": {
-      "fa": "فهرست نهایی مهارت‌ها همراه با شرح و سابقهٔ مرتبط تکمیل می‌شود.",
-      "en": "The final list of skills will include descriptions and relevant experience."
-    },
-    "text-035": {
-      "fa": "بیشتر ببینید",
-      "en": "Explore further"
-    },
-    "text-036": {
-      "fa": "آموزش و پروژه‌ها",
-      "en": "Education & projects"
-    },
-    "text-037": {
-      "fa": "آموزش پزشکی",
-      "en": "Medical education"
-    },
-    "text-038": {
-      "fa": "پروژهٔ پزشکی من؛ مبنایی برای انتخاب و آماده‌سازی مطالب آموزشی این وب‌سایت.",
-      "en": "My medical project, informing the educational content selected for this website."
-    },
     "text-039": {
-      "fa": "دربارهٔ پروژه",
-      "en": "About the project"
+      "fa": "پروژهٔ آموزش پزشکی من، IntMed",
+      "en": "My medical education project, IntMed"
     },
     "text-043": {
       "fa": "دکتر امیرهوشنگ گرامی",

@@ -128,7 +128,7 @@ def home_bootstrap(root, text, ident="home"):
     for path in paths:
         value = json.loads((root / path).read_text())
         if path == 'content/site.json' and ident != 'about':
-            value = {**value, 'cv': []}  # Detailed CV is rendered only by About.
+            value = {**value, 'cv': [], 'bio_fa': '', 'bio_en': ''}  # Only About renders the profile narrative.
         # A growing feed must not turn the initial HTML into a database dump.
         # Empty feed stays inline; published feeds load after the static first paint.
         if path == 'content/articles.json' and value.get('articles'):
@@ -204,13 +204,9 @@ def bake_settings(root, text, ident):
             return '<' + tag + ' data-fa="' + escape(fa) + '" data-en="' + escape(en) + '">' + escape(fa) + '</' + tag + '>'
         markup = bilingual('p', profile.get('bio_fa', ''), profile.get('bio_en', ''))
         if profile.get('cv'):
-            markup += bilingual('h2', 'رزومه و سوابق', 'CV and experience')
+            markup += bilingual('h2', 'مسیر حرفه‌ای و سوابق بالینی', 'Training and clinical experience')
             for item in profile['cv']:
-                markup += '<article class="cv-card card glass-surface">' + bilingual('h3', item['title_fa'], item['title_en']) + bilingual('p', item['detail_fa'], item['detail_en']) + '</article>'
-        def placeholder(match):
-            tag = re.sub(r'\s+hidden(?:="[^"]*")?', '', match[0])
-            return tag[:-1] + ' hidden>' if profile.get('cv') else tag
-        text = re.sub(r'<(?:p|dl)\b[^>]*\bdata-cv-placeholder[^>]*>', placeholder, text)
+                markup += '<article class="career-entry">' + bilingual('h3', item['title_fa'], item['title_en']) + bilingual('p', item['detail_fa'], item['detail_en']) + '</article>'
         text = re.sub(r'(<section\b[^>]*data-profile-host[^>]*>).*?(</section>)', lambda m: m[1] + markup + m[2], text, flags=re.S)
 
     def menu(items):

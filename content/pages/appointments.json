@@ -45,16 +45,16 @@
       "en": "Before visiting"
     },
     "text-024": {
-      "fa": "لینک نوبت‌دهی اختصاصی هنوز اعلام نشده است. در این نسخه امکان ثبت یا تأیید نوبت وجود ندارد.",
-      "en": "A dedicated booking link has not been announced yet. This version cannot register or confirm appointments."
+      "fa": "برای دیدن نوبت‌ها، یکی از صفحه‌های من را انتخاب کنید.",
+      "en": "Choose one of my profiles to view appointment options."
     },
     "text-025": {
       "fa": "مشاهدهٔ نوبت‌ها و رزرو",
       "en": "View availability & book"
     },
     "text-026": {
-      "fa": "نشانی، زمان‌های حضور و راه ارتباط با محل مراجعه پس از تأیید اطلاعات در این صفحه درج می‌شوند.",
-      "en": "Confirmed location, visiting hours, and practice contact information will be listed on this page."
+      "fa": "برای ویزیت حضوری، نشانی محل مراجعه را از تأییدیهٔ نوبت بخوانید. برای ویزیت آنلاین، روش تماس را در همان سرویس بررسی کنید.",
+      "en": "For an in-person visit, check the address in your booking confirmation. For an online visit, check the contact instructions from the service."
     },
     "text-027": {
       "fa": "راه‌های ارتباط",
@@ -83,10 +83,29 @@
     "text-038": {
       "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
       "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    },
+    "text-039": {
+      "fa": "نوع ویزیت، نزدیک‌ترین زمان آزاد و هزینه را در صفحهٔ پزشک بررسی کنید. نوبت پس از تأیید در همان سرویس ثبت می‌شود.",
+      "en": "Open a profile to see the visit format, next available time and fee. The service confirms your booking."
+    },
+    "text-040": {
+      "fa": "پذیرش۲۴",
+      "en": "Paziresh24"
+    },
+    "text-041": {
+      "fa": "اسنپ‌دکتر",
+      "en": "SnappDoctor"
+    },
+    "text-042": {
+      "fa": "دکترنکست",
+      "en": "DrNext"
     }
   },
   "links": {
     "link-001": "/index.html",
-    "link-002": "/pages/contact.html"
+    "link-002": "/pages/contact.html",
+    "link-003": "https://www.paziresh24.com/dr/دکتر-امیرهوشنگ-گرامی/",
+    "link-004": "https://snapp.doctor/specialist/82526/",
+    "link-005": "https://drnext.ir/doctor/general-practitioner-amirhoushang-gerami-2d69rn"
   }
 }

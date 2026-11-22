@@ -17,7 +17,7 @@ class SiteStudioBuild(unittest.TestCase):
             (root / 'content/site.json').write_text(json.dumps(profile))
             template = '<html><head></head><body><main><section data-profile-host></section></main></body></html>'
             page = bake_settings(root, template, 'about')
-            self.assertIn('class="cv-card card glass-surface"', page)
+            self.assertIn('class="career-entry"', page)
             self.assertIn('معرفی واقعی &lt;script&gt;bad()&lt;/script&gt;', page)
             self.assertIn('شرح مستند &lt;img onerror=bad()&gt;', page)
             self.assertIn('data-en="Clinical training"', page)

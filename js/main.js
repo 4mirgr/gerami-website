@@ -13,8 +13,8 @@
     document.querySelectorAll('img[data-src-fa][data-src-en]').forEach(image=>{
       const src=image.dataset[selected==='fa'?'srcFa':'srcEn'];
       if(image.dataset.activeLanguage!==selected){if(image.getAttribute('src')!==src)image.src=src;image.dataset.activeLanguage=selected;}
-      image.alt=image.dataset[selected==='fa'?'altFa':'altEn']||'';
     });
+    document.querySelectorAll('img[data-alt-fa][data-alt-en]').forEach(image=>{image.alt=image.dataset[selected==='fa'?'altFa':'altEn'];});
   }
   new MutationObserver(applyLanguageImages).observe(root,{attributes:true,attributeFilter:['lang']});
 

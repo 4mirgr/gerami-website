@@ -17,9 +17,8 @@ const clear=host=>{for(const img of host.querySelectorAll('img'))img.removeAttri
   if(!profileHost){profileHost=main.querySelector('[data-profile-host]');if(!profileHost){profileHost=el('section','','cms-profile container');main.append(profileHost);}}profileHost.replaceChildren();
   if(path.endsWith('/about')){
    if(profile['bio_'+lang()])profileHost.append(el('p',profile['bio_'+lang()]));const entries=Array.isArray(profile.cv)?profile.cv:[];
-   document.querySelectorAll('[data-cv-placeholder]').forEach(node=>{node.hidden=entries.length>0;});
-   if(entries.length)profileHost.append(el('h2',text('رزومه و سوابق','CV and experience')));
-   for(const item of entries){const card=el('article','','cv-card card glass-surface');card.append(el('h3',item['title_'+lang()]),el('p',item['detail_'+lang()]));profileHost.append(card);}
+   if(entries.length)profileHost.append(el('h2',text('مسیر حرفه‌ای و سوابق بالینی','Training and clinical experience')));
+   for(const item of entries){const card=el('article','','career-entry');card.append(el('h3',item['title_'+lang()]),el('p',item['detail_'+lang()]));profileHost.append(card);}
   }else{
    const contact=[];
    if(typeof profile.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email))contact.push([profile.email,'mailto:'+profile.email]);
@@ -49,7 +48,6 @@ function renderTopics(){
   }
   if(!catalog.topics.length)host.append(el('p',text('موضوعات آموزشی در حال تنظیم هستند.','Reading topics are being organized.'),'empty-topics'));
  }
- const input=document.querySelector('#home-search');if(input)input.placeholder=text('دربارهٔ چه موضوعی می‌خواهید بخوانید؟','What would you like to read about?');
 }
 let search,audienceSelect,topicSelect,list,count,heading,pagination;
 let filter=readFilter();
@@ -86,7 +84,13 @@ function renderArticles(){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
   if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
-  tile.append(el('p',[topic?.[lang()]||item.category,item.author,item.published_at,item.reviewed_at?text('بازبینی: ','Reviewed: ')+item.reviewed_at:''].filter(Boolean).join(' · '),'post-meta'),card);
+  const meta=el('p',[topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
+  for(const [label,date] of [['',item.published_at],[text('بازبینی: ','Reviewed: '),item.reviewed_at]]){
+   if(!date)continue;
+   const time=el('time',date);time.dateTime=date;time.dir='ltr';
+   meta.append((meta.textContent?' · ':'')+label,time);
+  }
+  tile.append(meta,card);
   const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,isHome?copy.body.trim().split(/\r?\n/).find(line=>line.trim()&&!/^#{1,4} /.test(line))||copy.title:copy.body,imageSource);card.append(body);
   const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(!isHome&&sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
   if(!isHome&&item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
