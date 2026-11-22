@@ -34,7 +34,7 @@ class PublicAssets(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             site = self.stage(folder)
             uploads = site / 'assets/uploads'; uploads.mkdir(exist_ok=True)
-            data = json.loads((site / 'content/articles.json').read_text())
+            data = {'articles': []}
             originals = {}
             for i in range(6):
                 image = Image.frombytes('RGB', (1200, 800), random.Random(i).randbytes(1200 * 800 * 3))
