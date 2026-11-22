@@ -29,3 +29,12 @@
  .section-emblem { width:70px; }
  .atlas-category img,.atlas-heading img { width:52px; height:52px; }
 }
+
+.contact-channel { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:clamp(14px,3vw,32px); align-items:center; color:var(--ink); text-decoration:none; }
+.contact-brand { display:block; width:clamp(52px,7vw,88px); height:auto; }
+.linkedin-brand { background:white; border-radius:8%; }
+.contact-channel h2 { font-size:clamp(1.3rem,2.5vw,1.9rem); }
+.contact-channel .contact-action { display:inline-block; margin-block-start:14px; color:var(--teal); font-weight:650; text-decoration:underline; text-underline-offset:.25em; overflow-wrap:anywhere; }
+.contact-channel:is(:hover,:focus-visible) .contact-action { color:var(--ink); text-decoration-thickness:2px; }
+.contact-channel:focus-visible { outline:3px solid var(--teal); outline-offset:3px; }
+.contact-channel[hidden] { display:none; }

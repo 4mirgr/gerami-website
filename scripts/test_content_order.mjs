@@ -12,5 +12,15 @@ try{
  await page.evaluate(()=>location.hash='public');await page.waitForFunction(()=>document.querySelector('[data-audience-filter]').value==='patients');assert.deepEqual(await page.locator('.cms-article summary').allTextContents(),['recent','oldest']);
  await page.goto('http://127.0.0.1:4173/pages/appointments.html');await page.waitForFunction(()=>document.querySelector('[data-pending=appointment]').hidden);assert.equal(await page.locator('[data-destination=appointment]').getAttribute('href'),'https://example.org/visit');
  await page.goto('http://127.0.0.1:4173/pages/about.html');await page.waitForSelector('.cms-profile .career-entry');assert.equal(await page.locator('.career-entry h3').first().textContent(),'عنوان تأییدشده');assert.equal(await page.locator('[data-destination=linkedin]').first().getAttribute('href'),'https://www.linkedin.com/in/test-physician/');
+ await page.goto('http://127.0.0.1:4173/pages/contact.html');
+ const email=page.locator('.contact-channel[data-destination=email]');
+ await page.waitForFunction(()=>document.querySelector('.contact-channel[data-destination=email]').getAttribute('href')==='mailto:public@example.org');
+ assert.equal(await email.locator('[data-contact-address]').innerText(),'public@example.org');
+ for(const kind of ['email','linkedin']){
+  const image=page.locator('.contact-channel[data-destination='+kind+'] img');
+  await image.evaluate(img=>img.decode());
+  assert(await image.evaluate(img=>{const box=img.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)?.closest('a')===img.closest('a');}));
+ }
+ assert.equal(await page.locator('main .cms-profile,main .notice').count(),0);
  console.log('PASS: latest articles follow publication dates; patient/clinician links apply audience filters.');
 }finally{await browser.close();}

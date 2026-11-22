@@ -16,6 +16,7 @@
   <script type="module" src="../js/content.js"></script>
 <link rel="stylesheet" href="../css/glass.css?v=20261117-1">
 <link rel="preload" href="../assets/fonts/Vazirmatn.woff2?v=20261112-font-logo-2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../css/catalog.css">
 <link rel="stylesheet" href="../css/customizer.css"><script type="module" src="../js/site-customizer.mjs"></script>
 <script type="module" src="/js/account.js"></script>
 <style id="site-settings">:root{--site-font:Vazirmatn,Tahoma,sans-serif;--site-font-size:16px;--site-line-height:1.9;--heading-weight:700;--radius:28px;--site-width:1200px;}:root:not([data-theme=dark]){--paper:#eeeae4;--white:#ffffff;--ink:#21212b;--muted:#30303b;--wash:#eceaf0;--line:#c9c6cf;--teal:#454b65;--button:#30323f;--buttonText:#ffffff;--glass-art:url("/assets/glass/golden-gate-day.webp");--site-background:none;}:root[data-theme=dark]{--paper:#161620;--white:#343442;--ink:#f4f4fa;--muted:#cdccd9;--wash:#30303f;--line:#626272;--teal:#d7d8ef;--button:#ededf5;--buttonText:#20202c;--glass-art:url("/assets/glass/golden-gate-night.webp");--site-background:none;}</style></head>
@@ -36,13 +37,31 @@
   </header>
   <main id="main" tabindex="-1">
 
-<section class="page-intro"><div class="container"><div class="breadcrumb"><a href="/index.html" class=""  data-link-key="link-001"><span data-fa="خانه" data-en="Home" data-content-key="text-019">خانه</span></a> / <span data-fa="در ارتباط باشیم" data-en="Get in touch" data-content-key="text-020">در ارتباط باشیم</span></div><h1 data-fa="در ارتباط باشیم" data-en="Get in touch" data-content-key="text-021">در ارتباط باشیم</h1><p class="lead" data-fa="راه‌های ارتباط و اطلاعات مراجعه" data-en="Contact channels and visit information" data-content-key="text-022">راه‌های ارتباط و اطلاعات مراجعه</p></div></section>
+<section class="page-intro"><div class="container catalog-banner">
+  <div><div class="breadcrumb"><a href="/index.html" data-link-key="link-001"><span data-fa="خانه" data-en="Home" data-content-key="text-019">خانه</span></a> / <span data-fa="در ارتباط باشیم" data-en="Get in touch" data-content-key="text-020">در ارتباط باشیم</span></div>
+    <h1 data-fa="در ارتباط باشیم" data-en="Get in touch" data-content-key="text-021">در ارتباط باشیم</h1>
+    <p class="lead" data-fa="راه‌های ارتباط و اطلاعات مراجعه" data-en="Contact channels and visit information" data-content-key="text-022">راه‌های ارتباط و اطلاعات مراجعه</p>
+  </div>
+  <img class="section-emblem" src="/assets/optimized/contact-conversation.879f5ba6e7d6c789.webp" width="124" height="124" alt="" decoding="async">
+</div></section>
 <section class="container section">
   <div class="grid-two">
-    <section class="card" id="linkedin"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 15 6-6M7 17l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0M17 7l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" transform="translate(1 0) scale(.9)"/></svg></span><h2 data-fa="لینکدین" data-en="LinkedIn" data-content-key="text-023">لینکدین</h2><p data-fa="برای آشنایی با مسیر حرفه‌ای و فعالیت‌ها." data-en="For professional background and activities." data-content-key="text-024">برای آشنایی با مسیر حرفه‌ای و فعالیت‌ها.</p><p data-pending="linkedin"><span data-fa="نشانی پروفایل هنوز اضافه نشده است." data-en="The profile address has not been added yet." data-content-key="text-025">نشانی پروفایل هنوز اضافه نشده است.</span></p><div data-ready="linkedin" hidden class="actions"><a href="#linkedin" class="button button-primary" data-destination="linkedin"><span data-fa="مشاهده پروفایل لینکدین" data-en="View LinkedIn profile" data-content-key="text-026">مشاهده پروفایل لینکدین</span></a></div></section>
-    <section class="card"><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span><h2 data-fa="ارتباط مستقیم" data-en="Direct contact" data-content-key="text-027">ارتباط مستقیم</h2><p data-pending="email"><span data-fa="ایمیل عمومی هنوز اعلام نشده است." data-en="A public email address has not been announced yet." data-content-key="text-028">ایمیل عمومی هنوز اعلام نشده است.</span></p><p data-ready="email" hidden><a href="#main" data-destination="email">Email</a></p><p data-pending="phone"><span data-fa="شماره تماس عمومی هنوز اعلام نشده است." data-en="A public phone number has not been announced yet." data-content-key="text-029">شماره تماس عمومی هنوز اعلام نشده است.</span></p><p data-ready="phone" hidden><a href="#main" data-destination="phone">Phone</a></p></section>
+    <a class="card contact-channel" id="linkedin" data-destination="linkedin" data-ready="linkedin" href="https://www.linkedin.com/in/amir-houshang-gerami-2424a9b5/" target="_blank" rel="noopener noreferrer">
+      <div><h2 data-fa="لینکدین" data-en="LinkedIn" data-content-key="text-023">لینکدین</h2>
+        <p data-fa="برای آشنایی با مسیر حرفه‌ای و فعالیت‌ها." data-en="For professional background and activities." data-content-key="text-024">برای آشنایی با مسیر حرفه‌ای و فعالیت‌ها.</p>
+        <span class="contact-action" data-fa="مشاهده پروفایل لینکدین" data-en="View LinkedIn profile" data-content-key="text-026">مشاهده پروفایل لینکدین</span>
+      </div>
+      <img class="contact-brand linkedin-brand" src="/assets/optimized/linkedin.e14ad9c44fe2388e.svg" width="80" height="80" alt="" decoding="async">
+    </a>
+    <a class="card contact-channel" data-destination="email" data-ready="email" href="mailto:dr.gerami.md@gmail.com">
+      <div><h2 data-fa="ارتباط مستقیم" data-en="Direct contact" data-content-key="text-027">ارتباط مستقیم</h2>
+        <p data-fa="با ایمیل با من در تماس باشید." data-en="Send me an email." data-content-key="text-028">با ایمیل با من در تماس باشید.</p>
+        <bdi class="contact-action" dir="ltr" data-contact-address>dr.gerami.md@gmail.com</bdi>
+      </div>
+      <img class="contact-brand" src="/assets/optimized/apple-mail.23a1a49431e1a366.webp" width="80" height="80" alt="" decoding="async">
+    </a>
   </div>
-  <div class="notice" style="margin-top:28px"><h2 data-fa="ارسال پیام" data-en="Messaging" data-content-key="text-030">ارسال پیام</h2><p data-fa="در این نسخه فرم ارسال پیام فعال نیست. پس از اعلام راه ارتباطی، از همان مسیر استفاده کنید؛ لطفاً اطلاعات پزشکی شخصی را در کانال‌های عمومی ارسال نکنید." data-en="There is no active message form in this version. Please use the contact channel once announced, and avoid sharing personal medical information in public channels." data-content-key="text-031">در این نسخه فرم ارسال پیام فعال نیست. پس از اعلام راه ارتباطی، از همان مسیر استفاده کنید؛ لطفاً اطلاعات پزشکی شخصی را در کانال‌های عمومی ارسال نکنید.</p></div>
+  <p data-ready="phone" hidden><a href="#main" data-destination="phone">Phone</a></p>
   <div class="actions"><a href="/pages/appointments.html" class="button button-secondary"  data-link-key="link-002"><span data-fa="اطلاعات مراجعه و نوبت" data-en="Visit &amp; appointment information" data-content-key="text-032">اطلاعات مراجعه و نوبت</span></a></div>
 </section>
   </main>

@@ -64,16 +64,19 @@
   }
 
   const originalLinks = new WeakMap();
-  function applyLinks(values) {
+  function applyLinks(values, initial=false) {
   Object.entries(values).forEach(([kind, value]) => {
     const destination = safeDestination(value, kind);
     if (!destination) {
+      const channel = document.querySelector('.contact-channel[data-destination="' + kind + '"]');
+      if (initial && channel && !channel.hidden) return;
       document.querySelectorAll('[data-destination="' + kind + '"]').forEach(link => {
         const original=originalLinks.get(link);if(!original)return;
         for(const key of ['href','target','rel','dir']){if(original[key]===null)link.removeAttribute(key);else link.setAttribute(key,original[key]);}
         link.replaceChildren(...original.children.map(child=>child.cloneNode(true)));
         link.querySelectorAll('[data-fa][data-en]').forEach(node=>{node.textContent=node.dataset[root.lang==='en'?'en':'fa'];});
       });
+      if(channel)channel.removeAttribute('href');
       document.querySelectorAll('[data-pending="' + kind + '"]').forEach(node=>{node.hidden=false;});
       document.querySelectorAll('[data-ready="' + kind + '"]').forEach(node=>{node.hidden=true;});
       return;
@@ -86,8 +89,9 @@
         link.rel = 'noopener noreferrer';
       }
       if (kind === 'email' || kind === 'phone') {
-        link.textContent = value.replace(/^(mailto:|tel:)/, '');
-        link.dir = 'ltr';
+        const label = link.querySelector('[data-contact-address]') || link;
+        label.textContent = value.replace(/^(mailto:|tel:)/, '');
+        label.dir = 'ltr';
       }
       const status = link.querySelector('[data-link-status]');
       if (status) {
@@ -99,7 +103,7 @@
     document.querySelectorAll('[data-ready="' + kind + '"]').forEach(element => { element.hidden = false; });
   });
   }
-  applyLinks(links);
+  applyLinks(links, true);
   window.addEventListener('site-profile', event => {
     const profile=event.detail;
     applyLinks({linkedin:profile.linkedin, appointment:profile.appointment, email:profile.email ? 'mailto:'+profile.email : null, phone:profile.phone ? 'tel:'+profile.phone : null});

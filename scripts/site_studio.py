@@ -5,6 +5,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -217,6 +218,24 @@ def bake_settings(root, text, ident):
     text = re.sub(r'<meta\b[^>]*data-content-key="[^"]+"[^>]*>', metadata, text)
     text = re.sub(r'<a\b[^>]*data-link-key="([^"]+)"[^>]*>', lambda match: attr(match[0], 'href', data['links'][match[1]]) if match[1] in data['links'] else match[0], text)
     profile = public_document(root / 'content/site.json')
+    if ident == 'contact':
+        email = profile.get('email', '')
+        linkedin = profile.get('linkedin', '')
+        url = urlsplit(linkedin)
+        destinations = {
+            'email': 'mailto:' + email if re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email) else '',
+            'linkedin': linkedin if url.scheme == 'https' and url.netloc.lower() in ('linkedin.com', 'www.linkedin.com') and url.path.startswith('/in/') else '',
+        }
+
+        def channel(match):
+            tag = match[0]
+            destination = destinations[match[1]]
+            tag = re.sub(r'\s(?:hidden\b|href="[^"]*")', '', tag)
+            return tag[:-1] + (' href="' + escape(destination) + '">' if destination else ' hidden>')
+
+        text = re.sub(r'<a\b[^>]*class="card contact-channel"[^>]*data-destination="(email|linkedin)"[^>]*>', channel, text)
+        text = re.sub(r'(<bdi\b[^>]+data-contact-address>).*?(</bdi>)', lambda m: m[1] + escape(email) + m[2], text)
+
     if ident == 'about':
         def bilingual(tag, fa, en):
             return '<' + tag + ' data-fa="' + escape(fa) + '" data-en="' + escape(en) + '">' + escape(fa) + '</' + tag + '>'
