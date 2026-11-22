@@ -32,6 +32,12 @@ def generate(root,output):
   text=re.sub(r'<meta[^>]+(?:property="og:[^"]+"|name="twitter:[^"]+")[^>]*>','',text)
   trail='<nav aria-label="مسیر موضوع"><a href="/">خانه</a> / '+' / '.join('<a href="'+escape(u)+'">'+escape(n)+'</a>' for n,u in crumbs)+'</nav>'
   main='<main id="main" tabindex="-1"><section class="container section">'+trail+'<h1>'+escape(title)+'</h1>'+body+'</section></main>'
+  if article:
+   trail='<nav aria-label="مسیر مطلب"><a href="/">خانه</a>'+''.join('<span aria-hidden="true">/</span><a href="'+escape(u)+'">'+escape(n)+'</a>' for n,u in crumbs[:-1])+'</nav>'
+   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+escape(article.get('author',''))+' · <time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
+   discussion='<section class="discussion" data-discussion="'+escape(article['slug'])+'" id="discussion"><h2 data-fa="دیدگاه خوانندگان" data-en="Reader discussion">دیدگاه خوانندگان</h2><div data-discussion-ui></div><noscript>برای ثبت دیدگاه یا پسندیدن، جاوااسکریپت را فعال کنید.</noscript></section>'
+   main='<main class="reader" id="main" tabindex="-1"><article class="reader-sheet">'+header+body+'</article>'+discussion+'</main>'
+   text=text.replace('</head>','<link rel="stylesheet" href="/css/article.css"><script type="module" src="/js/discussion.js"></script></head>',1)
   text=re.sub(r'<main\b.*?</main>',lambda _:main,text,count=1,flags=re.S)
   graph=[{'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i+1,'name':n,'item':SITE+u} for i,(n,u) in enumerate([('خانه','/'),*crumbs])]}]
   if article:
@@ -59,12 +65,18 @@ def generate(root,output):
  for p in posts:
   title=p.get('title_fa') or p.get('title_en');body=p.get('body_fa') or p.get('body_en') or '';description=re.sub(r'[#*_>`]','',body.split('\n')[0])[:240];markup=''
   image=p.get('image','')
-  if image.startswith('/assets/') or urlsplit(image).scheme=='https':markup+='<img class="post-cover" style="height:auto;max-width:1200px" src="'+escape(image)+'" alt="'+escape(title)+'" width="1200" height="800" loading="lazy" decoding="async">'
+  if image.startswith('/assets/') or urlsplit(image).scheme=='https':
+   markup+='<a class="article-cover" href="'+escape(image)+'"><img src="'+escape(image)+'" alt="'+escape(title)+'" decoding="async" fetchpriority="high" referrerpolicy="no-referrer"></a>'
   markup+='<div class="article-body" dir="'+('rtl' if p.get('body_fa') else 'ltr')+'">'+''.join('<p>'+escape(x).replace('\n','<br>')+'</p>' for x in body.split('\n\n') if x.strip())+'</div>'
-  markup+='<p>'+escape(p.get('author',''))+' · '+escape(p.get('published_at',''))+'</p>'
-  if p.get('source_topic_id'):markup+='<p>منبع: <span lang="en" dir="ltr">Harrison 2025</span></p>'
-  else:markup+=''.join('<p>'+escape(s.get('title',''))+'</p>' for s in p.get('sources',[]))
-  if p.get('hashtags'):markup+='<p>'+escape(' '.join(p['hashtags']))+'</p>'
+  # Preserve the static reading copy; progressively render the editor's Markdown
+  # and its second language when one was supplied by the author.
+  copies={lang:{'title':p['title_'+lang],'body':p['body_'+lang]} for lang in ('fa','en') if p.get('title_'+lang) and p.get('body_'+lang)}
+  if len(copies)>1 or re.search(r'(?m)^#|^>|^[-*] |^\d+\. |\*|\]\(|`',body):
+   encoded=json.dumps(copies,ensure_ascii=False).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
+   markup+='<script type="application/json" id="article-copies">'+encoded+'</script>'
+  if p.get('source_topic_id'):markup+='<p class="article-source">منبع: <span lang="en" dir="ltr">Harrison 2025</span></p>'
+  else:markup+=''.join('<p class="article-source"><a rel="noopener noreferrer" href="'+escape(s['url'])+'">'+escape(s.get('title') or s['url'])+'</a></p>' for s in p.get('sources',[]) if urlsplit(s.get('url','')).scheme=='https')
+  if p.get('hashtags'):markup+='<p class="article-tags">'+escape(' '.join(p['hashtags']))+'</p>'
   crumbs=[('همهٔ مطالب','/pages/blog.html')]
   if p.get('source_topic_id'):
    c,t=topics[p['source_topic_id']];crumbs=[('موضوعات','/topics/'),(c['root']['fa'],topic_path(c)),(t['fa'],topic_path(c,t))]

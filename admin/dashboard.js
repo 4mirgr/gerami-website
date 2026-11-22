@@ -13,7 +13,7 @@
  function menu(open){sidebar.classList.toggle('open',open);$('menu').setAttribute('aria-expanded',String(open));$('scrim').hidden=!open;}
  $('menu').addEventListener('click',()=>menu(!sidebar.classList.contains('open')));$('scrim').addEventListener('click',()=>menu(false));
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebar.classList.contains('open')){menu(false);$('menu').focus();}});
- const routes={dashboard:'داشبورد',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',media:'تصاویر و رسانه',profile:'رزومه و سوابق',contact:'اطلاعات تماس',editor:'ویرایشگر پیشرفته',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',history:'تاریخچه و بازیابی'};
+ const routes={discussion:'دیدگاه‌ها و پسندها',dashboard:'داشبورد',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',media:'تصاویر و رسانه',profile:'رزومه و سوابق',contact:'اطلاعات تماس',editor:'ویرایشگر پیشرفته',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',history:'تاریخچه و بازیابی'};
  let frame;window.addEventListener('cms-editor-reset',()=>{frame=undefined;route();});
  function route(){
   const selected=location.hash.slice(1);const page=Object.hasOwn(routes,selected)?selected:'dashboard';

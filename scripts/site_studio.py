@@ -87,7 +87,7 @@ def topic_markup(root, directory=False):
         ident = topic['id']
         tag = 'article' if directory else 'li'
         result += '<' + tag + ' class="topic-tile glass-surface" data-topic-id="' + escape(ident) + '">'
-        result += '<a class="topic-link"' + ('' if directory else ' data-topic-card="' + escape(ident) + '"') + ' href="/pages/blog.html?topic=' + escape(ident) + '">'
+        result += '<a class="topic-link"' + (' data-topic-card="' + escape(ident) + '"') + ' href="/pages/blog.html?topic=' + escape(ident) + '">'
         if topic['icon'] in art:
             result += '<span class="topic-icon"><img class="topic-art" src="/assets/topics/' + art[topic['icon']] + '.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async"></span>'
         result += label('h3', topic['fa'], topic['en'])
@@ -159,6 +159,17 @@ def bake_settings(root, text, ident):
     if ident == 'home':
         for marker, directory in [('topic-rail', False), ('topic-directory', True)]:
             text = re.sub(r'<!--' + marker + r':start-->.*?<!--' + marker + r':end-->', lambda _: '<!--' + marker + ':start-->' + topic_markup(root, directory) + '<!--' + marker + ':end-->', text, flags=re.S)
+        # Ordinary links keep the latest articles reachable during a failed feed request
+        # and without JS. The enhanced cards replace these once their data arrives.
+        articles = json.loads((root / 'content/articles.json').read_text())['articles']
+        ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: (a.get('published_at', ''), a['slug']), reverse=True)
+        links = []
+        for article in ordered[:7]:
+            path = article.get('url') or '/articles/' + article['slug'] + '/'
+            if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
+                title = article.get('title_fa') or article.get('title_en') or ''
+                links.append('<li><a href="' + path + '">' + html.escape(title[:150]) + '</a></li>')
+        text = text.replace('<!--recent-links-->', '<ul data-recent-links>' + ''.join(links) + '</ul>' if links else '')
     escape = lambda value: html.escape(str(value), quote=True)
     appearance = json.loads((root / 'content/appearance.json').read_text())
     navigation = json.loads((root / 'content/navigation.json').read_text())

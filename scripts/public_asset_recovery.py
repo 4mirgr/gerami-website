@@ -53,7 +53,7 @@ def add_public_asset_recovery(root, site):
     no_script = ':root{' + ''.join(entry['variable'] + ':url("' + path + '");' for path, entry in mirrors.items() if entry['type'] == 'image/webp') + '}'
     font = next(path for path, entry in mirrors.items() if entry['type'] == 'font/woff2')
     no_script += '@font-face{font-family:Vazirmatn;src:url("' + font + '") format("woff2");font-weight:100 900;font-display:swap}'
-    for page in [site / 'index.html', *sorted((site / 'pages').glob('*.html'))]:
+    for page in [site / 'index.html', *sorted((site / 'pages').glob('*.html')), *sorted((site / 'articles').rglob('index.html')), *sorted((site / 'topics').rglob('index.html'))]:
         text = page.read_text()
         if text.count('</body>') != 1:
             raise ValueError('Public recovery requires reviewed document boundary')

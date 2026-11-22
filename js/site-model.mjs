@@ -3,7 +3,7 @@ import {validateTopics,flattenTopics} from './topics.mjs';
 export function publicPath(value){const path=value.replace(/\/+$/,'').replace(/\.html$/,'');return path===''||path==='/index'?'/':path;}
 export const pages={home:'صفحهٔ اصلی',about:'دربارهٔ من',services:'حوزه‌های فعالیت',blog:'آموزش و مقالات',projects:'پروژه‌ها',contact:'ارتباط',appointments:'اطلاعات مراجعه',beyond:'فراتر از پزشکی',privacy:'حریم خصوصی'};
 export const fonts={Vazirmatn:'وزیرمتن',Tahoma:'Tahoma',Arial:'Arial',system:'فونت سیستم'};
-export const sections={hero:'معرفی و کارت‌های اصلی',explore:'کاروسل موضوعات',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'نقشهٔ شاخه‌ها و زیرشاخه‌ها',articles:'تازه‌ترین مطالب'};
+export const sections={hero:'معرفی و کارت‌های اصلی',projects:'پروژه‌ها',about:'معرفی کوتاه',education:'نقشهٔ شاخه‌ها و زیرشاخه‌ها',articles:'تازه‌ترین مطالب'};
 export const managedPaths=['content/appearance.json','content/navigation.json','content/extra-pages.json','content/site.json','content/articles.json','content/topics.json',...Object.keys(pages).map(id=>`content/pages/${id}.json`)];
 let publicSnapshot,articleDelivery;
 export async function readPublicDocument(path){
@@ -48,6 +48,7 @@ export function validateDocument(path,data){
    for(const key of ['paper','white','ink','muted','wash','line','teal','button','buttonText'])must(/^#[0-9a-f]{6}$/i.test(data[mode][key]),`رنگ ${key} معتبر نیست.`);
    for(const key of ['logo','wallpaper','background'])must((key==='background'&&data[mode][key]==='')||asset(data[mode][key]),'لوگو و تصویر کارت باید از رسانه‌های همین سایت باشند.');
   }
+  if(Array.isArray(data.sections))data.sections=data.sections.filter(s=>s.id!=='explore');
   must(Array.isArray(data.sections)&&data.sections.length===Object.keys(sections).length&&new Set(data.sections.map(s=>s.id)).size===Object.keys(sections).length&&data.sections.every(s=>Object.hasOwn(sections,s.id)&&typeof s.visible==='boolean'),'بخش‌های صفحهٔ اصلی معتبر نیستند.');
   must(data.sections[0].id==='hero'&&data.sections[0].visible,'معرفی اصلی باید اولین بخش و قابل نمایش باشد.');
  }else if(path==='content/navigation.json'){

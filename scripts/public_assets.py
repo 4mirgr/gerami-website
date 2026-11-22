@@ -80,6 +80,18 @@ def optimize_public_assets(site):
     inline_css_max_bytes=0
     for page in pages:
         text=page.read_text()
+        if page.is_relative_to(site/'articles'):
+            def responsive_cover(match):
+                original = match[1]
+                preview = article_images.get(original)
+                if not preview:
+                    return match[0]
+                from PIL import Image
+                with Image.open(site/preview.lstrip('/')) as thumbnail:
+                    width,height=thumbnail.size
+                image = match[0].replace('<img ', f'<img width="{width}" height="{height}" ', 1)
+                return '<picture><source media="(max-width: 540px)" srcset="'+preview+'">'+image+'</picture>'
+            text = re.sub(r'<img src="([^"]+)"[^>]+fetchpriority="high"[^>]*>', responsive_cover, text)
         def reference(match):
             target=resolve(match[2],page)
             url=mapping.get(target)

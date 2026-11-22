@@ -6,7 +6,7 @@ const lang=()=>root.lang==='en'?'en':'fa',text=(fa,en)=>lang()==='fa'?fa:en;
 const el=(tag,value='',className='')=>{const n=document.createElement(tag);n.textContent=value;if(className)n.className=className;return n;};
 function https(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password?u.href:null;}catch{return null;}}
 const json=file=>readPublicDocument('content/'+file);
-let profile=null,articles=[],catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
+let profile=null,articles=[],articleFeedFailed=false,catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
 const path=publicPath(location.pathname),isHome=path==='/',isBlog=path.endsWith('/blog');
 const articleImageSources={};
 const imageSource=src=>previewAssets[src]||src;
@@ -37,35 +37,17 @@ function renderTopics(){
  if(!catalog)return;
  const rows=published();
  const total=id=>{const ids=topicIds(catalog,id);return rows.filter(a=>ids.has(a.topic)).length;};
- for(const host of document.querySelectorAll('[data-topic-rail],[data-topic-directory]')){
+ for(const host of document.querySelectorAll('[data-topic-directory]')){
   clear(host);
   for(const topic of catalog.topics){
-   const directory=host.hasAttribute('data-topic-directory');
-   const wrap=el(directory?'article':'li','','topic-tile glass-surface');wrap.dataset.topicId=topic.id;
-   const link=el('a','','topic-link');link.href=topicURL(topic.id);if(!directory)link.dataset.topicCard=topic.id;
-   const icon=el('span','','topic-icon');icon.append(topicIcon(topic.icon));link.append(icon,el('h3',topic[lang()]));if(!directory)link.append(el('p',topic['description_'+lang()]));
-   const amount=total(topic.id);if(amount||!directory)link.append(el('span',amount?text(amount+' مطلب',amount+' posts'):text('در انتظار انتشار','Posts coming soon'),'topic-count'));wrap.append(link);
-   if(directory&&topic.children.length){const sub=el('div','','subtopic-links');for(const child of topic.children){const a=el('a',child[lang()]);a.href=topicURL(child.id);sub.append(a);}wrap.append(sub);}
+   const wrap=el('article','','topic-tile glass-surface');wrap.dataset.topicId=topic.id;
+   const link=el('a','','topic-link');link.href=topicURL(topic.id);link.dataset.topicCard=topic.id;
+   const icon=el('span','','topic-icon');icon.append(topicIcon(topic.icon));link.append(icon,el('h3',topic[lang()]));
+   const amount=total(topic.id);if(amount)link.append(el('span',text(amount+' مطلب',amount+' posts'),'topic-count'));wrap.append(link);
+   if(topic.children.length){const sub=el('div','','subtopic-links');for(const child of topic.children){const a=el('a',child[lang()]);a.href=topicURL(child.id);sub.append(a);}wrap.append(sub);}
    host.append(wrap);
   }
-  if(!catalog.topics.length)host.append(el(host.hasAttribute('data-topic-rail')?'li':'p',text('موضوعات آموزشی در حال تنظیم هستند.','Reading topics are being organized.'),'empty-topics'));
- }
- const rail=document.querySelector('[data-topic-rail]');
- if(rail){
-  const prev=document.querySelector('[data-topic-prev]'),next=document.querySelector('[data-topic-next]');
-  function state(){const offset=Math.abs(rail.scrollLeft),max=rail.scrollWidth-rail.clientWidth;prev.disabled=offset<2;next.disabled=offset>=max-2;}
-  for(const [button,direction] of [[prev,-1],[next,1]])if(button){button.hidden=false;button.textContent=direction<0?(root.dir==='rtl'?'→':'←'):(root.dir==='rtl'?'←':'→');button.onclick=()=>rail.scrollBy({left:(root.dir==='rtl'?-1:1)*direction*rail.clientWidth*.8,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});button.setAttribute('aria-label',direction<0?text('موضوعات قبلی','Previous topics'):text('موضوعات بعدی','Next topics'));}
-  rail.onscroll=state;requestAnimationFrame(state);
-  if(!rail.dataset.dragBound){
-   rail.dataset.dragBound='true';let startX=0,startScroll=0,active=false,dragged=false;
-   rail.addEventListener('pointerdown',event=>{if(event.pointerType!=='mouse'||event.button!==0)return;active=true;dragged=false;startX=event.clientX;startScroll=rail.scrollLeft;});
-   rail.addEventListener('pointermove',event=>{if(!active)return;const distance=event.clientX-startX;if(!dragged&&Math.abs(distance)<8)return;if(!dragged){dragged=true;rail.setPointerCapture(event.pointerId);rail.classList.add('is-dragging');}rail.scrollLeft=startScroll-distance;event.preventDefault();});
-   const end=()=>{active=false;rail.classList.remove('is-dragging');};
-   rail.addEventListener('pointerup',end);rail.addEventListener('pointercancel',end);rail.addEventListener('lostpointercapture',end);
-   rail.addEventListener('pointerleave',()=>{if(!dragged)end();});
-   rail.addEventListener('dragstart',event=>event.preventDefault());
-   rail.addEventListener('click',event=>{if(dragged&&event.detail!==0){event.preventDefault();event.stopImmediatePropagation();dragged=false;}},true);
-  }
+  if(!catalog.topics.length)host.append(el('p',text('موضوعات آموزشی در حال تنظیم هستند.','Reading topics are being organized.'),'empty-topics'));
  }
  const input=document.querySelector('#home-search');if(input)input.placeholder=text('دربارهٔ چه موضوعی می‌خواهید بخوانید؟','What would you like to read about?');
 }
@@ -95,7 +77,8 @@ function renderArticles(){
  const ids=topicIds(catalog,filter.topic),needle=filter.q.trim().toLocaleLowerCase();
  const matches=all.filter(a=>{const copy=articleText(a),topic=byId.get(a.topic);return (isHome||!filter.topic||ids.has(a.topic))&&(isHome||!filter.audience||a.audience===filter.audience)&&(isHome||!needle||(copy.title+' '+copy.body+' '+(a.category||'')+' '+(a.tags||[]).join(' ')+' '+(topic?.path_fa||'')+' '+(topic?.path_en||'')).toLocaleLowerCase().includes(needle));});
  let anchored='';if(filter.anchor&&matches.length){const index=matches.findIndex(a=>'article-'+a.slug===filter.anchor);if(index>=0){filter.page=Math.floor(index/12)+1;anchored=filter.anchor;}filter.anchor='';}
- const size=isHome?6:12,pages=Math.max(1,Math.ceil(matches.length/size));filter.page=Math.min(filter.page,pages);const selected=isHome?matches.slice(0,size):matches.slice((filter.page-1)*size,filter.page*size);
+ const fallback=articleHost.querySelector('[data-recent-links]');if(fallback)fallback.hidden=!articleFeedFailed||previewActive;
+ const size=isHome?7:12,pages=Math.max(1,Math.ceil(matches.length/size));filter.page=Math.min(filter.page,pages);const selected=isHome?matches.slice(0,size):matches.slice((filter.page-1)*size,filter.page*size);
  if(!heading.dataset.contentKey)heading.textContent=filter.topic&&byId.has(filter.topic)?byId.get(filter.topic)[lang()]:text('تازه‌ترین مطالب','Latest posts');
  count.textContent=matches.length?text(matches.length+' مقاله',matches.length+' articles')+(isHome?'':text(' · صفحهٔ '+filter.page+' از '+pages,' · Page '+filter.page+' of '+pages)):all.length?text('مقاله‌ای با این انتخاب پیدا نشد.','No posts match these filters.'):text('مطالب آموزشی در حال آماده‌سازی‌اند؛ موضوع موردنظر را انتخاب کنید.','Educational posts are being prepared. Explore a topic to get started.');
  const opened=new Set([...list.querySelectorAll('details[open]')].map(n=>n.id));clear(list);pagination.replaceChildren();
@@ -104,12 +87,14 @@ function renderArticles(){
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
   if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
   tile.append(el('p',[topic?.[lang()]||item.category,item.author,item.published_at,item.reviewed_at?text('بازبینی: ','Reviewed: ')+item.reviewed_at:''].filter(Boolean).join(' · '),'post-meta'),card);
-  const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,copy.body,imageSource);card.append(body);
-  const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
-  if(item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
-  const share=el('a',text('پیوند این مطلب','Link to this post'),'post-permalink');share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/pages/blog.html#'+card.id;tile.append(el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_>`~]/g,'').slice(0,145),'post-excerpt'),share);list.append(tile);
+  const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,isHome?copy.body.trim().split(/\r?\n/).find(line=>line.trim()&&!/^#{1,4} /.test(line))||copy.title:copy.body,imageSource);card.append(body);
+  const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(!isHome&&sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
+  if(!isHome&&item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
+  const share=el('a',text('ادامهٔ مطلب','Read more'),'post-permalink');share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/articles/'+item.slug+'/';if(!isHome)tile.append(el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_>`~]/g,'').slice(0,145),'post-excerpt'));const links=el('div','','post-actions'),discussion=el('a',text('دیدگاه و پسند','Comments & likes'));
+  discussion.href=share.href+'#discussion';links.append(share,discussion);tile.append(links);list.append(tile);
  }
- if(!selected.length){const empty=el('div','','reading-empty glass-surface');empty.append(topicIcon('medicine'),el('p',all.length?text('موضوع یا عبارت جست‌وجو را تغییر دهید.','Try a different topic or search.'):text('این بخش با انتشار مطالب تکمیل می‌شود.','This space will fill as posts are published.')));list.append(empty);}
+ if(fallback&&!fallback.hidden&&!all.length)count.textContent='';
+ if(!selected.length&&!(fallback&&!fallback.hidden)){const empty=el('div','','reading-empty glass-surface');empty.append(topicIcon('medicine'),el('p',all.length?text('موضوع یا عبارت جست‌وجو را تغییر دهید.','Try a different topic or search.'):text('این بخش با انتشار مطالب تکمیل می‌شود.','This space will fill as posts are published.')));list.append(empty);}
  if(isBlog&&(filter.q||filter.topic||filter.audience)){const clear=el('button',text('پاک‌کردن فیلترها','Clear filters'),'button button-secondary');clear.type='button';clear.dataset.clearFilters='';clear.onclick=()=>{filter={q:'',topic:'',audience:'',page:1};saveFilter(true);};pagination.append(clear);}
  if(!isHome&&pages>1){const turnPage=step=>{filter.page+=step;saveFilter(true);heading.tabIndex=-1;heading.focus({preventScroll:true});articleHost.scrollIntoView({block:'start'});};const prev=arrowButton(text('قبلی','Previous'),false,()=>turnPage(-1));prev.dataset.pagePrev='';prev.disabled=filter.page===1;const next=arrowButton(text('بعدی','Next'),true,()=>turnPage(1));next.dataset.pageNext='';next.disabled=filter.page===pages;pagination.append(prev,el('span',filter.page+' / '+pages),next);}
  window.dispatchEvent(new Event('site-articles-ready'));if(anchored)requestAnimationFrame(()=>document.getElementById(anchored)?.scrollIntoView({block:'start'}));
@@ -118,6 +103,7 @@ json('site.json').then(value=>{if(!previewActive){profile=value;renderProfile();
 if(isHome||isBlog)Promise.allSettled([json('topics.json'),json('articles.json')]).then(([topicsResult,articleResult])=>{
  if(previewActive)return;
  try{catalog=topicsResult.status==='fulfilled'?validateTopics(topicsResult.value):{topics:[]};}catch{catalog={topics:[]};}
+ articleFeedFailed=articleResult.status==='rejected';
  articles=articleResult.status==='fulfilled'&&Array.isArray(articleResult.value.articles)?articleResult.value.articles:[];
  renderTopics();renderArticles();
 });
