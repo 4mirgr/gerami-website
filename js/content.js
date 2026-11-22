@@ -90,7 +90,13 @@ function renderArticles(){
   const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,isHome?copy.body.trim().split(/\r?\n/).find(line=>line.trim()&&!/^#{1,4} /.test(line))||copy.title:copy.body,imageSource);card.append(body);
   const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(!isHome&&sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
   if(!isHome&&item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
-  const share=el('a',text('ادامهٔ مطلب','Read more'),'post-permalink');share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/articles/'+item.slug+'/';if(!isHome)tile.append(el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_>`~]/g,'').slice(0,145),'post-excerpt'));const links=el('div','','post-actions'),discussion=el('a',text('دیدگاه و پسند','Comments & likes'));
+  const share=el('a',text('ادامهٔ مطلب','Read more'),'post-permalink');
+  share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/articles/'+item.slug+'/';
+  if(!isHome){
+   const excerpt=el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_`>~]/g,'').slice(0,145),'post-excerpt');
+   excerpt.dir=body.dir;tile.append(excerpt);
+  }
+  const links=el('div','','post-actions'),discussion=el('a',text('دیدگاه و کامنت','Comments'));
   discussion.href=share.href+'#discussion';links.append(share,discussion);tile.append(links);list.append(tile);
  }
  if(fallback&&!fallback.hidden&&!all.length)count.textContent='';
