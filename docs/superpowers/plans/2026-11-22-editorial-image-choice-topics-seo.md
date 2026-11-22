@@ -21,7 +21,7 @@ Files: `backend/editorial/functions/gerami-editorial/taxonomy.json`, `backend/ed
 Interfaces: sourceTopic(sourceId) returns exact root/child metadata; articlePath(article) returns a unique nested URL; ensureArticleTopic(documents,taxonomy) adds only missing publication nodes.
 - [x] Test full pinned taxonomy, preserved aliases, missing-source denial, repeat articles, canonical/OG/JSON-LD/sitemap and no draft/empty-topic indexing.
 - [x] Implement source-to-child mapping and publisher admission; render complete static directory and article pages.
-- [ ] Test built relative assets, real article links and unchanged first-paint/recovery budgets; commit.
+- [x] Test built relative assets, real article links and unchanged first-paint/recovery budgets; commit.
 
 ## Task2: Private candidate media and owner selection
 
@@ -29,7 +29,7 @@ Files: `backend/editorial/cover-choice.sql`, `functions/gerami-editorial/{media,
 Interfaces: options(draft) yields two private candidate objects; select_cover binds active photo/revision/owner; notify sends two photos/full text and only arms approval for selected bytes.
 - [x] Test no approval without selected cover; wrong owner/revision/photo; selection/edit invalidation; failed partial delivery; custom image and retries.
 - [x] Implement service-only library/option ledger and one-use operations ingest; preserve storage byte limits and hashed media publication.
-- [ ] Prepare six original topic-specific images privately, validate them and import only after reviewed deployment; commit code/tests.
+- [x] Prepare six original topic-specific images privately, validate them and import only after reviewed deployment; commit code/tests.
 
 ## Task3: Background topic selection and editorial metadata
 
@@ -40,7 +40,7 @@ Interfaces: rankTopics(eligible,recent,signals,now) deterministically ranks topi
 
 ## Task4: Coherent release and real re-delivery
 
-- [ ] Run focused SQL/Edge/publisher/SEO tests, complete source/browser profile, fresh pinned assembled build and artifact performance/recovery suite.
-- [ ] Obtain fresh code review; PR/CI/exact-head merge; attach every PR and verify production.
-- [ ] Apply tested migrations, deploy the reviewed function bundle, import private image pairs and migrate all existing drafts as new revisions without approval.
-- [ ] Send all pending pairs via the existing bot; inspect redacted real delivery/state receipts; update handoff/checklist/release evidence.
+- [x] Run focused SQL/Edge/publisher/SEO tests, complete source/browser profile, fresh pinned assembled build and artifact performance/recovery suite.
+- [x] Obtain fresh code review; PR/CI/exact-head merge; attach every PR and verify production.
+- [x] Apply tested migrations, deploy the reviewed function bundle, import private image pairs and migrate all existing drafts as new revisions without approval.
+- [x] Send all pending pairs via the existing bot; inspect redacted real delivery/state receipts; update handoff/checklist/release evidence.

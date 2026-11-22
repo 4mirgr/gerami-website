@@ -340,3 +340,32 @@ when two related public-domain photos are unavailable; it never uses category ba
 Two minor follow-ups remain: cover-specific alt is available in the article model but
 static cover uses title; manually authored source-less posts are not inferred into
 IntMed leaf listings. Neither expands the publication authority or leaks a draft.
+
+
+### Activation receipt — 2026-11-22
+
+Feature PR47 merged after both PR workflows succeeded on60d35ea88be0b5e28c5caff0a552fd2b9d7aee9c;
+main9fb340588f0006978c6b7482098e8b5541d395ef deployed successfully as Cloudflare
+production eb587753-0ee5-48e7-90a5-8f9a673bc23c. Full local source/browser, fresh
+pinned combined build (659 files), assembled first-response/carrier-fault/integrity/
+cache/no-JS suites passed. Source171352 B/57318 B gzip, root124485 B/27771 B gzip;
+local mobile Chromium FCP204ms is controlled evidence, not an Iranian carrier test.
+New /topics/ and three relevant leaves returned200 with correct canonical URLs;
+empty leaves remain noindex. Anonymous editorial API returned403.
+
+Applied tested cover-choice migration; editorial Edge bundle version9 ACTIVE includes
+index/core/telegram/media/trends/catalog/publication/taxonomy. Prior live version8
+matched repository base except trailing newlines. Existing IntMed bot version20
+already routes all webpost callbacks; no bot/upstream pin/Auth change was required.
+All three private cover imports completed with payloads cleared, two distinct active
+images per source. Actual resend receipt: sent3, failed0, no continuation. Each current
+draft has two active distinct photo hashes, full text, current notified revision,
+exact source Harrison 2025 and exact root/leaf category; all remained unselected,
+unapproved drafts. No draft IDs, chat identifiers, message IDs or artwork bytes are
+recorded here. Actual original-topic images remain private until genuine approval.
+
+Actual refresh_trends operation completed: all3 feeds available,60 bounded parsed
+items cached. Availability/items are not search volumes or guaranteed fresh medical
+matches. SEO follow-up/owner Search Console connection remains in the roadmap.
+Pending acceptance is the owner's ordinary choice then explicit publication on the
+fresh Telegram version. We do not fabricate owner approval to test publication.
