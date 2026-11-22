@@ -110,7 +110,7 @@ begin
  select * into d from public.gerami_editorial_drafts where id=p_id for update;
  if not found or d.revision<>p_revision then raise exception 'stale_revision'; end if;
  if p_action='edit' then
-  if d.status not in ('draft','approved','rejected') then raise exception 'draft_locked'; end if;
+  if d.status not in ('draft','approved','rejected') or d.lease_run is not null or d.commit_sha is not null then raise exception 'draft_locked'; end if;
   update public.gerami_editorial_drafts set content=p_data->'content',image=p_data->>'image',media_path=p_data->>'media_path',
    snapshot_hash=p_data->>'snapshot_hash',revision=revision+1,status='draft',approval_hash=null,telegram_message_id=null,
    approved_by=null,approved_at=null,notified_revision=null,notification_attempts=0,next_notification_at=now(),error_code=null,updated_at=now() where id=p_id returning * into d;

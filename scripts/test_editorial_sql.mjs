@@ -36,5 +36,6 @@ try{
  await db.exec("update public.gerami_editorial_drafts set status='publish_error'");
  await assert.rejects(call('edit',2,{content:{},image:'x',snapshot_hash:'x'}),/draft_locked/);
  await call('retry',2);assert.equal((await db.query('select status,publication_attempts from public.gerami_editorial_drafts')).rows[0].status,'approved');
+ await assert.rejects(call('edit',2,{content:{},image:'x',snapshot_hash:'x'}),/draft_locked/,'Retrying an uncertain publication must not make its snapshot editable');
  console.log('Editorial PostgreSQL: RLS, stale revision/message/token, disabled owner, one-time approval, serialized claim, publication locks and receipt binding passed.');
 }catch(error){console.error(error);throw error;}finally{await db.close();}

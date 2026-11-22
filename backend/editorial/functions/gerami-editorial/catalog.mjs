@@ -6,9 +6,10 @@ export function ensureArticleTopic(documents,taxonomy){
  const canonical=sourceTopic(taxonomy.source_id);if(taxonomy.root.id!==canonical.root.id||taxonomy.child.id!==canonical.child.id)throw Error('topic_mismatch');
  const roots=documents['content/topics.json'].topics;let root=roots.find(t=>t.id===canonical.root.id);
  if(!root){root={...canonical.root,children:[]};roots.push(root);}
+ root.fa=canonical.root.fa;root.en=canonical.root.en;
  const anywhere=roots.flatMap(r=>r.children.map(t=>({root:r.id,id:t.id}))).find(t=>t.id===canonical.child.id);
  if(anywhere&&anywhere.root!==root.id)throw Error('topic_conflict');
- if(!root.children.some(t=>t.id===canonical.child.id)){const {source_id,...child}=canonical.child;root.children.push(child);}
+ if(!root.children.some(t=>t.id===canonical.child.id)){const {source_id,image_queries,...child}=canonical.child;root.children.push(child);}
  return canonical;
 }
 export function articlePath(article){
@@ -17,3 +18,5 @@ export function articlePath(article){
  return '/articles/'+article.slug+'/';
 }
 export const sourceCategories=catalog.categories.map(c=>c.source_id);
+
+export function imageQueries(id){const t=sourceTopic(id);const phrases=t.child.image_queries||[id.split('-').slice(1).join(' ')];if(!phrases.some(q=>q.split(/\s+/).some(w=>w.length>=4)))throw Error('image_options_pending');return phrases;}

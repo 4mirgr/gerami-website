@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
+import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {verifyPublicDelivery} from '../backend/editorial/functions/gerami-editorial/publication.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
 let handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus;
 const topic={lesson:[{paragraphs:[{text:'متن آموزشی منتشرشده دربارهٔ فشار خون و مراقبت از آن. '.repeat(30)}]}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
@@ -19,8 +19,8 @@ const fakeFetch=async(url,options={})=>{
   if(path.startsWith('gerami_editorial_cover_library'))return Response.json(covers);
   if(path.startsWith('gerami_editorial_cover_options'))return Response.json(coverOptions);
   if(path==='rpc/gerami_editorial_prepare_covers'){const d=drafts.find(d=>d.id===body.p_id);Object.assign(d,{source:body.p_source,topic:body.p_topic,category:body.p_category,cover_pack:body.p_pack,cover_selected:false,cover_required:true,selected_cover_id:null,cover_sha256:null,image:body.p_options[0].image,media_path:null,snapshot_hash:body.p_snapshot,revision:d.revision+1});coverOptions=body.p_options;return Response.json(d);}
-  if(path==='rpc/gerami_editorial_register_choices')return Response.json(true);
-  if(path==='rpc/gerami_editorial_begin_preview')return Response.json(true);
+  if(path==='rpc/gerami_editorial_register_choices'){const d=drafts.find(d=>d.id===body.p_id);d.notified_revision=d.revision;d.telegram_message_id=body.p_entries[0].message_id;d.approval_hash=null;return Response.json(true);}
+  if(path==='rpc/gerami_editorial_begin_preview'){const d=drafts.find(d=>d.id===body.p_id);d.notification_nonce=body.p_hash;d.approval_hash=body.p_hash;return Response.json(true);}
   if(path==='rpc/gerami_editorial_register_preview')return Response.json(true);
   if(path==='rpc/gerami_editorial_mutate')return Response.json(drafts.find(d=>d.id===body.p_id));
   if(path.startsWith('gerami_editorial_settings'))return Response.json([{categories:['cardio'],enabled:true,hour:9}]);
@@ -51,7 +51,7 @@ const fakeFetch=async(url,options={})=>{
  throw Error('Unexpected network '+url);
 };
 const source=(await fs.readFile('backend/editorial/functions/gerami-editorial/index.ts','utf8')).replace(/^import[^\n]+\n/gm,'');
-const bindings={createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
+const bindings={createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
 run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(bindings),...Object.values(core));
 const post=(action,body={},authorization='Bearer valid.session.token.value')=>handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/'+action,{method:'POST',headers:{Authorization:authorization},body:JSON.stringify(body)}));
 assert.equal((await handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/list'))).status,405);

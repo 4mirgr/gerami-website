@@ -1,5 +1,5 @@
 import {sha,validImage} from './core.mjs';
-import {sourceTopic} from './catalog.mjs';
+import {sourceTopic,imageQueries} from './catalog.mjs';
 export async function boundedBytes(response,limit=650000){
  if(!response.ok||Number(response.headers.get('Content-Length')||0)>limit)throw Error('invalid_image');
  const reader=response.body.getReader(),parts=[];let size=0;try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>limit)throw Error('invalid_image');parts.push(value);}}finally{await reader.cancel().catch(()=>{});}
@@ -10,7 +10,7 @@ const plain=s=>String(s||'').replace(/<[^>]*>/g,'').replace(/[\u0000-\u001f]/g,'
 export function commonsCandidate(page,query){
  const meta=page.imageinfo?.[0],extra=meta?.extmetadata||{},license=plain(extra.LicenseShortName?.value),licenseUrl=plain(extra.LicenseUrl?.value);
  if(meta?.mime!=='image/jpeg'||!(/^(Public domain|CC0|PDM)$/i.test(license)||/^https:\/\/creativecommons.org\/publicdomain\//.test(licenseUrl)))return null;
- const evidence=plain(page.title+' '+(extra.ImageDescription?.value||'')).toLowerCase();if(!query.split(/\s+/).filter(t=>t.length>=4).some(t=>evidence.includes(t.toLowerCase())))return null;
+ const evidence=new Set(plain(page.title+' '+(extra.ObjectName?.value||'')+' '+(extra.ImageDescription?.value||'')).toLowerCase().match(/[a-z0-9]+/g)||[]),terms=query.toLowerCase().match(/[a-z0-9]+/g)||[],generic=new Set(['acute','chronic','medical','clinical','disease','syndrome','disorder','general','test','tests','care','image']);if(!terms.some(t=>t.length>=4&&!generic.has(t))||!terms.every(t=>evidence.has(t)))return null;
  let url;try{url=new URL(meta.thumburl||meta.url);}catch{return null;}
  if(url.origin!=='https://upload.wikimedia.org'||!url.pathname.startsWith('/wikipedia/commons/')||url.username||url.password||url.href.length>2000)return null;
  return {url:url.href,label:plain(extra.ObjectName?.value||page.title).slice(0,120),provenance:{kind:'public-domain',provider:'Wikimedia Commons',license,license_url:licenseUrl,source:'https://commons.wikimedia.org/?curid='+Number(page.pageid),artist:plain(extra.Artist?.value).slice(0,160)}};
@@ -32,7 +32,7 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
   return rpc('library_pair',{p_topic:topic,p_options:saved});
  }
  async function discover(topic){
-  const query=topic.split('-').slice(1).join(' ').replace(/[^a-z ]/g,'').trim();if(query.length<4)throw Error('image_options_pending');
+  const query=imageQueries(topic)[0];
   const params=new URLSearchParams({action:'query',format:'json',generator:'search',gsrsearch:query+' filetype:bitmap',gsrnamespace:'6',gsrlimit:'12',prop:'imageinfo',iiprop:'url|mime|extmetadata',iiurlwidth:'1000'});
   const response=await remote('https://commons.wikimedia.org/w/api.php?'+params,{signal:AbortSignal.timeout(10000)}),data=JSON.parse(new TextDecoder().decode(await boundedBytes(response,350000)));
   const chosen=[];for(const p of Object.values(data.query?.pages||{})){
@@ -43,6 +43,9 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
  }
  async function ensure(d,{force=false}={}){
   if(d.cover_pack&&!force){const rows=await db('gerami_editorial_cover_options?draft_id=eq.'+d.id+'&pack_id=eq.'+d.cover_pack+'&select=*');if(rows.length===2&&d.topic===sourceTopic(d.source.topic_id).child.id&&d.source.reference==='Harrison 2025')return d;}
+  // Older owner uploads predate cover-selection metadata; verify bytes before preserving.
+  const oldImage=/^\/assets\/uploads\/editorial-([a-f0-9]{64})\.(jpg|webp)$/.exec(d.image||'');
+  if(d.media_path&&!d.selected_cover_id&&!d.source.cover&&oldImage){const bytes=await boundedBytes(await storage('object/gerami-editorial/'+d.media_path)),mime=oldImage[2]==='webp'?'image/webp':'image/jpeg';if(!validImage(bytes,mime)||await sha(bytes)!==oldImage[1])throw Error('invalid_image');d={...d,cover_selected:true,selected_cover_id:null,cover_sha256:oldImage[1],source:{...d.source,cover:{provider:'owner-upload',sha256:oldImage[1],label:'تصویر انتخابی پزشک'}}};}
   const topic=d.source.topic_id;let library=await db('gerami_editorial_cover_library?source_topic=eq.'+topic+'&active=eq.true&select=*&order=ordinal.asc&limit=2');
   if(library.length!==2){await discover(topic);library=await db('gerami_editorial_cover_library?source_topic=eq.'+topic+'&active=eq.true&select=*&order=ordinal.asc&limit=2');}
   if(library.length!==2||library[0].sha256===library[1].sha256)throw Error('image_options_pending');
@@ -56,7 +59,7 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
   if(d.cover_selected&&!d.selected_cover_id)rows=[{id:null,label:'تصویر انتخابی پزشک',image:d.image,media_path:d.media_path,sha256:d.cover_sha256,provenance:{provider:'owner-upload'}},rows.find(o=>o.sha256!==d.cover_sha256)];
   return rows;
  }
- async function load(o){const bytes=await boundedBytes(await storage('object/gerami-editorial/'+o.media_path));if(!validImage(bytes,'image/jpeg')||await sha(bytes)!==o.sha256)throw Error('invalid_image');return {bytes,mime:'image/jpeg',hash:o.sha256};}
+ async function load(o){const bytes=await boundedBytes(await storage('object/gerami-editorial/'+o.media_path));const mime=o.media_path.endsWith('.webp')?'image/webp':'image/jpeg';if(!validImage(bytes,mime)||await sha(bytes)!==o.sha256)throw Error('invalid_image');return {bytes,mime,hash:o.sha256};}
  async function choose(d,o,owner,cap=null){const next=selectedDraft(d,o);next.snapshot_hash=await snapshot(next);if(cap)return rpc('select_cover',{p_hash:cap.hash,p_message:cap.message,p_owner:owner,p_snapshot:next.snapshot_hash});return rpc('mutate',{p_id:d.id,p_action:'choose',p_revision:d.revision,p_data:{candidate_id:o.id,owner,snapshot_hash:next.snapshot_hash}});}
  return {ensure,options,load,choose,saveLibrary};
 }

@@ -8,8 +8,8 @@
       "source_label": "جنرال",
       "root": {
         "id": "internal-medicine",
-        "fa": "فرهنگ و اصول مراجعه به مراکز درمانی و پیگیری درمان",
-        "en": "Navigating healthcare & following up on treatment",
+        "fa": "جنرال",
+        "en": "General internal medicine",
         "icon": "medicine",
         "description_fa": "پیشگیری و سلامت، آموزش بالینی",
         "description_en": "Prevention, Clinical education"
@@ -33,7 +33,10 @@
           "icon": "medicine",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "cerebrospinal fluid"
+          ]
         },
         {
           "id": "general-pocus",
@@ -67,7 +70,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "heart failure"
+          ]
         },
         {
           "id": "cardio-cardiomyopathy",
@@ -87,7 +93,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "acute coronary syndrome"
+          ]
         },
         {
           "id": "cardio-arrhythmia",
@@ -107,7 +116,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "ventricular tachycardia"
+          ]
         },
         {
           "id": "cardio-vt-sustained",
@@ -117,7 +129,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "sustained ventricular tachycardia"
+          ]
         },
         {
           "id": "cardio-vt-polymorphic",
@@ -127,7 +142,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "polymorphic ventricular tachycardia"
+          ]
         },
         {
           "id": "cardio-svt",
@@ -137,7 +155,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "supraventricular tachycardia"
+          ]
         },
         {
           "id": "cardio-afib",
@@ -147,7 +168,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "atrial fibrillation"
+          ]
         },
         {
           "id": "cardio-ecg",
@@ -157,7 +181,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "electrocardiography"
+          ]
         },
         {
           "id": "cardio-valve",
@@ -167,7 +194,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "heart valve disease"
+          ]
         },
         {
           "id": "cardio-pericard",
@@ -177,7 +207,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "pericarditis"
+          ]
         },
         {
           "id": "cardio-htn",
@@ -187,7 +220,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "hypertension"
+          ]
         },
         {
           "id": "cardio-pulm-htn",
@@ -197,7 +233,10 @@
           "icon": "heart",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "pulmonary hypertension"
+          ]
         },
         {
           "id": "cardio-aorta",
@@ -216,7 +255,7 @@
       "source_label": "ریه",
       "root": {
         "id": "pulmonology",
-        "fa": "ریه و تنفس",
+        "fa": "ریه",
         "en": "Pulmonology",
         "icon": "lungs",
         "description_fa": "آسم، بیماری انسدادی ریه، خواب و تنفس",
@@ -231,7 +270,10 @@
           "icon": "lungs",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "asthma"
+          ]
         },
         {
           "id": "copd",
@@ -251,7 +293,10 @@
           "icon": "lungs",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "interstitial lung disease"
+          ]
         },
         {
           "id": "pulm-pe",
@@ -261,7 +306,10 @@
           "icon": "lungs",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "pulmonary embolism"
+          ]
         },
         {
           "id": "pulm-ards",
@@ -290,8 +338,8 @@
       "source_label": "کلیه",
       "root": {
         "id": "nephrology",
-        "fa": "نفرولوژی - کلیه و فشار خون",
-        "en": "Nephrology · Kidneys & blood pressure",
+        "fa": "کلیه",
+        "en": "Nephrology",
         "icon": "kidney",
         "description_fa": "سلامت کلیه، فشار خون، آب و الکترولیت",
         "description_en": "Kidney health, Blood pressure, Fluids and electrolytes"
@@ -315,7 +363,10 @@
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "azotemia"
+          ]
         },
         {
           "id": "nephro-aki",
@@ -325,7 +376,10 @@
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "acute kidney injury"
+          ]
         },
         {
           "id": "nephro-ckd",
@@ -335,7 +389,10 @@
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "chronic kidney disease"
+          ]
         },
         {
           "id": "nephro-dialysis",
@@ -375,7 +432,10 @@
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "glomerulonephritis"
+          ]
         },
         {
           "id": "nephro-pkd",
@@ -385,7 +445,10 @@
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "polycystic kidney disease"
+          ]
         },
         {
           "id": "nephro-tin",
@@ -395,7 +458,10 @@
           "icon": "kidney",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "tubulointerstitial nephritis"
+          ]
         },
         {
           "id": "nephro-vascular",
@@ -484,8 +550,8 @@
       "source_label": "گوارش و کبد",
       "root": {
         "id": "gastroenterology",
-        "fa": "گوارش٫ کبد ٫ کیسه صفرا و مجاری صفراوی و پانکراس",
-        "en": "Digestive system, liver, gallbladder, bile ducts & pancreas",
+        "fa": "گوارش و کبد",
+        "en": "Gastroenterology and hepatology",
         "icon": "digestive",
         "description_fa": "سلامت گوارش، کبد، بیماری‌های التهابی روده",
         "description_en": "Digestive health, Liver, Inflammatory bowel disease"
@@ -499,7 +565,10 @@
           "icon": "digestive",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "dysphagia"
+          ]
         },
         {
           "id": "gi-weight-loss",
@@ -559,7 +628,10 @@
           "icon": "digestive",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "irritable bowel syndrome"
+          ]
         },
         {
           "id": "gi-diverticular-anorectal",
@@ -619,7 +691,10 @@
           "icon": "digestive",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "liver function test"
+          ]
         },
         {
           "id": "gi-hyperbilirubinemia",
@@ -699,7 +774,10 @@
           "icon": "digestive",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "inflammatory bowel disease"
+          ]
         },
         {
           "id": "gi-pancreatitis-acute",
@@ -729,7 +807,7 @@
       "root": {
         "id": "endocrinology",
         "fa": "غدد و متابولیسم",
-        "en": "Endocrinology",
+        "en": "Endocrinology and metabolism",
         "icon": "endocrine",
         "description_fa": "دیابت، تیروئید، اختلالات متابولیک",
         "description_en": "Diabetes, Thyroid, Metabolic conditions"
@@ -993,7 +1071,10 @@
           "icon": "endocrine",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "autoimmune polyendocrine syndrome"
+          ]
         },
         {
           "id": "endo-men",
@@ -1003,7 +1084,10 @@
           "icon": "endocrine",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "multiple endocrine neoplasia"
+          ]
         },
         {
           "id": "endo-wilson",
@@ -1032,8 +1116,8 @@
       "source_label": "هماتولوژی و آنکولوژی",
       "root": {
         "id": "hematology",
-        "fa": "هماتولوژی - خون",
-        "en": "Hematology · Blood",
+        "fa": "هماتولوژی و آنکولوژی",
+        "en": "Hematology and oncology",
         "icon": "blood",
         "description_fa": "کم‌خونی، انعقاد خون",
         "description_en": "Anemia, Clotting"
@@ -1067,7 +1151,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "acute leukemia"
+          ]
         },
         {
           "id": "heme-cll",
@@ -1077,7 +1164,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "chronic lymphocytic leukemia"
+          ]
         },
         {
           "id": "heme-cml",
@@ -1087,7 +1177,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "chronic myeloid leukemia"
+          ]
         },
         {
           "id": "heme-mpn",
@@ -1097,7 +1190,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "myeloproliferative neoplasm"
+          ]
         },
         {
           "id": "heme-lymphoma",
@@ -1127,7 +1223,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "myelodysplastic syndrome"
+          ]
         },
         {
           "id": "heme-mm",
@@ -1137,7 +1236,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "multiple myeloma"
+          ]
         },
         {
           "id": "heme-breast-ca",
@@ -1217,7 +1319,10 @@
           "icon": "blood",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "peripheral blood smear"
+          ]
         }
       ]
     },
@@ -1226,8 +1331,8 @@
       "source_label": "روماتولوژی و ایمونولوژی",
       "root": {
         "id": "rheumatology",
-        "fa": "روماتولوژی و بیماری های خودایمن",
-        "en": "Rheumatology & autoimmune diseases",
+        "fa": "روماتولوژی و ایمونولوژی",
+        "en": "Rheumatology and immunology",
         "icon": "joint",
         "description_fa": "التهاب مفاصل، بیماری‌های خودایمنی",
         "description_en": "Arthritis, Autoimmune conditions"
@@ -1241,7 +1346,10 @@
           "icon": "joint",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "rheumatoid arthritis"
+          ]
         },
         {
           "id": "rheum-sle",
@@ -1251,7 +1359,10 @@
           "icon": "joint",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "systemic lupus erythematosus"
+          ]
         },
         {
           "id": "rheum-gout",
@@ -1291,7 +1402,10 @@
           "icon": "joint",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "spondyloarthritis"
+          ]
         },
         {
           "id": "rheum-sarcoidosis",
@@ -1321,7 +1435,10 @@
           "icon": "joint",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "antiphospholipid syndrome"
+          ]
         }
       ]
     },
@@ -1330,8 +1447,8 @@
       "source_label": "عفونی",
       "root": {
         "id": "infectious-diseases",
-        "fa": "بیماری های عفونی و نقص ایمنی",
-        "en": "Infectious diseases & immunodeficiency",
+        "fa": "عفونی",
+        "en": "Infectious diseases",
         "icon": "microbe",
         "description_fa": "عفونت‌ها، واکسیناسیون",
         "description_en": "Infections, Vaccination"
@@ -1355,7 +1472,10 @@
           "icon": "microbe",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "human immunodeficiency virus"
+          ]
         },
         {
           "id": "id-tb",
@@ -1365,7 +1485,10 @@
           "icon": "microbe",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "tuberculosis"
+          ]
         },
         {
           "id": "id-hai",
@@ -1375,7 +1498,10 @@
           "icon": "microbe",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "hospital acquired infection"
+          ]
         },
         {
           "id": "id-empiric",
@@ -1489,7 +1615,7 @@
       "root": {
         "id": "critical-care",
         "fa": "مراقبت ویژه و اورژانس داخلی",
-        "en": "Critical care",
+        "en": "Critical care and medical emergencies",
         "icon": "shield",
         "description_fa": "",
         "description_en": ""
@@ -1513,7 +1639,10 @@
           "icon": "shield",
           "description_fa": "",
           "description_en": "",
-          "children": []
+          "children": [],
+          "image_queries": [
+            "arterial blood gas"
+          ]
         },
         {
           "id": "crit-vent",

@@ -309,7 +309,7 @@ selected-cover gates in approval AND publisher claim. Both images/full text prec
 arming; chosen-only approval binds bytes, metadata, photo, snapshot and saved revision.
 Library refresh cannot change approved options. Custom owner uploads survive preparing
 new options. Actual publisher additionally verifies bytes against the content-hash
-filename. Deploy index/core/telegram/media/trends/catalog and taxonomy.json together.
+filename. Deploy index/core/telegram/media/trends/catalog/publication and taxonomy.json together.
 Operation import_covers uploads a private pair without exporting credentials and
 clears the large payload on completion. resend_previews walks all pending drafts in
 bounded batches with per-draft failure isolation and continuation, not a three-card cap.
@@ -326,3 +326,17 @@ must be imported only through the reviewed deployed operation. Owner approval is
 simulated. Final CI/build/deployment/backfill/Telegram receipts must be recorded after
 activation. Search Console connection currently lists no properties; owner connection
 is required for actual query/CTR/impression measurement, not technical SEO generation.
+
+
+Fresh independent final review found seven release blockers, corrected in one fix
+pass with focused PostgreSQL/media/delivery regressions: notification-attempt nonce
+and narrowly scoped retirement, atomic edit/reject invalidation, pre-migration owner
+JPEG/WebP preservation, complete medical discovery terms for short source IDs, exact
+parent labels, serialized active library pairs, resilient trend cache and actual
+clock, and canonical HTML/snapshot verification before a publication success link.
+Approved but unclaimed admin re-selection resets approval; any existing publisher
+lease/commit locks edits even after retry. Later-topic media discovery fails private
+when two related public-domain photos are unavailable; it never uses category badges.
+Two minor follow-ups remain: cover-specific alt is available in the article model but
+static cover uses title; manually authored source-less posts are not inferred into
+IntMed leaf listings. Neither expands the publication authority or leaks a draft.

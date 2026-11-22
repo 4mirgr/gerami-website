@@ -40,6 +40,7 @@ def generate(root,output):
    graph.append(node)
   ld=json.dumps({'@context':'https://schema.org','@graph':graph},ensure_ascii=False,separators=(',',':')).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
   extra='<meta property="og:title" content="'+escape(title)+'"><meta property="og:description" content="'+escape(description[:240])+'"><meta property="og:url" content="'+SITE+escape(path)+'"><meta property="og:type" content="'+('article' if article else 'website')+'"><script type="application/ld+json">'+ld+'</script>'
+  if article and article.get('editorial_hash'):extra+='<meta name="editorial-snapshot" content="'+escape(article['editorial_hash'])+'"><meta name="editorial-slug" content="'+escape(article['slug'])+'">'
   if article and article.get('image'):extra+='<meta property="og:image" content="'+escape(SITE+article['image'] if article['image'].startswith('/') else article['image'])+'">'
   if not indexable:extra+='<meta name="robots" content="noindex,follow">'
   text=text.replace('</head>',extra+'</head>',1);target=output/path.strip('/')/'index.html';target.parent.mkdir(parents=True,exist_ok=True);target.write_text(bake_settings(root,text,'extra'))
@@ -58,7 +59,7 @@ def generate(root,output):
  for p in posts:
   title=p.get('title_fa') or p.get('title_en');body=p.get('body_fa') or p.get('body_en') or '';description=re.sub(r'[#*_>`]','',body.split('\n')[0])[:240];markup=''
   image=p.get('image','')
-  if image.startswith('/assets/') or urlsplit(image).scheme=='https':markup+='<img class="post-cover" style="height:auto;max-width:1200px" src="'+escape(image)+'" alt="'+escape(title)+'" width="1200" height="800" decoding="async">'
+  if image.startswith('/assets/') or urlsplit(image).scheme=='https':markup+='<img class="post-cover" style="height:auto;max-width:1200px" src="'+escape(image)+'" alt="'+escape(title)+'" width="1200" height="800" loading="lazy" decoding="async">'
   markup+='<div class="article-body" dir="'+('rtl' if p.get('body_fa') else 'ltr')+'">'+''.join('<p>'+escape(x).replace('\n','<br>')+'</p>' for x in body.split('\n\n') if x.strip())+'</div>'
   markup+='<p>'+escape(p.get('author',''))+' · '+escape(p.get('published_at',''))+'</p>'
   if p.get('source_topic_id'):markup+='<p>منبع: <span lang="en" dir="ltr">Harrison 2025</span></p>'

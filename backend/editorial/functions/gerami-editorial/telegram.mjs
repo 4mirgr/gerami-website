@@ -7,10 +7,10 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
  const current=async id=>(await db('gerami_editorial_drafts?id=eq.'+id+'&select=*'))[0];
  async function verifiedOwner(){const id=await owner();if(!await rpc('telegram_owner',{p_owner:id}))throw Error('owner_disabled');return id;}
  async function retire(d){
-  const previews=await db('gerami_editorial_previews?draft_id=eq.'+d.id+'&retired_at=is.null&select=control_message_id');
+  const scope='&revision=eq.'+d.revision+'&snapshot_hash=eq.'+d.snapshot_hash+(d.notification_nonce?'&notification_nonce=eq.'+d.notification_nonce:'');
+  const previews=await db('gerami_editorial_previews?draft_id=eq.'+d.id+scope+'&select=control_message_id');
   const ids=new Set([d.telegram_message_id,...previews.map(p=>p.control_message_id)].filter(Boolean));
-  for(const id of ids)await telegram('editMessageReplyMarkup',{chat_id:await chat(),message_id:id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});
-  await db('gerami_editorial_previews?draft_id=eq.'+d.id+'&retired_at=is.null',{retired_at:new Date().toISOString()},'PATCH');
+  for(const id of ids){await telegram('editMessageReplyMarkup',{chat_id:await chat(),message_id:id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});await db('gerami_editorial_previews?draft_id=eq.'+d.id+'&control_message_id=eq.'+id+scope,{retired_at:new Date().toISOString()},'PATCH');}
  }
  async function cover(d){
   let r;if(d.media_path)r=await storage('object/gerami-editorial/'+d.media_path);
@@ -29,7 +29,7 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   await verifiedOwner();
   const sessions=await db('gerami_editorial_telegram_sessions?draft_id=eq.'+d.id+'&revision=eq.'+d.revision+'&select=expires_at');
   if(sessions.some(s=>Date.parse(s.expires_at)>Date.now()))return false;
-  if(d.cover_required)return notifyChoices(await media.ensure(d));
+  if(d.cover_required){const prepared=await media.ensure(d);if(prepared.revision!==d.revision)await retire(d);return notifyChoices(prepared);}
   const selected=await cover(d);await retire(d);
   const capability=crypto.randomUUID().replaceAll('-',''),hash=await sha(capability),target=await chat();
   await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:hash});
@@ -48,22 +48,26 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
  async function notifyChoices(d){
   const candidates=await media.options(d),loaded=[];for(const o of candidates)loaded.push(await media.load(o));
   const variants=await Promise.all(candidates.map(async(o,i)=>{const capability=crypto.randomUUID().replaceAll('-','');return {o,capability,hash:await sha(capability),loaded:loaded[i],selected:!!d.cover_selected&&o.id===d.selected_cover_id};}));
-  await retire(d);await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:(variants.find(v=>v.selected)||variants[0]).hash});
+  const attempt=(variants.find(v=>v.selected)||variants[0]).hash;await retire(d);await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:attempt});
   const target=await chat();for(let i=0;i<variants.length;i++){
-   const v=variants[i],form=new FormData();form.append('chat_id',target);form.append('photo',new Blob([v.loaded.bytes],{type:v.loaded.mime}),'cover.jpg');
+   const v=variants[i],form=new FormData();form.append('chat_id',target);form.append('photo',new Blob([v.loaded.bytes],{type:v.loaded.mime}),'cover.'+(v.loaded.mime==='image/webp'?'webp':'jpg'));
    form.append('caption','📝 پیش‌نویس سایت · نسخهٔ '+d.revision+'\nگزینهٔ '+(i+1)+(v.selected?' · ✅ تصویر انتخاب‌شده':'')+'\n'+v.o.label+'\n\n'+d.content.title+'\n'+d.content.summary+'\n\n'+d.category+'\nمنبع: Harrison 2025');
    v.photo=await telegram('sendPhoto',form);
   }
   const text=d.content.title+'\n\n'+d.content.paragraphs.join('\n\n')+'\n\n'+d.content.hashtags.join(' ')+'\n\nمسیر موضوع: '+d.category+'\nمنبع: Harrison 2025\nیکی از دو تصویر را انتخاب کنید؛ انتشار فقط با تأیید نسخهٔ انتخاب‌شده انجام می‌شود.';
   const messages=[];for(let offset=0;offset<text.length;offset+=3500){const m=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل پست سایت\n'+text.slice(offset,offset+3500),reply_parameters:{message_id:variants[0].photo.message_id},link_preview_options:{is_disabled:true}});messages.push(m.message_id);}
-  await rpc('register_choices',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_entries:variants.map(v=>({message_id:v.photo.message_id,hash:v.hash,candidate_id:v.o.id,photo_hash:v.loaded.hash})),p_text:messages});
-  try{for(const v of variants){const rows=[];
+  try{await rpc('register_choices',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_entries:variants.map(v=>({message_id:v.photo.message_id,hash:v.hash,candidate_id:v.o.id,photo_hash:v.loaded.hash})),p_text:messages,p_attempt:attempt});
+  for(const v of variants){const rows=[];
    if(v.selected)rows.push([{text:'✅ انتشار با همین تصویر و متن',callback_data:'webpost:a:'+v.capability}]);
    else rows.push([{text:'انتخاب این تصویر',callback_data:'webpost:i:'+v.capability}]);
    rows.push([{text:'✏️ ویرایش متن',callback_data:'webpost:e:'+v.capability},{text:'ویرایش عنوان',callback_data:'webpost:t:'+v.capability}],[{text:'🖼 تصویر دلخواه',callback_data:'webpost:c:'+v.capability},{text:'کنار گذاشتن',callback_data:'webpost:r:'+v.capability}]);
    await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:rows}});
-  }}catch(e){await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notified_revision:null},'PATCH');await retire(d);throw e;}
-  const updated=await current(d.id);if(updated.revision!==d.revision||updated.status!=='draft')for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});
+  }}catch(e){
+   for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});
+   if(['stale_approval','stale_revision','draft_locked'].includes(e.message))return false;
+   await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision+'&notification_nonce=eq.'+attempt,{notified_revision:null},'PATCH');await retire({...d,notification_nonce:attempt});throw e;
+  }
+  const updated=await current(d.id);if(updated.revision!==d.revision||updated.status!=='draft'||updated.notification_nonce!==attempt){for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});return false;}
   return true;
  }
  async function wake(force=false){

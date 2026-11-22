@@ -25,7 +25,7 @@ try{
  // Navigation must paint while every request after the HTML is still pending.
  // This reproduces mobile blank screens caused by a stalled stylesheet before
  // the synchronous theme bootstrap, without treating an aborted file as a pass.
- for(const path of ['/', '/pages/about.html', '/pages/blog.html']){
+ for(const path of ['/', '/pages/about.html', '/pages/blog.html', '/topics/', '/topics/pulmonology/', '/topics/pulmonology/asthma/']){
   const stalled=await browser.newContext({viewport:{width:390,height:844}}),held=[];
   await stalled.route('**/*',route=>{
    if(route.request().isNavigationRequest())return route.continue();
