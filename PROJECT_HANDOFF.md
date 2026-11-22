@@ -4,6 +4,10 @@ Updated 2026-11-22 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Contact page · 2026-11-22
+
+The contact banner uses the emerald conversation emblem modeled on the projects badge. The LinkedIn and Apple Mail illustrations are local assets. The LinkedIn brand shape comes from the [LinkedIn icon](https://github.com/gilbarbara/logos/blob/main/logos/linkedin-icon.svg). The [Apple Mail artwork](https://github.com/raycast/extensions/blob/4de3eeb7b89719e955098595ada42c7e1e1fe317/extensions/mail/assets/mail.png) is the blue envelope. The entire card is a native link, including its image. Public email and LinkedIn targets come from Studio’s contact profile in `content/site.json`, both at build time and in the live preview. Keep the visit-information link below the two cards. The owner removed the messaging notice and duplicate contact list from this page.
+
 ## Topic directory, projects and reading order · 2026-11-22
 
 Homepage defaults to latest posts, topic directory, physician and visits, projects, then the health literacy introduction. The HTML and appearance settings carry the same order. Studio can move the introduction. Preserve full-width folder tabs with a contrasting contour in RTL, LTR and both themes.

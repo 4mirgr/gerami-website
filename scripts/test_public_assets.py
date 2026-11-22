@@ -79,7 +79,7 @@ class PublicAssets(unittest.TestCase):
                 self.assertIn('rel="modulepreload"', text)
                 self.assertNotRegex(text, r'<link\b[^>]*rel="stylesheet"')
                 styles = re.findall(r'<style data-public-stylesheet="([^"]+)">(.*?)</style>', text, re.S)
-                self.assertEqual(len(styles), 4 if page.name in ('account.html','about.html','blog.html','projects.html') else 3)
+                self.assertEqual(len(styles), 4 if page.name in ('account.html','about.html','blog.html','projects.html','contact.html') else 3)
                 for url, css_text in styles:
                     self.assertEqual(css_text, (site / url.lstrip('/')).read_text(), 'inline cascade must match the exact emitted stylesheet')
                 for url in re.findall(r'(?:src|href)="(/assets/(?:runtime|optimized)/[^"?]+)', text):

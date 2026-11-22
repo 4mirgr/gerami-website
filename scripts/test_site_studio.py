@@ -7,6 +7,27 @@ from site_studio import ROOT, generate, bake_settings
 
 
 class SiteStudioBuild(unittest.TestCase):
+    def test_contact_cards_use_current_profile_before_javascript(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            shutil.copytree(ROOT / 'content', root / 'content')
+            path = root / 'content/site.json'
+            profile = json.loads(path.read_text())
+            template = (ROOT / 'pages/contact.html').read_text()
+            profile.update(email='doctor@example.com', linkedin='https://www.linkedin.com/in/doctor/')
+            path.write_text(json.dumps(profile))
+            page = bake_settings(root, template, 'contact')
+            self.assertIn('href="mailto:doctor@example.com"', page)
+            self.assertIn('data-contact-address>doctor@example.com</bdi>', page)
+            self.assertIn('href="https://www.linkedin.com/in/doctor/"', page)
+            profile.update(email='', linkedin='')
+            path.write_text(json.dumps(profile))
+            page = bake_settings(root, template, 'contact')
+            self.assertNotIn('href="mailto:', page)
+            self.assertNotIn('href="https://www.linkedin.com/in/', page)
+            self.assertEqual(page.count('contact-channel"'), 2)
+            self.assertIn('data-ready="email" hidden>', page)
+
     def test_public_profile_is_baked_and_escaped_without_waiting_for_javascript(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

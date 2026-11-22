@@ -13,7 +13,7 @@ const imageSource=src=>previewAssets[src]||src;
 const clear=host=>{for(const img of host.querySelectorAll('img'))img.removeAttribute('src');host.replaceChildren();};
  function renderProfile(){
   if(!profile)return;window.dispatchEvent(new CustomEvent('site-profile',{detail:profile}));
-  if(!['/about','/contact','/appointments'].some(p=>path.endsWith(p)))return;
+  if(!['/about','/appointments'].some(p=>path.endsWith(p)))return;
   if(!profileHost){profileHost=main.querySelector('[data-profile-host]');if(!profileHost){profileHost=el('section','','cms-profile container');main.append(profileHost);}}profileHost.replaceChildren();
   if(path.endsWith('/about')){
    if(profile['bio_'+lang()])profileHost.append(el('p',profile['bio_'+lang()]));const entries=Array.isArray(profile.cv)?profile.cv:[];
