@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PROJECTS = {
     'intmed': ('https://github.com/4mirgr/intMed-study-plan.git', 'docs'),
     'aus': ('https://github.com/4mirgr/immi-arash-amir.git', 'dist'),
+    'ventilator': ('https://github.com/4mirgr/Respiratory-ventilator.git', '.'),
 }
 
 
@@ -36,7 +37,7 @@ def validate(root=ROOT):
     if not isinstance(profile, dict) or not isinstance(data, dict) or not isinstance(data.get('articles'), list):
         raise ValueError('Content must contain a profile object and an articles list')
     if set(pins) != set(PROJECTS):
-        raise ValueError('Keep the independent IntMed/AUS integrations')
+        raise ValueError('Unexpected set of independent project integrations')
     for name, (repository, directory) in PROJECTS.items():
         spec = pins[name]
         if (spec.get('repository'), spec.get('public_directory'), spec.get('mount')) != (repository, directory, name):

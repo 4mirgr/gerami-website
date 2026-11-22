@@ -11,6 +11,9 @@ from validate_content import ROOT, validate
 def candidates(pins, resolve):
     result = json.loads(json.dumps(pins))
     for name, spec in result.items():
+        # Ventilator updates require review of the mounted files at each pin.
+        if name not in ('intmed', 'aus'):
+            continue
         head = resolve(spec['repository'], spec['commit'])
         if not re.fullmatch(r'[0-9a-f]{40}', head):
             raise ValueError(f'{name}: invalid upstream commit SHA')

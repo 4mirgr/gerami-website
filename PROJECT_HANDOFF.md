@@ -4,6 +4,10 @@ Updated 2026-11-22 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Respiratory ventilator simulator · 2026-11-22
+
+The Cloudflare Pages build mounts the approved release of `4mirgr/Respiratory-ventilator` at `/ventilator/`. The bare address passes through the same-origin slash redirect. The independent repository remains the source for the interactive monitor. The assembly verifies its full commit pin, runs its model suite and copies only the explicitly reviewed public files. Pin updates require review and are outside automatic maintenance. The public mount uses fictional educational examples and adds no account or medical data writes. Production verification is recorded in the release tag.
+
 ## Two daily Telegram editions · 2026-11-22
 
 The existing private editorial queue produces one patient and one physician draft per Tehran date. Physician text is taken verbatim from the verified, published IntMed bundle. The private source record identifies the section or flashcards. Both audiences use the two topic-specific images, Telegram edits, a revision-bound owner approval, and the existing publisher. A repeat run fills only a missing edition. The dashboard shows audience on the job and draft, and the website audience filter reads the approved edition. Deployment order and the scheduler contract are in backend/editorial/README.md.
@@ -45,6 +49,7 @@ Latest AUS-only continuation 2026-11-21: [quota-aware interface and reviewed GP 
 | Public website, account API, CMS, assembled static apps | `4mirgr/gerami-website`, Cloudflare Pages `gerami-website` | This repo; `deploy/projects.json` pins full reviewed IntMed/AUS commits |
 | IntMed learning app and existing Auth | `4mirgr/intMed-study-plan`, `/intmed/` | Independent source; public docs only imported into combined build |
 | AUS | `4mirgr/immi-arash-amir`, `/aus/` | Independent identity, backend and secrets; preserve its existing Worker binding |
+| Respiratory ventilator simulator | `4mirgr/Respiratory-ventilator`, `/ventilator/` | Independent simulator source, reviewed public files imported by full commit pin |
 | Clinic native Django and synthetic preview | `4mirgr/Clinic`, public `/clinic/` | Its canonical `PROJECT_HANDOFF.md`; native backend remains inactive |
 
 Do not migrate or merge repositories. Do not copy cloud/backend/private directories into public output. A public build uses reviewed, pinned upstream inputs in a temporary directory and must leave source checkouts unchanged. Independent AUS work may advance main while this task is running: fetch and inspect before pushing; merge current main and rerun required gates if it moved. Never reset its pins to a remembered older value.

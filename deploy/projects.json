@@ -10,5 +10,11 @@
     "commit": "4f935f8ff2eb7e4265362c1321adac11c0ae2173",
     "public_directory": "dist",
     "mount": "aus"
+  },
+  "ventilator": {
+    "repository": "https://github.com/4mirgr/Respiratory-ventilator.git",
+    "commit": "f5a26fa4c99f1ee7470261334e95268cf3b23c0d",
+    "public_directory": ".",
+    "mount": "ventilator"
   }
 }
