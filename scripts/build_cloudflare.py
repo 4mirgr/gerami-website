@@ -189,7 +189,8 @@ def assemble(sources, output):
         for name in SITE_DIRS:
             copy_public(ROOT / name, stage / name, {'.mjs'} if name in ('js', 'admin') else ())
         shutil.copy2(ROOT / 'admin/config.yml', stage / 'admin/config.yml')
-        from site_studio import generate
+        from site_studio import generate, write_public_feeds
+        write_public_feeds(ROOT, stage)
         generate(ROOT, stage)
         # AUS is a compiled authenticated application. Never copy its repository
         # root (which includes backend/private-data tooling) into public assets.
@@ -260,8 +261,7 @@ def main():
     args = parser.parse_args()
     if bool(args.intmed_source) != bool(args.aus_source):
         parser.error('Provide both local sources, or neither to fetch the pinned releases')
-    for check in ('check_site.py',):
-        subprocess.run([sys.executable, str(ROOT / 'scripts' / check)], check=True, timeout=60)
+    subprocess.run([sys.executable, str(ROOT / 'scripts/check_site.py')], check=True, timeout=300)
     pins = json.loads(PINS.read_text())
     with tempfile.TemporaryDirectory(prefix='gerami-sources-') as temporary:
         local_sources = {'intmed': args.intmed_source, 'aus': args.aus_source, 'ventilator': args.ventilator_source}

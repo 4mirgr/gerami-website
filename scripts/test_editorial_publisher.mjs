@@ -14,7 +14,11 @@ try{
  const env={...process.env,RUNNER_TEMP:runtime,GITHUB_OUTPUT:path.join(runtime,'output'),ACTIONS_ID_TOKEN_REQUEST_URL:'https://oidc.example.test/token',ACTIONS_ID_TOKEN_REQUEST_TOKEN:'synthetic-only'};
  const publisher=action=>execFileSync(process.execPath,['--import',preload,path.join(source,'scripts/editorial-publisher.mjs'),action],{cwd:repo,env,encoding:'utf8',stdio:['ignore','pipe','pipe']});
  publisher('claim');assert.match(await fs.readFile(env.GITHUB_OUTPUT,'utf8'),/claimed=true/);assert.match(run(['status','--porcelain']),/^M content\/articles.json/);
- publisher('commit');const receipt=JSON.parse(await fs.readFile(path.join(runtime,'receipt.json'),'utf8'));assert.equal(receipt.action,'receipt');assert(!receipt.error);assert.equal(receipt.commit_sha,run(['rev-parse','HEAD']));assert.equal(run(['status','--porcelain']),'');
+ const other=path.join(root,'other');run(['clone','-b','main',path.join(root,'origin.git'),other],root);
+ run(['-c','user.name=Test','-c','user.email=test@example.test','commit','--allow-empty','-m','Concurrent update'],other);run(['push','origin','main'],other);
+ publisher('commit');assert.match(await fs.readFile(env.GITHUB_OUTPUT,'utf8'),/restage=true/);
+ // A fresh checkout receives only the previously claimed approval.
+ run(['reset','--hard','origin/main']);publisher('restage');publisher('final-commit');const receipt=JSON.parse(await fs.readFile(path.join(runtime,'receipt.json'),'utf8'));assert.equal(receipt.action,'receipt');assert(!receipt.error);assert.equal(receipt.commit_sha,run(['rev-parse','HEAD']));assert.equal(run(['status','--porcelain']),'');
  assert(JSON.parse(run(['show','HEAD:content/articles.json'])).articles.some(a=>a.slug===article.slug));assert.equal(run(['rev-parse','origin/main']),receipt.commit_sha);
  const coverBytes=Buffer.from('synthetic-private-media'),badImage='/assets/uploads/editorial-'+('a'.repeat(64))+'.jpg';
  const invalid={...payload,draft:{...payload.draft,article:{...article,slug:'synthetic-invalid-media',url:'/articles/synthetic-invalid-media/',image:badImage},media:{path:badImage.slice(1),base64:coverBytes.toString('base64'),sha256:await sha(coverBytes)}}};await fs.writeFile(payloadPath,JSON.stringify(invalid));

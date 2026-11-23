@@ -7,6 +7,25 @@ from site_studio import ROOT, generate, bake_settings
 
 
 class SiteStudioBuild(unittest.TestCase):
+    def test_private_entries_absent_from_deployable_feeds_and_embedded_pages(self):
+        from site_studio import write_public_feeds, home_bootstrap
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            shutil.copytree(ROOT / 'content', root / 'content')
+            stage = root / 'stage'
+            (stage / 'content').mkdir(parents=True)
+            for file, key, status in [('articles', 'articles', {'status': 'draft'}), ('extra-pages', 'pages', {'published': False})]:
+                path = root / 'content' / (file + '.json')
+                doc = json.loads(path.read_text())
+                doc[key].append(dict(status, slug='private-example', body_fa='private review text'))
+                path.write_text(json.dumps(doc))
+                shutil.copy2(path, stage / 'content')
+            write_public_feeds(root, stage)
+            for file in (stage / 'content').iterdir():
+                self.assertNotIn('private review text', file.read_text())
+                self.assertIn('private review text', (root / 'content' / file.name).read_text())
+            self.assertNotIn('private review text', home_bootstrap(root, '<head></head>', 'extra'))
+
     def test_contact_cards_use_current_profile_before_javascript(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -69,6 +88,11 @@ class SiteStudioBuild(unittest.TestCase):
             self.assertIn('&lt;script&gt;bad()&lt;/script&gt;', html)
             self.assertIn('\\g&lt;1&gt;', html)
             self.assertIn('href="https://drgerami-md.ir/intmed/"', html)
+            archive = (output / 'pages/blog.html').read_text()
+            self.assertIn('<link rel="canonical" href="https://drgerami-md.ir/pages/blog"', archive)
+            for article in json.loads((root / 'content/articles.json').read_text())['articles']:
+                if article.get('status') == 'published':
+                    self.assertIn(article['slug'], archive.split('data-recent-links',1)[1].split('</ul>',1)[0])
             custom = (output / 'pages/test-page.html').read_text()
             self.assertIn('&lt;img onerror=bad()&gt;', custom)
             self.assertNotIn('<script>alert(1)</script>', custom)

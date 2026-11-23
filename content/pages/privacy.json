@@ -155,6 +155,14 @@
     "text-039": {
       "fa": "© دکتر امیرهوشنگ گرامی. تمامی حقوق محفوظ است.",
       "en": "© Dr. Amir Houshang Gerami. All rights reserved."
+    },
+    "text-101": {
+      "fa": "دیدگاه‌ها و پسندها",
+      "en": "Comments and likes"
+    },
+    "text-102": {
+      "fa": "نام نمایشی و متن دیدگاه پس از تأیید پزشک زیر مطلب منتشر می‌شود. واکنش‌ها برای بازبینی ثبت می‌شوند. لطفا در بخش دیدگاه‌ها اطلاعات پزشکی یا تماس شخصی ننویسید.",
+      "en": "After moderation, your display name and comment appear under the article. Likes also go through moderation. Please keep personal medical and contact details out of comments."
     }
   },
   "links": {}

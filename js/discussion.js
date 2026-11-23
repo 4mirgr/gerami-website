@@ -84,7 +84,7 @@ form.onsubmit=event=>{event.preventDefault();run(async()=>{
  const data={name:name.value.trim(),body:comment.value.trim()};
  const key=JSON.stringify(data);if(requestText!==key){request=crypto.randomUUID();requestText=key;}
  await api('comment',{...data,request});requestText='';comment.value='';
- message=['دیدگاهتان ثبت شد. پس از تأیید، از طریق ایمیل حسابتان خبر می‌دهیم.','Comment submitted. We’ll email you when it is approved.'];
+ message=['دیدگاهتان برای بازبینی ثبت شد. پس از تأیید، زیر همین مطلب نمایش داده می‌شود.','Comment submitted for review. It will appear here after approval.'];
 });};
 retry.hidden=true;host.append(like,list,more,form,signIn,status,retry);labels();
 new MutationObserver(labels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

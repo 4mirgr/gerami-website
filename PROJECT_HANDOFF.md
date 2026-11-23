@@ -1,8 +1,14 @@
 # Canonical project handoff / راهنمای ادامهٔ پروژه
 
-Updated 2026-11-22 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
+Updated 2026-11-23 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
+
+## Public site and editorial audit · 2026-11-23
+
+The publisher may encounter an unrelated push to main after validating a physician-approved snapshot. On a branch race, check out current main once, reapply the original lease, run the full populated-site checks again and use a normal push. Subsequent failures remain visible in the private dashboard. A retry of an approved revision does not approve new content.
+
+Public CMS feeds contain published entries only. Preserve exact feed bytes when no filtering is needed and disable the raw article recovery URL for mixed feeds. The home page carries both language variants in its rendered markup and does not duplicate its editable copy in bootstrap JSON. Both home and archive expose native article links while the feed is unavailable. Public topic membership uses the selected topic also for manually written articles, preserving their URLs. The production canonical for ordinary pages is extensionless. For reproducible checks run the browser profile, combined build, and assembled-asset browser test. Check the release tag for production receipts.
 
 ## Respiratory ventilator simulator · 2026-11-22
 
