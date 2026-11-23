@@ -4,6 +4,10 @@ Updated 2026-11-23 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Arash correspondence entry · 2026-11-24
+
+The AUS pin restores the correspondence tab as Arash's landing after verified sign-in. The source browser test checks a previous public-opportunities checkpoint, the unread badge, and opening the green review action. An exact private opportunity link retains its mailbox and item. The source change and browser test are pinned in `deploy/projects.json`. See the final release tag for the Pages deployment receipt.
+
 ## Physician identity and discovery in search and AI answers · 2026-11-23
 
 The About page is the canonical physician profile. Preserve its stable identifier `https://drgerami-md.ir/pages/about#physician` in structured data for this author and the two educational applications and the synthetic patient record prototype. The peer-reviewed colchicine paper has five co-authors. Other article authors retain their own bylines. Discovery links for the Clinic point to its public portfolio description. Project facts, working links and the clinician's background are present in server-rendered HTML. The ventilator picture comes from the public simulator using fictional data. The article citation block links to its canonical public page. The build refreshes `/llms.txt` from the approved public feed for optional discovery, with the complete sitemap alongside it. This grants neither access to protected routes nor permission to train models. Review public portfolio copy and scripts/physician_profile.py together when adding a project. External indexing and citations require evidence from the relevant service.
