@@ -24,7 +24,7 @@ VENTILATOR_FILES = (
     'assets/Vazirmatn-OFL.txt', 'assets/Vazirmatn.woff2', 'assets/alveoli.webp',
     'assets/favicon.png', 'assets/heart-lungs.webp', 'assets/ventilator-housing.webp',
 )
-VENTILATOR_CHECK = ('--test', 'tests/model.test.js')
+VENTILATOR_CHECK = ('--test',)
 
 
 def git(directory, *args):
