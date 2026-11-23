@@ -8,6 +8,14 @@
     language = localStorage.getItem('ahg-lang') === 'en' ? 'en' : 'fa';
   } catch (_) { /* Storage is optional (private browsing and restricted contexts). */ }
 
+  const booking=document.querySelector('[data-booking-consent]');
+  if(booking){
+    const load=()=>{const script=document.createElement('script');script.src=booking.dataset.src;document.head.append(script);};
+    if('IntersectionObserver' in window){
+      const observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){observer.disconnect();load();}},{rootMargin:'240px'});
+      observer.observe(booking.parentElement);
+    }else load();
+  }
   function applyLanguageImages() {
     const selected=root.lang==='en'?'en':'fa';
     document.querySelectorAll('img[data-src-fa][data-src-en]').forEach(image=>{

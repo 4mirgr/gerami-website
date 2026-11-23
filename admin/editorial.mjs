@@ -17,6 +17,7 @@ export async function editorialEditor(host,offset=0){
  try{
  const data=await api('list',{offset});if(!host.isConnected||location.hash!=='#auto-posts')return;
  const refresh=button('تازه‌سازی',()=>editorialEditor(host,offset));host.append(refresh,button('ساخت یا پیگیری پیش‌نویس‌های امروز',async()=>{await api('run');notice.textContent='درخواست ثبت شد. نتیجه صف را چند لحظه دیگر تازه کنید.';}));
+ if(data.searchConfigured===false)host.append(el('p','اتصال آمار جست‌وجوی گوگل در انتظار تأیید دامنه و دسترسی خواندن است.'));
  if(data.trendStatus?.length){const status=el('details','','panel');status.append(el('summary','وضعیت سیگنال‌های انتخاب موضوع'));for(const item of data.trendStatus)status.append(el('p',item.source+' · '+item.region+' · '+item.day+' · '+(item.error_code?'داده در دسترس نیست؛ انتخاب چرخشی':'داده دریافت شده؛ فقط تطبیق موضوعی')));host.append(status);}
  const settings=el('section','','panel'),enabled=el('input');enabled.type='checkbox';enabled.checked=data.settings.enabled;const enableLabel=el('label',' تولید روزانه فعال باشد ');enableLabel.prepend(enabled);settings.append(el('h3','زمان و موضوعات'),enableLabel);
  const hour=control(settings,'ساعت تولید به وقت تهران',data.settings.hour);hour.type='number';hour.min=0;hour.max=23;

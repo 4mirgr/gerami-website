@@ -7,6 +7,7 @@ let handler,mailJob=true,failDelivery=false;
 const calls=[],env={SUPABASE_URL:'https://test.invalid',SUPABASE_SERVICE_ROLE_KEY:'service',SUPABASE_ANON_KEY:'anon',GERAMI_RESEND_API_KEY:'test',GERAMI_COMMENT_FROM:'sender@example.test'};
 const mock=async(url,opt={})=>{
  const body=opt.body?JSON.parse(opt.body):null;calls.push({url,body,headers:opt.headers});
+ if(url.endsWith('/gerami_booking_click'))return Response.json(true);
  if(url.endsWith('/gerami_account'))return Response.json({id:'reader',role:'user'});
  if(url.endsWith('/content/articles.json'))return Response.json({articles:[{slug:'posted',status:'published'}]});
  if(url.endsWith('/gerami_discussion'))return Response.json({status:'pending'});
@@ -21,6 +22,10 @@ const mock=async(url,opt={})=>{
 new Function('Deno','fetch',source)({serve:f=>handler=f,env:{get:k=>env[k]}},mock);
 const ticket=crypto.randomUUID();
 const invoke=(action,p,token='anon')=>handler(new Request('https://test.invalid/'+action,{method:'POST',headers:{Authorization:'Bearer '+token},body:JSON.stringify(p)}));
+assert.equal((await invoke('booking-report',{},'member')).status,403);
+assert.equal((await invoke('booking-click',{provider:'snapp',surface:'home',email:'omit'})).status,400);
+assert.equal((await invoke('booking-click',{provider:'snapp',surface:'home'})).status,200);
+assert.deepEqual(calls.at(-1).body,{p_provider:'snapp',p_surface:'home'});
 assert.equal((await invoke('review',{id:1,decision:'approved'},'member')).status,403);
 assert.equal((await invoke('comment',{slug:'posted'})).status,401);
 assert.equal((await invoke('like',{slug:'draft',request:crypto.randomUUID()},'member')).status,404);

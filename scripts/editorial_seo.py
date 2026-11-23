@@ -17,6 +17,7 @@ def generate(root,output):
    if p.get('topic')!=t['id']:raise ValueError('Article topic differs from pinned IntMed source')
    return '/articles/'+c['root']['id']+'/'+t['id']+'/'+p['slug']+'/'
   return '/articles/'+p['slug']+'/'
+ audience_names={'patients':('برای عموم','For patients and families'),'professional':('ویژه پزشکان','For clinicians')}
  def linked(p):return '<li><a href="'+escape(post_path(p))+'">'+escape(p.get('title_fa') or p.get('title_en'))+'</a></li>'
  template=(root/'pages/services.html').read_text().replace('data-page="services"','data-page="editorial"')
  # Nested generated paths need root-relative owned resources, never ../css or pages.
@@ -37,7 +38,7 @@ def generate(root,output):
    text=text.replace('</head>','<link rel="stylesheet" href="/css/catalog.css"></head>',1)
   if article:
    trail='<nav aria-label="مسیر مطلب"><a href="/">خانه</a>'+''.join('<span aria-hidden="true">/</span><a href="'+escape(u)+'">'+escape(n)+'</a>' for n,u in crumbs[:-1])+'</nav>'
-   audience_label='<span data-fa="ویژه پزشکان" data-en="For clinicians">ویژه پزشکان</span> · ' if article.get('audience')=='professional' else ''
+   audience_label='<span data-fa="ویژه پزشکان" data-en="For clinicians">ویژه پزشکان</span> · ' if article.get('audience')=='professional' else '<span data-fa="برای عموم" data-en="For patients and families">برای عموم</span> · '
    header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+audience_label+escape(article.get('author',''))+' · <time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
    discussion='<section class="discussion" data-discussion="'+escape(article['slug'])+'" id="discussion"><h2 data-fa="دیدگاه خوانندگان" data-en="Reader discussion">دیدگاه خوانندگان</h2><div data-discussion-ui></div><noscript>برای ثبت دیدگاه یا پسندیدن، جاوااسکریپت را فعال کنید.</noscript></section>'
    main='<main class="reader" id="main" tabindex="-1"><article class="reader-sheet">'+header+body+'</article>'+discussion+'</main>'
@@ -45,7 +46,8 @@ def generate(root,output):
   text=re.sub(r'<main\b.*?</main>',lambda _:main,text,count=1,flags=re.S)
   graph=[{'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i+1,'name':n,'item':SITE+u} for i,(n,u) in enumerate([('خانه','/'),*crumbs])]}]
   if article:
-   node={'@type':'Article','headline':title,'description':description[:240],'inLanguage':'fa-IR' if article.get('title_fa') else 'en','mainEntityOfPage':SITE+path,'datePublished':article.get('published_at'),'author':{'@type':'Person','name':article.get('author',''),'url':SITE+'/pages/about.html'},'citation':'Harrison 2025' if article.get('source_topic_id') else [s.get('title','') for s in article.get('sources',[])]}
+   node={'@type':'Article','headline':title,'description':description[:240],'inLanguage':'fa-IR' if article.get('title_fa') else 'en','mainEntityOfPage':SITE+path,'datePublished':article.get('published_at'),'author':{'@type':'Person','name':article.get('author',''),'url':SITE+'/pages/about'},'citation':'Harrison 2025' if article.get('source_topic_id') else [s.get('title','') for s in article.get('sources',[])]}
+   node['audience']={'@type':'Audience','audienceType':audience_names.get(article.get('audience'),audience_names['patients'])[1]}
    if article.get('image'):node['image']=SITE+article['image'] if article['image'].startswith('/') else article['image']
    graph.append(node)
   ld=json.dumps({'@context':'https://schema.org','@graph':graph},ensure_ascii=False,separators=(',',':')).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
@@ -79,7 +81,12 @@ def generate(root,output):
  def article_list(rows):
   if not rows:
    return '<p>'+label('هنوز مطلبی در این مبحث منتشر نشده است.','No articles have been published on this topic yet.')+'</p>'
-  return '<ul class="atlas-links">'+''.join(map(linked,rows))+'</ul>'
+  groups=[]
+  for audience,(fa,en) in audience_names.items():
+   matches=sorted((row for row in rows if row.get('audience','patients')==audience),key=lambda row:(row.get('published_at',''),row['slug']),reverse=True)
+   if matches:
+    groups.append('<div class="audience-shelf"><h3>'+label(fa,en)+'</h3><ul class="atlas-links">'+''.join(map(linked,matches))+'</ul></div>')
+  return '<div class="audience-shelves">'+''.join(groups)+'</div>'
  directory=('موضوعات','Topics','/topics/')
  cards=[]
  for c in data['categories']:
@@ -117,15 +124,22 @@ def generate(root,output):
   if p.get('source_topic_id'):markup+='<p class="article-source">منبع: <span lang="en" dir="ltr">Harrison 2025</span></p>'
   else:markup+=''.join('<p class="article-source"><a rel="noopener noreferrer" href="'+escape(s['url'])+'">'+escape(s.get('title') or s['url'])+'</a></p>' for s in p.get('sources',[]) if urlsplit(s.get('url','')).scheme=='https')
   if p.get('hashtags'):markup+='<p class="article-tags">'+escape(' '.join(p['hashtags']))+'</p>'
-  crumbs=[('همه مطالب','/pages/blog.html')]
+  crumbs=[('همه مطالب','/pages/blog')]
   if p.get('source_topic_id'):
    c,t=topics[p['source_topic_id']];crumbs=[('موضوعات','/topics/'),(c['root']['fa'],topic_path(c)),(t['fa'],topic_path(c,t))]
    related=[x for x in posts if x.get('source_topic_id')==p['source_topic_id'] and x['slug']!=p['slug']]
-   if related:markup+='<h2>مطالب مرتبط</h2><ul>'+''.join(map(linked,related))+'</ul>'
+   if related:markup+='<h2>'+label('مطالعه بیشتر در همین موضوع','More on this topic')+'</h2>'+article_list(related)
+  if p.get('audience')=='patients':
+   markup+='<p><a class="button button-secondary" href="/pages/appointments">'+label('راهنمای مراجعه و نوبت‌گیری','Visit and booking information')+'</a></p>'
   page(post_path(p),title,description,markup,[*crumbs,(title,post_path(p))],article=p)
  ns='http://www.sitemaps.org/schemas/sitemap/0.9';ET.register_namespace('',ns)
  original=root/'sitemap.xml';tree=ET.parse(original) if original.exists() else ET.ElementTree(ET.Element('{'+ns+'}urlset'))
  existing={n.text for n in tree.findall('.//{'+ns+'}loc')}
+ article_dates={post_path(p):max(p.get('published_at',''),p.get('reviewed_at') or '') for p in posts}
  for path in added:
-  if SITE+path not in existing:ET.SubElement(ET.SubElement(tree.getroot(),'{'+ns+'}url'),'{'+ns+'}loc').text=SITE+path
+  if SITE+path in existing:continue
+  entry=ET.SubElement(tree.getroot(),'{'+ns+'}url')
+  ET.SubElement(entry,'{'+ns+'}loc').text=SITE+path
+  if re.fullmatch(r'\d{4}-\d{2}-\d{2}',article_dates.get(path,'')):
+   ET.SubElement(entry,'{'+ns+'}lastmod').text=article_dates[path]
  tree.write(output/'sitemap.xml',encoding='utf-8',xml_declaration=True)

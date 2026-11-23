@@ -212,3 +212,34 @@ function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Obj
 window.addEventListener('hashchange',route);
 window.addEventListener('beforeunload',event=>{if(store.storageError&&store.count||store.busy){event.preventDefault();event.returnValue='';}});
 try{await store.load();loaded=true;route();status();if(session.state==='connected')await synchronize();}catch(error){notice(error.message,true);}
+
+const bookingReport=document.getElementById('booking-report');
+bookingReport?.addEventListener('toggle',async()=>{
+ if(!bookingReport.open)return;
+ const results=bookingReport.querySelector('[data-booking-results]');
+ results.textContent='در حال دریافت…';
+ try{
+  const response=await fetch('/api/discussion/booking-report',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',cache:'no-store',signal:AbortSignal.timeout(12000)});
+  if(!response.ok)throw Error();
+  const {rows,articles}=await response.json();
+  const providers={snapp:'اسنپ‌دکتر',drnext:'دکترنکست',paziresh24:'پذیرش۲۴'};
+  const list=document.createElement('ul');
+  for(const row of rows){
+   const item=document.createElement('li');
+   item.textContent=providers[row.provider]+' · '+(row.surface==='home'?'صفحه اول':'راهنمای نوبت‌گیری')+' · '+Number(row.clicks).toLocaleString('fa-IR')+' کلیک';
+   list.append(item);
+  }
+  if(list.children.length)results.replaceChildren(list);
+  else results.textContent='در این بازه هنوز کلیکی با اجازه بازدیدکننده ثبت نشده است.';
+  if(articles?.length){
+   const titles=new Map((store.documents['content/articles.json']?.articles||[]).map(a=>[a.slug,a.title_fa||a.title_en]));
+   const heading=document.createElement('h3');heading.textContent='مقاله پیش از ورود به راهنمای نوبت‌گیری';
+   const ranking=document.createElement('ol');
+   for(const article of articles){
+    const item=document.createElement('li');item.textContent=(titles.get(article.slug)||article.slug)+' · '+Number(article.clicks).toLocaleString('fa-IR');
+    ranking.append(item);
+   }
+   results.append(heading,ranking);
+  }
+ }catch{results.textContent='دریافت آمار ممکن نشد. برای تلاش دوباره این بخش را ببندید و باز کنید.';}
+});

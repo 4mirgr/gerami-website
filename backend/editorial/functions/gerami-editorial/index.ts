@@ -42,7 +42,7 @@ const snapshot=snapshotHash;
 const media=createEditorialMedia({db,rpc,storage,remote,snapshot});
 const controls=createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,storage,remote,snapshot,media,githubToken:()=>Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')||'',background:p=>EdgeRuntime.waitUntil(p.catch(()=>{}))});
 const notify=(d,options={})=>controls.notify(d,options);
-const trends=createTrendSelector({db,remote});
+const trends=createTrendSelector({db,remote,searchCredentials:Deno.env.get('GERAMI_GSC_SERVICE_ACCOUNT_JSON')});
 async function generate(job){
  const pins=await(await remote('https://raw.githubusercontent.com/4mirgr/gerami-website/main/deploy/projects.json')).json();
  const pin=pins.intmed;
@@ -82,7 +82,7 @@ async function generate(job){
   const generated=clinical?{copy:clinical.copy,model:'intmed-verbatim'}:await patientEdition(topic,canonical,input,history);
   const path=destination.root.fa+' / '+destination.child.fa;
   const d={job_id:job.id,slug:(clinical?'clinical-':'health-')+job.day.replaceAll('-','')+'-'+topic.id,content:generated.copy,category:path,topic:destination.child.id,image:'',cover_required:true,cover_selected:false,
-   source:{audience,reference:'Harrison 2025',taxonomy:{source_id:topic.id,root:destination.root.id,child:destination.child.id,path_fa:path},commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'تطبیق ارجاع با مرجع در بازبینی پزشک انجام می‌شود.',sources:canonical.sources||[],model:generated.model,indirect:true,selection:{reason:choice.reason,signal_count:choice.signal_count,cooldown:choice.cooldown},...(clinical?{excerpt:clinical.excerpt}:{})}};
+   source:{audience,reference:'Harrison 2025',taxonomy:{source_id:topic.id,root:destination.root.id,child:destination.child.id,path_fa:path},commit,build_id:manifest.buildId,topic_id:topic.id,category_id:category.id,sha256:m.sha256,source_note:canonical.sourceNote||'تطبیق ارجاع با مرجع در بازبینی پزشک انجام می‌شود.',sources:canonical.sources||[],model:generated.model,indirect:true,selection:{reason:choice.reason,...(choice.search?{search:choice.search}:{}),signal_count:choice.signal_count,cooldown:choice.cooldown},...(clinical?{excerpt:clinical.excerpt}:{})}};
   d.snapshot_hash=await snapshot(d);
   return (await db('gerami_editorial_drafts',d))[0];
  }
@@ -171,7 +171,7 @@ Deno.serve(async req=>{
   if(action==='list'){
    const offset=Number.isInteger(body.offset)&&body.offset>=0&&body.offset<=100000?body.offset:0;
    const [drafts,jobs,settings,trendStatus]=await Promise.all([db('gerami_editorial_drafts?select=id,slug,status,revision,content,category,topic,image,media_path,source,cover_required,cover_selected,selected_cover_id,cover_sha256,cover_pack,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at&order=created_at.desc,id.desc&limit=25&offset='+offset),db('gerami_editorial_jobs?select=id,day,audience,status,attempts,error_code,updated_at&order=day.desc&limit=10'),db('gerami_editorial_settings'),db('gerami_editorial_trend_snapshots?select=day,source,region,observed_at,error_code&order=day.desc&limit=6')]);
-   for(const d of drafts){d.preview=d.cover_required&&!d.cover_selected&&!d.media_path?null:await preview(d);d.options=[];if(d.cover_pack)for(const o of await media.options(d))d.options.push({id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview({...d,image:o.image,media_path:o.media_path})});}return reply({drafts,jobs,settings:settings[0],trendStatus,next:drafts.length===25});
+   for(const d of drafts){d.preview=d.cover_required&&!d.cover_selected&&!d.media_path?null:await preview(d);d.options=[];if(d.cover_pack)for(const o of await media.options(d))d.options.push({id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview({...d,image:o.image,media_path:o.media_path})});}return reply({drafts,jobs,settings:settings[0],trendStatus,searchConfigured:Boolean(Deno.env.get('GERAMI_GSC_SERVICE_ACCOUNT_JSON')),next:drafts.length===25});
   }
   if(action==='settings'){
    if(typeof body.enabled!=='boolean'||!Number.isInteger(body.hour)||body.hour<0||body.hour>23||!Array.isArray(body.categories)||!body.categories.length||body.categories.some(c=>!sourceCategories.includes(c)))return reply({error:'invalid_settings'},400);

@@ -8,9 +8,10 @@ export async function onRequest({request}){
  if(request.method!=='POST')return error(405,'method');
  if(request.headers.get('Origin')!==url.origin)return error(403,'origin');
  if(!/^application\/json(?:;|$)/i.test(request.headers.get('Content-Type')||''))return error(415,'content_type');
- if(!['read','like','unlike','comment','list','review'].includes(action))return error(404,'action');
- const token=cookieValue(request,COOKIE_ACCESS);
- if(!token&&action!=='read')return error(401,'sign_in_required');
+ if(!['read','like','unlike','comment','list','review','booking-click','booking-report'].includes(action))return error(404,'action');
+ if(action==='booking-click'&&(url.hostname!=='drgerami-md.ir'||request.headers.get('Sec-GPC')==='1'||request.headers.get('DNT')==='1'))return new Response(null,{status:204,headers});
+ const token=action==='booking-click'?null:cookieValue(request,COOKIE_ACCESS);
+ if(!token&&!['read','booking-click'].includes(action))return error(401,'sign_in_required');
  try{
   const reader=request.body?.getReader();if(!reader)return error(400,'payload');
   const chunks=[];let length=0;
