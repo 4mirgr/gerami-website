@@ -67,6 +67,21 @@ def public_document(path):
     return display(json.loads(path.read_text()))
 
 
+def visible_entries(path, document):
+    if path == 'content/articles.json':
+        return {'articles': [row for row in document['articles'] if row.get('status') == 'published']}
+    return {'pages': [row for row in document['pages'] if row.get('published') is True]}
+
+
+def write_public_feeds(root, stage):
+    # Preserve exact approved bytes for delivery integrity when the feed is already public.
+    for path in ('content/articles.json', 'content/extra-pages.json'):
+        original = json.loads((root / path).read_text())
+        public = visible_entries(path, original)
+        if original != public:
+            (stage / path).write_text(json.dumps(public, ensure_ascii=False, indent=2) + '\n')
+
+
 def render_page(template, page):
     text = re.sub(r' data-(?:content|link)-key="[^"]+"', '', template)
     text = text.replace('data-page="services"', 'data-page="extra" data-extra-page="' + page['slug'] + '"')
@@ -146,13 +161,19 @@ def home_bootstrap(root, text, ident="home"):
         return value
     for path in paths:
         value = public_document(root / path)
+        if path == 'content/extra-pages.json':
+            value = visible_entries(path, value)
+        if path == 'content/pages/home.json':
+            # Home's editable copy and links are already baked into both language
+            # attributes and native destinations. Studio supplies full drafts separately.
+            value = {'blocks': {}, 'links': {}}
         if path == 'content/site.json' and ident != 'about':
             value = {**value, 'cv': [], 'bio_fa': '', 'bio_en': ''}  # Only About renders the profile narrative.
         # A growing feed must not turn the initial HTML into a database dump.
         # Empty feed stays inline; published feeds load after the static first paint.
         if path == 'content/articles.json' and value.get('articles'):
             revision = subprocess.run(['git', '-C', str(root), 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()
-            if re.fullmatch('[a-f0-9]{40}', revision):
+            if re.fullmatch('[a-f0-9]{40}', revision) and visible_entries(path, value) == value:
                 raw = (root / path).read_bytes()
                 snapshot['articleDelivery'] = {'revision': revision, 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
             continue
@@ -178,12 +199,13 @@ def bake_settings(root, text, ident):
     if ident == 'home':
         for marker, directory in [('topic-rail', False), ('topic-directory', True)]:
             text = re.sub(r'<!--' + marker + r':start-->.*?<!--' + marker + r':end-->', lambda _: '<!--' + marker + ':start-->' + topic_markup(root, directory) + '<!--' + marker + ':end-->', text, flags=re.S)
+    if ident in ('home', 'blog'):
         # Ordinary links keep the latest articles reachable during a failed feed request
         # and without JS. The enhanced cards replace these once their data arrives.
         articles = public_document(root / 'content/articles.json')['articles']
         ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: (a.get('published_at', ''), a['slug']), reverse=True)
         links = []
-        for article in ordered[:7]:
+        for article in (ordered[:7] if ident=='home' else ordered):
             path = article.get('url') or '/articles/' + article['slug'] + '/'
             if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
                 title = article.get('title_fa') or article.get('title_en') or ''
@@ -215,6 +237,7 @@ def bake_settings(root, text, ident):
         value = data['blocks'].get(key)
         return attr(attr(attr(tag, 'content', value['fa']), 'data-fa', value['fa']), 'data-en', value['en']) if value else tag
 
+    text = re.sub(r'(<link rel="canonical" href="https://drgerami-md\.ir/pages/[a-z0-9-]+)\.html("[^>]*>)', r'\1\2', text)
     text = re.sub(r'<meta\b[^>]*data-content-key="[^"]+"[^>]*>', metadata, text)
     text = re.sub(r'<a\b[^>]*data-link-key="([^"]+)"[^>]*>', lambda match: attr(match[0], 'href', data['links'][match[1]]) if match[1] in data['links'] else match[0], text)
     profile = public_document(root / 'content/site.json')

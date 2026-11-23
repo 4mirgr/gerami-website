@@ -84,7 +84,7 @@ def generate(root,output):
  cards=[]
  for c in data['categories']:
   node=c['root'];root_url=topic_path(c)
-  ids={t['source_id'] for t in c['topics']};members=[p for p in posts if p.get('source_topic_id') in ids]
+  child_ids={t['id'] for t in c['topics']};members=[p for p in posts if p.get('topic') in child_ids or p.get('topic')==node['id']]
   links='<ul class="atlas-links">'+''.join('<li><a href="'+topic_path(c,t)+'">'+label(t['fa'],t['en'])+'</a></li>' for t in c['topics'])+'</ul>'
   card='<article class="atlas-card glass-surface"><div class="atlas-category">'+topic_image(c)+'<h2><a href="'+root_url+'">'+label(node['fa'],node['en'])+'</a></h2></div>'
   cards.append(card+'<details><summary>'+label('زیرموضوع‌ها','Subtopics')+' ('+str(len(c['topics']))+')</summary>'+links+'</details></article>')
@@ -93,7 +93,7 @@ def generate(root,output):
        atlas_group('زیرموضوع‌ها','Subtopics',links)+atlas_group('مطالب این شاخه','Articles in this specialty',article_list(members)),
        [('موضوعات','/topics/'),(node['fa'],root_url)],bool(members),atlas_header=atlas_header(node['fa'],node['en'],[directory],c))
   for t in c['topics']:
-   matches=[p for p in members if p.get('source_topic_id')==t['source_id']]
+   matches=[p for p in members if p.get('topic')==t['id']]
    page(topic_path(c,t),t['fa'],'مطالب آموزشی '+t['fa']+' در '+node['fa'],
         atlas_group('مطالب این مبحث','Articles on this topic',article_list(matches)),
         [('موضوعات','/topics/'),(node['fa'],root_url),(t['fa'],topic_path(c,t))],bool(matches),

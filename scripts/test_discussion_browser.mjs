@@ -37,7 +37,7 @@ try{
   const login=page.locator('.discussion a[href*="next="]');await login.waitFor();
   signed=true;await page.reload();await page.getByLabel('نام نمایشی').fill('Reader');
   await page.getByLabel('دیدگاه شما',{exact:true}).fill('New comment');await page.getByRole('button',{name:'ارسال برای بازبینی'}).click();
-  await page.getByText(/دیدگاهتان ثبت شد/).waitFor();assert.equal(submitted.body,'New comment');
+  await page.getByText(/دیدگاهتان برای بازبینی ثبت شد/).waitFor();assert.equal(submitted.body,'New comment');
   await page.getByRole('button',{name:/پسندیدن/}).click();await page.getByRole('button',{name:/در انتظار تأیید/}).waitFor();
  }
  await page.goto(origin+'/admin/#discussion');await page.getByText('Synthetic comment').waitFor();

@@ -36,8 +36,23 @@ jobs:
           python scripts/build_cloudflare.py --output "$RUNNER_TEMP/editorial-public-build"
           node scripts/test_public_assets_browser.mjs "$RUNNER_TEMP/editorial-public-build"
       - name: Commit approved public content without force
+        id: commit
         if: steps.claim.outputs.claimed == 'true'
         run: node scripts/editorial-publisher.mjs commit
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: steps.commit.outputs.restage == 'true'
+        with:
+          ref: main
+      - uses: ./.github/actions/setup-checks
+        if: steps.commit.outputs.restage == 'true'
+      - name: Recheck the same approved revision against the new main
+        if: steps.commit.outputs.restage == 'true'
+        run: |
+          node scripts/editorial-publisher.mjs restage
+          python scripts/check_site.py --browser
+          python scripts/build_cloudflare.py --output "$RUNNER_TEMP/editorial-rechecked-build"
+          node scripts/test_public_assets_browser.mjs "$RUNNER_TEMP/editorial-rechecked-build"
+          node scripts/editorial-publisher.mjs final-commit
       - name: Record failed checks privately
         if: failure()
         run: node scripts/editorial-publisher.mjs failure

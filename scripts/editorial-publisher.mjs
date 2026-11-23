@@ -10,10 +10,13 @@ async function api(body){const r=await fetch(endpoint,{method:'POST',headers:{'C
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
 const state=process.env.RUNNER_TEMP+'/gerami-editorial-lease.json';
 const action=process.argv[2];
-if(action==='claim'){
- const result=await api({action:'claim'});if(!result.draft){console.log('No approved draft waiting.');process.exit(0);}
- console.log('::add-mask::'+result.capability);
- await fs.writeFile(state,JSON.stringify(result),{mode:0o600});
+if(action==='claim'||action==='restage'){
+ let result;
+ if(action==='claim'){
+  result=await api({action:'claim'});if(!result.draft){console.log('No approved draft waiting.');process.exit(0);}
+  console.log('::add-mask::'+result.capability);
+  await fs.writeFile(state,JSON.stringify(result),{mode:0o600});
+ }else result=JSON.parse(await fs.readFile(state,'utf8'));
  const {article,media}=result.draft;
  if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(article.slug)||article.status!=='published'||!/^[a-f0-9]{64}$/.test(article.editorial_hash))throw Error('Invalid publication payload');
  const documents={};for(const p of managedPaths)documents[p]=JSON.parse(await fs.readFile(p,'utf8'));
@@ -30,17 +33,26 @@ if(action==='claim'){
  }
  for(const path of ['content/topics.json','content/articles.json'])await fs.writeFile(path,JSON.stringify(documents[path],null,2)+'\n');
  await fs.appendFile(process.env.GITHUB_OUTPUT,'claimed=true\n');
-}else if(action==='commit'){
+}else if(action==='commit'||action==='final-commit'){
  const {draft,capability}=JSON.parse(await fs.readFile(state,'utf8'));
  try{
-  git('fetch','origin','main');if(git('rev-parse','HEAD')!==git('rev-parse','origin/main'))throw Error('Main changed; review again');
+  git('fetch','origin','main');if(git('rev-parse','HEAD')!==git('rev-parse','origin/main')){
+   if(action==='final-commit')throw Error('Main moved again during verification');
+   await fs.appendFile(process.env.GITHUB_OUTPUT,'restage=true\n');
+   process.exit(0);
+  }
   const allowed=['content/articles.json','content/topics.json',...(draft.media?[draft.media.path]:[])];
   const changed=execFileSync('git',['status','--porcelain','--untracked-files=all'],{encoding:'utf8'}).trimEnd().split('\n').filter(Boolean).map(l=>l.slice(3));
   if(changed.some(p=>!allowed.includes(p)))throw Error('Unexpected modified file');
   git('add','--',...allowed);
   if(git('diff','--cached','--name-only')){
    git('config','user.name','github-actions[bot]');git('config','user.email','41898282+github-actions[bot]@users.noreply.github.com');
-   git('commit','-m','content: publish physician-approved '+draft.article.slug);git('push','origin','HEAD:main');
+   git('commit','-m','content: publish physician-approved '+draft.article.slug);
+   try{git('push','origin','HEAD:main');}catch(e){
+    const moved=/\[rejected\].*\((?:fetch first|non-fast-forward)\)/.test(String(e.stderr));
+    if(action!=='commit'||!moved)throw e;
+    await fs.appendFile(process.env.GITHUB_OUTPUT,'restage=true\n');process.exit(0);
+   }
   }
   const commit_sha=git('rev-parse','HEAD');await api({action:'receipt',id:draft.id,capability,commit_sha});
   await fs.unlink(state);
