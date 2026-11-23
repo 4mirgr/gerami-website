@@ -22,6 +22,23 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
+ const booking=await browser.newContext();
+ try{
+  const pg=await booking.newPage(), recorded=[];
+  await pg.route('**/api/discussion/booking-click',route=>{recorded.push(route.request().postDataJSON());return route.fulfill({json:{ok:true}});});
+  await pg.route('https://snapp.doctor/**',route=>route.fulfill({body:'Booking profile'}));
+  await pg.goto(origin+'/pages/appointments.html');
+  const consent=pg.locator('[data-booking-consent] input');
+  await pg.locator('a[href^="https://snapp.doctor/"]').first().scrollIntoViewIfNeeded();
+  await consent.waitFor({state:'visible'});
+  assert.equal(await consent.isChecked(),false);
+  const profile=pg.locator('a[href^="https://snapp.doctor/"]').first();
+  await profile.click();await pg.waitForURL('https://snapp.doctor/**');await pg.goBack();
+  assert.equal(recorded.length,0);
+  await consent.check();await profile.click();await pg.waitForURL('https://snapp.doctor/**');
+  assert.deepEqual(recorded,[{surface:'appointments',provider:'snapp'}]);
+  await pg.goBack();await consent.uncheck();
+ }finally{await booking.close();}
  // Navigation must paint while every request after the HTML is still pending.
  // This reproduces mobile blank screens caused by a stalled stylesheet before
  // the synchronous theme bootstrap, without treating an aborted file as a pass.
@@ -41,6 +58,8 @@ try{
    console.log('PASS first-response paint with every subresource pending: '+path);
   }finally{await Promise.all(held.map(release=>release()));await stalled.close();}
  }
+ // Measure only this browser context; earlier isolated contexts have separate caches.
+ hits.length=0;
  const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage(),errors=[],bad=[],jsonRequests=[],normalMirrors=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()>=400)bad.push(r.status()+' '+r.url());});

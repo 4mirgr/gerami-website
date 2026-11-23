@@ -40,7 +40,7 @@ const nameLabel=make('label'),bodyLabel=make('label'),nameText=make('span'),body
 name.required=true;name.maxLength=80;name.autocomplete='nickname';comment.required=true;comment.maxLength=1600;
 nameLabel.append(nameText,name);bodyLabel.append(bodyText,comment);submit.className='button button-primary';
 form.append(nameLabel,bodyLabel,submit);
-let signed=false,likes=0,mine=null,cursor=null,ready=false,busy=false,request=null,requestText='',message=null;
+let signed=false,senderReady=false,likes=0,mine=null,cursor=null,ready=false,busy=false,request=null,requestText='',message=null;
 async function api(action,data={}){
  const res=await fetch('/api/discussion/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,...data}),signal:AbortSignal.timeout(24000),cache:'no-store'});
  if(!res.ok){const e=new Error('discussion');e.status=res.status;throw e;}return res.json();
@@ -71,6 +71,7 @@ async function read(append){
   const li=make('li');li.dir='auto';li.append(make('strong',row.display_name),make('p',row.body));list.append(li);
  }
  cursor=data.comments.length===30?data.comments.at(-1).id:null;likes=data.likes;mine=data.mine;
+ senderReady=data.senderReady===true;
  signed=data.signedIn===true;ready=true;retry.hidden=true;
  if(!message&&!list.children.length)message=['هنوز دیدگاهی منتشر نشده است.','No comments have been published yet.'];
 }
@@ -84,7 +85,7 @@ form.onsubmit=event=>{event.preventDefault();run(async()=>{
  const data={name:name.value.trim(),body:comment.value.trim()};
  const key=JSON.stringify(data);if(requestText!==key){request=crypto.randomUUID();requestText=key;}
  await api('comment',{...data,request});requestText='';comment.value='';
- message=['دیدگاهتان برای بازبینی ثبت شد. پس از تأیید، زیر همین مطلب نمایش داده می‌شود.','Comment submitted for review. It will appear here after approval.'];
+ message=senderReady?['دیدگاهتان برای بازبینی ثبت شد. پس از تأیید، اعلان به ایمیل حسابتان ارسال می‌شود.','Comment submitted for review. After approval, a notification is sent to your account email.']:['دیدگاهتان برای بازبینی ثبت شد. پس از تأیید، زیر همین مطلب نمایش داده می‌شود.','Comment submitted for review. It will appear here after approval.'];
 });};
 retry.hidden=true;host.append(like,list,more,form,signIn,status,retry);labels();
 new MutationObserver(labels).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

@@ -14,6 +14,18 @@ try {
   await db.query('insert into public.gerami_accounts values($1,$2,true)',[id,role]);
  }
  await db.exec(await readFile('backend/community/schema.sql','utf8'));
+ await db.exec(await readFile('backend/community/booking.sql','utf8'));
+ await db.exec(await readFile('backend/community/booking-articles.sql','utf8'));
+ await db.exec('set role service_role');
+ await db.query("select public.gerami_booking_article_click('drnext','appointments','sample-post')");
+ assert.equal((await db.query("select slug from public.gerami_booking_article_report()")).rows[0].slug,'sample-post');
+ await db.exec('reset role; set role anon');
+ await assert.rejects(db.query("select public.gerami_booking_report()"),/permission denied/);
+ await db.exec('reset role; set role service_role');
+ for(let n=0;n<2;n++)await db.query("select public.gerami_booking_click('snapp','home')");
+ assert.equal(Number((await db.query("select clicks from public.gerami_booking_report() where provider='snapp'")).rows[0].clicks),2);
+ await assert.rejects(db.query("select public.gerami_booking_click('snapp','unknown')"),/check constraint/);
+ await db.exec('reset role');
  const call=async(action,user,p)=> (await db.query('select public.gerami_discussion($1,$2,$3::jsonb) as result',[action,user,JSON.stringify(p)])).rows[0].result;
  const mail=async(action,id=null,lease=null,err=null)=>(await db.query('select public.gerami_discussion_mail($1,$2,$3,$4) as result',[action,id,lease,err])).rows[0].result;
  const post={slug:'lesson',path:'/articles/lesson/',name:'Reader',request:randomUUID(),body:'First comment'};

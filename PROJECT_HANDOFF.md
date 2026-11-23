@@ -4,6 +4,12 @@ Updated 2026-11-23 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Audience navigation, booking counts and search-informed editorial · 2026-11-23
+
+Topic lists and related reading use audience-specific static headings. Patient articles link to the real booking guide. The sitemap records known article publication/review dates. Booking links remain native links. With explicit browser opt-in, a best-effort same-origin request increments a Tehran-day counter by provider and button location. A separate counter attributes an appointments-page click to an immediately preceding same-origin published article when the browser supplies that referrer. No raw URL, query, IP, account identifier or patient record is stored in these counters. DNT/GPC disables recording. Read the last 28 days in the private dashboard. A click does not confirm a booking. Apply backend/community/booking.sql then booking-articles.sql before deploying the community function and Pages code.
+
+The daily publisher can read the latest settled 28-day Search Console window using the read-only scope. Enable the Search Console API, give the service account read access to the verified domain or HTTPS property, then put its JSON directly into the existing Supabase Edge secret GERAMI_GSC_SERVICE_ACCOUNT_JSON. It caches only matched topic counts and dates. Missing credentials, empty results and Google errors retain trend/rotation selection and physician approval. Keep the Google sign-in OAuth client separate from this service account. See docs/REMAINING_WORK_FA.md for owner setup. Actual release evidence is in the release tag.
+
 ## Public site and editorial audit · 2026-11-23
 
 The publisher may encounter an unrelated push to main after validating a physician-approved snapshot. On a branch race, check out current main once, reapply the original lease, run the full populated-site checks again and use a normal push. Subsequent failures remain visible in the private dashboard. A retry of an approved revision does not approve new content.

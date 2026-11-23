@@ -64,14 +64,27 @@ Deno.serve(async req=>{
   const action=new URL(req.url).pathname.split('/').pop()||'';
   const p=await payload(req);
   if(!p||typeof p!=='object'||Array.isArray(p))throw fail(400,'payload');
+  if(action==='booking-click'){
+   if(Object.keys(p).some(k=>!['provider','surface','article'].includes(k))||!['paziresh24','snapp','drnext'].includes(p.provider)||!['home','appointments'].includes(p.surface))throw fail(400,'invalid_booking');
+   const args={p_provider:p.provider,p_surface:p.surface};
+   if(p.article!==undefined&&(p.surface!=='appointments'||typeof p.article!=='string'||p.article.length>200||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.article)))throw fail(400,'invalid_article');
+   if(p.article&&await publishedPath(p.article).catch(()=>null))await rpc('gerami_booking_article_click',{...args,p_slug:p.article});
+   else await rpc('gerami_booking_click',args);
+   return json({ok:true});
+  }
   if(action==='mail'){
    if(!uuid.test(p.ticket)||!await rpc('gerami_discussion_consume',{p_token:p.ticket}))throw fail(403,'denied');
    await deliver();return json({ok:true});
   }
-  if(!['read','comment','like','unlike','list','review'].includes(action))throw fail(404,'action');
+  if(!['read','comment','like','unlike','list','review','booking-report'].includes(action))throw fail(404,'action');
   const token=(req.headers.get('Authorization')||'').replace(/^Bearer /,'');
   const viewer=token&&token!==anon?await rpc('gerami_account',{},token).catch(e=>{if(action==='read'&&e instanceof Response&&e.status===401)return null;throw e;}):null;
   if(action!=='read'&&!viewer?.id)throw fail(401,'sign_in_required');
+  if(action==='booking-report'){
+   if(viewer.role!=='admin')throw fail(403,'admin_required');
+   const [rows,articles]=await Promise.all([rpc('gerami_booking_report',{}),rpc('gerami_booking_article_report',{})]);
+   return json({rows,articles});
+  }
   const data:Record<string,unknown>={};
   const positive=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>0;
   if(p.before!=null){if(!positive(p.before))throw fail(400,'cursor');data.before=p.before;}
@@ -96,7 +109,7 @@ Deno.serve(async req=>{
   }
   const result=await rpc('gerami_discussion',{p_action:action,p_user:viewer?.id||null,p:data});
   if(action==='read')result.signedIn=Boolean(viewer?.id);
-  if(action==='list')result.senderReady=Boolean(Deno.env.get('GERAMI_RESEND_API_KEY')&&Deno.env.get('GERAMI_COMMENT_FROM'));
+  if(action==='list'||action==='read')result.senderReady=Boolean(Deno.env.get('GERAMI_RESEND_API_KEY')&&Deno.env.get('GERAMI_COMMENT_FROM'));
   return json(result);
  }catch(e){return e instanceof Response?e:fail(503,'discussion_unavailable');}
 });
