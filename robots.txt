@@ -1,5 +1,4 @@
 User-agent: *
-Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /dash/
@@ -7,4 +6,5 @@ Disallow: /clinic/
 Disallow: /aus/
 Disallow: /pages/account
 Disallow: /pages/studio-preview
+Allow: /
 Sitemap: https://drgerami-md.ir/sitemap.xml
