@@ -10,8 +10,10 @@ NAME = 'دکتر امیرهوشنگ گرامی'
 ENGLISH = 'Amir Houshang Gerami'
 DOI = 'https://doi.org/10.3389/fmed.2022.872528'
 PROJECTS = (
-    ('intmed', 'IntMed', 'A study platform for internal medicine and cardiology with lessons, flashcards and exam simulations.'),
-    ('ventilator', 'Respiratory Ventilator Simulator', 'An educational simulator for exploring pressure, flow and volume waveforms in fictional clinical cases.'),
+    ('intmed', '/intmed/', 'EducationalApplication', 'IntMed', 'A study platform for internal medicine and cardiology with lessons, flashcards and exam simulations.'),
+    ('ventilator', '/ventilator/', 'EducationalApplication', 'Respiratory Ventilator Simulator', 'An educational simulator for exploring pressure, flow and volume waveforms in fictional clinical cases.'),
+    ('clinic-demo', '/pages/projects#clinic-demo', 'HealthApplication', 'Patient Health Record Preview',
+     'A demonstration of organizing symptoms, medications and history before a visit, using fictional records.'),
 )
 
 
@@ -46,11 +48,11 @@ def profile_markup(page):
     elif page == 'projects':
         nodes = [{'@type': 'CollectionPage', '@id': PORTFOLIO, 'url': PORTFOLIO,
                   'name': 'پروژه‌های آموزش پزشکی دکتر امیرهوشنگ گرامی',
-                  'hasPart': [{'@id': PORTFOLIO + '#' + slug} for slug, _, _ in PROJECTS]}]
-        for slug, name, description in PROJECTS:
+                  'hasPart': [{'@id': PORTFOLIO + '#' + slug} for slug, *_ in PROJECTS]}]
+        for slug, path, category, name, description in PROJECTS:
             nodes.append({'@type': 'WebApplication', '@id': PORTFOLIO + '#' + slug,
-                          'name': name, 'url': SITE + '/' + slug + '/', 'description': description,
-                          'applicationCategory': 'EducationalApplication',
+                          'name': name, 'url': SITE + path, 'description': description,
+                          'applicationCategory': category,
                           'creator': {'@id': PERSON, '@type': 'Person', 'name': NAME, 'url': PROFILE}})
     else:
         return ''
@@ -66,8 +68,8 @@ def write_discovery(output, posts, post_path):
              f'- [Colchicine toxicity research]({DOI}): Peer-reviewed study co-authored by Dr. Gerami.',
              '', '## Public projects',
              f'- [Medical education portfolio]({PORTFOLIO}): Project descriptions and creator attribution.']
-    for slug, name, description in PROJECTS:
-        lines.append(f'- [{name}]({SITE}/{slug}/): {description}')
+    for slug, path, category, name, description in PROJECTS:
+        lines.append(f'- [{name}]({SITE}{path}): {description}')
     lines.extend(['', '## Medical articles', f'- [Browse by topic]({SITE}/topics/)'])
     for post in sorted(posts, key=lambda p: (p.get('published_at', ''), p['slug']), reverse=True)[:20]:
         title = ' '.join((post.get('title_fa') or post.get('title_en') or '').split())
