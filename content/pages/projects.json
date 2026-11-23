@@ -1,12 +1,12 @@
 {
   "blocks": {
     "text-001": {
-      "fa": "پروژه‌ها | دکتر امیرهوشنگ گرامی",
-      "en": "Projects | Dr. Amir Houshang Gerami"
+      "fa": "نرم‌افزارهای آموزش پزشکی | دکتر امیرهوشنگ گرامی",
+      "en": "Medical Education Software | Dr. Amir Houshang Gerami"
     },
     "text-002": {
-      "fa": "آشنایی با پروژه آموزش پزشکی IntMed و مسیر دسترسی به آن.",
-      "en": "Explore the IntMed medical education project and its entry point."
+      "fa": "با IntMed برای مطالعه طب داخلی و شبیه‌ساز ونتیلاتور برای تمرین تفسیر منحنی‌های تنفسی آشنا شوید. این دو ابزار آموزشی را دکتر امیرهوشنگ گرامی توسعه داده است.",
+      "en": "Explore IntMed for internal medicine study and a ventilator simulator for reading respiratory waveforms, developed by Dr. Amir Houshang Gerami."
     },
     "text-003": {
       "fa": "رفتن به محتوای اصلی",

@@ -307,6 +307,8 @@ def bake_settings(root, text, ident):
         css += '--site-background:' + ('url("' + value['background'] + '")' if value['background'] else 'none') + ';}'
     text = re.sub(r'<style id="site-settings">.*?</style>', '', text, flags=re.S)
     text = text.replace('</head>', '<style id="site-settings">' + css + '</style></head>')
+    from physician_profile import profile_markup
+    text = text.replace('</head>', profile_markup(ident) + '</head>', 1)
     return home_bootstrap(root, text, ident)
 
 

@@ -42,3 +42,6 @@
 .audience-shelves{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:1.2rem}
 .audience-shelf{border-inline-start:3px solid var(--accent,currentColor);padding-inline-start:1rem;min-width:0}
 .audience-shelf h3{font-size:1.1rem;margin:0 0 .5rem}
+
+.project-feature + .project-feature { margin-block-start: 2rem; }
+.project-feature > img { width: 100%; height: auto; border-radius: 16px; }
