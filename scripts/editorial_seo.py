@@ -2,7 +2,7 @@
 import html,json,re,xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
-SITE='https://drgerami-md.ir'
+from physician_profile import SITE, article_author, write_discovery
 def generate(root,output):
  from site_studio import TOPIC_ART, bake_settings, public_document
  root,output=Path(root),Path(output);escape=lambda s:html.escape(str(s),quote=True)
@@ -39,14 +39,19 @@ def generate(root,output):
   if article:
    trail='<nav aria-label="مسیر مطلب"><a href="/">خانه</a>'+''.join('<span aria-hidden="true">/</span><a href="'+escape(u)+'">'+escape(n)+'</a>' for n,u in crumbs[:-1])+'</nav>'
    audience_label='<span data-fa="ویژه پزشکان" data-en="For clinicians">ویژه پزشکان</span> · ' if article.get('audience')=='professional' else '<span data-fa="برای عموم" data-en="For patients and families">برای عموم</span> · '
-   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+audience_label+escape(article.get('author',''))+' · <time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
+   author=article_author(article.get('author'))
+   byline=escape(author['name']) if author else ''
+   if author and 'url' in author:
+    byline='<a rel="author" href="'+author['url']+'">'+byline+'</a>'
+   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+audience_label+(byline+' · ' if byline else '')+'<time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
    discussion='<section class="discussion" data-discussion="'+escape(article['slug'])+'" id="discussion"><h2 data-fa="دیدگاه خوانندگان" data-en="Reader discussion">دیدگاه خوانندگان</h2><div data-discussion-ui></div><noscript>برای ثبت دیدگاه یا پسندیدن، جاوااسکریپت را فعال کنید.</noscript></section>'
    main='<main class="reader" id="main" tabindex="-1"><article class="reader-sheet">'+header+body+'</article>'+discussion+'</main>'
    text=text.replace('</head>','<link rel="stylesheet" href="/css/article.css"><script type="module" src="/js/discussion.js"></script></head>',1)
   text=re.sub(r'<main\b.*?</main>',lambda _:main,text,count=1,flags=re.S)
   graph=[{'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i+1,'name':n,'item':SITE+u} for i,(n,u) in enumerate([('خانه','/'),*crumbs])]}]
   if article:
-   node={'@type':'Article','headline':title,'description':description[:240],'inLanguage':'fa-IR' if article.get('title_fa') else 'en','mainEntityOfPage':SITE+path,'datePublished':article.get('published_at'),'author':{'@type':'Person','name':article.get('author',''),'url':SITE+'/pages/about'},'citation':'Harrison 2025' if article.get('source_topic_id') else [s.get('title','') for s in article.get('sources',[])]}
+   node={'@type':'Article','headline':title,'description':description[:240],'inLanguage':'fa-IR' if article.get('title_fa') else 'en','mainEntityOfPage':SITE+path,'datePublished':article.get('published_at'),'citation':'Harrison 2025' if article.get('source_topic_id') else [s.get('title','') for s in article.get('sources',[])]}
+   if author:node['author']=author
    node['audience']={'@type':'Audience','audienceType':audience_names.get(article.get('audience'),audience_names['patients'])[1]}
    if article.get('image'):node['image']=SITE+article['image'] if article['image'].startswith('/') else article['image']
    graph.append(node)
@@ -131,6 +136,8 @@ def generate(root,output):
    if related:markup+='<h2>'+label('مطالعه بیشتر در همین موضوع','More on this topic')+'</h2>'+article_list(related)
   if p.get('audience')=='patients':
    markup+='<p><a class="button button-secondary" href="/pages/appointments">'+label('راهنمای مراجعه و نوبت‌گیری','Visit and booking information')+'</a></p>'
+  reference='، '.join(escape(value) for value in (p.get('author'),title,p.get('published_at')) if value)
+  markup+='<details class="article-citation"><summary>'+label('ارجاع به این مطلب','Cite this article')+'</summary><p>'+reference+' · <a href="'+SITE+post_path(p)+'">'+label('پیوند پایدار','Permalink')+'</a></p></details>'
   page(post_path(p),title,description,markup,[*crumbs,(title,post_path(p))],article=p)
  ns='http://www.sitemaps.org/schemas/sitemap/0.9';ET.register_namespace('',ns)
  original=root/'sitemap.xml';tree=ET.parse(original) if original.exists() else ET.ElementTree(ET.Element('{'+ns+'}urlset'))
@@ -143,3 +150,4 @@ def generate(root,output):
   if re.fullmatch(r'\d{4}-\d{2}-\d{2}',article_dates.get(path,'')):
    ET.SubElement(entry,'{'+ns+'}lastmod').text=article_dates[path]
  tree.write(output/'sitemap.xml',encoding='utf-8',xml_declaration=True)
+ write_discovery(output, posts, post_path)
