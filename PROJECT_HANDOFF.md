@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## AUS entry performance · 2026-11-24
+
+The short `/aus` URL serves the same public sign-in document as `/aus/` without a client redirect, keeping browser query and fragment handling intact. The document paints before optional files arrive. The sign-in module graph moved from about 389 kB to 87 kB gzip including the former blocking stylesheet. Full workspace CSS, dashboard code and local fonts are loaded after membership verification. Only compiled public assets and fonts bypass Pages Functions and receive static cache headers. The gateway and independent AUS identity remain authoritative. The final release tag records live checks; controlled Chromium is not a test on the owner's carrier.
+
 ## Correspondence priority and date order · 2026-11-24
 
 Correspondence defaults to relevance groups with newest messages first in each group. Arash's GP opportunities rank Level 1 plus sponsorship highest, then the remaining fit tiers, with closed/restricted leads last. The Worker applies the groups before pagination. Newest-only and prepared-letter options remain available. The final release tag records the exact Worker bundle and Pages build checks.

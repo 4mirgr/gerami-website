@@ -6,6 +6,18 @@ let gate=async({next})=>next();
 try{gate=(await import('../functions/_middleware.js')).onRequest;}catch(error){if(error.code!=='ERR_MODULE_NOT_FOUND')throw error;}
 const origin='https://site.test',env={CMS_GITHUB_CLIENT_SECRET:'synthetic-cms-secret-for-isolated-tests'};
 const visit=(path,extra={})=>gate({request:new Request(origin+path,{headers:{Accept:'text/html',...extra}}),env,next:()=>new Response('private-editor-document')});
+for(const method of ['GET','HEAD']){
+ const response=await gate({request:new Request(origin+'/aus?mailOpportunity=synthetic',{method,headers:{Cookie:'private=synthetic'}}),
+  env:{ASSETS:{fetch:async request=>{
+   assert.equal(request.url,origin+'/aus/');
+   assert.equal(request.method,method);
+   assert.equal(request.headers.get('Cookie'),null);
+   return new Response(method==='HEAD'?null:'AUS public entry');
+  }}},next:()=>assert.fail('The short entry must serve the public asset directly')});
+ assert.equal(response.status,200);
+ assert.equal(response.headers.get('Location'),null);
+ assert.equal(await response.text(),method==='GET'?'AUS public entry':'');
+}
 for(const path of ['/admin','/admin/','/admin/editor.html','/dash','/dash/']){
  const response=await visit(path);
  assert.equal(response.status,302,`Anonymous navigation must not receive ${path}`);
