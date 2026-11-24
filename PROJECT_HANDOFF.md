@@ -1,8 +1,12 @@
 # Canonical project handoff / راهنمای ادامهٔ پروژه
 
-Updated 2026-11-23 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
+Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
+
+## Arash batch application confirmation · 2026-11-24
+
+The AUS pin adds final review and explicit sending for the ready items in mixed Gmail opportunity selections. The mobile review shows the frozen sender, recipient, CV and letter for each delivery. Pending items remain visible with their status, shared recipients appear once, and partial or uncertain results remain distinct. The upstream browser regression uses fake addresses and transport. The annotated release tag records the Pages deployment and public asset verification.
 
 ## Arash correspondence entry · 2026-11-24
 
