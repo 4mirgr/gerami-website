@@ -3,6 +3,10 @@ const publicEntry=new Set(['/admin/login','/admin/login.html','/admin/login.mjs'
 const protectedPath=path=>/^\/(?:admin|dash)(?:\/|$)/i.test(path);
 export async function onRequest({request,env,next}){
  const url=new URL(request.url);let decoded=url.pathname;
+ if(url.pathname==='/aus'&&['GET','HEAD'].includes(request.method)&&env.ASSETS?.fetch){
+  const entry=new Request(new URL('/aus/',url),{method:request.method});
+  return env.ASSETS.fetch(entry);
+ }
  try{for(let i=0;i<3&&decoded.includes('%');i++)decoded=decodeURIComponent(decoded);}catch{return new Response('Invalid path',{status:400});}
  const normalized=new URL(url.origin+decoded.replaceAll('\\','/').replace(/\/{2,}/g,'/')).pathname;
  if(!protectedPath(url.pathname)&&!protectedPath(normalized))return next();
