@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -103,7 +104,7 @@ routes = json.loads((site / '_routes.json').read_text())
 if routes != {'version': 1, 'include': ['/*'], 'exclude': ['/aus/assets/*', '/aus/fonts/*']}:
     errors.append('Protected documents and encoded aliases must pass the server access gate')
 for asset in (aus / 'assets').glob('*'):
-    if not asset.is_file() or not re.fullmatch(r'[\w-]+-[A-Z0-9]{8}\.(?:js|css)', asset.name):
+    if not asset.is_file() or not re.fullmatch(r'[A-Za-z0-9_-]+-[A-Z0-9]{8}\.(?:js|css)', asset.name):
         errors.append(f'Only fingerprinted compiled files may use the AUS immutable asset route: {asset.name}')
 if any(path.name == '.git' for path in site.rglob('*')):
     errors.append('Git metadata must not be published')
