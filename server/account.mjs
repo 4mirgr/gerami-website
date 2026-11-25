@@ -41,4 +41,4 @@ export async function newFlow(kind='login'){
  const challenge=btoa(String.fromCharCode(...new Uint8Array(hash))).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'');
  return {flow,challenge,cookie:cookie(COOKIE_FLOW,encode(flow),600)};
 }
-export const safeNext=value=>typeof value==='string'&&(value==='/'||value==='/ventilator/'||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(value)||/^\/(?:admin\/(?:#(?:dashboard|pages))?|pages\/account(?:\.html)?|(?:dash|clinic)\/(?:portal\/)?)$/.test(value))?value:'/';
+export const safeNext=value=>value==='/ventilator/'?'/respiratory/ventilator/':typeof value==='string'&&(value==='/'||value==='/respiratory/ventilator/'||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(value)||/^\/(?:admin\/(?:#(?:dashboard|pages))?|pages\/account(?:\.html)?|(?:dash|clinic)\/(?:portal\/)?)$/.test(value))?value:'/';

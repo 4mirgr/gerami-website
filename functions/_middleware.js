@@ -15,17 +15,22 @@ export async function onRequest({request,env,next}){
  try{for(let i=0;i<3&&decoded.includes('%');i++)decoded=decodeURIComponent(decoded);}catch{return new Response('Invalid path',{status:400});}
  const normalized=new URL(url.origin+decoded.replaceAll('\\','/').replace(/\/{2,}/g,'/')).pathname;
  if(/^\/ventilator(?:\/|$)/i.test(normalized)){
+  if(url.pathname!==normalized||!/^\/ventilator(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers:{'Cache-Control':'no-store'}});
+  const destination='/respiratory'+normalized+url.search;
+  return new Response(null,{status:308,headers:{Location:destination,'Cache-Control':'no-store'}});
+ }
+ if(/^\/respiratory\/ventilator(?:\/|$)/i.test(normalized)){
   const headers=new Headers({'Cache-Control':'private, no-store','Vary':'Cookie','X-Robots-Tag':'noindex, nofollow'});
-  if(url.pathname!==normalized||!/^\/ventilator(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers});
+  if(url.pathname!==normalized||!/^\/respiratory\/ventilator(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers});
   // Installed browsers fetch manifest and launcher art without account cookies.
-  if(normalized==='/ventilator/manifest.webmanifest'||/^\/ventilator\/assets\/[a-zA-Z0-9.-]+\.(?:png|webp|woff2)$/.test(normalized))return next();
+  if(normalized==='/respiratory/ventilator/manifest.webmanifest'||/^\/respiratory\/ventilator\/assets\/[a-zA-Z0-9.-]+\.(?:png|webp|woff2)$/.test(normalized))return next();
   let account;
   try{account=await accountFromRequest(request);}catch(error){
    if(error.status!==400&&error.status!==401&&error.status!==403)return new Response('Account service unavailable',{status:503,headers});
   }
   if(!account){
-   if(['/ventilator','/ventilator/','/ventilator/index','/ventilator/index.html'].includes(normalized)){
-    headers.set('Location','/pages/account.html?next=%2Fventilator%2F');
+   if(['/respiratory/ventilator','/respiratory/ventilator/','/respiratory/ventilator/index','/respiratory/ventilator/index.html'].includes(normalized)){
+    headers.set('Location','/pages/account.html?next=%2Frespiratory%2Fventilator%2F');
     return new Response(null,{status:302,headers});
    }
    return new Response('Sign in required',{status:401,headers});

@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PROJECTS = {
     'intmed': ('https://github.com/4mirgr/intMed-study-plan.git', 'docs', 'intmed'),
     'aus': ('https://github.com/4mirgr/immi-arash-amir.git', 'dist', 'aus'),
-    'ventilator': ('https://github.com/4mirgr/Respiratory-ventilator.git', '.', 'ventilator'),
+    'ventilator': ('https://github.com/4mirgr/Respiratory-ventilator.git', '.', 'respiratory/ventilator'),
     'spirometry': ('https://github.com/4mirgr/spiromery.git', '.', 'respiratory/spirometry'),
 }
 
