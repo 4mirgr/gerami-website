@@ -37,14 +37,21 @@
     </div>
   </header>
     <main id="main" class="account-page" tabindex="-1"><div class="account-shell"><section class="account-card glass-surface">
-    <div id="ventilator-identity" hidden><img width="80" height="80" data-icon="/assets/optimized/ventilator-emblem.1207dbb932c94b0d.webp" alt=""><strong lang="en" dir="ltr">Ventilator</strong></div>
-    <p class="eyebrow" data-fa="حساب کاربری" data-en="Your account">حساب کاربری</p>
-    <h1 data-fa="خوش آمدید" data-en="Welcome">خوش آمدید</h1>
-    <p class="account-intro" data-fa="با حساب IntMed خود وارد شوید یا حساب تازه بسازید." data-en="Sign in with your IntMed account or create an account.">با حساب IntMed خود وارد شوید یا حساب تازه بسازید.</p>
-    <div id="account-forms"><p class="account-small"><a href="/pages/privacy.html" data-fa="حریم خصوصی و اطلاعات حساب" data-en="Privacy and account information">حریم خصوصی و اطلاعات حساب</a></p>
-      <button class="button button-secondary" type="button" id="google-signin" disabled aria-describedby="google-note"><span aria-hidden="true">G</span><span data-fa="ادامه با گوگل" data-en="Continue with Google">ادامه با گوگل</span></button>
-      <p class="account-small" id="google-note" data-fa="ورود گوگل هنوز فعال نشده؛ ورود با رمز در دسترس است." data-en="Google sign-in is not enabled yet; password sign-in is available.">ورود گوگل هنوز فعال نشده؛ ورود با رمز در دسترس است.</p>
+    <header class="account-heading">
+      <p class="account-kicker" data-fa="حساب کاربری" data-en="Your account">حساب کاربری</p>
+      <h1><span id="guest-title" data-fa="ورود به حساب" data-en="Sign in">ورود به حساب</span><bdi id="profile-name" hidden></bdi></h1>
+      <p class="account-intro" data-fa="با حساب مشترک سایت و IntMed وارد شوید." data-en="Sign in with your shared website and IntMed account.">با حساب مشترک سایت و IntMed وارد شوید.</p>
+      <span id="profile-role" hidden></span>
+      <div id="ventilator-identity" hidden><img width="80" height="80" data-icon="/assets/optimized/ventilator-emblem.1207dbb932c94b0d.webp" alt=""><strong lang="en" dir="ltr">Ventilator</strong></div>
+    </header>
+    <div class="account-body">
+    <div id="account-forms">
       <div class="account-tabs" role="group" aria-label="روش ورود"><button type="button" data-account-mode="login" aria-pressed="true" data-fa="ورود" data-en="Sign in">ورود</button><button type="button" data-account-mode="signup" aria-pressed="false" data-fa="ساخت حساب" data-en="Create account">ساخت حساب</button><button type="button" data-account-mode="recover" aria-pressed="false" data-fa="بازیابی رمز" data-en="Reset password">بازیابی رمز</button></div>
+      <div id="account-social">
+      <button class="button button-secondary" type="button" id="google-signin" disabled aria-describedby="google-note"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.3 14.3 0 0 1 9.78 24c0-1.59.27-3.13.75-4.59l-7.98-6.19A23.7 23.7 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span data-fa="ادامه با گوگل" data-en="Continue with Google">ادامه با گوگل</span></button>
+      <p class="account-small" id="google-note" data-fa="در حال بررسی دسترسی به گوگل…" data-en="Checking Google sign-in availability…">در حال بررسی دسترسی به گوگل…</p>
+      <div class="account-divider" data-fa="یا با رمز عبور" data-en="or use your password">یا با رمز عبور</div>
+      </div>
       <form method="post" data-account-form="login">
         <label><span data-fa="نام کاربری یا ایمیل" data-en="Username or email">نام کاربری یا ایمیل</span><input name="identity" autocomplete="username" dir="ltr" maxlength="254" required></label>
         <label><span data-fa="رمز عبور" data-en="Password">رمز عبور</span><input name="password" type="password" autocomplete="current-password" maxlength="4096" required></label>
@@ -61,16 +68,24 @@
         <label><span data-fa="ایمیل حساب" data-en="Account email">ایمیل حساب</span><input name="email" type="email" autocomplete="email" dir="ltr" maxlength="254" required></label>
         <button class="button" type="submit" data-fa="ارسال لینک بازیابی" data-en="Send reset link">ارسال لینک بازیابی</button>
       </form>
+      <p class="account-small account-privacy"><a href="/pages/privacy.html" data-fa="حریم خصوصی و اطلاعات حساب" data-en="Privacy and account information">حریم خصوصی و اطلاعات حساب</a></p>
     </div>
     <div id="account-profile" hidden>
-      <h2 id="profile-name"></h2><dl class="profile-data"><dt data-fa="نقش" data-en="Role">نقش</dt><dd id="profile-role"></dd><dt data-fa="نام کاربری" data-en="Username">نام کاربری</dt><dd id="profile-username" dir="ltr"></dd><dt data-fa="ایمیل" data-en="Email">ایمیل</dt><dd id="profile-email" dir="ltr"></dd></dl>
-      <div class="account-actions"><a class="button" id="account-continue" href="/pages/account.html" hidden data-fa="ادامه به پنل" data-en="Continue to your panel">ادامه به پنل</a><a class="button" href="/admin/" data-manager-only hidden data-fa="مدیریت محتوای سایت" data-en="Manage website">مدیریت محتوای سایت</a><a class="button button-secondary" href="https://drgerami-md.ir/intmed/" data-fa="رفتن به IntMed" data-en="Open IntMed">رفتن به IntMed</a></div>
-      <p class="account-small" data-fa="بخش پرونده بیمار پس از راه‌اندازی پنل خصوصی در دسترس قرار می‌گیرد." data-en="Patient records will become available when the private portal opens.">بخش پرونده بیمار پس از راه‌اندازی پنل خصوصی در دسترس قرار می‌گیرد.</p>
+      <dl class="profile-data">
+        <div><dt data-fa="نام کاربری" data-en="Username">نام کاربری</dt><dd id="profile-username" dir="ltr"></dd></div>
+        <div><dt data-fa="ایمیل" data-en="Email">ایمیل</dt><dd id="profile-email" dir="ltr"></dd></div>
+      </dl>
+      <div class="account-actions">
+        <a class="button" id="account-continue" href="/pages/account.html" hidden data-fa="ادامه به پنل" data-en="Continue to your panel">ادامه به پنل</a>
+        <a class="button" href="/admin/" data-manager-only hidden><img src="/assets/identity/admin/gear-48.png" alt="" width="28" height="28"><span data-fa="داشبورد مدیریت سایت" data-en="Site dashboard">داشبورد مدیریت سایت</span></a>
+        <a class="button button-secondary" href="https://drgerami-md.ir/intmed/"><img src="/assets/identity/intmed-project-icon.webp" alt="" width="28" height="28"><span data-fa="ورود به IntMed" data-en="Open IntMed">ورود به IntMed</span></a>
+      </div>
       <details id="password-settings"><summary data-fa="تعیین یا تغییر رمز عبور" data-en="Set or change password">تعیین یا تغییر رمز عبور</summary><form method="post" action="/api/account/password" id="password-form"><label><span data-fa="رمز جدید؛ حداقل ۱۲ کاراکتر" data-en="New password; at least 12 characters">رمز جدید؛ حداقل ۱۲ کاراکتر</span><input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label><button class="button" type="submit" data-fa="ذخیره رمز" data-en="Save password">ذخیره رمز</button></form></details>
       <button class="button button-secondary" type="button" id="account-logout" data-fa="خروج از حساب" data-en="Sign out">خروج از حساب</button>
     </div>
-    <p id="account-status" class="account-status" role="status" aria-live="polite"></p><button class="account-quiet" id="account-retry" type="button" data-fa="بررسی دوباره اتصال" data-en="Check connection again">بررسی دوباره اتصال</button>
+    <p id="account-status" class="account-status" role="status" aria-live="polite"></p><button hidden class="account-quiet" id="account-retry" type="button" data-fa="بررسی دوباره اتصال" data-en="Check connection again">بررسی دوباره اتصال</button>
     <noscript><p>می‌توانید با نام کاربری یا ایمیل و رمز عبور وارد شوید. برای ساخت حساب یا بازیابی رمز، جاوااسکریپت را فعال کنید. / Sign in with your username or email and password. Enable JavaScript to create an account or reset your password.</p></noscript>
+    </div>
   </section></div></main>
 
   <footer class="site-footer">
