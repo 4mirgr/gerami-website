@@ -18,7 +18,7 @@ try{
  await page.waitForFunction(()=>document.querySelector('.contact-channel[data-destination=email]').getAttribute('href')==='mailto:public@example.org');
  assert.equal(await email.locator('[data-contact-address]').innerText(),'public@example.org');
  for(const kind of ['email','linkedin']){
-  const image=page.locator('.contact-channel[data-destination='+kind+'] img');
+  const image=page.locator('.contact-channel[data-destination='+kind+'] img.contact-brand');
   await image.evaluate(img=>img.decode());
   assert(await image.evaluate(img=>{const box=img.getBoundingClientRect();return document.elementFromPoint(box.x+box.width/2,box.y+box.height/2)?.closest('a')===img.closest('a');}));
  }

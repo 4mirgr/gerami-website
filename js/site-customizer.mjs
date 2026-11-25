@@ -1,4 +1,4 @@
-import {validateDocument,pages,safeLink,readPublicDocument} from './site-model.mjs';
+import {validateDocument,pages,safeLink,publicPath,readPublicDocument} from './site-model.mjs';
 import {enhanceToolbars} from './toolbar.mjs';
 const root=document.documentElement;
 const page=document.body.dataset.page;
