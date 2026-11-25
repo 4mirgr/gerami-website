@@ -27,7 +27,8 @@ VENTILATOR_FILES = (
 )
 SPIROMETRY_FILES = (
     'index.html', 'styles.css', 'app.mjs', 'cases.mjs', 'charts.mjs',
-    'curriculum.mjs', 'model.mjs', 'assets/Vazirmatn.woff2',
+    'curriculum.mjs', 'model.mjs', 'lesson-notes.mjs', 'notebook.mjs', 'notebook.css',
+    'assets/Vazirmatn.woff2',
     'assets/Vazirmatn-OFL.txt', 'assets/lungs.webp', 'assets/icon.png',
 )
 STATIC_APPS = {'ventilator': VENTILATOR_FILES, 'spirometry': SPIROMETRY_FILES}

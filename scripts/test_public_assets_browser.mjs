@@ -61,6 +61,13 @@ try{
   await spirometry.getByRole('heading',{name:'آزمایشگاه اسپیرومتری',exact:true}).waitFor();
   await spirometry.getByRole('link',{name:'ورود به شبیه‌ساز'}).click();
   await spirometry.getByRole('img',{name:/نمودار جریان/}).waitFor();
+  await spirometry.locator('[data-nav=notebook]').click();
+  await spirometry.waitForURL(origin+'/respiratory/spirometry/#notebook');
+  await spirometry.goto(origin+'/respiratory/spirometry/#notebook/lung-volumes');
+  await spirometry.reload();
+  const session=spirometry.locator('#notebook-session-lung-volumes');
+  await session.getByRole('heading',{name:'حجم‌ها و ظرفیت‌های ریه',exact:true}).waitFor();
+  assert.match(await session.innerText(),/Tidal Volume/);
   assert.deepEqual(appFailures,[]);
  }finally{await spirometry.close();}
  // Navigation must paint while every request after the HTML is still pending.

@@ -42,6 +42,8 @@ The simulator header pairs the owner’s metallic monogram with «دکتر گر�
 
 ## Spirometry Lab · 2026-11-25
 
+The lecture notebook opens at `/respiratory/spirometry/#notebook`. Add reviewed sessions in the independent course repository and advance the website pin after its tests pass. The reviewed notebook modules and stylesheet are served within the same course mount. The assembled browser checks open the notebook directly as well as navigating to the simulator from Projects.
+
 The Persian course is mounted publicly at `/respiratory/spirometry/`. The short address redirects to the directory URL so module, font and image requests resolve within the course. The Projects page links to the same origin in assembled previews and production. The Cloudflare build imports only the reviewed public files at the immutable `4mirgr/spiromery` pin, runs its Node tests, and checks published files against the source bytes. Course progress uses browser storage and cases use fictional data. Review source and tests before updating the pin. Read the release tag for the production receipt.
 
 ## Respiratory teaching handout · 2026-11-25

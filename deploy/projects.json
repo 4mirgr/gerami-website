@@ -19,7 +19,7 @@
   },
   "spirometry": {
     "repository": "https://github.com/4mirgr/spiromery.git",
-    "commit": "6e1e6ee083103efa8b50a37e43a59ac35d244b74",
+    "commit": "dc4de9bad67420f8c4ae9e1ec0b56cae142beaf8",
     "public_directory": ".",
     "mount": "respiratory/spirometry"
   }
