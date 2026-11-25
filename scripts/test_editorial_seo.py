@@ -17,6 +17,8 @@ class EditorialSEO(unittest.TestCase):
    person=json.loads(profile_markup('about').split('>',1)[1].split('</script>')[0])['@graph'][1]
    self.assertEqual(person['@id'],PERSON)
    apps=json.loads(profile_markup('projects').split('>',1)[1].split('</script>')[0])['@graph'][1:]
+   spirometry=next(app for app in apps if app['url'].endswith('/respiratory/spirometry/'))
+   self.assertEqual((spirometry['name'],spirometry['alternateName']),('Spiromertry Lab','اسپیرومتری'))
    self.assertEqual({app['creator']['@id'] for app in apps},{PERSON})
    discovery=(out/'llms.txt').read_text()
    for app in apps:self.assertIn(app['url'],discovery)

@@ -20,7 +20,7 @@ The publishing build generates `/content/search-index.json` from the public arti
 
 The six published medical articles have full English editions with the author credited as Dr. Amir Houshang Gerami. Keep each edition's title, paragraphs, image description and citation together when updating an article. Studio accepts incomplete drafts and requires both editions at publication. The editorial publisher derives English from the exact approved Persian snapshot and stores it privately for retries. Apply backend/editorial/english-edition.sql before releasing the matching Edge function. Paragraphs use 94% of the cover width on desktop and its full width on mobile, with equal side margins.
 
-The public product catalog is at `/projects`. The first home panel links to IntMed, the ventilator simulator, Spirometry Lab and the patient health record preview. Product descriptions and launch destinations belong to the catalog. Visitor appearance settings are available through the account menu, including before sign-in, and are saved in the current browser.
+The public product catalog is at `/projects`. The first home panel links to IntMed, the ventilator simulator, Spiromertry Lab and the patient health record preview. Product descriptions and launch destinations belong to the catalog. Visitor appearance settings are available through the account menu, including before sign-in, and are saved in the current browser.
 
 ## Account page · 2026-11-25
 
@@ -62,7 +62,9 @@ If a visitor submits the shared login form before its JavaScript loads, the acco
 
 The simulator header pairs the owner’s metallic monogram with «دکتر گرامی» on its left edge on mobile and desktop. The combined build copies the reviewed mark from `assets/dr-gerami.webp` in the pinned simulator source.
 
-## Spirometry Lab · 2026-11-25
+## Spiromertry Lab · 2026-11-26
+
+The application uses «اسپیرومتری» in Persian and the owner-specified spelling `Spiromertry Lab` in English. The home tile, catalog heading, launch link and search results follow the selected language. The English discovery name and Persian alternate name use the same labels.
 
 The lecture notebook opens at `/respiratory/spirometry/#notebook`. Add reviewed Persian and English sessions in the independent course repository and advance the website pin after its tests pass. The reviewed notebook and language modules and stylesheets are served within the same course mount. The assembled browser checks open the notebook directly, switch languages while retaining its chapter link and navigate to the simulator from Projects.
 
@@ -168,7 +170,7 @@ Latest AUS-only continuation 2026-11-21: [quota-aware interface and reviewed GP 
 | IntMed learning app and existing Auth | `4mirgr/intMed-study-plan`, `/intmed/` | Independent source; public docs only imported into combined build |
 | AUS | `4mirgr/immi-arash-amir`, `/aus/` | Independent identity, backend and secrets; preserve its existing Worker binding |
 | Respiratory ventilator simulator | `4mirgr/Respiratory-ventilator`, `/respiratory/ventilator/` | Independent simulator source, reviewed public files imported by full commit pin |
-| Spirometry Lab | `4mirgr/spiromery`, `/respiratory/spirometry/` | Independent course and simulator, reviewed public files imported by full commit pin |
+| Spiromertry Lab | `4mirgr/spiromery`, `/respiratory/spirometry/` | Independent course and simulator, reviewed public files imported by full commit pin |
 | Clinic native Django and synthetic preview | `4mirgr/Clinic`, public `/clinic/` | Its canonical `PROJECT_HANDOFF.md`; native backend remains inactive |
 
 Do not migrate or merge repositories. Do not copy cloud/backend/private directories into public output. A public build uses reviewed, pinned upstream inputs in a temporary directory and must leave source checkouts unchanged. Independent AUS work may advance main while this task is running: fetch and inspect before pushing; merge current main and rerun required gates if it moved. Never reset its pins to a remembered older value.

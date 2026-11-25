@@ -20,8 +20,8 @@ try{
  await page.keyboard.press('Escape');assert(await panel.isHidden());assert(await trigger.evaluate(b=>b===document.activeElement));
  await page.locator('[data-language-toggle]').click();
  assert.equal(await trigger.getAttribute('aria-label'),'Search the site');
- await trigger.click();await input.fill('Spirometry Lab');
- const spirometry=panel.getByRole('link',{name:/spirometry lab/i}).first();
+ await trigger.click();await input.fill('Spiromertry Lab');
+ const spirometry=panel.getByRole('link',{name:/Spiromertry Lab/}).first();
  await spirometry.waitFor();
  await input.fill('never-matches-zxq');await panel.getByRole('status').getByText('No results found.').waitFor();
  await input.fill('asthma');
