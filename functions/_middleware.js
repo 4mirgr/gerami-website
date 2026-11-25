@@ -1,8 +1,13 @@
 import {accountFromRequest} from '../server/account.mjs';
+import {handleAccountRequest} from './api/account/[[path]].js';
 const publicEntry=new Set(['/admin/login','/admin/login.html','/admin/login.mjs','/admin/login.css','/admin/github-session.mjs']);
 const protectedPath=path=>/^\/(?:admin|dash)(?:\/|$)/i.test(path);
 export async function onRequest({request,env,next}){
  const url=new URL(request.url);let decoded=url.pathname;
+ // Native password submissions retain the account page's return destination, even without JavaScript.
+ if(request.method==='POST'&&['/pages/account','/pages/account.html'].includes(url.pathname)){
+  return handleAccountRequest(request,'login');
+ }
  if(url.pathname==='/aus'&&['GET','HEAD'].includes(request.method)&&env.ASSETS?.fetch){
   const entry=new Request(new URL('/aus/',url),{method:request.method});
   return env.ASSETS.fetch(entry);

@@ -45,7 +45,7 @@
       <button class="button button-secondary" type="button" id="google-signin"><span aria-hidden="true">G</span><span data-fa="ادامه با گوگل" data-en="Continue with Google">ادامه با گوگل</span></button>
       <p class="account-small" id="google-note" data-fa="ورود گوگل هنوز فعال نشده؛ ورود با رمز در دسترس است." data-en="Google sign-in is not enabled yet; password sign-in is available.">ورود گوگل هنوز فعال نشده؛ ورود با رمز در دسترس است.</p>
       <div class="account-tabs" role="group" aria-label="روش ورود"><button type="button" data-account-mode="login" aria-pressed="true" data-fa="ورود" data-en="Sign in">ورود</button><button type="button" data-account-mode="signup" aria-pressed="false" data-fa="ساخت حساب" data-en="Create account">ساخت حساب</button><button type="button" data-account-mode="recover" aria-pressed="false" data-fa="بازیابی رمز" data-en="Reset password">بازیابی رمز</button></div>
-      <form method="post" action="/api/account/login" data-account-form="login">
+      <form method="post" data-account-form="login">
         <label><span data-fa="نام کاربری یا ایمیل" data-en="Username or email">نام کاربری یا ایمیل</span><input name="identity" autocomplete="username" dir="ltr" maxlength="254" required></label>
         <label><span data-fa="رمز عبور" data-en="Password">رمز عبور</span><input name="password" type="password" autocomplete="current-password" maxlength="4096" required></label>
         <button class="button" type="submit" data-fa="ورود به حساب" data-en="Sign in">ورود به حساب</button>
