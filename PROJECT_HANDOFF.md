@@ -28,6 +28,10 @@ The simulator header pairs the owner’s metallic monogram with «دکتر گر�
 
 Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.
 
+## AUS correspondence priorities and GP intake · 2026-11-25
+
+The reviewed AUS build surfaces offers, interviews and document requests ahead of due follow-ups in the loaded mailbox window. It shows the next step in each thread, uses a five-minute cached refresh and respects retry deadlines. The general inbox keeps recent-relevant order on mailbox changes and the Arash overview reports actual read/send capabilities for each own slot. The Worker accepts the reviewed GPAP page within the existing three-megabyte transport bound and preserves its expression-of-interest classification. Use the release tag for exact production evidence.
+
 ## AUS entry performance · 2026-11-24
 
 The short `/aus` URL serves the same public sign-in document as `/aus/` without a client redirect, keeping browser query and fragment handling intact. The document paints before optional files arrive. The sign-in module graph moved from about 389 kB to 87 kB gzip including the former blocking stylesheet. Full workspace CSS, dashboard code and local fonts are loaded after membership verification. Only compiled public assets and fonts bypass Pages Functions and receive static cache headers. The gateway and independent AUS identity remain authoritative. The final release tag records live checks; controlled Chromium is not a test on the owner's carrier.
