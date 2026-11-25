@@ -37,12 +37,12 @@
       "en": "Visit information"
     },
     "text-022": {
-      "fa": "نوبت‌دهی و راه‌های مراجعه",
-      "en": "Appointments and visiting"
+      "fa": "نوبت ویزیت آنلاین و آماده‌کردن پرونده پزشکی",
+      "en": "Book an online visit and prepare your medical record"
     },
     "text-023": {
-      "fa": "پیش از مراجعه",
-      "en": "Before visiting"
+      "fa": "ویزیت آنلاین",
+      "en": "Online visit"
     },
     "text-024": {
       "fa": "برای دیدن نوبت‌ها، یکی از صفحه‌های من را انتخاب کنید.",
@@ -99,6 +99,42 @@
     "text-042": {
       "fa": "دکترنکست",
       "en": "DrNext"
+    },
+    "text-043": {
+      "fa": "ساخت پرونده پزشکی",
+      "en": "Build a medical record"
+    },
+    "text-044": {
+      "fa": "برای شروع، بنویسید چه مشکلی شما را به ویزیت کشانده، از چه زمانی شروع شده و چه تغییری کرده است. این خط زمانی به پزشک کمک می‌کند علائم امروز را کنار تشخیص‌ها و درمان‌های قبلی بگذارد.",
+      "en": "Start with the concern that brings you to the visit, when it began and how it has changed. This timeline helps your doctor relate current symptoms to earlier diagnoses and treatments."
+    },
+    "text-045": {
+      "fa": "چه چیزهایی را آماده کنم؟",
+      "en": "What should I prepare?"
+    },
+    "text-046": {
+      "fa": "بیماری‌های قبلی، جراحی‌ها و بستری‌ها را با تاریخ تقریبی و علت آن‌ها یادداشت کنید. خلاصه ترخیص و گزارش عمل را کنار همان تاریخ بگذارید.",
+      "en": "List past diagnoses, operations and hospital stays with approximate dates and reasons. Keep discharge summaries and procedure reports with the matching entries."
+    },
+    "text-047": {
+      "fa": "نام داروها و مکمل‌ها، مقدار و دفعات مصرف و تغییرات اخیر را بنویسید. اگر به دارویی حساسیت دارید، نام دارو و واکنشی را که تجربه کرده‌اید ثبت کنید.",
+      "en": "List medicines and supplements with their dose, frequency and any recent changes. For a drug allergy, note the medicine and the reaction you experienced."
+    },
+    "text-048": {
+      "fa": "نتیجه آزمایش‌ها و گزارش تصویربرداری را همراه تاریخ نگه دارید. داشتن نتیجه قبلی کنار نتیجه جدید به پزشک کمک می‌کند روند تغییرات را ببیند.",
+      "en": "Keep dated lab results and imaging reports. A previous result alongside a new one helps your doctor assess changes over time."
+    },
+    "text-049": {
+      "fa": "پیش از ویزیت، مهم‌ترین پرسش خود را مشخص کنید. بعد از ویزیت، برنامه‌ای را که با پزشک هماهنگ کرده‌اید، زمان پیگیری و نتیجه‌هایی که باید مرور شوند به همان پرونده اضافه کنید.",
+      "en": "Before the visit, write down your most important question. Afterwards, add the plan you agreed with your doctor, the follow-up date and any results still to review."
+    },
+    "text-050": {
+      "fa": "با حساب سایت وارد پیش‌نمایش کلینیک می‌شوید و می‌توانید نمونه پرونده‌ای با شرح حال، داروها و سوابق فرضی را ببینید. ثبت اطلاعات شخصی و بارگذاری مدارک در این پیش‌نمایش غیرفعال است.",
+      "en": "Sign in with your site account to explore a sample clinical record with a fictional history and medication list. Personal record entry and document uploads are disabled in this preview."
+    },
+    "text-051": {
+      "fa": "ورود به پیش‌نمایش پرونده",
+      "en": "Open the record preview"
     }
   },
   "links": {
@@ -106,6 +142,7 @@
     "link-002": "/pages/contact.html",
     "link-003": "https://www.paziresh24.com/dr/دکتر-امیرهوشنگ-گرامی/",
     "link-004": "https://snapp.doctor/specialist/82526/",
-    "link-005": "https://drnext.ir/doctor/general-practitioner-amirhoushang-gerami-2d69rn"
+    "link-005": "https://drnext.ir/doctor/general-practitioner-amirhoushang-gerami-2d69rn",
+    "link-006": "https://drgerami-md.ir/clinic/portal/"
   }
 }

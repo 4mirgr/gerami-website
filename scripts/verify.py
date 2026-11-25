@@ -80,7 +80,7 @@ for file, page in pages.items():
         elif url.fragment and target in pages and unquote(url.fragment) not in pages[target].ids:
             errors.append(f'{file.relative_to(ROOT)}: missing anchor {reference}')
 
-resources=('index.html', 'css/style.css', 'css/glass.css', 'js/main.js', 'js/links.js', 'js/theme.js', 'js/content.js', 'js/post-date.mjs', 'js/account.js', 'js/site-model.mjs', 'js/topics.mjs', 'js/site-customizer.mjs', 'js/toolbar.mjs', 'js/rich-text.mjs', 'css/customizer.css', 'assets/favicon.ico')
+resources=('index.html', 'css/style.css', 'css/glass.css', 'js/main.js', 'js/contact-marks.js', 'js/links.js', 'js/theme.js', 'js/content.js', 'js/post-date.mjs', 'js/account.js', 'js/site-model.mjs', 'js/topics.mjs', 'js/site-customizer.mjs', 'js/toolbar.mjs', 'js/rich-text.mjs', 'css/customizer.css', 'assets/favicon.ico')
 entry = sum((ROOT / path).stat().st_size for path in resources)
 compressed = sum(len(gzip.compress((ROOT / path).read_bytes())) for path in resources)
 # The expanded bilingual introduction and project overview increase document

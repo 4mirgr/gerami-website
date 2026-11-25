@@ -89,10 +89,10 @@ try {
       const faTitle = await evaluate('document.title');
       for (const language of ['fa','en']) {
         if (language === 'en') await evaluate("document.querySelector('[data-language-toggle]').click()");
-        const state = await evaluate(`({lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+1, headings:document.querySelectorAll('h1').length, title:document.title, untranslated:[...document.querySelectorAll('[data-fa][data-en]')].filter(e=>e.textContent!==e.dataset[document.documentElement.lang]).length})`);
+        const state = await evaluate(`({lang:document.documentElement.lang,dir:document.documentElement.dir,overflow:document.documentElement.scrollWidth>innerWidth+1, headings:document.querySelectorAll('h1').length, title:document.title, untranslated:[...document.querySelectorAll('[data-fa][data-en]')].filter(e=>(e.tagName === 'META' ? e.content : e.textContent) !== e.dataset[document.documentElement.lang]).map(e=>e.tagName+' '+(e.getAttribute('name') || e.dataset.en))})`);
         assert.equal(state.lang,language,page); assert.equal(state.dir,language==='fa'?'rtl':'ltr',page);
         assert.equal(state.overflow,false,'Horizontal overflow '+width+' '+language+' '+page);
-        assert.equal(state.headings,1,page); assert.equal(state.untranslated,0,page);
+        assert.equal(state.headings,1,page); assert.deepEqual(state.untranslated,[],'Localized values on /'+page+' in '+language);
         if (page === '' || page === 'pages/projects.html') {
           const entries = [['intmed',projectOrigin+'/intmed/']];
           if (page === 'pages/projects.html') entries.push(['spirometry',projectOrigin+'/respiratory/spirometry/']);

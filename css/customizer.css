@@ -19,3 +19,5 @@ body h1,body h2,body h3,body h4{font-weight:var(--heading-weight,700)!important}
 [data-custom-background=true] .signature-hero{background-image:var(--site-background);background-position:center;background-size:cover}
 
 .site-header .nav-group:has(>.nav-submenu>a:first-child[href="/topics/"])>summary::after{content:none}
+
+.extra-reading-copy {white-space:pre-line}

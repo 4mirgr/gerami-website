@@ -9,3 +9,5 @@ Use the user-supplied Drive folder `logo / wallpaper` (`1fyoUZlBbHa73hZBFcUgRrNJ
 - Existing Enfhess and Dompet layouts and application integrations remain intact. Portrait wallpapers remain source options rather than filling the site with duplicate brand images.
 
 Validated with the existing public site, admin and 48-combination browser suites. No external requests are introduced on public pages.
+
+The inline Gmail mark is served from the site’s optimized assets. The source is the [Gmail vector in the Logos collection](https://github.com/gilbarbara/logos/blob/main/logos/google-gmail.svg).

@@ -1,6 +1,7 @@
 /* Progressive enhancements only: content and navigation work without JavaScript. */
 (() => {
   'use strict';
+  import('./contact-marks.js');
   const root = document.documentElement;
   const toggle = document.querySelector('[data-language-toggle]');
   let language = 'fa';
@@ -26,12 +27,41 @@
   }
   new MutationObserver(applyLanguageImages).observe(root,{attributes:true,attributeFilter:['lang']});
 
+  // A label may share its element with a decorative icon or a numeric counter.
+  function setLabel(node, value) {
+    if (node.tagName === 'META') { node.content = value; return; }
+    if (!node.childElementCount) {
+      if (node.textContent !== value) node.textContent = value;
+      return;
+    }
+    const labels = [node.dataset.fa, node.dataset.en];
+    const decorated = node.querySelectorAll('[data-contact-copy]');
+    if (decorated.length) {
+      if (node.textContent.trim() === value) return;
+      for (const copy of decorated) {
+        if (copy.parentElement.closest('[data-fa][data-en]') === node) {
+          const parent = copy.parentNode;
+          copy.replaceWith(copy.textContent);
+          parent.normalize();
+        }
+      }
+    }
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const child = walker.currentNode;
+      if (!labels.includes(child.data.trim()) || child.parentElement.closest('[data-fa][data-en]') !== node) continue;
+      child.data = child.data.replace(/\S[\s\S]*\S|\S/, () => value);
+      return;
+    }
+  }
+  window.SITE_SET_LABEL = setLabel;
+
   function applyLanguage(next) {
     language = next === 'en' ? 'en' : 'fa';
     root.lang = language;
     root.dir = language === 'fa' ? 'rtl' : 'ltr';
     document.querySelectorAll('[data-fa][data-en]').forEach(element => {
-      element.textContent = element.dataset[language];
+      setLabel(element, element.dataset[language]);
     });
     document.querySelectorAll('[data-label-fa][data-label-en]').forEach(element => {
       element.setAttribute('aria-label', element.dataset[language === 'fa' ? 'labelFa' : 'labelEn']);
@@ -84,7 +114,7 @@
         const original=originalLinks.get(link);if(!original)return;
         for(const key of ['href','target','rel','dir']){if(original[key]===null)link.removeAttribute(key);else link.setAttribute(key,original[key]);}
         link.replaceChildren(...original.children.map(child=>child.cloneNode(true)));
-        link.querySelectorAll('[data-fa][data-en]').forEach(node=>{node.textContent=node.dataset[root.lang==='en'?'en':'fa'];});
+        link.querySelectorAll('[data-fa][data-en]').forEach(node=>{setLabel(node,node.dataset[root.lang==='en'?'en':'fa']);});
       });
       if(channel)channel.removeAttribute('href');
       document.querySelectorAll('[data-pending="' + kind + '"]').forEach(node=>{node.hidden=false;});
