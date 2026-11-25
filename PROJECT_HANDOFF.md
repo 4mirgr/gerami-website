@@ -570,3 +570,5 @@ Public post cards label the discussion link «دیدگاه و کامنت» in Pe
 The booking instructions and provider controls share a reading surface so the wallpaper does not obscure the visit details on mobile.
 
 The editorial inbox keeps approved, publishing, verifying and failed editions visible until public delivery succeeds. History links to the canonical article. A retry must use the existing approved revision and selected cover. The homepage keeps static previews and retrieves the full archive as readers approach them. Its managed settings travel in a fingerprinted deferred asset. Public dates use the Tehran civil day and the selected language. The physician introduction sits directly before the health literacy section in both source and managed layouts.
+
+The owner replaced folded section outlines with a simple heading baseline and gold accent. The homepage lists audience names in gold-bordered labels above each rail. Article counts remain in the filterable archive.

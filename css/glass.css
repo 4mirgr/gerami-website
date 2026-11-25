@@ -308,21 +308,33 @@ body::before { background:var(--glass-art) center/cover no-repeat; background-co
 
 .site-header [hidden] {display:none!important}
 
-/* Full-width section dividers: folded glass rather than content cards. */
-.section-heading {--folder-edge:#746652;position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;width:100%;box-sizing:border-box;padding:42px 28px 24px;margin-top:18px}
-.section-heading::before {content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;border:2px solid var(--folder-edge);border-top:0;border-radius:22px;background:linear-gradient(135deg,#ffffffc0,#ffffff30 65%);clip-path:polygon(0 23px,58% 23px,60% 20px,63% 3px,65% 0,100% 0,100% 100%,0 100%);box-shadow:inset 0 -1px 0 #fff9,inset 0 1px 0 #fff9;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-[dir=ltr] .section-heading::before,[dir=ltr] .section-heading::after {transform:scaleX(-1)}
-.section-heading::after {
- content:''; position:absolute; inset:0; pointer-events:none; border-radius:22px;
- --folder-top:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 36' preserveAspectRatio='none'%3E%3Cpath d='M1 36V29Q1 23 8 23H348Q356 23 362 17L376 5Q381 1 390 1H586Q599 1 599 14V36M5 29H347Q358 29 366 22' fill='none' stroke='white' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
- background:var(--folder-edge); -webkit-mask:var(--folder-top) center top/100% 36px no-repeat; mask:var(--folder-top) center top/100% 36px no-repeat;
+/* Section titles sit on an open baseline. Gold marks the start of each section. */
+.section-heading {
+  display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:14px 24px;
+  width:100%; position:relative; padding-block:8px 15px; border-bottom:1px solid var(--line);
 }
-[data-theme=dark] .section-heading { --folder-edge:#d4c2a4; }
-.section-heading>div {min-width:0;width:100%;padding:0;background:none;border:0;border-radius:0;box-shadow:none;outline:0;backdrop-filter:none;-webkit-backdrop-filter:none}
-.section-heading :is(h1,h2) {margin:0;font-size:clamp(1.5rem,2.6vw,2.4rem)}.section-heading>.button {justify-self:end;white-space:nowrap}.section-heading>p {grid-column:1/-1;margin:0;max-width:none}
-[data-theme=dark] .section-heading::before {background:linear-gradient(135deg,#414151a0,#29293630);box-shadow:inset 0 -1px 0 #ffffff70,inset 0 1px 0 #ffffff70}
-@media(max-width:760px) {.section-heading,.topic-section .section-heading {display:grid;grid-template-columns:1fr;padding:38px 18px 20px;gap:12px}.section-heading>.button {justify-self:start;margin:0}.section-heading>p {max-width:none}}
-@media(forced-colors:active) {.section-heading::before {background:Canvas;border:1px solid CanvasText;clip-path:none}.section-heading::after {display:none}}
+.section-heading::after {
+  content:""; position:absolute; inset-inline-start:0; inset-block-end:-1px;
+  width:3.4rem; height:3px; background:#aa813b; border-radius:4px;
+}
+.section-heading>div { min-width:0; }
+.section-heading :is(h1,h2) { margin:0; font-size:clamp(1.5rem,3vw,2.35rem); line-height:1.55; }
+.section-heading>.button { justify-self:end; white-space:nowrap; }
+.section-heading>p { grid-column:1/-1; max-width:65ch; margin:0; }
+#recent-posts :is(.audience-group,[data-recent-links] section)>h3 {
+  display:table; margin:0 0 10px; padding:5px 17px; font-size:1rem; font-weight:700;
+  color:#49371c; background:linear-gradient(125deg,#fffaf0,#f1e3c8); border:1px solid #a78342;
+  border-radius:10px; box-shadow:inset 0 1px 0 #fff9;
+}
+[data-theme=dark] #recent-posts :is(.audience-group,[data-recent-links] section)>h3 {
+  color:#f5e3bb; background:linear-gradient(125deg,#35312e,#24232c); border-color:#bea16b;
+}
+@media(max-width:760px) {
+  .section-heading,.topic-section .section-heading { display:grid; grid-template-columns:1fr; justify-items:center; gap:8px; }
+  .section-heading>.button { justify-self:center; margin:0; }
+  .section-heading::after { inset-inline-start:calc(50% - 1.7rem); }
+  #recent-posts :is(.audience-group,[data-recent-links] section)>h3 { margin-inline:auto; }
+}
 
 /* Owner-supplied posters keep their full frame; one language is active. */
 .reading-project {flex-wrap:wrap}.reading-project .intmed-poster {display:block;flex:0 0 100%;width:100%;max-width:960px;margin-inline:auto;border-radius:20px;overflow:hidden}.intmed-poster img {display:block;width:100%;height:auto}.intmed-poster:focus-visible {outline:3px solid var(--ink);outline-offset:5px}
