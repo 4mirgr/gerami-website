@@ -4,7 +4,8 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'
 try {
  const origin=process.env.APPEARANCE_TEST_ORIGIN||'http://127.0.0.1:4173';
  const page=await browser.newPage({viewport:{width:360,height:780},colorScheme:'light'});
- const errors=[];
+ const errors=[], themeRequests=[];
+ page.on('request',r=>{if(r.url().includes('/assets/glass/waves/'))themeRequests.push(new URL(r.url()).pathname);});
  page.on('pageerror',e=>errors.push(e.message));
  const root=page.locator('html');
  const launcher=page.locator('.appearance-launch');
@@ -14,6 +15,8 @@ try {
  const brightness=dialog.locator('[name=brightness]');
  const bg=()=>page.evaluate(()=>getComputedStyle(document.body,'::before').backgroundImage);
  await page.goto(origin);
+ await launcher.waitFor();
+ assert.deepEqual(themeRequests,['/assets/glass/waves/entry.js'],'default never fetches optional settings or art');
  assert.match(await bg(),/golden-gate-day/);
  await launcher.click();
  assert.equal(await style.inputValue(),'classic');

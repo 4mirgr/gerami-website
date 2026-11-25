@@ -1,23 +1,17 @@
 // Visitor-only preferences. Nothing is written to Studio, the account or the server.
 const root = document.documentElement;
-const host = document.querySelector('.footer-bottom') || document.querySelector('.site-footer .container');
 const colors = [
   ['blue', 'آبی', 'Blue'], ['warm', 'گرم (نارنجی / قرمز)', 'Warm (orange / red)'],
   ['violet', 'بنفش', 'Violet'], ['green', 'سبز', 'Green'], ['neutral', 'خنثی', 'Neutral'],
 ];
 const read = key => { try { return localStorage.getItem(key); } catch { return null; } };
 const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
-const preview = window !== parent && new URLSearchParams(location.search).has('studio-preview');
-if (host && !preview && window.HTMLDialogElement) {
+export function enableAppearance(launch) {
   const sheet = document.createElement('link');
   sheet.rel = 'stylesheet';
-  sheet.href = '/assets/glass/waves/settings.css?v=1';
+  sheet.href = '/assets/glass/waves/settings.css?v=2';
   document.head.append(sheet);
   const choices = rows => rows.map(([key,fa,en]) => `<option value="${key}" data-fa="${fa}" data-en="${en}">${fa}</option>`).join('');
-  const launch = document.createElement('button');
-  launch.type = 'button';
-  launch.className = 'appearance-launch';
-  launch.setAttribute('aria-haspopup','dialog');
   const dialog = document.createElement('dialog');
   dialog.className = 'appearance-dialog';
   dialog.setAttribute('aria-labelledby','appearance-heading');
@@ -64,12 +58,12 @@ if (host && !preview && window.HTMLDialogElement) {
     if (brightness.value !== root.dataset.theme) document.querySelector('[data-theme-toggle]')?.click();
     sync();
   });
-  launch.addEventListener('click', () => { sync(); dialog.showModal(); });
+
   dialog.querySelector('.appearance-close').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => launch.focus());
   new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:['lang','data-theme']});
   if (read('ahg-appearance') === 'wave') root.dataset.wave = color.value;
-  host.append(launch);
   document.body.append(dialog);
   sync();
+  return () => { sync(); if (!dialog.open) dialog.showModal(); };
 }

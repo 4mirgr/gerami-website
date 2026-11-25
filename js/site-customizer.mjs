@@ -1,9 +1,9 @@
-import './appearance-settings.mjs';
 import {displayDocument,validateDocument,pages,safeLink,asset,publicPath,readPublicDocument} from './site-model.mjs';
 import {richText} from './rich-text.mjs';
 import {enhanceToolbars} from './toolbar.mjs';
 const root=document.documentElement;
 const page=document.body.dataset.page;
+import('/assets/glass/waves/entry.js?v=2').catch(()=>{});
 let documents={},previewAssets={};
 let navigationSignature='';
 const preview=new URLSearchParams(location.search).has('studio-preview')&&parent!==window;
