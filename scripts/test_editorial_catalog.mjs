@@ -1,5 +1,12 @@
 import assert from 'node:assert/strict';import {sourceTopic,allTopics,ensureArticleTopic,articlePath,imageQueries} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';
-for(const t of allTopics())assert.equal(t.root.fa,t.source_label,'Mirrored parent label must match IntMed');
+for(const {root,child,source_label} of allTopics()){
+ assert.equal(root.fa,source_label,'Mirrored parent label must match IntMed');
+ for(const node of [root,child]){
+  assert.match(node.en,/[A-Za-z]/,node.id);
+  assert.doesNotMatch(node.en+' '+node.description_en,/\p{Script=Arabic}/u,node.id);
+  assert.ok(node.en.length<=100,'The English topic label must fit the public catalog: '+node.id);
+ }
+}
 for(const t of allTopics())if(!t.source_id.split('-').slice(1).some(w=>w.length>=4))assert(imageQueries(t.source_id)[0].split(/\s+/).some(w=>w.length>=4),'Medical short IDs need meaningful discovery queries');
 const a=sourceTopic('pulm-asthma');assert.equal(a.root.id,'pulmonology');assert.equal(a.child.id,'asthma');assert.equal(a.child.fa,'آسم');assert.equal(sourceTopic('gi-dysphagia').child.fa,'دیسفاژی');assert.equal(sourceTopic('nephro-azotemia').child.id,'azotemia');assert.equal(allTopics().length,149);assert.throws(()=>sourceTopic('invented-topic'));
 const docs={'content/topics.json':{topics:[]}};ensureArticleTopic(docs,a);ensureArticleTopic(docs,a);assert.equal(docs['content/topics.json'].topics.length,1);assert.equal(docs['content/topics.json'].topics[0].children.length,1);

@@ -10,7 +10,80 @@
       "fa": "موضوعات",
       "en": "Topics",
       "url": "/topics/",
-      "children": []
+      "children": [
+        {
+          "fa": "جنرال",
+          "en": "General internal medicine",
+          "url": "/topics/internal-medicine/",
+          "children": []
+        },
+        {
+          "fa": "قلب و عروق",
+          "en": "Cardiology",
+          "url": "/topics/cardiology/",
+          "children": []
+        },
+        {
+          "fa": "ریه",
+          "en": "Pulmonology",
+          "url": "/topics/pulmonology/",
+          "children": []
+        },
+        {
+          "fa": "کلیه",
+          "en": "Nephrology",
+          "url": "/topics/nephrology/",
+          "children": []
+        },
+        {
+          "fa": "گوارش و کبد",
+          "en": "Gastroenterology and hepatology",
+          "url": "/topics/gastroenterology/",
+          "children": []
+        },
+        {
+          "fa": "غدد و متابولیسم",
+          "en": "Endocrinology and metabolism",
+          "url": "/topics/endocrinology/",
+          "children": []
+        },
+        {
+          "fa": "هماتولوژی و آنکولوژی",
+          "en": "Hematology and oncology",
+          "url": "/topics/hematology/",
+          "children": []
+        },
+        {
+          "fa": "روماتولوژی و ایمونولوژی",
+          "en": "Rheumatology and immunology",
+          "url": "/topics/rheumatology/",
+          "children": []
+        },
+        {
+          "fa": "عفونی",
+          "en": "Infectious diseases",
+          "url": "/topics/infectious-diseases/",
+          "children": []
+        },
+        {
+          "fa": "اعصاب",
+          "en": "Neurology",
+          "url": "/topics/neurology/",
+          "children": []
+        },
+        {
+          "fa": "مراقبت ویژه و اورژانس داخلی",
+          "en": "Critical care and medical emergencies",
+          "url": "/topics/critical-care/",
+          "children": []
+        },
+        {
+          "fa": "مسمومیت",
+          "en": "Toxicology",
+          "url": "/topics/toxicology/",
+          "children": []
+        }
+      ]
     },
     {
       "fa": "همه مطالب",

@@ -11,34 +11,19 @@ if(host){
  try{if(appearanceAvailable && localStorage.getItem('ahg-appearance')==='wave')loadAppearance().catch(()=>{});}catch{}
  let menuStyle;
  function installMenuStyles(){
-  if (menuStyle) return;
-  menuStyle = document.createElement('style');
-  menuStyle.textContent = `
-.account-menu {position:absolute;inset-inline-end:0;top:calc(100% + 12px);width:min(270px,calc(100vw - 30px));padding:10px;border:1px solid #ffffff80;border-radius:24px;background:linear-gradient(145deg,#fffffff2,#ebeef0eb);box-shadow:inset 0 1px 0 #fff,0 18px 48px #15182d2b;backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);color:var(--ink);font-size:.86rem;z-index:40;box-sizing:border-box}
-.account-menu[hidden] {display:none!important}
-.account-menu {max-height:calc(100vh - var(--header-clearance,144px));max-height:calc(100dvh - var(--header-clearance,144px));overflow-y:auto;overscroll-behavior:contain}
-.account-menu::before {content:'';position:absolute;top:-14px;inset-inline:0;height:14px}
-[data-theme=dark] .account-menu {background:linear-gradient(145deg,#353848f5,#242632ef);border-color:#ffffff45;box-shadow:inset 0 1px 0 #ffffff25,0 18px 48px #0005}
-.account-menu-heading {display:grid;gap:1px;padding:8px 12px 12px;margin-bottom:5px;border-bottom:1px solid #9296ab35;overflow-wrap:anywhere}
-.account-menu-heading strong {font-size:.86rem}.account-menu-heading small {color:var(--muted);font-size:.73rem}
-.account-menu a,.account-menu>button {display:flex;align-items:center;gap:10px;min-height:44px;width:100%;padding:9px 12px;border:0;border-radius:13px;background:transparent;text-decoration:none;color:inherit;font:inherit;text-align:start;box-sizing:border-box;cursor:pointer}
-.account-menu a:hover,.account-menu>button:hover,.account-menu a:focus-visible,.account-menu>button:focus-visible {background:#a5afcf30;outline:2px solid transparent}
-.account-menu a:focus-visible,.account-menu>button:focus-visible {outline-color:var(--ink);outline-offset:-2px}
-.account-menu-icon {display:grid;place-items:center;width:23px;height:23px;color:#a07945;font-size:1.15rem;font-weight:500}
-.account-menu .account-menu-logout {margin-top:5px;border-top:1px solid #9296ab35;border-radius:0 0 13px 13px;color:var(--ink)}
-.account-menu-status {margin:6px 10px;font-size:.75rem;color:var(--muted)}
-`;
+  if(menuStyle)return;
+  menuStyle=document.createElement('link');menuStyle.rel='stylesheet';menuStyle.href='/assets/ui/account-menu.css';
+  menuStyle.onload=()=>{if(isOpen())open();};
   document.head.append(menuStyle);
  }
  let account=null,key='',timer,signingOut=false,button,menu;
  const isOpen=()=>host.dataset.accountOpen==='true';
- function open(){if(menu){clearTimeout(timer);host.dataset.accountOpen='true';menu.hidden=false;button.setAttribute('aria-expanded','true');menu.style.transform='';const rect=menu.getBoundingClientRect(),width=document.documentElement.clientWidth;const shift=rect.left<12?12-rect.left:rect.right>width-12?width-12-rect.right:0;menu.style.transform=`translateX(${shift}px)`;}}
+ function open(){if(menu){installMenuStyles();if(!isOpen())document.dispatchEvent(new CustomEvent('toolbar:disclose',{detail:host}));clearTimeout(timer);host.dataset.accountOpen='true';menu.hidden=false;button.setAttribute('aria-expanded','true');menu.style.transform='';const rect=menu.getBoundingClientRect(),width=document.documentElement.clientWidth;const shift=rect.left<12?12-rect.left:rect.right>width-12?width-12-rect.right:0;menu.style.transform=`translateX(${shift}px)`;}}
  function close(){clearTimeout(timer);delete host.dataset.accountOpen;if(menu)menu.hidden=true;button?.setAttribute('aria-expanded','false');}
  function render(){
   const next=JSON.stringify([account?.id,account?.role,account?.name,account?.username,fa()]);if(next===key)return;key=next;
   const wasOpen=isOpen(),focus=document.activeElement?.id;close();
   const label=t('منوی حساب کاربری','Account menu');
-  installMenuStyles();
   button=document.createElement('button');button.type='button';button.className='account-signin';button.classList.toggle('is-authenticated',!!account);button.id='account-trigger';button.setAttribute('aria-label',label);button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','account-menu');
   button.append(initial.querySelector('svg').cloneNode(true));
   const triggerText=document.createElement('span');triggerText.textContent=label;button.append(triggerText);
@@ -87,7 +72,8 @@ if(host){
   const previousFocus=document.getElementById(focus);
   if(previousFocus&&host.contains(previousFocus))previousFocus.focus();
  }
- host.addEventListener('pointerenter',()=>clearTimeout(timer));
+ host.addEventListener('pointerenter',()=>{clearTimeout(timer);installMenuStyles();});
+ host.addEventListener('focusin',installMenuStyles);
  host.addEventListener('pointerleave',()=>{timer=setTimeout(()=>{if(!signingOut&&!menu?.contains(document.activeElement))close();},180);});
  host.addEventListener('focusout',()=>{setTimeout(()=>{if(!signingOut&&!host.contains(document.activeElement))close();},0);});
  host.addEventListener('keydown',event=>{
@@ -96,6 +82,7 @@ if(host){
   event.preventDefault();open();const items=[...menu.querySelectorAll('a,button:not(:disabled)')],index=items.indexOf(document.activeElement);
   const next=event.key==='Home'?0:event.key==='End'?items.length-1:event.key==='ArrowDown'?(index+1)%items.length:(index-1+items.length)%items.length;items[next]?.focus();
  });
+ document.addEventListener('toolbar:disclose',event=>{if(!host.contains(event.detail))close();});
  document.addEventListener('pointerdown',event=>{if(!host.contains(event.target))close();});
  addEventListener('resize',()=>{if(isOpen())open();});
  async function refresh(){try{account=await getSession();render();}catch{if(account)close();}}

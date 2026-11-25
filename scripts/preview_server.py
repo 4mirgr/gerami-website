@@ -20,7 +20,7 @@ class Preview(SimpleHTTPRequestHandler):
         if route.rstrip('/') == '/projects':
             return str(ROOT / 'pages/projects.html')
         if route == '/llms.txt' or route.startswith(('/topics/', '/articles/')):
-            stamp = tuple((ROOT / name).stat().st_mtime_ns for name in ('content/articles.json', 'backend/editorial/functions/gerami-editorial/taxonomy.json'))
+            stamp = tuple((ROOT / name).stat().st_mtime_ns for name in ('content/articles.json', 'content/navigation.json', 'backend/editorial/functions/gerami-editorial/taxonomy.json'))
             if stamp != SEO_STAMP:
                 from editorial_seo import generate
                 generate(ROOT, Path(SEO_CACHE.name))
@@ -31,6 +31,16 @@ class Preview(SimpleHTTPRequestHandler):
         return super().translate_path(path)
 
     def do_GET(self):
+        if urlsplit(self.path).path == '/content/search-index.json':
+            from search_index import search_bytes
+            data = search_bytes(ROOT)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Cache-Control', 'no-store')
+            self.send_header('Content-Length', str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
         if urlsplit(self.path).path in ('/api/cms/session','/api/account/session'):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')

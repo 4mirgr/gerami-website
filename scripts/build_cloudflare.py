@@ -200,6 +200,8 @@ def assemble(sources, output):
         from site_studio import generate, write_public_feeds
         write_public_feeds(ROOT, stage)
         generate(ROOT, stage)
+        from search_index import search_bytes
+        (stage / 'content/search-index.json').write_bytes(search_bytes(ROOT))
         # AUS is a compiled authenticated application. Never copy its repository
         # root (which includes backend/private-data tooling) into public assets.
         copy_public(sources['intmed'] / pins['intmed']['public_directory'], stage / 'intmed')
