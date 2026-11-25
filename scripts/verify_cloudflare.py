@@ -41,9 +41,9 @@ class Assets(HTMLParser):
             self.entries.append(attributes.get('href'))
 
 
-for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html', 'connection-check.html', 'asset-check.html', 'ventilator/index.html'):
+for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html', 'connection-check.html', 'asset-check.html', 'respiratory/ventilator/index.html'):
     file = site / path
-    is_ventilator = path == 'ventilator/index.html'
+    is_ventilator = path == 'respiratory/ventilator/index.html'
     assets = Assets(include_images=is_ventilator)
     assets.feed(file.read_text())
     for reference in assets.refs:
@@ -76,7 +76,7 @@ for forbidden in ('cloud', 'src', 'tests', 'private', 'node_modules', 'wrangler.
     if (aus / forbidden).exists():
         errors.append(f'Nonpublic AUS source published: {forbidden}')
 
-ventilator = site / 'ventilator'
+ventilator = site / 'respiratory/ventilator'
 ventilator_published = {file.relative_to(ventilator).as_posix() for file in ventilator.rglob('*') if file.is_file()}
 if ventilator_published != set(VENTILATOR_FILES):
     errors.append('Ventilator artifact differs from the reviewed public file allowlist')
@@ -93,7 +93,7 @@ if report['projects'] != json.loads((ROOT / 'deploy/projects.json').read_text())
     errors.append('Build pins differ from deployment manifest')
 redirects = (site / '_redirects').read_text()
 if (not (site / '404.html').is_file()
-        or any(f'/{name} /{name}/ 308' not in redirects for name in ('intmed', 'ventilator'))
+        or any(f'/{name} /{name}/ 308' not in redirects for name in ('intmed', 'respiratory/ventilator'))
         or any(line.split()[:1] == ['/aus'] for line in redirects.splitlines())):
     errors.append('Missing routing configuration')
 if report.get('aus_checks') != ['--test tests/cloud_auth.mjs']:

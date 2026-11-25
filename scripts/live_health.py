@@ -50,7 +50,7 @@ def probe_admin(path):
         location=urlsplit(urljoin(ORIGIN+'/',error.headers.get('Location','')))
         if error.code!=302 or location.path not in ('/pages/account','/pages/account.html') or location.scheme!='https' or location.netloc!=urlsplit(ORIGIN).netloc or location.username is not None or location.password is not None:
             raise RuntimeError('Administrator document did not require the local login gate') from error
-        if path == '/ventilator/' and parse_qs(location.query).get('next') != [path]:
+        if path == '/respiratory/ventilator/' and parse_qs(location.query).get('next') != [path]:
             raise RuntimeError('Ventilator sign-in lost its return destination')
     return f'PASS production: {path} require authentication'
 
@@ -59,5 +59,5 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=3) as pool:
         for result in pool.map(probe, CHECKS.items()):
             print(result)
-    for path in ('/admin/','/admin/editor.html','/dash/','/ventilator/'):
+    for path in ('/admin/','/admin/editor.html','/dash/','/respiratory/ventilator/'):
         print(probe_admin(path))
