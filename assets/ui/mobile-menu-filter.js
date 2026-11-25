@@ -9,15 +9,15 @@ export function enableMobileFilter(nav,state,t,searchText){
  function filter(){
   state.query=input.value;const query=searchText(state.query);let count=0;
   function matchItem(item){
-   if(item.matches('a')){const span=item.querySelector('[data-fa]');const match=!query||searchText((span?.dataset.fa||'')+' '+(span?.dataset.en||'')+' '+item.textContent).includes(query);item.hidden=!match;if(match)count++;return match;}
+   if(item.matches('a,.topic-directory')){const span=item.querySelector('[data-fa]');const match=!query||searchText((span?.dataset.fa||'')+' '+(span?.dataset.en||'')+' '+item.textContent).includes(query);item.hidden=!match;if(match)count++;return match;}
    if(item.matches('.topic-navigation')){
-    const directory=item.querySelector('.topic-directory'),popup=item.querySelector('.nav-submenu'),toggle=item.querySelector('.topic-disclosure');
+    const directory=item.querySelector('.topic-directory'),popup=item.querySelector('.nav-submenu');
     const parentMatch=matchItem(directory);
     const children=[...popup.children].map(matchItem);
     const found=parentMatch||children.some(Boolean);
     item.hidden=!found;directory.hidden=false;
     if(query&&!item.dataset.searching)item.dataset.beforeSearchOpen=String(!popup.hidden);
-    if(query||item.dataset.searching){popup.hidden=query?!children.some(Boolean):item.dataset.beforeSearchOpen!=='true';toggle.setAttribute('aria-expanded',String(!popup.hidden));}
+    if(query||item.dataset.searching){popup.hidden=query?!children.some(Boolean):item.dataset.beforeSearchOpen!=='true';directory.setAttribute('aria-expanded',String(!popup.hidden));}
     if(query)item.dataset.searching='true';else delete item.dataset.searching;
     return found;
    }

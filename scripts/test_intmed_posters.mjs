@@ -19,7 +19,7 @@ try {
  await page.locator('[data-language-toggle]').click();await page.reload();assert.equal(await image.getAttribute('src'),homeImages.en.path,'Stored English language selects the English poster');
  await page.evaluate(()=>document.documentElement.lang='fa');await page.waitForFunction(()=>document.querySelector('[data-intmed-poster]').getAttribute('src')===document.querySelector('[data-intmed-poster]').dataset.srcFa,{},{timeout:1500});
  const nojs=await browser.newPage({javaScriptEnabled:false,viewport:{width:390,height:844}});await nojs.goto('http://127.0.0.1:4173/');assert.equal(await nojs.locator('[data-intmed-poster]').getAttribute('src'),homeImages.fa.path);
- await page.getByRole('link',{name:'View all projects'}).or(page.getByRole('link',{name:'مشاهده همه پروژه‌ها'})).click();
+ await page.getByRole('link',{name:'View all projects and their details'}).or(page.getByRole('link',{name:'توضیحات و مشاهده ی همه ی پروژه ها'})).click();
  assert.equal(new URL(page.url()).pathname,'/projects');
  assert.equal(await page.locator('.project-feature').count(),4);
  assert.equal(await page.locator('#spirometry h2').textContent(),'Spirometry Lab');

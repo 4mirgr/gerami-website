@@ -15,10 +15,10 @@ try{
   assert.ok(labels.length===7&&labels.every(Boolean),'Each translated action label fits on one line inside its button at '+width+'px');
   if (await p.locator('.mobile-menu>summary').isVisible()) {
    await p.locator('.mobile-menu>summary').click();
-   const links = p.locator('.mobile-menu>nav a:visible');
-   assert.ok(await links.count() >= 5);
-   for (const link of await links.all()) {
-    const r = await link.boundingBox();
+   const controls = p.locator('.mobile-menu>nav a:visible,.mobile-menu>nav button.topic-directory:visible');
+   assert.equal(await controls.count(),5,'All five primary navigation items stay visible');
+   for (const control of await controls.all()) {
+    const r = await control.boundingBox();
     assert.ok(r.x >= 0 && r.x + r.width <= width, 'Open floating menu must fit');
    }
    await p.keyboard.press('Escape');
