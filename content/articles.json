@@ -5,9 +5,9 @@
       "status": "published",
       "audience": "patients",
       "title_fa": "آسم دقیقا چطور باعث تنگی نفس می‌شود",
-      "title_en": "",
+      "title_en": "How does asthma make it hard to breathe?",
       "body_fa": "در آسم، مسیرهایی که هوا را به ریه می‌رسانند ملتهب و حساس می‌شوند. به همین دلیل، چیزهایی مثل دود یا بعضی مواد حساسیت‌زا می‌توانند نفس‌کشیدن را سخت کنند. سرفه، خس‌خس سینه، تنگی‌نفس و احساس فشار در قفسهٔ سینه از نشانه‌های آسم‌اند. این نشانه‌ها ممکن است مدتی کم شوند و دوباره برگردند؛ بهترشدن موقت هم همیشه به معنی برطرف‌شدن بیماری نیست.\n\nالبته هر سرفه یا تنگی‌نفسی آسم نیست. پزشک علاوه بر شنیدن شرح حال، ممکن است آزمایش تنفس یا «اسپیرومتری» بخواهد تا ببیند هوا چقدر راحت وارد ریه و از آن خارج می‌شود. مشکلاتی مثل برگشت اسید معده، سینوزیت یا چاقی هم گاهی کنترل آسم را سخت‌تر می‌کنند و لازم است در بررسی‌ها به آن‌ها توجه شود.\n\nمراقبت روزمره نقش زیادی در کنترل آسم دارد: دوری از دود دخانیات، شناخت چیزهایی که نشانه‌ها را بدتر می‌کنند و دنبال‌کردن برنامهٔ درمانی پزشک. بعضی اسپری‌ها التهاب را کم می‌کنند و بعضی برای بازشدن راه تنفس به کار می‌روند؛ پس نوع و روش مصرفشان برای همه یکسان نیست. اگر دربارهٔ استفاده از اسپری مطمئن نیستید، از پزشک یا داروساز بخواهید روش درست آن را با شما مرور کند.\n\nتنگی‌نفس شدید، گیجی، خستگی غیرعادی یا بهترنشدن با درمانی که پزشک برای حمله تعیین کرده، نیاز به کمک پزشکی فوری دارد. در این وضعیت منتظر برطرف‌شدن خودبه‌خودی نشانه‌ها نمانید و درمان را با تصمیم خودتان تغییر ندهید. برای روزهایی که حالتان بهتر است هم پیگیری منظم را ادامه دهید تا اگر برنامهٔ درمان به تغییر نیاز داشت، به‌موقع بررسی شود.",
-      "body_en": "",
+      "body_en": "In asthma, the airways that carry air into your lungs become swollen and sensitive. Smoke or certain allergens can then make breathing difficult. You may cough, wheeze, feel short of breath or notice tightness in your chest. These symptoms can ease for a while and then return. Feeling better for a time does not always mean the asthma has gone away.\n\nCoughing and shortness of breath have many possible causes. Your doctor will ask about your symptoms and may suggest a breathing test called spirometry to check how easily air moves in and out of your lungs. Acid reflux, sinusitis and obesity can also make asthma harder to control, so your doctor may take these into account.\n\nEveryday care makes a difference. Avoid tobacco smoke, learn what makes your symptoms worse and follow the treatment plan you agreed on with your doctor. Some inhalers reduce swelling in the airways, while others help them open up. Which inhaler you need and how you use it can vary. If you are unsure about yours, ask your doctor or pharmacist to go through the technique with you.\n\nGet urgent medical help if you are severely short of breath, feel confused or unusually tired, or do not improve with the treatment your doctor prescribed for an attack. Do not wait for symptoms to pass or change the treatment on your own. Keep your regular appointments even when you feel well so your doctor can review your plan and adjust it when needed.",
       "author": "دکتر امیرهوشنگ گرامی",
       "category": "ریه / آسم",
       "topic": "asthma",
@@ -30,16 +30,25 @@
       "source_topic_id": "pulm-asthma",
       "topic_root": "pulmonology",
       "image_alt": "تصویر توضیحی مرتبط با آسم",
-      "url": "/articles/pulmonology/asthma/health-20261120-pulm-asthma/"
+      "url": "/articles/pulmonology/asthma/health-20261120-pulm-asthma/",
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Pulmonology / Asthma",
+      "image_alt_en": "Cross-sections of an open airway and a narrowed airway with a swollen lining and mucus.",
+      "hashtags_en": [
+        "#Asthma",
+        "#LungHealth",
+        "#EverydayCare",
+        "#Breathing"
+      ]
     },
     {
       "slug": "health-20261121-nephro-azotemia",
       "status": "published",
       "audience": "patients",
       "title_fa": "آشنایی با آزوتمی و مشکلات کلیوی",
-      "title_en": "",
+      "title_en": "Understanding azotemia and kidney problems",
       "body_fa": "آزوتمی زمانی رخ می‌دهد که کلیه‌ها به دلایلی نمی‌توانند مواد زائد نیتروژنی را به درستی از خون تصفیه کنند. این وضعیت معمولاً با بالا رفتن سطح کراتینین و اوره در آزمایش خون شناسایی می‌شود. پزشک برای پیدا کردن علت، آن را به سه دسته کلی تقسیم می‌کند: مشکلاتی که به دلیل کاهش خون‌رسانی به کلیه ایجاد شده‌اند (پره‌رنال)، آسیب‌های بافتی و سلولی خودِ کلیه (اینترینزیک) و یا انسداد در مسیر خروج ادرار (پست‌رنال). تشخیص سریع هر یک از این موارد، کلید اصلی بازگشت عملکرد کلیه به حالت طبیعی است.\n\nدر بررسی‌های تشخیصی، سونوگرافی یکی از اولین اقداماتی است که برای رد کردن انسداد مجاری ادراری انجام می‌شود. اگر کلیه‌ها از نظر ساختاری سالم باشند و انسدادی وجود نداشته باشد، پزشک با بررسی دقیق‌تر ادرار و گاهی آزمایش‌های تکمیلی، وضعیت توبول‌های کلیه یا گلومرول‌ها را ارزیابی می‌کند. در بسیاری از موارد، مصرف برخی داروها، عفونت‌ها یا بیماری‌های سیستمیک می‌توانند باعث آسیب به بافت کلیه شوند. قطع داروهای آسیب‌رسان و اصلاح وضعیت عمومی بدن، از اقدامات اولیه و بسیار مهم در روند درمان محسوب می‌شوند.\n\nتغییر در حجم ادرار، تغییر رنگ آن یا مشاهده علائمی مثل ادم و فشار خون بالا، هشدارهایی هستند که نباید نادیده گرفته شوند. اگر متوجه کاهش شدید حجم ادرار یا قطع کامل آن شدید، حتماً باید در سریع‌ترین زمان ممکن به مراکز درمانی مراجعه کنید. همچنین در بیمارانی که دچار بیماری‌های مزمن کلیوی هستند، پایش دقیق سطح املاحی مانند فسفر و پتاسیم و توجه به تداخلات دارویی اهمیت دوچندان دارد، زیرا کلیه‌های ضعیف شده توانایی کمتری برای دفع این مواد دارند.\n\nدر نهایت، تفسیر آزمایش‌های کلیوی نیازمند نگاهی جامع به وضعیت بالینی بیمار است. عواملی مثل توده عضلانی، سن و حتی برخی داروها می‌توانند نتایج آزمایش کراتینین را تحت تأثیر قرار دهند. پزشک شما با در نظر گرفتن تمام این جوانب و استفاده از فرمول‌های دقیق‌تر، وضعیت کلیه‌ها را بررسی می‌کند. فراموش نکنید که هرگونه تغییر در عملکرد کلیه، نیازمند پیگیری مستمر و همکاری نزدیک با تیم پزشکی است تا از پیشرفت بیماری و بروز عوارض جدی جلوگیری شود.",
-      "body_en": "",
+      "body_en": "Azotemia means that nitrogen-containing waste products build up in the blood because the kidneys are not clearing them properly. Blood tests typically show raised levels of creatinine and urea. Doctors look for three broad causes. Too little blood may be reaching the kidneys (prerenal), the kidney tissue itself may be damaged (intrinsic), or something may be blocking the flow of urine (postrenal). Identifying the cause promptly gives kidney function the best chance to recover.\n\nAn ultrasound is often one of the first tests doctors use to rule out a blockage. If the kidneys look structurally normal and there is no blockage, a closer examination of the urine and sometimes further tests can show how the filtering units (glomeruli) and tiny tubes (tubules) are working. Certain medicines, infections and diseases affecting the whole body can injure kidney tissue. Early treatment includes addressing the person's overall condition and having the medical team stop medicines that are damaging the kidneys.\n\nA change in how much urine you pass or in its color, swelling from fluid buildup, and high blood pressure all deserve attention. If you pass much less urine than usual or stop passing urine altogether, seek medical care urgently. People with chronic kidney disease also need close monitoring of minerals such as phosphorus and potassium, along with careful checks for drug interactions. Weakened kidneys are less able to clear excess minerals.\n\nYour doctor interprets kidney test results in the context of your overall health. Muscle mass, age and some medicines can affect a creatinine result. Your doctor takes these factors into account and uses formulas to estimate how well your kidneys are working. A change in kidney function needs ongoing follow-up. Working closely with your care team can help prevent the disease from progressing and reduce the risk of serious complications.",
       "author": "دکتر امیرهوشنگ گرامی",
       "category": "کلیه / ازوتمی و اختلالات ادراری",
       "topic": "azotemia",
@@ -62,16 +71,25 @@
       "source_topic_id": "nephro-azotemia",
       "topic_root": "nephrology",
       "image_alt": "تصویر توضیحی مرتبط با ازوتمی",
-      "url": "/articles/nephrology/azotemia/health-20261121-nephro-azotemia/"
+      "url": "/articles/nephrology/azotemia/health-20261121-nephro-azotemia/",
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Nephrology / Azotemia and urinary disorders",
+      "image_alt_en": "Kidneys and their blood vessels, with a magnified view of blood passing a filtration barrier.",
+      "hashtags_en": [
+        "#Kidneys",
+        "#Azotemia",
+        "#KidneyHealth",
+        "#Medicine"
+      ]
     },
     {
       "slug": "health-20261122-gi-dysphagia",
       "status": "published",
       "audience": "patients",
       "title_fa": "آشنایی با اختلال بلع یا دیسفاژی",
-      "title_en": "",
+      "title_en": "Understanding swallowing difficulties (dysphagia)",
       "body_fa": "دیسفاژی یا همان اختلال در بلع، به حالتی گفته می‌شود که فرد در انتقال غذا یا مایعات از دهان به سمت حلق و مری دچار مشکل است. این اختلال می‌تواند به صورت احساس گیر کردن غذا در گلو یا قفسه سینه بروز کند. اگر این مشکل جدی گرفته نشود، ممکن است فرد دچار کاهش وزن، سوءتغذیه یا حتی ورود ناخواسته مواد غذایی به مسیر تنفسی شود که خطرناک است. بنابراین، هرگونه تغییر مداوم در الگوی بلع باید توسط پزشک بررسی شود.\n\nعوامل متعددی در ایجاد دیسفاژی نقش دارند که به دو دسته کلی تقسیم می‌شوند. در نوع ساختاری، تنگی یا انسدادی در مسیر بلع وجود دارد که مانع عبور لقمه می‌شود. در نوع حرکتی، عضلات مری یا اسفنکترها نمی‌توانند هماهنگی لازم برای پیش‌راندن غذا را انجام دهند. گاهی نیز بیماری‌های عصبی مانند سکته مغزی یا پارکینسون با تضعیف عضلات درگیر در بلع، باعث بروز این نشانه‌ها می‌شوند. تشخیص دقیق علت، اولین گام برای انتخاب روش درمانی مناسب است.\n\nاگر هنگام بلع دچار سرفه، احساس خفگی، برگشت غذا به بینی یا خشونت صدا می‌شوید، حتماً موضوع را با پزشک در میان بگذارید. این نشانه‌ها ممکن است هشداری برای بروز آسپیراسیون یا ورود غذا به ریه باشند. برای بررسی دقیق، پزشک ممکن است از روش‌هایی مانند آندوسکوپی یا تصویربرداری‌های مخصوص بلع استفاده کند تا وضعیت مسیر عبور غذا را مشاهده کند. هرگز سعی نکنید با تغییرات خودسرانه در نوع غذا یا روش خوردن، این علائم را نادیده بگیرید، زیرا درمان به موقع می‌تواند از مشکلات جدی‌تر پیشگیری کند.",
-      "body_en": "",
+      "body_en": "Dysphagia means difficulty moving food or liquids from your mouth through your throat and into your esophagus, the tube that carries food to the stomach. You may feel as if food is sticking in your throat or chest. Persistent difficulty swallowing can lead to weight loss or malnutrition. Food can also enter the airway, which can be dangerous. Ask your doctor to assess any lasting change in the way you swallow.\n\nSwallowing difficulties have several causes. A structural problem, such as a narrowing or blockage, can stop a mouthful of food from passing. A movement problem can develop when the muscles of the esophagus or its rings of muscle (sphincters) do not work together to move food along. Conditions affecting the nervous system, such as a stroke or Parkinson's disease, can also weaken the muscles used for swallowing. Finding the cause is the first step in choosing treatment.\n\nTell your doctor if you cough or choke when swallowing, if food comes back through your nose or if your voice becomes hoarse. These symptoms can warn that food is entering the airway and may reach the lungs, a problem called aspiration. Your doctor may use endoscopy or a specialized swallowing study to see how food passes through. Changing what or how you eat on your own can leave the cause unaddressed. Prompt assessment and treatment can help prevent more serious problems.",
       "author": "دکتر امیرهوشنگ گرامی",
       "category": "گوارش و کبد / دیسفاژی",
       "topic": "dysphagia",
@@ -93,16 +111,24 @@
       "source_topic_id": "gi-dysphagia",
       "topic_root": "gastroenterology",
       "image_alt": "تصویر توضیحی مرتبط با اختلال بلع",
-      "url": "/articles/gastroenterology/dysphagia/health-20261122-gi-dysphagia/"
+      "url": "/articles/gastroenterology/dysphagia/health-20261122-gi-dysphagia/",
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Gastroenterology and hepatology / Dysphagia",
+      "image_alt_en": "Side view showing the route food takes from the mouth through the throat into the esophagus.",
+      "hashtags_en": [
+        "#Dysphagia",
+        "#SwallowingDifficulties",
+        "#DigestiveHealth"
+      ]
     },
     {
       "slug": "clinical-20261122-pulm-asthma",
       "status": "published",
       "audience": "professional",
       "title_fa": "آسم | از شک بالینی تا انتخاب ابزار ارزیابی",
-      "title_en": "",
+      "title_en": "Asthma: from clinical suspicion to choosing an assessment",
       "body_fa": "شرح‌حال حمله‌ای سازگار با آسم همراه با معاینه، رادیوگرافی و اسپیرومتری طبیعی، بیماری را رد نمی‌کند؛ اگر تست عملکرد ریوی تشخیص را تأیید نکند ولی شک بالینی باقی باشد، ارزیابی hyper reactivity راه هوایی با چالش متاکولین مطرح است. متاکولین آگونیست کولینرژیک است و PD20 به دوز ایجادکننده افت ۲۰٪ FEV1 گفته می‌شود؛ منبع دوز تجمعی حداکثر ۴۰۰ میکروگرم را به نفع hyper sensitivity ذکر می‌کند. مانیتول و سالین هیپرتونیک نیز آزمون‌های جایگزین‌اند. این آزمون‌ها برای هر بیمارِ از قبل اثبات‌شده تکرار نمی‌شوند.\n\nپس از اثبات آسم، سؤال بعدی همیشه «آیا هنوز آسم دارد؟» نیست؛ ممکن است یافتن التهاب قابل هدف‌گیری اهمیت بیشتری داشته باشد. شمارش مطلق ائوزینوفیل خون، IgE کل و ارزیابی حساسیت آلرژیک اطلاعات مکمل و متفاوتی می‌دهند. کورتیکواستروئید خوراکی یا ICS دوز بالا می‌تواند ائوزینوفیل را سرکوب کند؛ بنابراین عدد پایین در بیمار تحت درمان را نباید بدون توجه به سابقه و درمان تفسیر کرد. ائوزینوفیلی بسیار زیاد بررسی EGPA یا اختلال اولیه ائوزینوفیلیک را می‌طلبد.\n\nFeNO شاخص التهاب نوع ۲، به‌ویژه مسیر IL-13، است و با ICS سریع کاهش می‌یابد. بالا ماندن آن در بیماری که ICS متوسط یا بالا برایش تجویز شده، ابتدا بررسی پایبندی و تکنیک مصرف را مطرح می‌کند؛ التهاب نوع ۲ پایدار نیز ممکن است علت باشد. پس FeNO بالا اثبات قطعی عدم مصرف دارو نیست. منبع مقادیر بیش از ۳۵–۴۰ ppb در درمان‌نشده و بیش از ۲۰–۲۵ ppb در آسم شدید تحت ICS را ذکر می‌کند. FeNO تحت تأثیر تفاوت‌های جمعیتی نیز قرار می‌گیرد و نباید شاخصی مستقل از قومیت فرض شود.\n\nدر مقایسه تست‌ها، برونکودیلاتور و پاسخ به درمان ضدالتهابی تغییرپذیری انسداد را بررسی می‌کنند؛ FeNO و ائوزینوفیل فنوتیپ التهاب را توضیح می‌دهند. عدد درصد تغییر FEV1 نسبت به پایه را با تغییر برحسب مقدار پیش‌بینی‌شده یکی نگیرید. CXR در آسم اغلب طبیعی است و طبیعی بودنش دلیل رد آسم نیست. DLCO پایین یافته مورد انتظار آسم بدون عارضه نیست و ارزیابی علت دیگری مانند آمفیزم، فیبروز، بیماری عروقی ریوی یا کم‌خونی را مطرح می‌کند.",
-      "body_en": "",
+      "body_en": "In a patient with episodic symptoms consistent with asthma, normal examination findings, chest radiography and spirometry do not exclude the diagnosis. If pulmonary function testing is inconclusive and clinical suspicion persists, consider a methacholine challenge to assess airway hyperresponsiveness. Methacholine is a cholinergic agonist. PD20 is the dose that induces a 20% fall in FEV1. The cited source considers a response at a cumulative dose of 400 micrograms or less supportive of hyperresponsiveness. Mannitol and hypertonic saline are alternative challenge agents. Repeat challenge testing is not routine for every patient with established asthma.\n\nOnce asthma is confirmed, identifying inflammation that can be targeted by treatment may be more informative than asking whether the patient still has asthma. The absolute blood eosinophil count, total IgE and tests for allergic sensitization provide different, complementary information. Oral corticosteroids and high-dose inhaled corticosteroids (ICS) can suppress eosinophils. Interpret a low count in a treated patient alongside the clinical history and treatment exposure. Marked eosinophilia warrants evaluation for eosinophilic granulomatosis with polyangiitis (EGPA) or a primary eosinophilic disorder.\n\nFractional exhaled nitric oxide (FeNO) reflects type 2 inflammation, particularly the IL-13 pathway, and can fall rapidly with ICS. If FeNO remains high in a patient prescribed medium- or high-dose ICS, first review adherence and inhaler technique. Persistent type 2 inflammation is another possible explanation. A high FeNO value alone does not establish nonadherence. The source cites values above 35–40 ppb in untreated patients and above 20–25 ppb in severe asthma treated with ICS. FeNO also varies across populations, and ethnicity can affect its interpretation.\n\nBronchodilator response and response to anti-inflammatory treatment assess variability in airflow obstruction. FeNO and eosinophils help characterize the inflammatory phenotype. A percentage change in FEV1 from baseline uses a different denominator from a change expressed as a percentage of the predicted value. Chest radiographs are often normal in asthma and cannot rule it out. A low diffusing capacity for carbon monoxide (DLCO) is unexpected in uncomplicated asthma and warrants assessment for another cause, such as emphysema, fibrosis, pulmonary vascular disease or anemia.",
       "author": "دکتر امیرهوشنگ گرامی",
       "category": "ریه / آسم",
       "topic": "asthma",
@@ -124,16 +150,24 @@
       "source_topic_id": "pulm-asthma",
       "topic_root": "pulmonology",
       "image_alt": "نمای بالینی مرتبط با آسم",
-      "url": "/articles/pulmonology/asthma/clinical-20261122-pulm-asthma/"
+      "url": "/articles/pulmonology/asthma/clinical-20261122-pulm-asthma/",
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Pulmonology / Asthma",
+      "image_alt_en": "A patient holds an inhaler during a consultation, with a spacer on the table.",
+      "hashtags_en": [
+        "#Pulmonology",
+        "#Asthma",
+        "#MedicalEducation"
+      ]
     },
     {
       "slug": "health-20261125-pulm-copd",
       "status": "published",
       "audience": "patients",
       "title_fa": "مدیریت بیماری انسداد مزمن ریه (COPD)",
-      "title_en": "",
+      "title_en": "Managing chronic obstructive pulmonary disease (COPD)",
       "body_fa": "بیماری انسداد مزمن ریه که اغلب به دلیل مصرف طولانی‌مدت سیگار یا مواجهه با آلاینده‌های محیطی ایجاد می‌شود، باعث تنگی نفس، سرفه و تولید خلط می‌شود. در این بیماری، مسیرهای هوایی باریک شده و بافت ریه آسیب می‌بیند. اگرچه این آسیب‌ها اغلب پایدار هستند، اما با تشخیص به‌موقع و همکاری نزدیک با تیم درمانی می‌توان کیفیت زندگی را حفظ کرد و از پیشرفت سریع مشکلات تنفسی جلوگیری نمود.\n\nستون اصلی درمان، داروهای استنشاقی هستند که پزشک بر اساس شدت علائم و سابقه تشدید بیماری تجویز می‌کند. بسیار مهم است که نحوه استفاده از این داروها را به دقت بیاموزید، زیرا استفاده نادرست از وسیله، اثر دارو را به شدت کاهش می‌دهد. در کنار دارو، توانبخشی ریوی که شامل برنامه‌های ورزشی و آموزشی است، به شما کمک می‌کند تا فعالیت‌های روزمره را با سختی کمتری انجام دهید و توان بدنی خود را بهبود ببخشید.\n\nدر مسیر درمان، پزشک ممکن است آزمایش‌هایی مانند شمارش سلول‌های خون یا اسپیرومتری (تست تنفس) را برای تنظیم دقیق داروها درخواست کند. اگر با وجود درمان، دچار تنگی نفس شدید، سرفه همراه با خلط چرکی، تب یا کاهش هوشیاری شدید، باید بدون تأخیر به اورژانس مراجعه کنید. هرگز بدون مشورت پزشک، دوز داروها را تغییر ندهید یا از روش‌های خوددرمانی استفاده نکنید، چرا که مدیریت اصولی این بیماری تنها زیر نظر متخصص امکان‌پذیر است.",
-      "body_en": "",
+      "body_en": "Chronic obstructive pulmonary disease (COPD) can cause shortness of breath, coughing and phlegm. It often develops after years of smoking or exposure to environmental pollutants. The airways narrow and lung tissue is damaged. Although the damage often persists, an early diagnosis and close follow-up with your care team can help maintain your quality of life and slow the worsening of breathing problems.\n\nInhaled medicines are the mainstay of treatment. Your doctor chooses them based on your symptoms and how often you have had flare-ups. Take time to learn how to use your inhaler. If the technique is incorrect, much less medicine may reach your lungs. Alongside medication, pulmonary rehabilitation combines exercise and education to build stamina and make daily activities easier.\n\nYour doctor may order a blood cell count or a breathing test called spirometry to help adjust your medicines. Seek emergency care without delay if, despite treatment, you develop severe breathlessness, a cough with pus-like phlegm, a fever or reduced alertness. Work with your doctor when adjusting treatment. Changing doses or treating a flare-up on your own can interfere with the specialist care you need.",
       "author": "دکتر امیرهوشنگ گرامی",
       "category": "ریه / COPD",
       "topic": "copd",
@@ -156,16 +190,25 @@
       "source_topic_id": "pulm-copd",
       "topic_root": "pulmonology",
       "image_alt": "تصویرسازی پیگیری علائم هنگام فعالیت روزانه",
-      "url": "/articles/pulmonology/copd/health-20261125-pulm-copd/"
+      "url": "/articles/pulmonology/copd/health-20261125-pulm-copd/",
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Pulmonology / COPD",
+      "image_alt_en": "A woman pauses on a park bench during an outdoor activity.",
+      "hashtags_en": [
+        "#COPD",
+        "#Breathlessness",
+        "#LungHealth",
+        "#HealthEducation"
+      ]
     },
     {
       "slug": "clinical-20261124-pulm-copd",
       "status": "published",
       "audience": "professional",
       "title_fa": "COPD | دو محور مستقل: شدت انسداد، و مسیر درمان",
-      "title_en": "",
+      "title_en": "COPD: grading airflow obstruction and guiding treatment",
       "body_fa": "FEV1 شدت فیزیولوژیک انسداد را توصیف می‌کند؛ گروه A/B/E از بار علائم و سابقه تشدید در ۱۲ ماه گذشته به دست می‌آید. بنابراین FEV1 نسبتاً حفظ‌شده یا CAT پایین، خطر ناشی از یک بستری قبلی را حذف نمی‌کند. حداقل دو Exacerbation متوسط یا یک Exacerbation منجر به بستری، در چارچوب ABE این منبع با گروه E سازگار است؛ درمان اولیه معمول LABA+LAMA است و در ائوزینوفیل خون ≥۳۰۰ می‌توان درمان سه‌گانه +ICS را در نظر گرفت.\n\nدر پیگیری، ابتدا مشخص کنید مشکل غالب تنگی نفس پایدار است یا Exacerbationهای جدید. در تنگی نفس با یک برونکودیلاتور طولانی‌اثر، افزودن کلاس دوم منطقی است. اگر بیمار LABA+LAMA را درست مصرف می‌کند، تکنیک و پایبندی، مناسب‌بودن وسیله، توانبخشی و علل دیگر تنگی نفس را بازبینی کنید؛ صرف تنگی نفس اندیکاسیون افزودن ICS، روفلومیلاست یا آنتی‌بیوتیک پیشگیرانه نیست. Ensifentrine در الگوریتم جدید منبع به‌عنوان گزینه قابل بررسی آمده است؛ جایگاه آن به شواهد، دسترسی و ارزیابی متخصص وابسته است.\n\nبرای تصمیم درباره ICS، شمارش مطلق ائوزینوفیل خون لازم است: WBC × درصد ائوزینوفیل ÷۱۰۰. در مثال منبع، ۴۸۰۰×۲٪=۹۶ سلول/µL و ۵۰۰۰×۳٪=۱۵۰ سلول/µL است. شمارش خلط جای شمارش مطلق خون را نمی‌گیرد. در Exacerbation مکرر علی‌رغم LABA+LAMA، ائوزینوفیل ≥۱۰۰ احتمال سود از افزودن ICS را تقویت می‌کند و احتمال پاسخ با شمارش بالاتر، به‌ویژه ≥۳۰۰، بیشتر است؛ زیر ۱۰۰ سود پیشگیرانه معمولاً کم است، نه اینکه این عدد به‌تنهایی یک منع مطلق باشد. یعنی اگر بیمار روی LABA+LAMA دوره ی Exacerbation نداشت و ائوزینوفیل زیر ۳۰۰ داشت لازم نیست ICS اضافه کنیم. اما این عدد برای دوره های Exacerbation با ویژگی های گفته شده از ۳۰۰ به ۱۰۰ برای افزودن ICS کاهش میابد.",
-      "body_en": "",
+      "body_en": "FEV1 describes the physiological severity of airflow obstruction. The A/B/E group is determined by symptom burden and the history of exacerbations over the previous 12 months. A relatively preserved FEV1 or a low COPD Assessment Test (CAT) score does not remove the risk associated with a previous hospitalization. In the ABE framework used by the cited source, at least two moderate exacerbations or one exacerbation requiring hospitalization places a patient in group E. Usual initial therapy combines a long-acting beta agonist (LABA) with a long-acting muscarinic antagonist (LAMA). In patients with blood eosinophils ≥300 cells/µL, triple therapy with an inhaled corticosteroid (ICS) may be considered.\n\nAt follow-up, establish whether the main problem is persistent dyspnea or new exacerbations. For dyspnea on a single long-acting bronchodilator, adding the second class is reasonable. For a patient using LABA + LAMA, reassess technique, adherence, device suitability, pulmonary rehabilitation and other causes of dyspnea. Dyspnea alone is not an indication for ICS, roflumilast or prophylactic antibiotics. The source's updated algorithm includes ensifentrine as an option. Its role depends on the evidence, availability and specialist assessment.\n\nUse the absolute blood eosinophil count when considering ICS. Calculate it as the white blood cell count × eosinophil percentage ÷ 100. In the source examples, 4,800 × 2% gives 96 cells/µL, and 5,000 × 3% gives 150 cells/µL. A sputum eosinophil count cannot substitute for the absolute blood count. With recurrent exacerbations despite LABA + LAMA, blood eosinophils ≥100 cells/µL support a potential benefit from adding ICS. The likelihood of benefit increases at higher counts, particularly ≥300 cells/µL. Below 100 cells/µL the preventive benefit is usually small, although the count alone is not an absolute contraindication. A patient without exacerbations on LABA + LAMA and with a count below 300 cells/µL does not need ICS added on that basis. When the exacerbation criteria above are met on dual therapy, the threshold for considering ICS is 100 cells/µL, compared with 300 cells/µL when considering initial triple therapy.",
       "author": "دکتر امیرهوشنگ گرامی",
       "category": "ریه / COPD",
       "topic": "copd",
@@ -187,7 +230,15 @@
       "source_topic_id": "pulm-copd",
       "topic_root": "pulmonology",
       "image_alt": "تصویرسازی اسپیرومتری برای ارزیابی شدت انسداد در COPD",
-      "url": "/articles/pulmonology/copd/clinical-20261124-pulm-copd/"
+      "url": "/articles/pulmonology/copd/clinical-20261124-pulm-copd/",
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Pulmonology / COPD",
+      "image_alt_en": "A man performs spirometry beside a monitor displaying a flow–volume curve.",
+      "hashtags_en": [
+        "#Pulmonology",
+        "#COPD",
+        "#MedicalEducation"
+      ]
     }
   ]
 }

@@ -47,7 +47,7 @@ class Assets(HTMLParser):
             self.entries.append(attributes.get('href'))
 
 
-for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html',
+for path in ('index.html', 'projects.html', 'pages/projects.html', 'aus/index.html', 'intmed/index.html',
              'connection-check.html', 'asset-check.html', *sorted(static_entries)):
     file = site / path
     is_static_app = path in static_entries
@@ -65,10 +65,13 @@ for path in ('index.html', 'pages/projects.html', 'aus/index.html', 'intmed/inde
             errors.append(f'{path}: missing local asset {reference}')
     expected_entries = {
         'index.html': ['/intmed/'],
+        'projects.html': ['/intmed/', '/respiratory/spirometry/'],
         'pages/projects.html': ['/intmed/', '/respiratory/spirometry/'],
     }
     if path in expected_entries and assets.entries != expected_entries[path]:
         errors.append(f'{path}: project buttons must stay on the preview/production origin')
+    if path == 'projects.html' and assets.canonical != ['https://drgerami-md.ir/projects']:
+        errors.append('Storefront canonical must match /projects')
     if path == 'respiratory/spirometry/index.html' and assets.canonical != ['https://drgerami-md.ir/respiratory/spirometry/']:
         errors.append(f'{path}: expected the published course as its canonical URL')
 

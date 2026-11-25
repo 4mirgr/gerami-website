@@ -220,17 +220,13 @@ def assemble(sources, output):
         # Enable cards in the assembled artifact, where the actual apps now exist.
         with (stage / 'js/links.js').open('a', encoding='utf-8') as handle:
             handle.write("\nwindow.SITE_LINKS = Object.freeze(Object.assign({}, window.SITE_LINKS, {intmed:'/intmed/',aus:'/aus/'}));\n")
-        ready_fa = 'پروژه آموزشی IntMed از زیرمسیر همین سایت در دسترس است.'
-        ready_en = 'The IntMed education project is available under this site’s own path.'
         for page in (stage / 'index.html', stage / 'pages/projects.html'):
             html = page.read_text()
             # Relative destinations keep Pages previews and the .ir site on their own host.
             html = html.replace('href="https://drgerami-md.ir/intmed/"', 'href="/intmed/"').replace('href="https://drgerami-md.ir/aus/"', 'href="/aus/"')
             spirometry_entry = '/' + pins['spirometry']['mount'] + '/'
             html = html.replace(f'href="https://drgerami-md.ir{spirometry_entry}"', f'href="{spirometry_entry}"')
-            html, count = re.subn(r'<p[^>]*id="project-entry-status"[^>]*>.*?</p>', lambda match: match[0] if 'data-content-key=' in match[0] else f'<p class="link-status" id="project-entry-status" data-fa="{ready_fa}" data-en="{ready_en}">{ready_fa}</p>', html, flags=re.S)
-            if count != 1:
-                raise ValueError('Project entry markup changed; review the deployment adapter')
+            html = html.replace('href="https://drgerami-md.ir/clinic/portal/"', 'href="/clinic/portal/"')
             if page.name == 'index.html':
                 html = html.replace('</head>', '<script src="/legacy-intmed-links.js" defer></script>\n</head>', 1)
             page.write_text(html, encoding='utf-8')
@@ -241,6 +237,7 @@ def assemble(sources, output):
         shutil.copy2(ROOT / 'deploy/404.html', stage / '404.html')
         (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n/aus/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/aus/fonts/*\n  Cache-Control: public, max-age=86400\n', encoding='utf-8')
         with (stage / '_headers').open('a', encoding='utf-8') as headers:
+            headers.write('/projects\n  Cache-Control: no-cache\n')
             for name in STATIC_APPS:
                 mount = pins[name]['mount']
                 headers.write(f'/{mount}/\n  Cache-Control: no-cache\n/{mount}/*\n  Cache-Control: no-cache\n')
@@ -250,6 +247,8 @@ def assemble(sources, output):
         performance = optimize_public_assets(stage)
         from public_asset_recovery import add_public_asset_recovery
         add_public_asset_recovery(ROOT, stage)
+        # Publish the Studio-managed catalog at the clean storefront address.
+        shutil.copy2(stage / 'pages/projects.html', stage / 'projects.html')
         from asset_check import build_asset_check
         build_asset_check(ROOT, stage)
         files = [file for file in stage.rglob('*') if file.is_file()]

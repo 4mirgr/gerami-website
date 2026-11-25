@@ -8,6 +8,7 @@ try{
  create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;
  insert into auth.users values('${owner}',now(),null,null);insert into public.gerami_accounts values('${owner}','admin',true);`);
  await db.exec(await fs.readFile('backend/editorial/schema.sql','utf8'));
+ await db.exec(await fs.readFile('backend/editorial/english-edition.sql','utf8'));
  // Upgrade with a pre-existing public job and rerun the scheduler inside its dispatch window.
  await db.exec(`insert into public.gerami_editorial_jobs(day,status) values((now() at time zone 'Asia/Tehran')::date,'complete');`);
  await db.exec(await fs.readFile('backend/editorial/daily-audiences.sql','utf8'));

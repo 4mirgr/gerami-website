@@ -4,6 +4,12 @@ Updated 2026-11-25 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## English reading, project catalog and appearance · 2026-11-25
+
+The six published medical articles have full English editions with the author credited as Dr. Amir Houshang Gerami. Keep each edition's title, paragraphs, image description and citation together when updating an article. Studio accepts incomplete drafts and requires both editions at publication. The editorial publisher derives English from the exact approved Persian snapshot and stores it privately for retries. Apply backend/editorial/english-edition.sql before releasing the matching Edge function. Paragraphs use 94% of the cover width on desktop and its full width on mobile, with equal side margins.
+
+The public product catalog is at `/projects`. The first home panel links to IntMed, the ventilator simulator, Spirometry Lab and the patient health record preview. Product descriptions and launch destinations belong to the catalog. Visitor appearance settings are available through the account menu, including before sign-in, and are saved in the current browser.
+
 ## Account page · 2026-11-25
 
 The guest form and signed-in profile share one heading that follows session state. The Google button follows live provider availability. An admin returning from the draft inbox can continue to its exact section.
@@ -18,7 +24,7 @@ The archive and navigation share a Persian search normalizer. The account page c
 
 ## Visitor appearance settings · 2026-11-25
 
-The public-site footer offers «تنظیمات ظاهر» in Persian and English. Golden Gate remains the default and keeps the header day/night shortcut. Glass Wave lets visitors choose independently between five palettes and two brightness modes. Choices stay in browser storage; the CMS preview, mounted apps, accounts and authentication are unchanged. The wallpaper derivatives in `assets/glass/waves/` include the eight owner-supplied styles plus matching derived green-light and neutral-dark variants. Run `scripts/test_appearance_settings.mjs` through the preview server and check the combined build before release.
+The public-site account menu offers «تنظیمات ظاهر» in Persian and English. Golden Gate remains the default and keeps the header day/night shortcut. Glass Wave lets visitors choose independently between five palettes and two brightness modes. Choices stay in browser storage; the CMS preview, mounted apps, accounts and authentication are unchanged. The wallpaper derivatives in `assets/glass/waves/` include the eight owner-supplied styles plus matching derived green-light and neutral-dark variants. Run `scripts/test_appearance_settings.mjs` through the preview server and check the combined build before release.
 
 ## Simulator path · 2026-11-25
 

@@ -212,25 +212,30 @@ def bake_settings(root, text, ident):
         ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: a['slug'])
         ordered.sort(key=lambda a: a.get('published_at', ''), reverse=True)
 
+        def excerpt(body):
+            intro = next((line.strip() for line in body.splitlines() if line.strip() and not re.match(r'^#{1,6}\s|^!\[', line.strip())), body)
+            intro = re.sub(r'[#*_`>~]', '', re.sub(r'!?\[([^\]]*)\]\([^)]*\)', r'\1', intro)).strip()
+            return re.sub(r'\s+\S*$', '', intro[:145]) + '…' if len(intro) > 145 else intro
+
+        def localized(fa, en):
+            return f'data-fa="{html.escape(fa)}" data-en="{html.escape(en)}">{html.escape(fa)}'
+
         def article_links(items, previews=False):
             links = []
             for article in items:
                 path = article.get('url') or '/articles/' + article['slug'] + '/'
                 if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
                     title = article.get('title_fa') or article.get('title_en') or ''
-                    link = '<a href="' + path + '">' + html.escape(title[:150]) + '</a>'
+                    link = f'<a href="{path}" {localized(title[:150], (article.get("title_en") or title)[:150])}</a>'
                     if previews:
                         from validate_content import remote_article_image
                         image = article.get('image') or ''
                         if not (re.fullmatch(r'/assets/(?:uploads|optimized)/[a-zA-Z0-9._-]+', image) or remote_article_image(image)):
                             image = ''
                         body = article.get('body_fa') or article.get('body_en') or ''
-                        intro = next((line.strip() for line in body.splitlines() if line.strip() and not re.match(r'^#{1,6}\s|^!\[', line.strip())), body)
-                        intro = re.sub(r'[#*_`>~]', '', re.sub(r'!?\[([^\]]*)\]\([^)]*\)', r'\1', intro)).strip()
-                        if len(intro) > 145:
-                            intro = re.sub(r'\s+\S*$', '', intro[:145]) + '…'
+                        intro = localized(excerpt(body), excerpt(article.get('body_en') or body))
                         cover = f'<img class="post-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{html.escape(image, quote=True)}" alt="">' if image else ''
-                        link = f'{cover}<strong>{link}</strong><p class="post-excerpt">{html.escape(intro)}</p>'
+                        link = f'{cover}<strong>{link}</strong><p class="post-excerpt" {intro}</p>'
                     links.append('<li>' + link + '</li>')
             return ''.join(links)
 

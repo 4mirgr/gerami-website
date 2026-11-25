@@ -17,6 +17,8 @@ class Preview(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         global SEO_STAMP
         route = unquote(urlsplit(path).path)
+        if route.rstrip('/') == '/projects':
+            return str(ROOT / 'pages/projects.html')
         if route == '/llms.txt' or route.startswith(('/topics/', '/articles/')):
             stamp = tuple((ROOT / name).stat().st_mtime_ns for name in ('content/articles.json', 'backend/editorial/functions/gerami-editorial/taxonomy.json'))
             if stamp != SEO_STAMP:

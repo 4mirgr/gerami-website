@@ -6,10 +6,10 @@ const colors = [
 ];
 const read = key => { try { return localStorage.getItem(key); } catch { return null; } };
 const save = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
-export function enableAppearance(launch) {
+export function enableAppearance() {
   const sheet = document.createElement('link');
   sheet.rel = 'stylesheet';
-  sheet.href = '/assets/glass/waves/settings.css?v=2';
+  sheet.href = '/assets/glass/waves/settings.css?v=3';
   document.head.append(sheet);
   const choices = rows => rows.map(([key,fa,en]) => `<option value="${key}" data-fa="${fa}" data-en="${en}">${fa}</option>`).join('');
   const dialog = document.createElement('dialog');
@@ -39,7 +39,6 @@ export function enableAppearance(launch) {
 
   function sync() {
     const lang = root.lang === 'en' ? 'en' : 'fa';
-    launch.textContent = lang === 'fa' ? 'تنظیمات ظاهر' : 'Appearance settings';
     dialog.querySelectorAll('[data-fa]').forEach(el => { el.textContent = el.dataset[lang]; });
     mode.value = root.dataset.wave ? 'wave' : 'classic';
     options.hidden = mode.value !== 'wave';
@@ -60,7 +59,7 @@ export function enableAppearance(launch) {
   });
 
   dialog.querySelector('.appearance-close').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('close', () => launch.focus());
+  dialog.addEventListener('close', () => document.getElementById('account-trigger')?.focus());
   new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:['lang','data-theme']});
   if (read('ahg-appearance') === 'wave') root.dataset.wave = color.value;
   document.body.append(dialog);

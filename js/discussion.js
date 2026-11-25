@@ -16,7 +16,6 @@ if(copyData){
   const {title,body}=versions[selected],content=document.querySelector('.reader .article-body');
   const heading=document.querySelector('.reader h1');heading.textContent=title;heading.lang=selected;
   content.dir=selected==='fa'?'rtl':'ltr';content.lang=selected;richText(content,body);
-  const cover=document.querySelector('.article-cover img');if(cover)cover.alt=title;
  };
  renderCopy();new MutationObserver(renderCopy).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 }
