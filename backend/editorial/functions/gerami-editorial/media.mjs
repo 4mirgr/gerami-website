@@ -35,9 +35,11 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
   const query=imageQueries(topic)[0];
   const params=new URLSearchParams({action:'query',format:'json',generator:'search',gsrsearch:query+' filetype:bitmap',gsrnamespace:'6',gsrlimit:'12',prop:'imageinfo',iiprop:'url|mime|extmetadata',iiurlwidth:'1000'});
   const response=await remote('https://commons.wikimedia.org/w/api.php?'+params,{signal:AbortSignal.timeout(10000)}),data=JSON.parse(new TextDecoder().decode(await boundedBytes(response,350000)));
+  const prior=await db('gerami_editorial_cover_library?source_topic=eq.'+topic+'&select=sha256,provenance');
+  const seen=new Set(prior.map(o=>o.sha256)),sources=new Set(prior.map(o=>o.provenance?.source).filter(Boolean));
   const chosen=[];for(const p of Object.values(data.query?.pages||{})){
-   const c=commonsCandidate(p,query);if(!c)continue;
-   try{const bytes=await boundedBytes(await remote(c.url,{signal:AbortSignal.timeout(10000)}));if(!validImage(bytes,'image/jpeg'))continue;const digest=await sha(bytes);if(chosen.some(x=>x.digest===digest))continue;chosen.push({...c,bytes,digest});if(chosen.length===2)break;}catch{}
+   const c=commonsCandidate(p,query);if(!c||sources.has(c.provenance.source))continue;
+   try{const bytes=await boundedBytes(await remote(c.url,{signal:AbortSignal.timeout(10000)}));if(!validImage(bytes,'image/jpeg'))continue;const digest=await sha(bytes);if(seen.has(digest))continue;seen.add(digest);sources.add(c.provenance.source);chosen.push({...c,bytes,digest});if(chosen.length===2)break;}catch{}
   }
   if(chosen.length!==2)throw Error('image_options_pending');return saveLibrary(topic,chosen);
  }
@@ -46,14 +48,14 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
   // Older owner uploads predate cover-selection metadata; verify bytes before preserving.
   const oldImage=/^\/assets\/uploads\/editorial-([a-f0-9]{64})\.(jpg|webp)$/.exec(d.image||'');
   if(d.media_path&&!d.selected_cover_id&&!d.source.cover&&oldImage){const bytes=await boundedBytes(await storage('object/gerami-editorial/'+d.media_path)),mime=oldImage[2]==='webp'?'image/webp':'image/jpeg';if(!validImage(bytes,mime)||await sha(bytes)!==oldImage[1])throw Error('invalid_image');d={...d,cover_selected:true,selected_cover_id:null,cover_sha256:oldImage[1],source:{...d.source,cover:{provider:'owner-upload',sha256:oldImage[1],label:'تصویر انتخابی پزشک'}}};}
-  const topic=d.source.topic_id;let library=await db('gerami_editorial_cover_library?source_topic=eq.'+topic+'&active=eq.true&select=*&order=ordinal.asc&limit=2');
-  if(library.length!==2){await discover(topic);library=await db('gerami_editorial_cover_library?source_topic=eq.'+topic+'&active=eq.true&select=*&order=ordinal.asc&limit=2');}
+  const topic=d.source.topic_id;let library=await rpc('unused_pair',{p_topic:topic});
+  if(library.length!==2){await discover(topic);library=await rpc('unused_pair',{p_topic:topic});}
   if(library.length!==2||library[0].sha256===library[1].sha256)throw Error('image_options_pending');
   const t=sourceTopic(topic),pack=crypto.randomUUID(),options=library.map((o,i)=>({...o,id:crypto.randomUUID(),ordinal:i+1}));
   const keepCustom=d.cover_selected&&!d.selected_cover_id&&d.media_path&&d.source.cover?.provider==='owner-upload'&&d.source.cover.sha256===d.cover_sha256;
   const source={...d.source,reference:'Harrison 2025',taxonomy:{source_id:t.source_id,root:t.root.id,child:t.child.id,path_fa:t.root.fa+' / '+t.child.fa}};if(!keepCustom)delete source.cover;
   const next={...d,topic:t.child.id,category:source.taxonomy.path_fa,source,cover_pack:pack,cover_required:true,cover_selected:!!keepCustom,selected_cover_id:null,cover_sha256:keepCustom?d.cover_sha256:null,media_path:keepCustom?d.media_path:null,image:keepCustom?d.image:options[0].image};next.snapshot_hash=await snapshot(next);
-  await rpc('prepare_covers',{p_id:d.id,p_revision:d.revision,p_source:source,p_topic:next.topic,p_category:next.category,p_pack:pack,p_options:options,p_snapshot:next.snapshot_hash});return fresh(d.id);
+  await rpc('prepare_unique',{p_id:d.id,p_revision:d.revision,p_source:source,p_topic:next.topic,p_category:next.category,p_pack:pack,p_options:options,p_snapshot:next.snapshot_hash});return fresh(d.id);
  }
  async function options(d){let rows=await db('gerami_editorial_cover_options?draft_id=eq.'+d.id+'&pack_id=eq.'+d.cover_pack+'&select=*&order=ordinal.asc');if(rows.length!==2)throw Error('image_options_pending');
   if(d.cover_selected&&!d.selected_cover_id)rows=[{id:null,label:'تصویر انتخابی پزشک',image:d.image,media_path:d.media_path,sha256:d.cover_sha256,provenance:{provider:'owner-upload'}},rows.find(o=>o.sha256!==d.cover_sha256)];

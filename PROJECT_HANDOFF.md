@@ -4,6 +4,10 @@ Updated 2026-11-25 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Editorial comparison · 2026-11-25
+
+The private inbox groups complete topics across pagination, with separate public and clinician columns. Both the dashboard and Telegram can authorize an exact saved revision with a selected cover. Dashboard approval locks the draft and uses the existing publisher. Apply backend/editorial/dashboard-review.sql before deploying the editorial Edge bundle and Pages. Newly allocated pairs consume distinct library images across drafts.
+
 ## Site review · 2026-11-25
 
 The archive and navigation share a Persian search normalizer. The account page checks whether Google login is available and retries that check with the session. The admin gate reports temporary provider failures separately from sign-in. Editing a draft title preserves its editorial tags. Daily production checks now include the booking guide, project directory, sitemap, AI discovery file and the return destination for Ventilator sign-in. The standalone 404 offers article search and direct links to topics and booking.
