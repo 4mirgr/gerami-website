@@ -49,6 +49,10 @@ collections:
               - {name: body_fa, label: متن فارسی, widget: markdown, required: false}
               - {name: body_en, label: متن انگلیسی, widget: markdown, required: false}
               - {name: author, label: نویسنده, widget: string, required: false}
+              - {name: author_en, label: English author name, widget: string, required: false}
+              - {name: category_en, label: English category, widget: string, required: false}
+              - {name: image_alt_en, label: English image description, widget: string, required: false}
+              - {name: hashtags_en, label: English hashtags, widget: list, required: false}
               - {name: published_at, label: تاریخ انتشار, widget: datetime, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
               - {name: reviewed_at, label: تاریخ بازبینی (اختیاری), widget: datetime, required: false, date_format: YYYY-MM-DD, time_format: false, format: YYYY-MM-DD}
               - {name: image, label: تصویر, widget: image, required: false}
@@ -57,4 +61,5 @@ collections:
                 widget: list
                 fields:
                   - {name: title, label: نام منبع, widget: string}
+                  - {name: title_en, label: English source title, widget: string, required: false}
                   - {name: url, label: پیوند HTTPS, widget: string, pattern: ['^https://', 'پیوند باید HTTPS باشد']}

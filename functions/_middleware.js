@@ -8,6 +8,9 @@ export async function onRequest({request,env,next}){
  if(request.method==='POST'&&['/pages/account','/pages/account.html'].includes(url.pathname)){
   return handleAccountRequest(request,'login');
  }
+ if(['/pages/projects','/pages/projects/','/pages/projects.html'].includes(url.pathname)&&['GET','HEAD'].includes(request.method)){
+  return new Response(null,{status:308,headers:{Location:'/projects'+url.search}});
+ }
  if(url.pathname==='/aus'&&['GET','HEAD'].includes(request.method)&&env.ASSETS?.fetch){
   const entry=new Request(new URL('/aus/',url),{method:request.method});
   return env.ASSETS.fetch(entry);

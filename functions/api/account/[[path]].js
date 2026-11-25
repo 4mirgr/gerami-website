@@ -37,15 +37,17 @@ function afterPasswordLogin(next,role){
  return next;
 }
 const loginErrors={
- account_rejected:'نام کاربری یا رمز عبور را بررسی کنید.',
- invalid_credentials:'نام کاربری و رمز عبور را وارد کنید.',
- email_not_confirmed:'برای ورود، ابتدا ایمیل حساب را تایید کنید.',
- too_many_attempts:'تعداد تلاش‌ها زیاد است. کمی بعد دوباره وارد شوید.',
- payload_too_large:'اطلاعات واردشده بیش از اندازه طولانی است.'
+ account_rejected:['نام کاربری یا رمز عبور را بررسی کنید.','Check your username and password.'],
+ invalid_credentials:['نام کاربری و رمز عبور را وارد کنید.','Enter your username and password.'],
+ email_not_confirmed:['برای ورود، ابتدا ایمیل حساب را تایید کنید.','Confirm your email address before signing in.'],
+ too_many_attempts:['تعداد تلاش\u200cها زیاد است. کمی بعد دوباره وارد شوید.','Too many attempts. Please try again later.'],
+ payload_too_large:['اطلاعات واردشده بیش از اندازه طولانی است.','The information you entered is too long.']
 };
 function formError(error,next){
- const message=loginErrors[error.message]||'ورود انجام نشد. دوباره تلاش کنید.';
- const html='<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ورود به حساب</title><main><h1>ورود به حساب</h1><p>'+message+'</p><a href="'+accountPage(next)+'">بازگشت به فرم ورود</a></main></html>';
+ const message=loginErrors[error.message]||['ورود انجام نشد. دوباره تلاش کنید.','Sign-in failed. Please try again.'];
+ const title=['ورود به حساب','Sign in'];
+ const label=([fa,en])=>'data-fa="'+fa+'" data-en="'+en+'">'+fa;
+ const html='<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title '+label(title)+'</title><script defer src="/js/main.js"></script><main><h1 '+label(title)+'</h1><p '+label(message)+'</p><a href="'+accountPage(next)+'" '+label(['بازگشت به فرم ورود','Back to sign in'])+'</a></main></html>';
  return new Response(html,{status:error instanceof AccountError?error.status:503,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'}});
 }
 export function onRequest({request}){

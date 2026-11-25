@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 
-const origin='http://127.0.0.1:4173';
+const origin=process.env.DISCUSSION_TEST_ORIGIN||'http://127.0.0.1:4173';
 const posts=JSON.parse(await readFile('content/articles.json','utf8')).articles.filter(p=>p.status==='published');
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
@@ -28,12 +28,19 @@ try{
    assert.equal(await actions.evaluate(n=>getComputedStyle(n).justifyContent),'space-between');
    await page.locator('[data-language-toggle]').click();
    await page.waitForFunction(()=>/[0-9]{4}/.test(document.querySelector('.post-card time')?.textContent));
+   const id=await card.locator('details').getAttribute('id');
+   const displayed=posts.find(p=>'article-'+p.slug===id);
+   if(displayed?.title_en){
+    assert.equal(await card.locator('summary').textContent(),displayed.title_en);
+    if(displayed.author_en)assert.ok((await card.locator('.post-meta').first().textContent()).includes(displayed.author_en));
+    if(displayed.image_alt_en)assert.equal(await card.locator('.post-cover').getAttribute('alt'),displayed.image_alt_en);
+   }
    assert.equal(await date.getAttribute('datetime'),await date.evaluate(n=>n.dateTime));
    await page.locator('[data-language-toggle]').click();
    assert.equal(await card.locator('.article-body p').first().evaluate(p=>getComputedStyle(p).textAlign),'center');
   }
  }
- for(const post of posts.slice(0,3)){
+ for(const post of posts){
   await page.goto(origin+(post.url||'/articles/'+post.slug+'/'));await page.locator('.reader h1').waitFor();
   const paragraph=page.locator('.reader .article-body p').first();
   assert.equal(await paragraph.isVisible(),true);
@@ -44,8 +51,30 @@ try{
    await page.setViewportSize({width,height:844});
    const bounds=await page.locator('.site-header,.reader-sheet').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return [Math.round(r.left),Math.round(r.right)];}));
    assert.deepEqual(bounds[0],bounds[1],'Article and toolbar edges align at '+width+'px');
+   if(post.image){
+    const measure=await paragraph.evaluate(p=>{
+     const cover=document.querySelector('.article-cover').getBoundingClientRect(),r=p.getBoundingClientRect();
+     return {ratio:r.width/cover.width,offset:(r.left-cover.left)-(cover.right-r.right),font:parseFloat(getComputedStyle(p).fontSize),rem:parseFloat(getComputedStyle(document.documentElement).fontSize)};
+    });
+    assert.ok(Math.abs(measure.ratio-(width<=700?1:.94))<.005&&Math.abs(measure.offset)<1,'Symmetric reading margins');
+    const original=Math.min(1.18*measure.rem,Math.max(1.03*measure.rem,width*.023));
+    assert.ok(Math.abs(measure.font-original-2)<.03,'Article paragraphs gain two CSS pixels');
+   }
   }
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  if(post.title_en&&post.body_en){
+   await page.locator('[data-language-toggle]').click();
+   await page.waitForFunction(title=>document.querySelector('.reader h1').textContent===title,post.title_en);
+   assert.ok((await page.title()).includes(post.title_en));
+   assert.equal(await page.locator('.reader .article-body').getAttribute('dir'),'ltr');
+   if(post.author_en)assert.ok((await page.locator('.byline').innerText()).includes(post.author_en));
+   if(post.image_alt_en)assert.equal(await page.locator('.article-cover img').getAttribute('alt'),post.image_alt_en);
+   const citation=page.locator('.article-citation');await citation.locator('summary').click();
+   assert.ok((await citation.innerText()).includes(post.title_en));
+   assert.doesNotMatch(await page.locator('.reader-sheet').innerText(),/\p{Script=Arabic}/u);
+   await page.locator('[data-language-toggle]').click();
+   await page.waitForFunction(title=>document.querySelector('.reader h1').textContent===title,post.title_fa);
+  }
   if(post.image)await page.waitForFunction(()=>document.querySelector('.article-cover img')?.naturalWidth>0);
  }
  if(posts.length){

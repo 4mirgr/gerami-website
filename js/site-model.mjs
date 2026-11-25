@@ -83,12 +83,12 @@ export function validateDocument(path,data){
   for(const item of data.articles){
    must(typeof item.slug==='string'&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)&&!seen.has(item.slug),'شناسه مقاله نامعتبر یا تکراری است.');seen.add(item.slug);
    must(['draft','published'].includes(item.status)&&['patients','professional'].includes(item.audience),'وضعیت یا مخاطب مقاله معتبر نیست.');
-   for(const key of ['title_fa','title_en','body_fa','body_en','author','category'])must(string(item[key]??'',100000),'متن مقاله معتبر نیست.');
-   must(item.status!=='published'||['fa','en'].some(lang=>item['title_'+lang]?.trim()&&item['body_'+lang]?.trim()),'عنوان و متن مقاله را کامل کنید. ترجمه انگلیسی اختیاری است.');
+   for(const key of ['title_fa','title_en','body_fa','body_en','author','author_en','category','category_en','image_alt_en'])must(string(item[key]??'',100000),'متن مقاله معتبر نیست.');
+   must(item.status!=='published'||['fa','en'].every(lang=>item['title_'+lang]?.trim()&&item['body_'+lang]?.trim()),'برای انتشار، عنوان و متن کامل فارسی و انگلیسی مقاله را وارد کنید.');
    for(const key of ['published_at','reviewed_at']){const date=item[key]||'';must((!date&&(item.status==='draft'||key==='reviewed_at'))||/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date))&&new Date(date).toISOString().slice(0,10)===date,key==='published_at'?'تاریخ انتشار انتخاب‌شده معتبر نیست؛ آن را خالی بگذارید تا خودکار ثبت شود.':'تاریخ بازبینی انتخاب‌شده معتبر نیست؛ این فیلد اختیاری است.');}
    must(item.topic===undefined||item.topic===''||typeof item.topic==='string'&&item.topic.length<=80&&/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(item.topic),'موضوع مقاله معتبر نیست.');
    must(!item.image||articleImage(item.image),'برای تصویر مقاله فایل بارگذاری کنید یا لینک مستقیم HTTPS معتبر وارد کنید.');
-   for(const key of ['tags','hashtags'])must(item[key]===undefined||Array.isArray(item[key])&&item[key].length<=8&&item[key].every(t=>typeof t==='string'&&t.length<=50&&/^[#\p{L}\p{N} _‌-]+$/u.test(t)),'تگ‌های مقاله معتبر نیستند.');
+   for(const key of ['tags','hashtags','hashtags_en'])must(item[key]===undefined||Array.isArray(item[key])&&item[key].length<=8&&item[key].every(t=>typeof t==='string'&&t.length<=50&&/^[#\p{L}\p{N} _‌-]+$/u.test(t)),'تگ‌های مقاله معتبر نیستند.');
    must(!item.sources||Array.isArray(item.sources)&&item.sources.length<=100,'منابع معتبر نیستند.');for(const source of item.sources||[])must(string(source.title)&&source.url?.startsWith('https://')&&safeLink(source.url),'منبع نیاز به عنوان و پیوند HTTPS دارد.');
   }
  }else{

@@ -4,6 +4,7 @@ import {createTelegramEditorial} from './telegram.mjs';
 import {createEditorialMedia} from './media.mjs';
 import {sourceTopic,sourceCategories} from './catalog.mjs';
 import {createTrendSelector} from './trends.mjs';
+import {ENGLISH_PROMPT,englishMaterial,validateEnglish} from './english.mjs';
 import {verifyPublicDelivery} from './publication.mjs';
 const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',anon=Deno.env.get('SUPABASE_ANON_KEY')||'';
 const token=Deno.env.get('TELEGRAM_BOT_TOKEN')||'';
@@ -88,18 +89,32 @@ async function generate(job){
  }
  throw Error(hasSource?'image_options_pending':'insufficient_source');
 }
+function providerModel(){return Deno.env.get('INTMED_GEMINI_MODEL')||'gemini-3.1-flash-lite';}
+async function generateJSON(prompt,material,temperature){
+ const apiKey=Deno.env.get('GEMINI_API_KEY'),model=providerModel();
+ if(!apiKey||!/^[a-z0-9.-]{1,80}$/.test(model))throw Error('provider_unavailable');
+ const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({systemInstruction:{parts:[{text:prompt}]},contents:[{role:'user',parts:[{text:JSON.stringify(material)}]}],generationConfig:{temperature,maxOutputTokens:5000,responseMimeType:'application/json'}}),signal:AbortSignal.timeout(55000)});
+ if(!response.ok)throw Error(response.status===429?'provider_quota':'provider_unavailable');
+ const output=await response.json(),candidate=output.candidates?.[0];
+ if(candidate?.finishReason!=='STOP')throw Error('provider_incomplete');
+ return JSON.parse((candidate.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join(''));
+}
+async function claimArticle(d,leaseHash){
+ const article=publicArticle(d);
+ if(d.english_edition?.snapshot_hash===d.snapshot_hash)return article;
+ const source=englishMaterial(article);
+ const fields=validateEnglish(source,await generateJSON(ENGLISH_PROMPT,source,0));
+ const english_edition={snapshot_hash:d.snapshot_hash,fields};
+ const matched=await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision+'&snapshot_hash=eq.'+d.snapshot_hash+'&lease_hash=eq.'+leaseHash+'&status=eq.publishing&select=id',{english_edition},'PATCH');
+ if(!matched.length)throw Error('stale_approval');
+ return publicArticle({...d,english_edition});
+}
 async function patientEdition(topic,canonical,input,previous){
- const apiKey=Deno.env.get('GEMINI_API_KEY');if(!apiKey)throw Error('provider_unavailable');
- const model=Deno.env.get('INTMED_GEMINI_MODEL')||'gemini-3.1-flash-lite';if(!/^[a-z0-9.-]{1,80}$/.test(model))throw Error('provider_unavailable');
- const modelCopy=async material=>{
-  const generated=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({systemInstruction:{parts:[{text:PROMPT}]},contents:[{role:'user',parts:[{text:JSON.stringify(material)}]}],generationConfig:{temperature:0.6,maxOutputTokens:5000,responseMimeType:'application/json'}}),signal:AbortSignal.timeout(55000)});
-  if(!generated.ok)throw Error(generated.status===429?'provider_quota':'provider_unavailable');
-  const output=await generated.json(),raw=(output.candidates?.[0]?.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join('');return validateCopy(JSON.parse(raw));
- };
+ const modelCopy=async material=>validateCopy(await generateJSON(PROMPT,material,0.6));
  const angles=['تعریف و نشانه‌های قابل فهم برای بیمار','مراقبت روزانه و زمان مراجعه به پزشک','پرسش‌ها و نگرانی‌های رایج بیمار'];const material={topic:topic.label,editorialAngle:angles[previous.filter(p=>p.source?.topic_id===topic.id).length%angles.length]+'؛ فقط در محدودهٔ اطلاعات منبع بنویس.',sourceNote:canonical.sourceNote||'',publishedMaterial:input};
  let copy=await modelCopy(material),issues=publicStyleIssues(copy);
  if(issues.length){copy=await modelCopy({...material,editorialTask:'این پیش‌نویس هنوز برای عموم زیادی تخصصی است. آن را با جمله‌های کوتاه، واژه‌های آشنا و مراقبت‌های عملیِ عمومی بازنویسی کن؛ هیچ اطلاعات تازه‌ای نساز.',issues,previousDraft:copy});if(publicStyleIssues(copy).length)throw Error('copy_style_review_required');}
- return {copy,model};
+ return {copy,model:providerModel()};
 }
 async function reconcile(){
  const rows=await db('gerami_editorial_drafts?or=(status.in.(verifying,publishing,publish_error),and(status.eq.published,published_notified.eq.false))&select=*');if(!rows.length)return;
@@ -175,8 +190,15 @@ Deno.serve(async req=>{
    const claims=await verifyOIDC((req.headers.get('Authorization')||'').replace(/^Bearer /,''));
    if(body.action==='claim'){
     const capability=crypto.randomUUID().replaceAll('-',''),d=await rpc('claim',{p_hash:await sha(capability),p_run:String(claims.run_id)});if(!d)return reply({draft:null});
+    let article;const leaseHash=await sha(capability);
+    try{article=await claimArticle(d,leaseHash);}
+    catch(e){
+     const error=e.message==='provider_quota'?'translation_quota':'translation_failed';
+     await mutate(d,'receipt',{lease_hash:leaseHash,run:String(claims.run_id),error});
+     return reply({error},503);
+    }
     let media=null;if(d.media_path){const bytes=new Uint8Array(await(await storage('object/gerami-editorial/'+d.media_path)).arrayBuffer());if(d.cover_required&&await sha(bytes)!==d.cover_sha256)throw Error('invalid_image');media={path:d.image.slice(1),base64:Array.from({length:Math.ceil(bytes.length/16383)},(_,i)=>btoa(String.fromCharCode(...bytes.subarray(i*16383,(i+1)*16383)))).join(''),sha256:await sha(bytes)};}
-    return reply({draft:{id:d.id,revision:d.revision,article:publicArticle(d),media},capability});
+    return reply({draft:{id:d.id,revision:d.revision,article,media},capability});
    }
    if(body.action==='receipt'&&uuid(body.id)&&/^[a-f0-9]{32}$/.test(body.capability||'')&&(!body.commit_sha||/^[a-f0-9]{40}$/.test(body.commit_sha))){
     const d=(await db('gerami_editorial_drafts?id=eq.'+body.id+'&select=*'))[0];if(!d)throw Error('stale_revision');

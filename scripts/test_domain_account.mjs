@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-const origin='http://127.0.0.1:4173';
+const origin=process.env.APPEARANCE_TEST_ORIGIN||'http://127.0.0.1:4173';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
  const page=await browser.newPage({viewport:{width:390,height:844}});let account=null,failLogout=false,loginRole='user',rejectLogin=false,googleEnabled=false,googleNext,logins=[];
@@ -19,11 +19,11 @@ try{
   }
   return route.fulfill({json:{authenticated:!!account,account}});
  });
- await page.goto(origin);await page.waitForSelector('.account-signin');
- assert.equal(await page.locator('.account-signin').getAttribute('href'),'/pages/account.html');
+ await page.goto(origin);await page.waitForSelector('#account-trigger');
+ assert.equal(await page.locator('#account-sign-in').getAttribute('href'),'/pages/account.html');
  const box=await page.locator('.account-signin').boundingBox();assert.equal(box.width,44);assert.equal(box.height,44);
  await page.evaluate(()=>localStorage.setItem('user',JSON.stringify({role:'admin',authenticated:true})));
- await page.locator('.account-signin').click();await page.waitForSelector('form[data-account-form="login"]');
+ await page.locator('.account-signin').click();await page.locator('#account-sign-in').click();await page.waitForSelector('form[data-account-form="login"]');
  for(const form of await page.locator('form').all())assert.equal(await form.getAttribute('method'),'post','A missing/broken JS module must never put credentials in a URL');
  assert.equal(await page.locator('[data-manager-only]:visible').count(),0);
  await page.locator('[data-account-form="login"] [name=identity]').fill('member');await page.locator('[data-account-form="login"] [name=password]').fill('synthetic-password');

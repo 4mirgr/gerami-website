@@ -8,7 +8,8 @@ try {
  page.on('request',r=>{if(r.url().includes('/assets/glass/waves/'))themeRequests.push(new URL(r.url()).pathname);});
  page.on('pageerror',e=>errors.push(e.message));
  const root=page.locator('html');
- const launcher=page.locator('.appearance-launch');
+ const trigger=page.locator('#account-trigger');
+ const launcher=page.locator('#account-menu .appearance-launch');
  const dialog=page.locator('.appearance-dialog');
  const style=dialog.locator('[name=style]');
  const color=dialog.locator('[name=color]');
@@ -27,8 +28,11 @@ try {
   assert.ok(matches,'default wallpaper must be the Golden Gate day image');
  }
  await page.goto(origin);
+ await trigger.waitFor();
+ assert.equal(await page.locator('footer .appearance-launch').count(),0);
+ await trigger.press('ArrowDown');
  await launcher.waitFor();
- assert.deepEqual(themeRequests,['/assets/glass/waves/entry.js'],'default never fetches optional settings or art');
+ assert.deepEqual(themeRequests,[],'default never fetches optional settings or art');
  await expectGoldenGateDay();
  await launcher.click();
  assert.equal(await style.inputValue(),'classic');
@@ -51,15 +55,16 @@ try {
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.keyboard.press('Escape');
  assert.equal(await dialog.isVisible(),false);
- assert.equal(await launcher.evaluate(el=>document.activeElement===el),true);
+ assert.equal(await trigger.evaluate(el=>document.activeElement===el),true);
  await page.goto(origin+'/pages/about.html');
  await page.locator('html[data-wave=neutral]').waitFor();
  assert.match(await bg(),/neutral-dark/);
  await page.locator('[data-theme-toggle]').click();
  assert.match(await bg(),/neutral-light/);
  await page.locator('[data-language-toggle]').click();
+ await trigger.press('ArrowDown');
  await launcher.click();
- assert.equal(await launcher.textContent(),'Appearance settings');
+ assert.equal(await launcher.locator('span').textContent(),'Appearance settings');
  assert.equal(await dialog.locator('h2').textContent(),'Site appearance');
  await style.selectOption('classic');
  await expectGoldenGateDay();
