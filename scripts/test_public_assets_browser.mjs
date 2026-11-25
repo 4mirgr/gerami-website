@@ -71,6 +71,20 @@ try{
   const session=spirometry.locator('#notebook-session-lung-volumes');
   await session.getByRole('heading',{name:'حجم‌ها و ظرفیت‌های ریه',exact:true}).waitFor();
   assert.match(await session.innerText(),/Tidal Volume/);
+  const chapterUrl=spirometry.url();
+  const languageToggle=spirometry.locator('#language-toggle');
+  await languageToggle.click();
+  await session.getByRole('heading',{name:/^lung volumes and capacities$/i}).waitFor();
+  assert.equal(await spirometry.locator('html').getAttribute('lang'),'en');
+  assert.equal(await spirometry.locator('html').getAttribute('dir'),'ltr');
+  assert.equal(spirometry.url(),chapterUrl);
+  await spirometry.reload();
+  await session.getByRole('heading',{name:/^lung volumes and capacities$/i}).waitFor();
+  await languageToggle.click();
+  await session.getByRole('heading',{name:'حجم‌ها و ظرفیت‌های ریه',exact:true}).waitFor();
+  assert.equal(await spirometry.locator('html').getAttribute('lang'),'fa');
+  assert.equal(await spirometry.locator('html').getAttribute('dir'),'rtl');
+  assert.equal(spirometry.url(),chapterUrl);
   assert.deepEqual(appFailures,[]);
  }finally{await spirometry.close();}
  // Navigation must paint while every request after the HTML is still pending.
