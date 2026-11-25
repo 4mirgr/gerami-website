@@ -239,6 +239,45 @@
         "#COPD",
         "#MedicalEducation"
       ]
+    },
+    {
+      "slug": "clinical-20261123-nephro-azotemia",
+      "status": "published",
+      "audience": "professional",
+      "title_fa": "ازوتمی و اختلالات ادراری | فرمول‌های تخمینی عملکرد کلیه",
+      "title_en": "Azotemia and Urinary Disorders | Estimated Kidney Function Formulas",
+      "body_fa": "Cockcroft-Gault: CrCl(mL/min)=[(140−سن)×وزن(kg)]/[کراتینین سرم(mg/dL)×72] (×۰.۸۵ در زنان). MDRD: eGFR از کراتینین، سن، جنس، نژاد. CKD-EPI دقت بالاتر دارد (به‌خصوص در GFR طبیعی/نزدیک‌طبیعی) و امروزه ترجیح دارد؛ ضریب نژادی اولیه آن (۱.۱۵۹ برای سیاه‌پوستان) به‌دلیل ماهیت اجتماعی نژاد کنار گذاشته می‌شود.\n\nمحدودیت مشترک: همه این فرمول‌ها (حتی CrCl ۲۴ساعته) بر پایه steady state‌اند و در تغییر سریع GFR معتبر نیستند. کاهش توده عضلانی (بیماری مزمن، سوءتغذیه، کورتیکواستروئید طولانی) → PCr پایین کاذب در برابر GFR واقعاً کاهش‌یافته؛ در ورزشکاران PCr بالا → GFR واقعی کمتر از برآورد؛ در این شرایط سیستاتین C مناسب‌تر است.\n\nنکته تکمیلی: فرمول Cockcroft-Gault رسماً از وزن بدن لاغر (Lean Body Weight)، نه وزن کل بدن، استفاده می‌کند: CrCl(mL/min)=[(140−سن)×LBW(kg)]/[کراتینین سرم(mg/dL)×72] (×۰.۸۵ در زنان). فرمول دقیق MDRD: eGFR(mL/min/1.73m²)=186.3×PCr^(−1.154)×سن^(−0.203)×(۰.۷۴۲ در صورت زن‌بودن)×(۱.۲۱ در صورت سیاه‌پوست‌بودن).",
+      "body_en": "Cockcroft-Gault: CrCl(mL/min)=[(140−age)×weight(kg)]/[serum creatinine(mg/dL)×72] (×0.85 in women). MDRD: eGFR from creatinine, age, sex, race. CKD-EPI has higher accuracy (especially in normal/near-normal GFR) and is preferred today; its original race coefficient (1.159 for Black individuals) is being phased out due to the social nature of race.\n\nCommon limitation: All these formulas (even 24-hour CrCl) are based on steady state and are not valid during rapid GFR changes. Reduced muscle mass (chronic illness, malnutrition, prolonged corticosteroid use) → falsely low PCr despite truly reduced GFR; in athletes, high PCr → true GFR is lower than estimated; in these conditions, Cystatin C is more appropriate.\n\nSupplementary note: The Cockcroft-Gault formula officially uses Lean Body Weight (LBW), not total body weight: CrCl(mL/min)=[(140−age)×LBW(kg)]/[serum creatinine(mg/dL)×72] (×0.85 in women). The precise MDRD formula: eGFR(mL/min/1.73m²)=186.3×PCr^(−1.154)×age^(−0.203)×(0.742 if female)×(1.21 if Black).",
+      "author": "دکتر امیرهوشنگ گرامی",
+      "category": "کلیه / ازوتمی و اختلالات ادراری",
+      "topic": "azotemia",
+      "image": "/assets/uploads/editorial-aa5f5c949f6724bcc031e79ec2fbed9a1b7f201f5ed3693efdb002d326e20adc.jpg",
+      "published_at": "2026-11-25",
+      "updated_at": "2026-11-25",
+      "sources": [
+        {
+          "title": "Harrison 2025",
+          "url": "https://accessmedicine.mhmedical.com/"
+        }
+      ],
+      "hashtags": [
+        "#کلیه",
+        "#ازوتمی_و_اختلالات_ادراری",
+        "#آموزش_پزشکی"
+      ],
+      "editorial_hash": "dcd7db731de5f14170874a24a7aff0306802ae6165c231acf7fa52e4ee3bbe98",
+      "source_topic_id": "nephro-azotemia",
+      "topic_root": "nephrology",
+      "image_alt": "تصویرسازی آزمایش کراتینین سرم برای تخمین عملکرد کلیه",
+      "image_alt_en": "Illustration of serum creatinine test for estimating kidney function",
+      "hashtags_en": [
+        "#kidney",
+        "#azotemia_and_urinary_disorders",
+        "#medical_education"
+      ],
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Nephrology / Azotemia and urinary abnormalities",
+      "url": "/articles/nephrology/azotemia/clinical-20261123-nephro-azotemia/"
     }
   ]
 }
