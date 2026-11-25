@@ -73,12 +73,15 @@ try{
  assert.deepEqual(calls.filter(c=>c.action==='publish').map(c=>c.body),[{id:draft.id,revision:3,snapshot_hash:draft.snapshot_hash}]);
  // Scheduling uses an exact saved revision and a Jalali picker with Tehran civil values.
  await card.getByLabel('روش زمان‌بندی').selectOption('manual');
+ await page.setViewportSize({width:390,height:900});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await card.locator('.tehran-calendar-trigger').click();
  const calendar=card.locator('dialog');
  assert.equal(await calendar.locator('[aria-current=date]').count(),1);
  await calendar.getByLabel('ساعت',{exact:true}).selectOption('23');
  await calendar.getByLabel('دقیقه',{exact:true}).selectOption('45');
  await calendar.getByRole('button',{name:'ثبت تاریخ و ساعت',exact:true}).click();
+ await page.screenshot({path:'/tmp/gerami-editorial-scheduling-mobile.png',fullPage:true});
  await card.getByRole('button',{name:'تغییر زمان انتشار',exact:true}).click();
  await page.waitForFunction(()=>document.querySelector('.edition-scheduled')?.textContent.includes('۲۳:۴۵'));
  const manual=calls.filter(c=>c.action==='publish'&&c.body.mode==='manual').at(-1);
