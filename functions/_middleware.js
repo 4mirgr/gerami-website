@@ -23,7 +23,7 @@ export async function onRequest({request,env,next}){
   const headers=new Headers({'Cache-Control':'private, no-store','Vary':'Cookie','X-Robots-Tag':'noindex, nofollow'});
   if(url.pathname!==normalized||!/^\/respiratory\/ventilator(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers});
   // Installed browsers fetch manifest and launcher art without account cookies.
-  if(normalized==='/respiratory/ventilator/manifest.webmanifest'||/^\/respiratory\/ventilator\/assets\/[a-zA-Z0-9.-]+\.(?:png|webp|woff2)$/.test(normalized))return next();
+  if(/^\/respiratory\/ventilator\/manifest(?:\.en)?\.webmanifest$/.test(normalized)||/^\/respiratory\/ventilator\/assets\/[a-zA-Z0-9.-]+\.(?:png|webp|woff2)$/.test(normalized))return next();
   let account;
   try{account=await accountFromRequest(request);}catch(error){
    if(error.status!==400&&error.status!==401&&error.status!==403)return new Response('Account service unavailable',{status:503,headers});
