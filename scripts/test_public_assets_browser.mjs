@@ -50,6 +50,19 @@ try{
   assert.deepEqual(recorded,[{surface:'appointments',provider:'snapp'}]);
   await pg.goBack();await consent.uncheck();
  }finally{await booking.close();}
+ const spirometry=await browser.newPage({viewport:{width:390,height:844}});
+ try{
+  const appFailures=[];
+  spirometry.on('pageerror',error=>appFailures.push(error.message));
+  spirometry.on('response',response=>{if(response.status()>=400)appFailures.push(response.url());});
+  await spirometry.goto(origin+'/pages/projects.html');
+  await spirometry.locator('#spirometry [data-app-entry]').click();
+  await spirometry.waitForURL(origin+'/respiratory/spirometry/');
+  await spirometry.getByRole('heading',{name:'آزمایشگاه اسپیرومتری',exact:true}).waitFor();
+  await spirometry.getByRole('link',{name:'ورود به شبیه‌ساز'}).click();
+  await spirometry.getByRole('img',{name:/نمودار جریان/}).waitFor();
+  assert.deepEqual(appFailures,[]);
+ }finally{await spirometry.close();}
  // Navigation must paint while every request after the HTML is still pending.
  // This reproduces mobile blank screens caused by a stalled stylesheet before
  // the synchronous theme bootstrap, without treating an aborted file as a pass.

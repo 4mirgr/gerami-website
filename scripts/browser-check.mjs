@@ -94,9 +94,9 @@ try {
         assert.equal(state.overflow,false,'Horizontal overflow '+width+' '+language+' '+page);
         assert.equal(state.headings,1,page); assert.equal(state.untranslated,0,page);
         if (page === '' || page === 'pages/projects.html') {
-          assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>[link.dataset.appEntry,link.href])"), [
-            ['intmed',projectOrigin+'/intmed/']
-          ], 'Project entries must stay on the .ir domain');
+          const entries = [['intmed',projectOrigin+'/intmed/']];
+          if (page === 'pages/projects.html') entries.push(['spirometry',projectOrigin+'/respiratory/spirometry/']);
+          assert.deepEqual(await evaluate("[...document.querySelectorAll('[data-app-entry]')].map(link=>[link.dataset.appEntry,link.href])"), entries, 'Project entries must stay on the preview or production origin');
         }
         if(language==='en') assert.notEqual(state.title,faTitle,'Localized title '+page);
         checks++;

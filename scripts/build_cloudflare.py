@@ -25,7 +25,13 @@ VENTILATOR_FILES = (
     'assets/apple-touch-icon.png', 'assets/icon-192.png', 'assets/icon-512.png',
     'assets/icon-maskable-512.png', 'assets/dr-gerami.webp',
 )
-VENTILATOR_CHECK = ('--test',)
+SPIROMETRY_FILES = (
+    'index.html', 'styles.css', 'app.mjs', 'cases.mjs', 'charts.mjs',
+    'curriculum.mjs', 'model.mjs', 'assets/Vazirmatn.woff2',
+    'assets/Vazirmatn-OFL.txt', 'assets/lungs.webp', 'assets/icon.png',
+)
+STATIC_APPS = {'ventilator': VENTILATOR_FILES, 'spirometry': SPIROMETRY_FILES}
+STATIC_APP_CHECK = ('--test',)
 
 
 def git(directory, *args):
@@ -140,23 +146,23 @@ def validate_aus(source):
     return [' '.join(command[1:]) for command in commands], warnings
 
 
-def validate_ventilator(source):
+def validate_static_app(name, source):
     result = subprocess.run(
-        ['node', *VENTILATOR_CHECK], cwd=source, text=True,
+        ['node', *STATIC_APP_CHECK], cwd=source, text=True,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
     )
     if result.returncode:
-        raise RuntimeError('Ventilator validation failed:\n' + result.stdout[-4000:])
+        raise RuntimeError(f'{name} validation failed:\n' + result.stdout[-4000:])
     if git(source, 'status', '--porcelain', '--untracked-files=all'):
-        raise RuntimeError('Ventilator validation modified the checkout; refusing to publish')
-    print('PASS Ventilator: ' + ' '.join(VENTILATOR_CHECK), flush=True)
+        raise RuntimeError(f'{name} validation modified the checkout; refusing to publish')
+    print(f'PASS {name}: ' + ' '.join(STATIC_APP_CHECK), flush=True)
 
 
-def copy_ventilator(source, target):
-    for name in VENTILATOR_FILES:
+def copy_reviewed_app(source, target, files):
+    for name in files:
         original = source / name
         if not original.is_file() or original.resolve() != original:
-            raise ValueError(f'Missing or symlinked ventilator public asset: {name}')
+            raise ValueError(f'Missing or symlinked public asset for {target.name}: {name}')
         destination = target / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(original, destination)
@@ -178,8 +184,8 @@ def assemble(sources, output):
     validate_config((sources['intmed'] / 'docs/config.js').read_text())
     aus_checks, aus_warnings = validate_aus(sources['aus'])
     intmed_checks = validate_intmed(sources['intmed'])
-    ventilator = sources['ventilator'].resolve()
-    validate_ventilator(ventilator)
+    for name in STATIC_APPS:
+        validate_static_app(name, sources[name])
     output.parent.mkdir(parents=True, exist_ok=True)
     # Build in a temporary sibling; failure never leaves a half-built _site.
     with tempfile.TemporaryDirectory(prefix='gerami-stage-', dir=output.parent) as temporary:
@@ -196,7 +202,9 @@ def assemble(sources, output):
         # AUS is a compiled authenticated application. Never copy its repository
         # root (which includes backend/private-data tooling) into public assets.
         copy_public(sources['intmed'] / pins['intmed']['public_directory'], stage / 'intmed')
-        copy_ventilator(ventilator, stage / pins['ventilator']['mount'])
+        for name, files in STATIC_APPS.items():
+            spec = pins[name]
+            copy_reviewed_app((sources[name] / spec['public_directory']).resolve(), stage / spec['mount'], files)
         from aus_frontend_adapter import prepare_and_build
         prepare_and_build(sources['aus'], stage / 'aus')
         if git(sources['aus'], 'status', '--porcelain', '--untracked-files=all'):
@@ -217,16 +225,24 @@ def assemble(sources, output):
             html = page.read_text()
             # Relative destinations keep Pages previews and the .ir site on their own host.
             html = html.replace('href="https://drgerami-md.ir/intmed/"', 'href="/intmed/"').replace('href="https://drgerami-md.ir/aus/"', 'href="/aus/"')
+            spirometry_entry = '/' + pins['spirometry']['mount'] + '/'
+            html = html.replace(f'href="https://drgerami-md.ir{spirometry_entry}"', f'href="{spirometry_entry}"')
             html, count = re.subn(r'<p[^>]*id="project-entry-status"[^>]*>.*?</p>', lambda match: match[0] if 'data-content-key=' in match[0] else f'<p class="link-status" id="project-entry-status" data-fa="{ready_fa}" data-en="{ready_en}">{ready_fa}</p>', html, flags=re.S)
             if count != 1:
                 raise ValueError('Project entry markup changed; review the deployment adapter')
             if page.name == 'index.html':
                 html = html.replace('</head>', '<script src="/legacy-intmed-links.js" defer></script>\n</head>', 1)
             page.write_text(html, encoding='utf-8')
-        (stage / '_redirects').write_text('/intmed /intmed/ 308\n/respiratory/ventilator /respiratory/ventilator/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
+        spa_mounts = ('intmed', *(pins[name]['mount'] for name in STATIC_APPS))
+        redirects = ''.join(f'/{mount} /{mount}/ 308\n' for mount in spa_mounts)
+        (stage / '_redirects').write_text(redirects + '/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
         (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/*'], 'exclude': ['/aus/assets/*', '/aus/fonts/*']}) + '\n', encoding='utf-8')
         shutil.copy2(ROOT / 'deploy/404.html', stage / '404.html')
-        (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n/respiratory/ventilator/\n  Cache-Control: no-cache\n/respiratory/ventilator/*\n  Cache-Control: no-cache\n/aus/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/aus/fonts/*\n  Cache-Control: public, max-age=86400\n', encoding='utf-8')
+        (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n/aus/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/aus/fonts/*\n  Cache-Control: public, max-age=86400\n', encoding='utf-8')
+        with (stage / '_headers').open('a', encoding='utf-8') as headers:
+            for name in STATIC_APPS:
+                mount = pins[name]['mount']
+                headers.write(f'/{mount}/\n  Cache-Control: no-cache\n/{mount}/*\n  Cache-Control: no-cache\n')
         from version_assets import version_assets
         version_assets(stage)
         from public_assets import optimize_public_assets
@@ -239,7 +255,8 @@ def assemble(sources, output):
         if len(files) > 20000 or any(file.stat().st_size > 25 * 1024 * 1024 for file in files):
             raise ValueError('Output exceeds Cloudflare Pages static asset limits')
         report = {'performance': performance, 'projects': pins, 'files': len(files), 'bytes': sum(file.stat().st_size for file in files), 'upstream_sources_modified': False, 'intmed_checks': intmed_checks, 'aus_checks': aus_checks, 'aus_warnings': aus_warnings, 'adapters': ['IntMed service-worker scope/cache paths', 'AUS authenticated frontend with same-origin API and auth gateway', 'root legacy worker retirement', 'same-origin project entries']}
-        report['ventilator_checks'] = [' '.join(VENTILATOR_CHECK)]
+        for name in STATIC_APPS:
+            report[f'{name}_checks'] = [' '.join(STATIC_APP_CHECK)]
         (stage / 'build-info.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         stage.rename(output)
     return report
@@ -250,6 +267,7 @@ def main():
     parser.add_argument('--intmed-source', type=Path)
     parser.add_argument('--aus-source', type=Path)
     parser.add_argument('--ventilator-source', type=Path)
+    parser.add_argument('--spirometry-source', type=Path)
     parser.add_argument('--output', type=Path, default=ROOT / '_site')
     args = parser.parse_args()
     if bool(args.intmed_source) != bool(args.aus_source):
@@ -257,7 +275,8 @@ def main():
     subprocess.run([sys.executable, str(ROOT / 'scripts/check_site.py')], check=True, timeout=300)
     pins = json.loads(PINS.read_text())
     with tempfile.TemporaryDirectory(prefix='gerami-sources-') as temporary:
-        local_sources = {'intmed': args.intmed_source, 'aus': args.aus_source, 'ventilator': args.ventilator_source}
+        local_sources = {'intmed': args.intmed_source, 'aus': args.aus_source,
+                         'ventilator': args.ventilator_source, 'spirometry': args.spirometry_source}
         sources = {
             name: local_sources[name].resolve() if local_sources[name] else fetch_source(spec, Path(temporary) / name)
             for name, spec in pins.items()
