@@ -7,29 +7,18 @@ const lang=()=>root.lang==='en'?'en':'fa',text=(fa,en)=>lang()==='fa'?fa:en;
 const el=(tag,value='',className='')=>{const n=document.createElement(tag);n.textContent=value;if(className)n.className=className;return n;};
 function https(value){try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password?u.href:null;}catch{return null;}}
 const json=file=>readPublicDocument('content/'+file);
-let profile=null,articles=[],articleFeedFailed=true,catalog=null,profileHost,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
+let profile=null,articles=[],articleFeedFailed=true,catalog=null,articleHost,previewAssets={},previewDrafts=false,previewActive=false;
 const path=publicPath(location.pathname),isHome=path==='/',isBlog=path.endsWith('/blog');
 const articleImageSources={};
 const imageSource=src=>previewAssets[src]||src;
 const clear=host=>{for(const img of host.querySelectorAll('img'))img.removeAttribute('src');host.replaceChildren();};
- function renderProfile(){
-  if(!profile)return;window.dispatchEvent(new CustomEvent('site-profile',{detail:profile}));
-  if(!['/about','/appointments'].some(p=>path.endsWith(p)))return;
-  if(!profileHost){profileHost=main.querySelector('[data-profile-host]');if(!profileHost){profileHost=el('section','','cms-profile container');main.append(profileHost);}}profileHost.replaceChildren();
-  if(path.endsWith('/about')){
-   if(profile['bio_'+lang()])profileHost.append(el('p',profile['bio_'+lang()]));const entries=Array.isArray(profile.cv)?profile.cv:[];
-   if(entries.length)profileHost.append(el('h2',text('مسیر حرفه‌ای و سوابق بالینی','Training and clinical experience')));
-   for(const item of entries){const card=el('article','','career-entry');card.append(el('h3',item['title_'+lang()]),el('p',item['detail_'+lang()]));profileHost.append(card);}
-  }else{
-   const contact=[];
-   if(typeof profile.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email))contact.push([profile.email,'mailto:'+profile.email]);
-   if(typeof profile.phone==='string'&&/^\+?[0-9 -]{7,20}$/.test(profile.phone))contact.push([profile.phone,'tel:'+profile.phone]);
-   if(https(profile.linkedin)&&/^(www\.)?linkedin\.com$/.test(new URL(profile.linkedin).hostname))contact.push(['LinkedIn',profile.linkedin]);
-   if(https(profile.appointment))contact.push([text('دریافت نوبت','Book a visit'),profile.appointment]);
-   if(contact.length)profileHost.append(el('h2',text('راه‌های ارتباط و مراجعه','Contact and visits')));
-   for(const [label,href] of contact){const a=el('a',label,'button button-secondary');a.href=href;profileHost.append(a);}
-  }
- }
+const profilePanel=['/about','/appointments'].some(end=>path.endsWith(end))?(await import('./profile-panel.js')).renderProfilePanel:null;
+function renderProfile(){
+ if(!profile)return;
+ window.dispatchEvent(new CustomEvent('site-profile',{detail:profile}));
+ profilePanel?.(profile,{main,path,el,https,lang,text});
+}
+
 const articleText=item=>{const wanted=lang(),other=wanted==='fa'?'en':'fa';const language=item['title_'+wanted]?.trim()&&item['body_'+wanted]?.trim()?wanted:other;return {title:item['title_'+language]||item.title_fa||item.title_en,body:item['body_'+language]||'',language};};
 function field(item,key,fallback=''){
  const original=item[key]||'';

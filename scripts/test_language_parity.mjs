@@ -4,6 +4,7 @@ import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 
 const origin = process.env.PARITY_TEST_ORIGIN || 'http://127.0.0.1:4173';
+const publicProfile = JSON.parse(await readFile(new URL('../content/site.json', import.meta.url)));
 const routes = [
   '/', '/pages/blog.html', '/pages/about.html', '/projects', '/pages/account.html',
   '/pages/contact.html', '/pages/appointments.html', '/pages/services.html', '/pages/beyond.html',
@@ -145,6 +146,92 @@ async function verifyArchiveFallback(context) {
   await page.close();
 }
 
+// A decorative brand mark can be inside the translated label or immediately beside it.
+// Match each visible mention to its own small image, so the large contact artwork cannot mask a missing mark.
+async function verifyContactMarks(page, path, language) {
+  const report = await page.evaluate(() => {
+    const issues = [];
+    const counts = {linkedin: 0, gmail: 0};
+    const used = new Set();
+    const shows = el => el && el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0;
+    const words = /\bLinkedIn\b|لینکدین|\b[\w.%+-]+@gmail\.com\b|\be-?mail\b|\bGmail\b|(?<![\p{L}\p{N}_])(?:ای[‌ -]?میل|جی[‌ -]?میل|پست\s+الکترونیک(?:ی)?)(?![\p{L}\p{N}_])/giu;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const el = node.parentElement;
+      if (!el || !shows(el) || el.closest('code,pre,script,style,textarea,select,[contenteditable=true]')) continue;
+      const plain = node.textContent.replace(/(?:https?:\/\/|www\.)[^\s]+/gi, '');
+      for (const match of plain.matchAll(words)) {
+        const kind = /linkedin|لینکدین/i.test(match[0]) ? 'linkedin' : 'gmail';
+        counts[kind]++;
+        const selector = 'img.' + kind + '-mark';
+        const candidates = [...el.querySelectorAll(selector), el.previousElementSibling, el.nextElementSibling];
+        const mark = candidates.find(icon => icon?.matches(selector) && !used.has(icon) && shows(icon));
+        if (!mark) {
+          issues.push('Missing ' + kind + ' mark beside «' + plain.trim() + '» (' + el.tagName + ')');
+          continue;
+        }
+        used.add(mark);
+        const rect = mark.getBoundingClientRect();
+        const font = parseFloat(getComputedStyle(el).fontSize);
+        const hasBrandArt = mark.getAttribute('src')?.includes('/' + kind + '.');
+        if (mark.getAttribute('alt') !== '' || !hasBrandArt || Math.max(rect.width, rect.height) > font * 1.35 || rect.width < Math.min(8, font * .45))
+          issues.push('Oversized, undersized or non-decorative mark for ' + match[0]);
+      }
+    }
+    for (const mark of document.querySelectorAll('img.linkedin-mark, img.gmail-mark')) {
+      if (shows(mark) && !used.has(mark)) issues.push('Unpaired or duplicate ' + mark.className);
+    }
+    return {counts, issues};
+  });
+  const label = path + ' ' + language;
+  assert.deepEqual(report.issues, [], label);
+  assert.ok(report.counts.linkedin >= 1, label + ' missing footer LinkedIn label');
+  if (path === '/pages/about.html' || path === '/pages/contact.html') {
+    assert.ok(report.counts.linkedin >= 2, label + ' missing profile or contact label');
+    for (const link of await page.locator('a[data-destination=linkedin]:visible').all()) {
+      assert.equal(await link.getAttribute('href'), publicProfile.linkedin, label + ' should open the real profile');
+    }
+  }
+  if (path === '/pages/contact.html') {
+    const email = page.locator('a[href^="mailto:"]:visible');
+    assert.equal(await email.getAttribute('href'), 'mailto:' + publicProfile.email);
+    assert.ok((await email.innerText()).includes(publicProfile.email), label + ' address remains selectable plain text');
+    assert.ok(report.counts.gmail >= 2, label + ' needs icons for both email label and Gmail address');
+  }
+  if (path === '/pages/account.html') assert.ok(report.counts.gmail >= 1, label + ' missing visible email form label');
+}
+
+async function verifyUpdatedContactText(page) {
+  await page.evaluate(() => {
+    const block = document.createElement('aside');
+    block.id = 'dynamic-brand-copy';
+    const copy = document.createElement('p');
+    copy.textContent = 'LinkedIn · Gmail · dr.gerami+test@gmail.com, care@example.org. میلوپرولیفراتیو و میلودیسپلاستیک';
+    const literal = document.createElement('code');
+    literal.textContent = 'LinkedIn and Gmail';
+    const url = document.createElement('span');
+    url.textContent = 'https://www.linkedin.com/in/example/';
+    const input = document.createElement('input');
+    input.value = 'reader@gmail.com';
+    block.append(copy, literal, url, input);
+    document.body.append(block);
+  });
+  const block = page.locator('#dynamic-brand-copy'), copy = block.locator('p');
+  await copy.locator('.linkedin-mark').waitFor({state: 'attached'});
+  await copy.locator('.gmail-mark').first().waitFor({state: 'attached'});
+  await page.waitForFunction(() => document.querySelectorAll('#dynamic-brand-copy p img.gmail-mark').length === 2);
+  assert.equal(await copy.textContent(), 'LinkedIn · Gmail · dr.gerami+test@gmail.com, care@example.org. میلوپرولیفراتیو و میلودیسپلاستیک');
+  assert.equal(await block.locator('img').count(), 3, 'Code, URLs, other domains and medical words do not get decorative icons');
+  await copy.evaluate(el => { el.textContent = 'ایمیل · لینکدین'; });
+  await copy.locator('.gmail-mark').first().waitFor({state: 'attached'});
+  await copy.locator('.linkedin-mark').waitFor({state: 'attached'});
+  assert.equal(await copy.textContent(), 'ایمیل · لینکدین');
+  assert.equal(await block.locator('img').count(), 2);
+  assert.equal(await block.locator('code').textContent(), 'LinkedIn and Gmail');
+  assert.equal(await block.locator('input').inputValue(), 'reader@gmail.com');
+  await block.evaluate(el => el.remove());
+}
+
 try {
   for (const width of [390, 1440]) {
     const context = await browser.newContext({viewport: {width, height: 900}, reducedMotion: 'reduce'});
@@ -164,6 +251,7 @@ try {
       const compare = async (lang, baseline) => {
         const current = await snapshot(page, lang);
         const label = path + ' ' + width + 'px ' + lang;
+        await verifyContactMarks(page, path, lang);
         assert.equal(current.direction, lang === 'fa' ? 'rtl' : 'ltr', label);
         assert.ok(current.overflow <= 1, label + ' horizontal overflow: ' + current.overflow);
         assert.ok(current.headingCount > 0, label + ' missing main heading');
@@ -188,6 +276,7 @@ try {
       await page.locator('[data-language-toggle]').click();
       await compare('fa', fa);
     }
+    await verifyUpdatedContactText(page);
     await verifyArchiveFallback(context);
     await context.close();
   }

@@ -230,7 +230,12 @@ try{
    assert.equal(digest,homeImages[language].sha256,'Recovered poster must match its active language byte for byte');
   }
   await failed.locator('.patient-panel .feature-poster img').scrollIntoViewIfNeeded();
-  await failed.waitForFunction(()=>{const image=document.querySelector('.patient-panel .feature-poster img');return image.currentSrc.startsWith('blob:')&&image.naturalWidth===800;},{},{timeout:9000});
+  await failed.waitForFunction(()=>{const image=document.querySelector('.patient-panel .feature-poster img');return image.currentSrc.startsWith('blob:')&&image.complete&&image.naturalWidth>0;},{},{timeout:9000});
+  const portalWidth=await failed.locator('.patient-panel .feature-poster img').evaluate(async image=>{
+   const bitmap=await createImageBitmap(await (await fetch(image.currentSrc)).blob());
+   const width=bitmap.width;bitmap.close();return width;
+  });
+  assert.equal(portalWidth,800,'Carrier recovery serves the verified original image');
   assert.deepEqual(recoveryErrors,[]);
   console.log('PASS carrier fault reproduction: blocked primary font/art recover from byte-identical public mirror; theme remains usable.');
  }finally{await Promise.all(held.map(release=>release()));await broken.close();}

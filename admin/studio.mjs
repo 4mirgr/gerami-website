@@ -1,3 +1,4 @@
+import '../js/contact-marks.js';
 import {discussionEditor} from './discussion.mjs';
 import {editorialEditor} from './editorial.mjs';
 import {topicEditor} from './topic-editor.mjs';

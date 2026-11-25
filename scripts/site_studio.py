@@ -363,7 +363,8 @@ def bake_settings(root, text, ident):
     text = text.replace('</head>', '<style id="site-settings">' + css + '</style></head>')
     from physician_profile import profile_markup
     text = text.replace('</head>', profile_markup(ident) + '</head>', 1)
-    return home_bootstrap(root, text, ident)
+    from contact_marks import mark_public_copy
+    return home_bootstrap(root, mark_public_copy(text), ident)
 
 
 def apply_static_settings(root, output):

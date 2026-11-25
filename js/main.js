@@ -1,6 +1,7 @@
 /* Progressive enhancements only: content and navigation work without JavaScript. */
 (() => {
   'use strict';
+  import('./contact-marks.js');
   const root = document.documentElement;
   const toggle = document.querySelector('[data-language-toggle]');
   let language = 'fa';
@@ -34,6 +35,17 @@
       return;
     }
     const labels = [node.dataset.fa, node.dataset.en];
+    const decorated = node.querySelectorAll('[data-contact-copy]');
+    if (decorated.length) {
+      if (node.textContent.trim() === value) return;
+      for (const copy of decorated) {
+        if (copy.parentElement.closest('[data-fa][data-en]') === node) {
+          const parent = copy.parentNode;
+          copy.replaceWith(copy.textContent);
+          parent.normalize();
+        }
+      }
+    }
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
       const child = walker.currentNode;

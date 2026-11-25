@@ -8,6 +8,8 @@ Use plain Persian ه in site copy, including words like «درباره من» an
 
 The topic directory, specialty pages, subtopics and related articles share the same card markup in both languages. Use a published article's approved cover for its topic. Keep the public and clinician groups distinct and render the same links and images when translated. The first HTML response of the archive includes illustrated cards before its interactive feed is ready. The Ventilator project uses a matching full-frame poster in each language, with a smaller derivative of the same design on the home page. Generated Studio pages carry both language versions in their HTML so translated copy and artwork remain available if a settings request fails. Use the browser language-parity check to verify visible images, icons and card groups in both directions and viewport sizes.
 
+The visit information page pairs online booking with a bilingual medical-record preparation guide and the existing Clinic sample portal. The public site and Studio render proportional decorative LinkedIn and Gmail marks beside visible mentions. Keep the underlying labels, email addresses and destinations intact.
+
 ## Toolbar navigation and live search · 2026-11-25
 
 On desktop the navigation capsule sits at the center of the header. Hovering over the Topics title opens the twelve medical specialties. The title itself is the desktop directory link and the mobile disclosure, with the directory available as the first mobile entry. The search control also appears directly on mobile. Both menus support touch and keyboard navigation in Persian and English.
