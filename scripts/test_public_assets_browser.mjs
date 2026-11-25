@@ -110,12 +110,12 @@ try{
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
  assert.deepEqual(normalMirrors,[],'healthy primary delivery must not download alternate copies');
  console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:sharedReloads.length,newPageAssetNetworkRequests:added.length,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
- const {images:posters,homeImages}=JSON.parse(await readFile(resolve(root,'assets/optimized/intmed-posters.json')));
+ const {homeImages}=JSON.parse(await readFile(resolve(root,'assets/optimized/intmed-posters.json')));
  for(const language of ['fa','en']){
   if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
   const poster=page.locator('[data-intmed-poster]');await poster.scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>document.querySelector('[data-intmed-poster]').complete&&document.querySelector('[data-intmed-poster]').naturalWidth===1199);
-  assert.equal(await poster.getAttribute('src'),posters[language].path);
+  await page.waitForFunction(width=>document.querySelector('[data-intmed-poster]').complete&&document.querySelector('[data-intmed-poster]').naturalWidth===width,homeImages[language].width);
+  assert.equal(await poster.getAttribute('src'),homeImages[language].path);
  }
  console.log('PASS built localized IntMed posters: selected asset decodes and language swaps after fingerprinting.');
 
