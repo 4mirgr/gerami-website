@@ -69,13 +69,6 @@ function arrowButton(label,forward,action){const b=el('button',label,'button but
 if(isHome||isBlog){
  const style=document.createElement('style');
  style.textContent=`
-.article-toolbar input,.article-toolbar select { min-height:48px; border-radius:16px; }
-.article-pagination button:disabled { opacity:.45; cursor:default; }
-.article-toolbar { border-radius:22px; padding:12px; gap:10px; margin-top:24px; }
-.article-toolbar input,.article-toolbar select { min-width:0; background:color-mix(in srgb,var(--white) 38%,transparent); }
-.article-toolbar input { min-width:160px; flex:1 1 240px; }
-.article-toolbar select { flex:1 1 180px; }
-.article-result-count { margin:18px 0; font-size:.85rem; color:var(--muted); }
 .post-card { display:flex; flex-direction:column; min-width:0; padding:24px; }
 .post-meta time { white-space:nowrap; }
 .post-card:has(details[open]) { grid-column:1/-1; }
@@ -86,9 +79,6 @@ if(isHome||isBlog){
 .post-permalink { display:inline-block; font-size:.75rem; color:var(--teal); margin-top:14px; }
 .reading-empty { display:flex; align-items:center; gap:20px; padding:32px; grid-column:1/-1; color:var(--muted); }
 .reading-empty svg { width:42px; height:42px; flex-shrink:0; color:var(--teal); }
-.article-pagination { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:28px; }
-.article-result-count { background:var(--white); border:1px solid var(--line); border-radius:20px; padding:16px 22px; }
-.article-result-count { width:fit-content; max-width:100%; }
 .post-actions {display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;padding-block-start:10px;border-block-start:1px solid var(--line);margin-block-start:auto}
 .post-actions a {display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:99px;background:var(--white);color:var(--ink);margin:0;font-size:.8rem;text-decoration:none}
 .post-actions .post-permalink {background:var(--button);color:var(--buttonText);font-weight:700}

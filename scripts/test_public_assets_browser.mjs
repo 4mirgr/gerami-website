@@ -124,6 +124,10 @@ try{
  assert.equal(hits.filter(p=>p.includes('/assets/topics/')||p.endsWith('material-controls.png')).length,0,'full-resolution decorative originals must never be downloaded');
  assert.ok(await page.locator('img.topic-art').evaluateAll(images=>images.length>0&&images.filter(i=>i.complete).every(i=>i.naturalWidth===192)),'deployed badges use correctly decoded 192px derivatives');
  const cold=await page.evaluate(()=>({resources:performance.getEntriesByType('resource').length,bytes:performance.getEntriesByType('resource').reduce((n,r)=>n+r.transferSize,0),navigationBytes:performance.getEntriesByType('navigation')[0].transferSize,fcp:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,load:performance.getEntriesByType('navigation')[0].loadEventEnd}));
+ const portalImages=page.locator('img[src*="/patient-portal."]');
+ assert.equal(await portalImages.count(),2);
+ assert.ok(await portalImages.evaluateAll(images=>images.every(image=>image.currentSrc.includes('/patient-portal-mobile.')&&image.complete&&image.naturalWidth>0)),'Mobile tile and panel reuse the compact portal image');
+ assert.equal(hits.filter(path=>path.includes('/patient-portal.')).length,0,'Mobile should not also transfer the full portrait');
  const cards=await page.locator('img.post-cover').evaluateAll(es=>es.map(e=>({src:e.getAttribute('src'),width:e.naturalWidth})));
  assert.ok(cards.every(c=>!/^\/assets\/uploads\/editorial-/.test(c.src)),'listing cards must use bounded previews, not approved full-size originals');
  assert.ok(cards.filter(c=>c.src.startsWith('/assets/optimized/post-')&&c.width).every(c=>c.width<=480));
@@ -225,6 +229,8 @@ try{
    const digest=await failed.evaluate(async()=>{const data=await(await fetch(document.querySelector('[data-intmed-poster]').src)).arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data)),b=>b.toString(16).padStart(2,'0')).join('');});
    assert.equal(digest,homeImages[language].sha256,'Recovered poster must match its active language byte for byte');
   }
+  await failed.locator('.patient-panel .feature-poster img').scrollIntoViewIfNeeded();
+  await failed.waitForFunction(()=>{const image=document.querySelector('.patient-panel .feature-poster img');return image.currentSrc.startsWith('blob:')&&image.naturalWidth===800;},{},{timeout:9000});
   assert.deepEqual(recoveryErrors,[]);
   console.log('PASS carrier fault reproduction: blocked primary font/art recover from byte-identical public mirror; theme remains usable.');
  }finally{await Promise.all(held.map(release=>release()));await broken.close();}

@@ -22,6 +22,10 @@
    return URL.createObjectURL(new Blob([data],{type:entry.type}));
   }finally{clearTimeout(timer);}
  }
+ function useFallback(image,url){
+  // Let the verified source take precedence over a failed responsive candidate.
+  image.removeAttribute('srcset');image.src=url;
+ }
  function obtain(path,primary=true){
   if(pending.has(path))return pending.get(path);
   const entry=assets[path];
@@ -31,7 +35,7 @@
     if(primary){try{url=await verifiedFetch(path,entry,delay);}catch{notify(path,'primary_unavailable');}}
     if(!url)url=await verifiedFetch(entry.url,entry,6000);
     ready.set(path,url);
-    if(entry.type==='image/webp')for(const image of document.images)if(key(image.getAttribute('src')||image.currentSrc)===path&&!(image.complete&&image.naturalWidth>0))image.src=url;
+    if(entry.type==='image/webp')for(const image of document.images)if(key(image.getAttribute('src')||image.currentSrc)===path&&!(image.complete&&image.naturalWidth>0))useFallback(image,url);
     notify(path,'verified');return url;
    }catch(error){failed.add(path);notify(path,'unavailable');throw error;}
   })();
@@ -52,12 +56,12 @@
  function watchImage(image){
   const source=image.getAttribute('src')||image.currentSrc,path=key(source);
   if(!path||image.complete&&image.naturalWidth>0)return;
-  if(ready.has(path)){image.src=ready.get(path);return;}
-  if(failed.has(path)){image.src=empty;return;}
+  if(ready.has(path)){useFallback(image,ready.get(path));return;}
+  if(failed.has(path)){useFallback(image,empty);return;}
   if(watched.get(image)===source)return;watched.set(image,source);
   setTimeout(()=>{
    if(image.complete&&image.naturalWidth>0||key(image.getAttribute('src')||image.currentSrc)!==path)return;
-   obtain(path,false).then(url=>{if(key(image.getAttribute('src')||image.currentSrc)===path&&!(image.complete&&image.naturalWidth>0))image.src=url;}).catch(()=>{if(key(image.getAttribute('src')||image.currentSrc)===path&&!(image.complete&&image.naturalWidth>0))image.src=empty;});
+   obtain(path,false).then(url=>{if(key(image.getAttribute('src')||image.currentSrc)===path&&!(image.complete&&image.naturalWidth>0))useFallback(image,url);}).catch(()=>{if(key(image.getAttribute('src')||image.currentSrc)===path&&!(image.complete&&image.naturalWidth>0))useFallback(image,empty);});
   },delay);
  }
  const observer=typeof IntersectionObserver==='undefined'?{observe:watchImage}:new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){observer.unobserve(entry.target);watchImage(entry.target);}},{rootMargin:'200px'});

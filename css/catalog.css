@@ -56,3 +56,11 @@
 
 .ventilator-visual { margin:0; border-radius:16px; overflow:hidden; }
 .ventilator-visual img { display:block; width:100%; height:auto; }
+
+.article-toolbar { display:flex; flex-wrap:wrap; gap:10px; padding:12px; margin:24px 0; border-radius:22px; }
+.article-toolbar input,.article-toolbar select { min-width:0; max-width:100%; min-height:48px; padding:12px; border:1px solid var(--line); border-radius:16px; background:color-mix(in srgb,var(--white) 38%,transparent); color:var(--ink); font:inherit; }
+.article-toolbar input { flex:1 1 240px; min-width:160px; }
+.article-toolbar select { flex:1 1 180px; }
+.article-result-count { width:fit-content; max-width:100%; margin:18px 0; padding:16px 22px; font-size:.85rem; color:var(--muted); background:var(--white); border:1px solid var(--line); border-radius:20px; }
+.article-pagination { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:28px; }
+.article-pagination button:disabled { opacity:.45; cursor:default; }

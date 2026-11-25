@@ -81,6 +81,13 @@ def optimize_public_assets(site):
     for page in pages:
         text=page.read_text()
         if page == site/'index.html':
+            # The small project tile and the patient panel share the same
+            # illustration. Let each viewport fetch its appropriate size.
+            def portal_preview(match):
+                original, sizes = match.groups()
+                thumb = '/assets/optimized/patient-portal-mobile.c25d06b66dcf9aec.webp'
+                return f'src="{original}" srcset="{thumb} 400w, {original} 800w" sizes="{sizes}"'
+            text = re.sub(r'src="(/assets/optimized/patient-portal\.[a-f0-9]{16}\.webp)" data-preview-sizes="([^"]+)"', portal_preview, text)
             # Static links, titles and previews paint immediately. The interactive
             # homepage shares one cacheable snapshot for all managed settings.
             snapshot_pattern = r'<script id="site-public-data" type="application/json">(.*?)</script>'
