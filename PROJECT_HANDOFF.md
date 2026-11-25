@@ -56,6 +56,10 @@ The Persian and English course is mounted publicly at `/respiratory/spirometry/`
 
 The simulator source pin now includes the first bilingual respiratory mechanics chapters. The lessons cover tidal volume, respiratory rate, minute and alveolar ventilation, dead space, compliance, resistance, peak and plateau pressures with worked tables, review prompts and a downloadable HTML handout. Persian and English terms and full expansions accompany abbreviations. The tutorial uses the existing protected simulator mount at `/respiratory/ventilator/`. Verify normal lesson navigation and handout download in the reviewed source browser, then record production deployment evidence in the release tag.
 
+## Simulator Persian and English interface · 2026-11-25
+
+The ventilator simulator has a compact header language switch. Its interface, scenario data, teaching chapters and downloaded handout render in the selected Persian or English language, with matching document direction. Review both languages at mobile and desktop widths before advancing the immutable source pin. The app remains under the existing account gate at `/respiratory/ventilator/`; this release changes presentation and teaching text. Record the verified source pin, Cloudflare deployment and live checks in an annotated release tag.
+
 ## Browser and home screen identity · 2026-11-25
 
 Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.

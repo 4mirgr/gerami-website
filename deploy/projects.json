@@ -13,7 +13,7 @@
   },
   "ventilator": {
     "repository": "https://github.com/4mirgr/Respiratory-ventilator.git",
-    "commit": "41613a59437a9385cdd2794b99f19541d8c79288",
+    "commit": "11008959c2e01b923de943d3ee839ff956a572be",
     "public_directory": ".",
     "mount": "respiratory/ventilator"
   },
