@@ -38,12 +38,17 @@ export async function onRequest({request,env,next}){
  if(url.pathname!==normalized||/%|\\|\/\//.test(url.pathname)||!/^\/(?:admin|dash)(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers:{'Cache-Control':'no-store'}});
  if(['/admin/login','/admin/login.html'].includes(url.pathname))return new Response(null,{status:302,headers:{Location:'/pages/account.html?next=%2Fadmin%2F','Cache-Control':'no-store'}});
  if(publicEntry.has(url.pathname))return next();
+ const denialHeaders={'Cache-Control':'no-store','X-Robots-Tag':'noindex,nofollow','Referrer-Policy':'no-referrer'};
  let administrator=false;
- try{administrator=(await accountFromRequest(request))?.role==='admin';}catch{/* Deny access when live verification fails. */}
+ try{administrator=(await accountFromRequest(request))?.role==='admin';}catch(error){
+  if(![400,401,403].includes(error.status)){
+   const limited=error.status===429;
+   return new Response(limited?'تعداد درخواست‌ها زیاد است. کمی بعد دوباره تلاش کنید.':'اتصال به سرویس حساب برقرار نشد. دوباره تلاش کنید.',{status:limited?429:503,headers:{...denialHeaders,'Content-Type':'text/plain; charset=utf-8'}});
+  }
+ }
  if(!administrator){
-  const headers={'Cache-Control':'no-store','X-Robots-Tag':'noindex,nofollow','Referrer-Policy':'no-referrer'};
-  if(['GET','HEAD'].includes(request.method)&&(request.headers.get('Accept')||'').includes('text/html'))return new Response(null,{status:302,headers:{...headers,Location:'/pages/account.html?next=%2Fadmin%2F'}});
-  return new Response(JSON.stringify({error:'sign_in_required'}),{status:401,headers:{...headers,'Content-Type':'application/json'}});
+  if(['GET','HEAD'].includes(request.method)&&(request.headers.get('Accept')||'').includes('text/html'))return new Response(null,{status:302,headers:{...denialHeaders,Location:'/pages/account.html?next=%2Fadmin%2F'}});
+  return new Response(JSON.stringify({error:'sign_in_required'}),{status:401,headers:{...denialHeaders,'Content-Type':'application/json'}});
  }
  if(/^\/admin\/editor\/?$/.test(url.pathname))return new Response(null,{status:302,headers:{Location:'/admin/#pages','Cache-Control':'no-store'}});
  const result=await next(),headers=new Headers(result.headers);

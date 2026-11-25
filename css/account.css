@@ -2,3 +2,5 @@
 
 #ventilator-identity { display:grid; justify-items:center; gap:6px; margin-block-end:18px; }
 #ventilator-identity img { border-radius:50%; }
+
+.account-page button:disabled {cursor: not-allowed; opacity: .65;}

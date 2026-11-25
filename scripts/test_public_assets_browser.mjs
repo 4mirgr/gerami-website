@@ -22,6 +22,17 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const origin='http://127.0.0.1:'+server.address().port;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
+ const missing=await browser.newPage({viewport:{width:390,height:844}});
+ try{
+  await missing.goto(origin+'/404.html');
+  await missing.evaluate(()=>localStorage.setItem('ahg-lang','en'));
+  await missing.reload();
+  await missing.getByRole('heading',{name:'Page not found'}).waitFor();
+  await missing.getByRole('searchbox').fill('كليوي');
+  const submitted=missing.waitForRequest(req=>req.isNavigationRequest()&&new URL(req.url()).pathname==='/pages/blog');
+  await missing.getByRole('button',{name:'Search',exact:true}).click();
+  assert.equal(new URL((await submitted).url()).searchParams.get('q'),'كليوي');
+ }finally{await missing.close();}
  const booking=await browser.newContext();
  try{
   const pg=await booking.newPage(), recorded=[];

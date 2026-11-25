@@ -9,6 +9,12 @@ let publicSnapshot,articleDelivery;
 export function displayText(text){
  return text.replace(/\]\([^\s)]+\)|[هە]\u0654|[\u06c0\ufba4\ufba5]/gu,match=>match.startsWith(']')?match:'ه');
 }
+export function searchText(value){
+ return displayText(value.normalize('NFKC')).toLowerCase()
+  .replace(/[يى]/g,'ی').replace(/ك/g,'ک').replace(/[\u0640\u064b-\u0652\u0670]/g,'')
+  .replace(/[۰-۹]/g,n=>String(n.charCodeAt(0)-0x6f0)).replace(/[٠-٩]/g,n=>String(n.charCodeAt(0)-0x660))
+  .replace(/[\s\u200c]+/g,' ').trim();
+}
 export function displayDocument(value,key=''){
  if(Array.isArray(value))return value.map(item=>displayDocument(item,key));
  if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,displayDocument(v,k)]));

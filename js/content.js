@@ -1,5 +1,5 @@
 import {richText} from './rich-text.mjs';
-import {displayText,articleImage,publicPath,readPublicDocument} from './site-model.mjs';
+import {displayText,searchText,articleImage,publicPath,readPublicDocument} from './site-model.mjs';
 import {validateTopics,flattenTopics,topicIds,topicIcon} from './topics.mjs';
 const root=document.documentElement,main=document.querySelector('main');
 const lang=()=>root.lang==='en'?'en':'fa',text=(fa,en)=>lang()==='fa'?fa:en;
@@ -147,8 +147,8 @@ function renderArticles(){
  audienceSelect.replaceChildren(...[['',text('همه مخاطبان','All audiences')],['patients',text('برای بیماران','For patients')],['professional',text('برای پزشکان','For clinicians')]].map(([v,t])=>{const o=el('option',t);o.value=v;return o;}));audienceSelect.value=filter.audience;
  topicSelect.replaceChildren(...[['',text('همه موضوعات','All topics')],...flat.map(t=>[t.id,t['path_'+lang()]])].map(([v,t])=>{const o=el('option',t);o.value=v;return o;}));
  if(filter.topic&&!byId.has(filter.topic)){const unknown=el('option',text('موضوع یافت نشد','Topic not found'));unknown.value=filter.topic;topicSelect.append(unknown);}topicSelect.value=filter.topic;
- const ids=topicIds(catalog,filter.topic),needle=displayText(filter.q).trim().toLocaleLowerCase();
- const matches=all.filter(a=>{const copy=articleText(a),topic=byId.get(a.topic);return (isHome||!filter.topic||ids.has(a.topic))&&(isHome||!filter.audience||a.audience===filter.audience)&&(isHome||!needle||(copy.title+' '+copy.body+' '+(a.category||'')+' '+[...(a.tags||[]),...(a.hashtags||[])].join(' ')+' '+(topic?.path_fa||'')+' '+(topic?.path_en||'')).toLocaleLowerCase().includes(needle));});
+ const ids=topicIds(catalog,filter.topic),needle=searchText(filter.q);
+ const matches=all.filter(a=>{const copy=articleText(a),topic=byId.get(a.topic);return (isHome||!filter.topic||ids.has(a.topic))&&(isHome||!filter.audience||a.audience===filter.audience)&&(isHome||!needle||searchText(copy.title+' '+copy.body+' '+(a.category||'')+' '+[...(a.tags||[]),...(a.hashtags||[])].join(' ')+' '+(topic?.path_fa||'')+' '+(topic?.path_en||'')).includes(needle));});
  let anchored='';if(filter.anchor&&matches.length){const index=matches.findIndex(a=>'article-'+a.slug===filter.anchor);if(index>=0){filter.page=Math.floor(index/12)+1;anchored=filter.anchor;}filter.anchor='';}
  const fallback=articleHost.querySelector('[data-recent-links]');if(fallback)fallback.hidden=!articleFeedFailed||previewActive;
  const size=12,pages=Math.max(1,Math.ceil(matches.length/size));filter.page=Math.min(filter.page,pages);const selected=isHome?matches:matches.slice((filter.page-1)*size,filter.page*size);
@@ -174,7 +174,7 @@ function renderArticles(){
  }else for(const item of selected)list.append(postCard(item,byId,opened));
  if(fallback&&!fallback.hidden&&!all.length)count.textContent='';
  if(!selected.length&&!(fallback&&!fallback.hidden)){const empty=el('div','','reading-empty glass-surface');empty.append(topicIcon('medicine'),el('p',all.length?text('موضوع یا عبارت جست‌وجو را تغییر دهید.','Try a different topic or search.'):text('این بخش با انتشار مطالب تکمیل می‌شود.','This space will fill as posts are published.')));list.append(empty);}
- if(isBlog&&(filter.q||filter.topic||filter.audience)){const clear=el('button',text('پاک‌کردن فیلترها','Clear filters'),'button button-secondary');clear.type='button';clear.dataset.clearFilters='';clear.onclick=()=>{filter={q:'',topic:'',audience:'',page:1};saveFilter(true);};pagination.append(clear);}
+ if(isBlog&&(filter.q||filter.topic||filter.audience)){const clear=el('button',text('پاک‌کردن فیلترها','Clear filters'),'button button-secondary');clear.type='button';clear.dataset.clearFilters='';clear.onclick=()=>{filter={q:'',topic:'',audience:'',page:1};saveFilter(true);search.focus();};pagination.append(clear);}
  if(!isHome&&pages>1){const turnPage=step=>{filter.page+=step;saveFilter(true);heading.tabIndex=-1;heading.focus({preventScroll:true});articleHost.scrollIntoView({block:'start'});};const prev=arrowButton(text('قبلی','Previous'),false,()=>turnPage(-1));prev.dataset.pagePrev='';prev.disabled=filter.page===1;const next=arrowButton(text('بعدی','Next'),true,()=>turnPage(1));next.dataset.pageNext='';next.disabled=filter.page===pages;pagination.append(prev,el('span',filter.page+' / '+pages),next);}
  window.dispatchEvent(new Event('site-articles-ready'));if(anchored)requestAnimationFrame(()=>document.getElementById(anchored)?.scrollIntoView({block:'start'}));
 }
