@@ -1,9 +1,12 @@
 import {accountAPI,getSession,changed,signOut} from './account-client.mjs';
 const root=document.documentElement,status=document.querySelector('#account-status'),forms=document.querySelector('#account-forms'),profile=document.querySelector('#account-profile');
-let account=null,mode='login',busy=false,googleEnabled=false;
+let account=null,mode='login',busy=false,googleEnabled=false,sessionUnavailable=false;
 const googleButton=document.querySelector('#google-signin'),googleNote=document.querySelector('#google-note');
 const t=(fa,en)=>root.lang==='en'?en:fa;
-const ventilatorEntry=new URLSearchParams(location.search).get('next')==='/ventilator/';
+const rawNext=new URLSearchParams(location.search).get('next');
+const adminSections=/^#(?:dashboard|pages|auto-posts)$/;
+const nextDestination=rawNext==='/admin/'&&adminSections.test(location.hash)?rawNext+location.hash:rawNext;
+const ventilatorEntry=nextDestination==='/ventilator/';
 if(ventilatorEntry){
  const badge=document.querySelector('#ventilator-identity');
  const image=badge.querySelector('img');
@@ -28,12 +31,25 @@ const errors={
 function message(error){const text=errors[error?.message]||errors.account_unavailable;status.textContent=t(...text);status.dataset.kind='error';}
 function render(){
  forms.hidden=!!account;profile.hidden=!account;
+ const guestTitle=document.querySelector('#guest-title');
+ const titles={login:['ورود به حساب','Sign in'],signup:['ساخت حساب','Create account'],recover:['بازیابی رمز عبور','Reset password']};
+ [guestTitle.dataset.fa,guestTitle.dataset.en]=titles[mode];
+ guestTitle.textContent=t(...titles[mode]);
+ guestTitle.hidden=!!account;
+ document.querySelector('.account-intro').hidden=!!account||mode!=='login';
+ document.querySelector('#account-social').hidden=mode==='recover';
+ document.querySelector('.account-tabs').setAttribute('aria-label',t('گزینه‌های حساب','Account options'));
+ document.querySelector('#account-retry').hidden=!sessionUnavailable&&(!!account||googleEnabled);
+ document.querySelector('#profile-name').hidden=!account;
+ document.querySelector('#profile-role').hidden=!account;
  if(account){
   document.querySelector('#profile-name').textContent=account.name||account.username||account.email;
   document.querySelector('#profile-email').textContent=account.email;
   document.querySelector('#profile-username').textContent=account.username;
   document.querySelector('#profile-role').textContent=account.role==='admin'?t('مدیر','Administrator'):account.role==='secretary'?t('منشی','Secretary'):t('کاربر','User');
-  document.querySelectorAll('[data-manager-only]').forEach(el=>el.hidden=account.role!=='admin');
+  const managerLink=document.querySelector('.account-actions [data-manager-only]');
+  managerLink.hidden=account.role!=='admin';
+  managerLink.href=/^\/admin\/#(?:dashboard|pages|auto-posts)$/.test(nextDestination||'')?nextDestination:'/admin/';
   const params=new URLSearchParams(location.search),next=params.get('next'),continueLink=document.querySelector('#account-continue');
   continueLink.hidden=!/^\/(?:dash|clinic)\/(?:portal\/)?$/.test(next||'')||params.has('reauth');
   if(!continueLink.hidden)continueLink.href=next.startsWith('/clinic/')?(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/'):next;
@@ -53,18 +69,18 @@ for(const form of document.querySelectorAll('form[data-account-form]'))form.addE
   const data=Object.fromEntries(new FormData(form)),result=await accountAPI(form.dataset.accountForm,form.dataset.accountForm==='signup'&&ventilatorEntry?{...data,next:'/ventilator/'}:data);
   form.querySelectorAll('input[type=password]').forEach(el=>el.value='');
   if(result.authenticated){account=result.account;changed(account);status.textContent='';render();
-   const next=new URLSearchParams(location.search).get('next');if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if(ventilatorEntry)location.assign('/ventilator/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
+   const next=nextDestination;if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if(ventilatorEntry)location.assign('/ventilator/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages|auto-posts))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
   }else{status.textContent=t('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
 googleButton.addEventListener('click',()=>action(async()=>{
- const result=await accountAPI('google',{next:new URLSearchParams(location.search).get('next')||'/'});location.assign(result.url);
+ const result=await accountAPI('google',{next:nextDestination||'/'});location.assign(result.url);
 }));
 document.querySelector('#account-logout').addEventListener('click',()=>action(async()=>{await signOut();account=null;status.textContent=t('از حساب خارج شدید.','Signed out.');render();}));
 document.querySelector('#password-form').addEventListener('submit',event=>{event.preventDefault();const form=event.currentTarget;action(async()=>{
  const data=Object.fromEntries(new FormData(form));await accountAPI('password',data);form.reset();status.textContent=t('رمز ذخیره شد.','Password saved.');status.dataset.kind='success';
 });});
-document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();status.textContent='';render();await checkProviders();}));
+document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();sessionUnavailable=false;status.textContent='';render();await checkProviders();}));
 new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
 addEventListener('account:changed',event=>{account=event.detail;render();});
 async function initialize(){try{
@@ -75,7 +91,7 @@ async function initialize(){try{
  if(['invalid_callback','account_unavailable'].includes(params.get('error')))message({message:params.get('error')});
  if(account&&ventilatorEntry&&!['reset','error','reauth','logout'].some(key=>params.has(key)))location.replace('/ventilator/');
  if(account&&/^\/clinic\/(?:portal\/)?$/.test(params.get('next')||'')&&!['error','reauth','logout'].some(key=>params.has(key)))location.replace(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');
-}catch(error){message(error);}
+}catch(error){sessionUnavailable=true;message(error);}
 await checkProviders();
 }
 async function checkProviders(){
@@ -83,8 +99,9 @@ async function checkProviders(){
  googleEnabled=providers?.google===true;
  googleButton.disabled=busy||!googleEnabled;
  googleNote.hidden=googleEnabled;
- googleNote.dataset.fa=providers?'در حال حاضر می‌توانید با رمز عبور وارد شوید.':'وضعیت ورود با گوگل در دسترس نیست. اتصال را دوباره بررسی کنید.';
- googleNote.dataset.en=providers?'Password sign-in is currently available.':'Google sign-in status is unavailable. Check the connection again.';
+ document.querySelector('#account-retry').hidden=!sessionUnavailable&&(!!account||googleEnabled);
+ googleNote.dataset.fa=providers?'ورود با گوگل فعلا غیرفعال است. با رمز عبور وارد شوید.':'وضعیت ورود با گوگل در دسترس نیست. اتصال را دوباره بررسی کنید.';
+ googleNote.dataset.en=providers?'Google sign-in is currently unavailable. Use your password.':'Google sign-in status is unavailable. Check the connection again.';
  googleNote.textContent=t(googleNote.dataset.fa,googleNote.dataset.en);
  if(googleEnabled)googleButton.removeAttribute('aria-describedby');
  else googleButton.setAttribute('aria-describedby','google-note');

@@ -4,6 +4,10 @@ Updated 2026-11-25 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Account page · 2026-11-25
+
+The guest form and signed-in profile share one heading that follows session state. The Google button follows live provider availability. An admin returning from the draft inbox can continue to its exact section.
+
 ## Editorial comparison · 2026-11-25
 
 The private inbox groups complete topics across pagination, with separate public and clinician columns. Both the dashboard and Telegram can authorize an exact saved revision with a selected cover. Dashboard approval locks the draft and uses the existing publisher. Apply backend/editorial/dashboard-review.sql before deploying the editorial Edge bundle and Pages. Each draft consumes two unused clinical images. Rank eligible captions against the individual article and exclude site branding, including its JPEG transport copies. The light dashboard uses violet navigation and pastel state cards. The night palette uses navy and cyan.

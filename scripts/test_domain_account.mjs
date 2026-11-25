@@ -29,6 +29,7 @@ try{
  await page.locator('[data-account-form="login"] [name=identity]').fill('member');await page.locator('[data-account-form="login"] [name=password]').fill('synthetic-password');
  await page.locator('[data-account-form="login"] button').click();await page.waitForURL(origin+'/');
  await page.goto(origin+'/pages/account.html');await page.locator('#account-profile').waitFor({state:'visible'});
+ assert(await page.locator('.account-intro').isHidden());assert(await page.locator('#profile-name').isVisible());
  assert.equal(logins.length,1);assert.equal(await page.locator('[data-manager-only]:visible').count(),0);
  assert.equal(await page.evaluate(()=>Object.values(localStorage).some(v=>v.includes('synthetic-password'))),false);
  assert.equal(await page.locator('.account-signin.is-authenticated').count(),1);
@@ -46,11 +47,11 @@ try{
  assert.equal(await page.locator('a[href*="chatgpt.site"],a[href*="signin-with-chatgpt"]').count(),0);
  await page.route('**/clinic/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Synthetic clinic destination</h1>'}));
  await page.route('**/admin/**',r=>r.fulfill({contentType:'text/html',body:'<h1>Synthetic admin destination</h1>'}));
- for(const [role,next,target] of [['admin','','/'],['user','/clinic/','/clinic/portal/'],['secretary','/clinic/portal/','/clinic/'],['admin','/admin/#dashboard','/admin/#dashboard'],['user','/ventilator/','/ventilator/'],['user','https://evil.test/','/']]){
+ for(const [role,next,target] of [['admin','','/'],['user','/clinic/','/clinic/portal/'],['secretary','/clinic/portal/','/clinic/'],['admin','/admin/#dashboard','/admin/#dashboard'],['admin','/admin/#auto-posts','/admin/#auto-posts'],['user','/ventilator/','/ventilator/'],['user','https://evil.test/','/']]){
   account=null;loginRole=role;await page.goto(origin+'/pages/account.html'+(next?'?next='+encodeURIComponent(next):''));if(next==='/ventilator/')assert.equal(await page.locator('#ventilator-identity').innerText(),'Ventilator');await page.locator('[data-account-form=login] [name=identity]').fill('member');await page.locator('[data-account-form=login] [name=password]').fill('synthetic-password');await page.locator('[data-account-form=login] button').click();await page.waitForURL(origin+target);
  }
  account=null;rejectLogin=true;await page.goto(origin+'/pages/account.html');await page.locator('[data-account-form=login] [name=identity]').fill('member');await page.locator('[data-account-form=login] [name=password]').fill('synthetic-password');await page.locator('[data-account-form=login] button').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(new URL(page.url()).pathname,'/pages/account.html');
- assert(await page.locator('#google-signin').isDisabled());
+ assert(await page.locator('#google-signin').isDisabled());assert.equal(await page.locator('#google-signin svg path').count(),4);
  assert.equal(googleNext,undefined);
  googleEnabled=true;await page.locator('#account-retry').click();
  await page.locator('#google-signin').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(googleNext,'/');
