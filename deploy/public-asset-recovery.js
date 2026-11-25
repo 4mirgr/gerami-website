@@ -1,6 +1,10 @@
 /* Bounded delivery of reviewed public font/art. No modules or account data. */
 (() => {
- const assets=/* public-asset-mirror */{},pending=new Map(),ready=new Map(),failed=new Set(),watched=new WeakMap(),delay=1800;
+ const [mirror,files]=/* public-asset-mirror */['',[]];
+ const assets=Object.fromEntries(files.map(([path,sha256,bytes,source=path])=>[path,{
+  url:mirror+source,sha256,bytes,type:path.endsWith('.woff2')?'font/woff2':'image/webp',variable:'--public-asset-'+sha256.slice(0,16)
+ }]));
+ const pending=new Map(),ready=new Map(),failed=new Set(),watched=new WeakMap(),delay=1800;
  const empty='data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%221%22%20height=%221%22/%3E';
  const key=source=>{try{const u=new URL(source,location.href);return u.origin===location.origin&&Object.hasOwn(assets,u.pathname)?u.pathname:null;}catch{return null;}};
  const notify=(path,outcome)=>dispatchEvent(new CustomEvent('site-public-asset-recovery',{detail:{path,outcome}}));
