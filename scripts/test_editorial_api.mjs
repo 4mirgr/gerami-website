@@ -11,6 +11,6 @@ try{
  assert.equal((await request('list',{Origin:'https://evil.test'})).status,403);
  assert.equal((await request('list',{Cookie:''})).status,401);
  for(role of ['user','secretary'])assert.equal((await request()).status,403);
- role='admin';assert.equal((await request('callback')).status,404);assert.equal((await request()).status,200);assert.equal(forwarded,1);
+ role='admin';assert.equal((await request('callback')).status,404);assert.equal((await request()).status,200);assert.equal((await request('covers')).status,200);assert.equal((await request('schedule')).status,200);assert.equal(forwarded,3);
  console.log('Editorial proxy: CSRF, anonymous/user/secretary denial, fixed action allowlist and HttpOnly session forwarding passed.');
 }finally{globalThis.fetch=original;}

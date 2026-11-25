@@ -19,7 +19,8 @@ try{
   assert.equal(await page.locator('#account-dashboard-link').count(),role==='admin'?1:0);
   if(role==='admin'){
    assert.equal(await page.locator('#account-dashboard-link').getAttribute('href'),'/admin/#dashboard');
-   assert.equal(await page.locator('#account-admin-link').getAttribute('href'),'/admin/#pages');
+   assert.equal(await page.locator('#account-admin-link').count(),0);
+   assert.equal(await page.locator('#account-menu a[href^="/admin/"]').count(),1);
   }
   const menuBox=await page.locator('#account-menu').boundingBox();assert(menuBox.x>=0&&menuBox.x+menuBox.width<=390);
   await page.setViewportSize({width:568,height:320});await trigger.hover();const landscape=await page.locator('#account-menu').boundingBox();assert(landscape.y+landscape.height<=320,'Landscape menu must fit the available height');await page.setViewportSize({width:390,height:844});
