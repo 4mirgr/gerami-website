@@ -13,7 +13,8 @@ const server=createServer(async(req,res)=>{
  }
  try{
   if(path!==root&&!path.startsWith(root+'/'))throw Error('Outside artifact');
-  const file=(await stat(path)).isDirectory()?resolve(path,'index.html'):path;
+  const cleanPath=url.pathname==='/projects'?path+'.html':path;
+  const file=(await stat(cleanPath)).isDirectory()?resolve(cleanPath,'index.html'):cleanPath;
   const body=await readFile(file);hits.push(url.pathname);
   res.writeHead(200,{'Content-Type':types[extname(file)]||'application/octet-stream','Content-Length':body.length,'Cache-Control':/^\/assets\/(runtime|optimized)\//.test(url.pathname)?'public, max-age=31536000, immutable':'no-cache'});res.end(body);
  }catch{res.writeHead(404);res.end('Missing artifact asset');}
@@ -55,7 +56,9 @@ try{
   const appFailures=[];
   spirometry.on('pageerror',error=>appFailures.push(error.message));
   spirometry.on('response',response=>{if(response.status()>=400)appFailures.push(response.url());});
-  await spirometry.goto(origin+'/pages/projects.html');
+  await spirometry.goto(origin+'/projects');
+  assert.equal(await spirometry.locator('link[rel=canonical]').getAttribute('href'),'https://drgerami-md.ir/projects');
+  assert.equal(await spirometry.locator('.project-feature').count(),4);
   await spirometry.locator('#spirometry [data-app-entry]').click();
   await spirometry.waitForURL(origin+'/respiratory/spirometry/');
   await spirometry.getByRole('heading',{name:'آزمایشگاه اسپیرومتری',exact:true}).waitFor();

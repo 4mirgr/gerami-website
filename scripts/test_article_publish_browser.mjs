@@ -34,6 +34,8 @@ try{
  await page.getByRole('button',{name:'نوشتن مقاله جدید',exact:true}).click();
  await page.getByLabel('عنوان فارسی',{exact:true}).fill('مطلب ساختگی برای آزمون انتشار');
  await page.getByLabel('متن فارسی',{exact:true}).fill('متن **ساختگی** فقط برای آزمون؛ هیچ پست واقعی ارسال نمی‌شود.');
+ await page.getByLabel('English title',{exact:true}).fill('Synthetic article');
+ await page.getByLabel('English content',{exact:true}).fill('English text for the publication test.');
  await page.getByLabel('بارگذاری تصویر مقاله',{exact:true}).setInputFiles({name:'cover.webp',mimeType:'image/webp',buffer:testImage},{timeout:2000});
  await page.locator('#image-dialog').waitFor({state:'visible'});await page.locator('#image-ratio').selectOption('1.7777778');await page.locator('#image-save').click();
  await page.waitForFunction(()=>document.getElementById('image-dialog')?.open===false&&document.querySelector('.article-cover img')?.src.startsWith('blob:'));
@@ -54,13 +56,13 @@ try{
  const publish=page.getByRole('button',{name:'انتشار مقاله',exact:true});await publish.waitFor();
  const color=await publish.evaluate(button=>getComputedStyle(button).backgroundColor);assert.equal(color,'rgb(33, 136, 74)');
  await publish.click();await page.waitForFunction(()=>document.getElementById('studio-notice')?.textContent.includes('تغییرات ذخیره شد'));
- assert.equal(writes,1);assert.equal(published.articles[0].status,'published');assert.match(published.articles[0].published_at,/^\d{4}-\d{2}-\d{2}$/);assert.equal(published.articles[0].reviewed_at,'');assert.equal(published.articles[0].title_en,'');
+ assert.equal(writes,1);assert.equal(published.articles[0].status,'published');assert.match(published.articles[0].published_at,/^\d{4}-\d{2}-\d{2}$/);assert.equal(published.articles[0].reviewed_at,'');assert.equal(published.articles[0].title_en,'Synthetic article');
  assert.equal(published.articles[0].image,uploadedCover);assert.ok(mediaBytes.length>0);assert.ok(publishedPaths.includes(uploadedCover.slice(1)));assert.ok(publishedPaths.includes('content/articles.json'));assert.equal(publishedPaths.filter(path=>path.startsWith('assets/uploads/')).length,1);
  assert.equal(await page.locator('dialog[open]').count(),0);assert.equal(await page.locator('#publish').isDisabled(),true);
  await page.goto(origin+'/pages/blog.html');const card=page.locator('.cms-article'),tile=page.locator('.post-card');await card.waitFor();assert.match(await card.locator('summary').textContent(),/مطلب ساختگی/);assert.equal((await tile.textContent()).includes('بازبینی:'),false);
- await page.locator('[data-language-toggle]').click();await page.waitForFunction(()=>document.documentElement.lang==='en');await card.locator('summary').click();assert.match(await card.locator('.article-body').textContent(),/آزمون/);assert.equal(await card.locator('.article-body').getAttribute('dir'),'rtl');assert.equal((await tile.textContent()).includes('Reviewed:'),false);
+ await page.locator('[data-language-toggle]').click();await page.waitForFunction(()=>document.documentElement.lang==='en');await card.locator('summary').click();assert.match(await card.locator('.article-body').textContent(),/publication test/);assert.equal(await card.locator('.article-body').getAttribute('dir'),'ltr');assert.equal((await tile.textContent()).includes('Reviewed:'),false);
  await tile.locator('.post-cover').waitFor();assert.equal(await tile.locator('.post-cover').getAttribute('src'),uploadedCover);
- published={articles:[{slug:'saved-draft',status:'draft',audience:'patients',title_fa:'پیش‌نویس ذخیره‌شده',body_fa:'این متن ساختگی قبلاً در مخزن ذخیره شده است.',title_en:'',body_en:'',author:'',category:'',published_at:'',reviewed_at:'',sources:[]}]};documents['content/articles.json']=published;
+ published={articles:[{slug:'saved-draft',status:'draft',audience:'patients',title_fa:'پیش‌نویس ذخیره‌شده',body_fa:'این متن ساختگی قبلاً در مخزن ذخیره شده است.',title_en:'Saved draft',body_en:'Saved article for testing.',author:'',category:'',published_at:'',reviewed_at:'',sources:[]}]};documents['content/articles.json']=published;
  holdSavedRead=true;
  await page.goto(origin+'/admin/#articles');await savedReadObserved;
  // Connected identity is not completed repository synchronization. Keep the
@@ -73,5 +75,5 @@ try{
  await page.setViewportSize({width:390,height:844});await page.locator('#theme').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('.article-cover').screenshot({path:'/tmp/gerami-article-cover-mobile.png'});
  await savedDraft.click();await page.waitForFunction(()=>document.getElementById('studio-notice')?.textContent.includes('تغییرات ذخیره شد'));assert.equal(writes,2);assert.equal(published.articles[0].slug,'saved-draft');assert.equal(published.articles[0].status,'published');
  assert.equal(published.articles[0].image,remoteCover);await page.goto(origin+'/pages/blog.html');await page.locator('.cms-article summary').click();const remote=page.locator('.post-card .post-cover');await remote.waitFor();assert.equal(await remote.getAttribute('src'),remoteCover);assert.equal(await remote.getAttribute('referrerpolicy'),'no-referrer');await page.waitForFunction(()=>document.querySelector('.post-card .post-cover')?.naturalWidth>0);
- console.log('PASS one-click article publication: new/saved drafts, inline cover upload/crop/cancel/reload, HTTPS cover, green button, empty dates, atomic media/content commit and readable language fallback.');
+ console.log('PASS one-click article publication: new/saved drafts, inline cover upload/crop/cancel/reload, HTTPS cover, green button, empty dates, atomic media/content commit and English and Persian editions.');
 }finally{await browser.close();}

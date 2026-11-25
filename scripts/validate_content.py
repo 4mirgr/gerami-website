@@ -71,12 +71,12 @@ def validate(root=ROOT):
         seen.add(item['slug'])
         if item.get('status') not in ('draft', 'published') or item.get('audience') not in ('patients', 'professional'):
             raise ValueError('Invalid article status or audience')
-        required = ('title_fa', 'title_en', 'body_fa', 'body_en', 'author', 'category')
+        required = ('title_fa', 'title_en', 'body_fa', 'body_en', 'author', 'author_en', 'category', 'category_en', 'image_alt_en')
         for key in required:
             if not isinstance(item.get(key, ''), str):
                 raise ValueError(f'Invalid article text: {key}')
-        if item['status']=='published' and not any(item.get('title_'+lang,'').strip() and item.get('body_'+lang,'').strip() for lang in ('fa','en')):
-            raise ValueError('Published article requires a title and body in at least one language')
+        if item['status']=='published' and not all(item.get('title_'+lang,'').strip() and item.get('body_'+lang,'').strip() for lang in ('fa','en')):
+            raise ValueError('Published article requires a title and body in both Persian and English')
         for key in ('published_at', 'reviewed_at'):
             value = item.get(key, '')
             if value or (key=='published_at' and item['status']=='published'):
@@ -95,7 +95,7 @@ def validate(root=ROOT):
             uploads = (root / 'assets/uploads').resolve()
             if not image.startswith('/assets/uploads/') or '..' in image or not target.is_relative_to(uploads) or not target.is_file():
                 raise ValueError('Article image must exist within assets/uploads')
-        for key in ('tags', 'hashtags'):
+        for key in ('tags', 'hashtags', 'hashtags_en'):
             tags = item.get(key, [])
             if not isinstance(tags, list) or len(tags) > 8 or any(not isinstance(t, str) or not re.fullmatch(r'[#\w \u200c-]{1,50}', t) for t in tags):
                 raise ValueError('Invalid article tags')

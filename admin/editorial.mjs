@@ -95,7 +95,7 @@ function edition(host,d){
  tools.append(save,uploadLabel,send);
  host.replaceChildren(info,heading,el('p',d.content.summary,'edition-summary'),read,gallery);
  if(mutable)host.append(tools);
- if(d.error_code)host.append(el('p',d.error_code==='publication_checks_failed'?'بررسی پیش از انتشار ناموفق بود. متن و تصویر تاییدشده محفوظ است.':'وضعیت سرویس · '+d.error_code));
+ if(d.error_code)host.append(el('p',d.error_code==='publication_checks_failed'?'بررسی پیش از انتشار ناموفق بود. متن و تصویر تاییدشده محفوظ است.':({translation_quota:'سهمیه ترجمه انگلیسی در دسترس نیست. پس از آزاد شدن سهمیه، انتشار را دوباره امتحان کنید.',translation_failed:'ترجمه کامل انگلیسی آماده نشد. متن تاییدشده محفوظ است و می‌توانید انتشار را دوباره امتحان کنید.'}[d.error_code]||'وضعیت سرویس · '+d.error_code)));
  if(d.status==='published'){
   const taxonomy=d.source?.taxonomy;
   const parts=d.source?.topic_id?[taxonomy?.root,taxonomy?.child,d.slug]:[d.slug];

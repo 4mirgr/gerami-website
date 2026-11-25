@@ -31,6 +31,13 @@ const clear=host=>{for(const img of host.querySelectorAll('img'))img.removeAttri
   }
  }
 const articleText=item=>{const wanted=lang(),other=wanted==='fa'?'en':'fa';const language=item['title_'+wanted]?.trim()&&item['body_'+wanted]?.trim()?wanted:other;return {title:item['title_'+language]||item.title_fa||item.title_en,body:item['body_'+language]||'',language};};
+function field(item,key,fallback=''){
+ const original=item[key]||'';
+ if(lang()==='fa')return original||fallback;
+ if(item[key+'_en'])return item[key+'_en'];
+ if(key==='author'&&original==='دکتر امیرهوشنگ گرامی')return 'Dr. Amir Houshang Gerami';
+ return original&&!/\p{Script=Arabic}/u.test(original)?original:fallback;
+}
 const published=()=>articles.filter(a=>(a.status==='published'||previewDrafts)&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(a.slug)&&(a.title_fa||a.title_en)).sort((a,b)=>String(b.published_at||'').localeCompare(String(a.published_at||''))||a.slug.localeCompare(b.slug));
 const topicURL=id=>'/pages/blog.html?topic='+encodeURIComponent(id);
 function renderTopics(){
@@ -139,18 +146,19 @@ function buildArticleHost(){
  heading=articleHost.querySelector('h1,h2')||el('h2');if(!heading.parentNode)articleHost.append(heading);
  const toolbar=el('div','','article-toolbar glass-surface');search=el('input');search.type='search';search.dataset.articleSearch='';audienceSelect=el('select');audienceSelect.dataset.audienceFilter='';topicSelect=el('select');topicSelect.dataset.topicFilter='';
  toolbar.append(search,topicSelect,audienceSelect);toolbar.hidden=isHome;search.addEventListener('input',()=>changed('q',search.value,false));topicSelect.addEventListener('change',()=>changed('topic',topicSelect.value,true));audienceSelect.addEventListener('change',()=>changed('audience',audienceSelect.value,true));
- count=el('p','','article-result-count');count.dataset.articleCount='';count.setAttribute('role','status');count.setAttribute('aria-live','polite');list=el('div','',isHome?'home-audiences':'post-grid');pagination=el('nav','','article-pagination');pagination.setAttribute('aria-label','صفحه‌های مطالب / Article pages');articleHost.append(toolbar);if(!isHome)articleHost.append(count);articleHost.append(list,pagination);if(!articleHost.parentNode)main.append(articleHost);
+ count=el('p','','article-result-count');count.dataset.articleCount='';count.setAttribute('role','status');count.setAttribute('aria-live','polite');list=el('div','',isHome?'home-audiences':'post-grid');pagination=el('nav','','article-pagination');articleHost.append(toolbar);if(!isHome)articleHost.append(count);articleHost.append(list,pagination);if(!articleHost.parentNode)main.append(articleHost);
 }
 function renderArticles(){
  if(!isBlog&&!isHome)return;if(!articleHost)buildArticleHost();const all=published(),flat=flattenTopics(catalog),byId=new Map(flat.map(t=>[t.id,t]));
  articleHost.dataset.empty='false';articleHost.hidden=false;document.querySelectorAll('.article-topic').forEach(n=>n.hidden=true);
+ pagination.setAttribute('aria-label',text('صفحه‌های مطالب','Article pages'));
  search.placeholder=text('جست‌وجو در مطالب…','Search posts…');search.setAttribute('aria-label',search.placeholder);search.value=filter.q;
  topicSelect.setAttribute('aria-label',text('موضوع یا زیرموضوع','Topic or subtopic'));audienceSelect.setAttribute('aria-label',text('مخاطب مقاله','Article audience'));
  audienceSelect.replaceChildren(...[['',text('همه مخاطبان','All audiences')],['patients',text('برای بیماران','For patients')],['professional',text('برای پزشکان','For clinicians')]].map(([v,t])=>{const o=el('option',t);o.value=v;return o;}));audienceSelect.value=filter.audience;
  topicSelect.replaceChildren(...[['',text('همه موضوعات','All topics')],...flat.map(t=>[t.id,t['path_'+lang()]])].map(([v,t])=>{const o=el('option',t);o.value=v;return o;}));
  if(filter.topic&&!byId.has(filter.topic)){const unknown=el('option',text('موضوع یافت نشد','Topic not found'));unknown.value=filter.topic;topicSelect.append(unknown);}topicSelect.value=filter.topic;
  const ids=topicIds(catalog,filter.topic),needle=searchText(filter.q);
- const matches=all.filter(a=>{const copy=articleText(a),topic=byId.get(a.topic);return (isHome||!filter.topic||ids.has(a.topic))&&(isHome||!filter.audience||a.audience===filter.audience)&&(isHome||!needle||searchText(copy.title+' '+copy.body+' '+(a.category||'')+' '+[...(a.tags||[]),...(a.hashtags||[])].join(' ')+' '+(topic?.path_fa||'')+' '+(topic?.path_en||'')).includes(needle));});
+ const matches=all.filter(a=>{const copy=articleText(a),topic=byId.get(a.topic);return (isHome||!filter.topic||ids.has(a.topic))&&(isHome||!filter.audience||a.audience===filter.audience)&&(isHome||!needle||searchText(copy.title+' '+copy.body+' '+field(a,'category')+' '+field(a,'author')+' '+[...(a.tags||[]),...(a.hashtags||[]),...(a.hashtags_en||[])].join(' ')+' '+(topic?.path_fa||'')+' '+(topic?.path_en||'')).includes(needle));});
  let anchored='';if(filter.anchor&&matches.length){const index=matches.findIndex(a=>'article-'+a.slug===filter.anchor);if(index>=0){filter.page=Math.floor(index/12)+1;anchored=filter.anchor;}filter.anchor='';}
  const fallback=articleHost.querySelector('[data-recent-links]');if(fallback)fallback.hidden=!articleFeedFailed||previewActive;
  const size=12,pages=Math.max(1,Math.ceil(matches.length/size));filter.page=Math.min(filter.page,pages);const selected=isHome?matches:matches.slice((filter.page-1)*size,filter.page*size);
@@ -183,8 +191,8 @@ function renderArticles(){
 function postCard(item,byId,opened){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
-  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=item.image_alt||copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.remove(),{once:true});tile.append(img);}
-  const meta=el('p',[item.audience==='professional'?text('ویژه پزشکان','For clinicians'):'',topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
+  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=field(item,'image_alt',copy.title);img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.remove(),{once:true});tile.append(img);}
+  const meta=el('p',[item.audience==='professional'?text('ویژه پزشکان','For clinicians'):'',topic?.[lang()]||field(item,'category'),field(item,'author')].filter(Boolean).join(' · '),'post-meta');
   for(const [label,date] of [['',item.published_at],[text('بازبینی: ','Reviewed: '),item.reviewed_at]]){
    if(!date)continue;
    const time=el('time',postDate(date,lang()));time.dateTime=date;time.dir='auto';
@@ -192,8 +200,9 @@ function postCard(item,byId,opened){
   }
   tile.append(meta,card);
   const body=el('div','','article-body');body.dir=copy.language==='fa'?'rtl':'ltr';richText(body,isHome?copy.body.trim().split(/\r?\n/).find(line=>line.trim()&&!/^#{1,4} /.test(line))||copy.title:copy.body,imageSource);card.append(body);
-  const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',source.title||source.url);a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(!isHome&&sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
-  if(!isHome&&item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
+  const sources=el('ul');for(const source of item.sources||[]){if(!https(source.url))continue;const li=el('li'),a=el('a',field(source,'title',source.url));a.href=https(source.url);a.rel='noopener noreferrer';li.append(a);sources.append(li);}if(!isHome&&sources.children.length)card.append(el('h3',text('منابع','Sources')),sources);
+  const hashtags=lang()==='fa'?item.hashtags:item.hashtags_en||item.hashtags?.filter(tag=>!/[\u0600-\u06ff]/.test(tag));
+  if(!isHome&&hashtags?.length)card.append(el('p',hashtags.join(' '),'post-meta'));
   const share=el('a',text('ادامه مطلب','Read more'),'post-permalink');
   share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/articles/'+item.slug+'/';
   const intro=copy.body.split(/\r?\n/).map(line=>line.trim()).find(line=>line&&!/^#{1,6}\s|^!\[/.test(line))||copy.body;

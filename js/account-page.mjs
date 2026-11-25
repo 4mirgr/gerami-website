@@ -28,7 +28,10 @@ const errors={
  invalid_email:['ایمیل معتبر وارد کنید.','Enter a valid email address.'],
  invalid_callback:['لینک ورود منقضی یا نامعتبر است؛ دوباره وارد شوید.','The sign-in link expired or is invalid. Please sign in again.']
 };
-function message(error){const text=errors[error?.message]||errors.account_unavailable;status.textContent=t(...text);status.dataset.kind='error';}
+function setStatus(fa='',en=''){
+ status.dataset.fa=fa;status.dataset.en=en;status.textContent=t(fa,en);
+}
+function message(error){const text=errors[error?.message]||errors.account_unavailable;setStatus(...text);status.dataset.kind='error';}
 function render(){
  forms.hidden=!!account;profile.hidden=!account;
  const guestTitle=document.querySelector('#guest-title');
@@ -58,9 +61,9 @@ function render(){
  document.querySelectorAll('[data-account-form]').forEach(el=>el.hidden=el.dataset.accountForm!==mode);
  document.querySelectorAll('[data-account-mode]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.accountMode===mode)));
 }
-document.querySelectorAll('[data-account-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.accountMode;status.textContent='';render();}));
+document.querySelectorAll('[data-account-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.accountMode;setStatus();render();}));
 async function action(task){
- if(busy)return;busy=true;status.textContent=t('در حال بررسی…','Working…');status.dataset.kind='pending';
+ if(busy)return;busy=true;setStatus('در حال بررسی…','Working…');status.dataset.kind='pending';
  const buttons=[...document.querySelectorAll('#account-forms button:not(:disabled),#account-profile button:not(:disabled),#account-retry:not(:disabled)')];buttons.forEach(el=>el.disabled=true);
  try{await task();}catch(error){message(error);}finally{busy=false;buttons.forEach(el=>el.disabled=false);googleButton.disabled=!googleEnabled;}
 }
@@ -68,26 +71,26 @@ for(const form of document.querySelectorAll('form[data-account-form]'))form.addE
  event.preventDefault();action(async()=>{
   const data=Object.fromEntries(new FormData(form)),result=await accountAPI(form.dataset.accountForm,form.dataset.accountForm==='signup'&&ventilatorEntry?{...data,next:'/respiratory/ventilator/'}:data);
   form.querySelectorAll('input[type=password]').forEach(el=>el.value='');
-  if(result.authenticated){account=result.account;changed(account);status.textContent='';render();
+  if(result.authenticated){account=result.account;changed(account);setStatus();render();
    const next=nextDestination;if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if(ventilatorEntry)location.assign('/respiratory/ventilator/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages|auto-posts))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
-  }else{status.textContent=t('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
+  }else{setStatus('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
 googleButton.addEventListener('click',()=>action(async()=>{
  const result=await accountAPI('google',{next:nextDestination||'/'});location.assign(result.url);
 }));
-document.querySelector('#account-logout').addEventListener('click',()=>action(async()=>{await signOut();account=null;status.textContent=t('از حساب خارج شدید.','Signed out.');render();}));
+document.querySelector('#account-logout').addEventListener('click',()=>action(async()=>{await signOut();account=null;setStatus('از حساب خارج شدید.','Signed out.');render();}));
 document.querySelector('#password-form').addEventListener('submit',event=>{event.preventDefault();const form=event.currentTarget;action(async()=>{
- const data=Object.fromEntries(new FormData(form));await accountAPI('password',data);form.reset();status.textContent=t('رمز ذخیره شد.','Password saved.');status.dataset.kind='success';
+ const data=Object.fromEntries(new FormData(form));await accountAPI('password',data);form.reset();setStatus('رمز ذخیره شد.','Password saved.');status.dataset.kind='success';
 });});
-document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();sessionUnavailable=false;status.textContent='';render();await checkProviders();}));
+document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();sessionUnavailable=false;setStatus();render();await checkProviders();}));
 new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
 addEventListener('account:changed',event=>{account=event.detail;render();});
 async function initialize(){try{
  account=await getSession();render();
  const params=new URLSearchParams(location.search);
- if(params.has('logout')&&account)status.textContent=t('برای خروج، دکمه خروج از حساب را بزنید.','Use Sign out to end your session.');
- if(params.has('reauth')&&account)status.textContent=t('برای ادامه، از حساب خارج شوید و دوباره وارد شوید.','To continue, sign out and sign in again.');
+ if(params.has('logout')&&account)setStatus('برای خروج، دکمه خروج از حساب را بزنید.','Use Sign out to end your session.');
+ if(params.has('reauth')&&account)setStatus('برای ادامه، از حساب خارج شوید و دوباره وارد شوید.','To continue, sign out and sign in again.');
  if(['invalid_callback','account_unavailable'].includes(params.get('error')))message({message:params.get('error')});
  if(account&&ventilatorEntry&&!['reset','error','reauth','logout'].some(key=>params.has(key)))location.replace('/respiratory/ventilator/');
  if(account&&/^\/clinic\/(?:portal\/)?$/.test(params.get('next')||'')&&!['error','reauth','logout'].some(key=>params.has(key)))location.replace(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');

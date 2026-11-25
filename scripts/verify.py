@@ -71,6 +71,8 @@ for file, page in pages.items():
         if not target.is_relative_to(ROOT):
             errors.append(f'{file.name}: path escapes site: {reference}')
             continue
+        if path == '/projects':
+            target = ROOT / 'pages/projects.html'
         if target.is_dir():
             target /= 'index.html'
         if not target.exists():

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
-const origin='http://127.0.0.1:4173',browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
+const origin=process.env.APPEARANCE_TEST_ORIGIN||'http://127.0.0.1:4173',browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
  for(const role of ['admin','secretary','user']){
   const page=await browser.newPage({viewport:{width:390,height:844}});let fail=true,loggedIn=true;
@@ -11,11 +11,17 @@ try{
    }
    return route.fulfill({json:{authenticated:loggedIn,account:loggedIn?{id:'synthetic',role,name:'Test User',username:'member'}:null}});
   });
-  await page.goto(origin);const trigger=page.locator('.account-signin[aria-expanded]');await trigger.waitFor();
+  await page.goto(origin);const trigger=page.locator('.account-signin.is-authenticated[aria-expanded]');await trigger.waitFor();
   const box=await trigger.boundingBox();assert.equal(box.width,box.height);assert(box.width>=44);
   await trigger.hover();await page.locator('#account-menu').waitFor({state:'visible'});
+  await trigger.click();assert.equal(await trigger.getAttribute('aria-expanded'),'true','The first mouse click on the hover-open menu keeps it usable');
+  await trigger.click();assert.equal(await trigger.getAttribute('aria-expanded'),'false','The next mouse click closes it');
+  await trigger.click();assert.equal(await trigger.getAttribute('aria-expanded'),'true');
   assert.equal(await page.locator('#account-clinic-link').getAttribute('href'),role==='user'?'/clinic/portal/':'/clinic/');
   assert.equal(await page.locator('#account-menu a[href="/intmed/"]').count(),1);
+  await page.locator('#account-appearance').click();await page.locator('.appearance-dialog[open]').waitFor();
+  await page.keyboard.press('Escape');assert(await trigger.evaluate(el=>el===document.activeElement));
+  await trigger.press('ArrowDown');
   assert.equal(await page.locator('#account-dashboard-link').count(),role==='admin'?1:0);
   if(role==='admin'){
    assert.equal(await page.locator('#account-dashboard-link').getAttribute('href'),'/admin/#dashboard');
@@ -29,13 +35,15 @@ try{
   assert.equal(await page.locator('#account-menu a').first().evaluate(el=>el===document.activeElement),true);
   await page.locator('#account-menu-logout').click();await page.locator('#account-menu-status').waitFor({state:'visible'});
   assert.equal(await page.locator('.account-signin[aria-expanded]').count(),1,'A failed logout must not claim signed-out state');
-  fail=false;await page.locator('#account-menu-logout').click();await page.waitForSelector('a.account-signin[href="/pages/account.html"]');
-  assert.equal(await page.locator('#account-menu').count(),0);
+  fail=false;await page.locator('#account-menu-logout').click();await page.locator('#account-sign-in').waitFor({state:'attached'});
+  assert.equal(await page.locator('.is-authenticated,#account-clinic-link,#account-dashboard-link,#account-menu-logout').count(),0);
+  assert.equal(await page.locator('#account-sign-in').getAttribute('href'),'/pages/account.html');
+  assert.equal(await page.locator('#account-appearance').count(),1);
   await page.close();
  }
  const touch=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  await touch.route('**/api/account/session',route=>route.fulfill({json:{authenticated:true,account:{id:'touch',role:'user',name:'Touch user'}}}));
- await touch.goto(origin);const trigger=touch.locator('.account-signin[aria-expanded]');await trigger.waitFor();
+ await touch.goto(origin);const trigger=touch.locator('.account-signin.is-authenticated[aria-expanded]');await trigger.waitFor();
  await trigger.tap();assert.equal(await trigger.getAttribute('aria-expanded'),'true','The first touch must open the menu');
  await trigger.tap();assert.equal(await trigger.getAttribute('aria-expanded'),'false');await touch.close();
  console.log('PASS account menu: 44px circle, hover/touch/keyboard, role-specific clinic paths, bounded mobile menu, real logout and retry.');
