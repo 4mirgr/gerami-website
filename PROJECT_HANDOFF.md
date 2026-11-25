@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Browser and home screen identity · 2026-11-25
+
+Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.
+
 ## AUS entry performance · 2026-11-24
 
 The short `/aus` URL serves the same public sign-in document as `/aus/` without a client redirect, keeping browser query and fragment handling intact. The document paints before optional files arrive. The sign-in module graph moved from about 389 kB to 87 kB gzip including the former blocking stylesheet. Full workspace CSS, dashboard code and local fonts are loaded after membership verification. Only compiled public assets and fonts bypass Pages Functions and receive static cache headers. The gateway and independent AUS identity remain authoritative. The final release tag records live checks; controlled Chromium is not a test on the owner's carrier.

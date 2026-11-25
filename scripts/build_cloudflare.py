@@ -7,7 +7,6 @@ import json
 import os
 import re
 import shutil
-import struct
 import subprocess
 import sys
 import tempfile
@@ -16,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PINS = ROOT / 'deploy/projects.json'
 PUBLIC_EXTENSIONS = {'.html', '.css', '.js', '.json', '.webmanifest', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.webp', '.woff', '.woff2', '.ttf', '.ico', '.pdf', '.txt'}
-SITE_FILES = ('index.html', 'favicon.svg', 'robots.txt', 'sitemap.xml')
+SITE_FILES = ('index.html', 'favicon.svg', 'apple-touch-icon.png', 'site.webmanifest', 'robots.txt', 'sitemap.xml')
 SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin', 'dash')
 VENTILATOR_FILES = (
     'index.html', 'app.js', 'content.js', 'model.js', 'organ-motion.js', 'waveforms.js',
@@ -202,15 +201,7 @@ def assemble(sources, output):
             raise RuntimeError('AUS build modified the checkout; refusing to publish')
         worker = stage / 'intmed/sw.js'
         worker.write_text(scoped_worker(worker.read_text()), encoding='utf-8')
-        # Supply a local fallback favicon for browser requests.
-        # Wrap its medical project's existing PNG in a standard ICO container;
-        # no image pixels or imported app files are changed.
-        icon = (stage / 'intmed/assets/pwa-192.png').read_bytes()
-        width, height = struct.unpack('>II', icon[16:24])
-        if icon[:8] != b'\x89PNG\r\n\x1a\n' or not (0 < width <= 256 and 0 < height <= 256):
-            raise ValueError('Review the fallback favicon source')
-        entry = struct.pack('<BBBBHHII', width % 256, height % 256, 0, 0, 1, 32, len(icon), 22)
-        (stage / 'favicon.ico').write_bytes(struct.pack('<HHH', 0, 1, 1) + entry + icon)
+        shutil.copy2(stage / 'assets/favicon.ico', stage / 'favicon.ico')
         shutil.copy2(ROOT / 'deploy/retire-legacy-sw.js', stage / 'sw.js')
         shutil.copy2(ROOT / 'deploy/legacy-intmed-links.js', stage / 'legacy-intmed-links.js')
         for name in ('connection-check.html', 'connection-check.js'):
