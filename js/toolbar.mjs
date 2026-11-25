@@ -6,7 +6,39 @@ const paths={home:'M3 11 12 3l9 8M5 10v11h5v-7h4v7h5V10',topics:'M3 3h7v7H3zM14 
 function icon(link){if(link.querySelector('.toolbar-icon'))return;const url=new URL(link.href,location.href),id=url.pathname==='/topics/'?'topics':url.pathname.includes('/blog')?'blog':url.pathname.includes('/about')?'about':url.pathname.includes('/contact')?'contact':publicPath(url.pathname)==='/'?'home':'other';const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.classList.add('toolbar-icon');const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('d',paths[id]);svg.append(path);link.prepend(svg);}
 function normalized(value){return displayText(value).normalize('NFKC').replace(/ي/g,'ی').replace(/ك/g,'ک').toLowerCase().trim();}
 function topTarget(nav,target){const item=[...nav.children].find(child=>target&&child.contains(target));return item?.matches('a')?item:item?.querySelector(':scope>summary');}
+// These rules apply only to controls installed by this enhancement.
+const toolbarStyles = `
+.toolbar-icon {width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.site-header .desktop-nav.toolbar-ready {position:relative;gap:3px;padding:4px;border:1px solid #ffffff70;border-radius:20px;background:linear-gradient(145deg,#fff8e629,#ffffff12);box-shadow:inset 0 1px 0 #fff9,0 4px 18px #4c3c2910;isolation:isolate}
+.desktop-nav.toolbar-ready>a {display:flex;align-items:center;gap:7px;min-height:44px;padding:8px 11px;white-space:nowrap;box-sizing:border-box}
+.desktop-nav.toolbar-ready>a[aria-current] {box-shadow:none;text-decoration:none}
+.toolbar-selection {position:absolute;top:0;left:0;z-index:-1;border-radius:15px;background:linear-gradient(145deg,#fffaf1ad,#e9c88955);box-shadow:inset 0 1px 0 #fff,0 2px 8px #70522d18;pointer-events:none;opacity:0;transition:transform .24s cubic-bezier(.2,.8,.2,1),width .24s,height .24s,opacity .15s}
+.site-header .mobile-menu>nav.toolbar-ready {padding:12px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;border:1px solid #fff9;box-shadow:inset 1px 1px 0 #fff9,inset -1px -1px 0 #fff3,0 20px 50px #26213126;background:linear-gradient(135deg,#ffffffed,#fff6e9ed)}
+.toolbar-search {position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px;min-height:48px;padding:4px 6px;margin-bottom:10px;border:1px solid #b296633b;border-radius:16px;background:#fff4eaf5;box-shadow:inset 0 1px 3px #634c2510}
+.toolbar-search input {font:inherit;font-size:.85rem;min-width:0;width:100%;height:40px;padding:4px 10px;border:0;border-radius:10px;background:transparent;color:inherit;outline-offset:-2px}
+.toolbar-search input::placeholder {color:var(--muted);opacity:1}
+.toolbar-search button {display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:0;border-radius:50%;font:24px/1 sans-serif;background:#d8b77124;color:inherit;cursor:pointer}
+.toolbar-links {display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px;padding:2px}
+.site-header .toolbar-links a {display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 14px;box-sizing:border-box}
+.toolbar-links .nav-group {min-width:0}.toolbar-links .nav-submenu {position:static;min-width:0;box-shadow:none}
+.toolbar-empty {margin:12px;padding:10px;color:var(--muted);font-size:.85rem}
+[data-theme=dark] .toolbar-selection {background:linear-gradient(145deg,#e9cc8540,#e2b97720);box-shadow:inset 0 1px 0 #fff5,0 2px 8px #0002}
+[data-theme=dark] .site-header .mobile-menu>nav.toolbar-ready {background:linear-gradient(135deg,#30303bf2,#242431f2);border-color:#ffffff45}
+[data-theme=dark] .toolbar-search {background:#292833f5;border-color:#e2cba33b}
+@supports ((backdrop-filter:blur(24px)) or (-webkit-backdrop-filter:blur(24px))) {
+ .site-header .mobile-menu>nav.toolbar-ready {background:linear-gradient(135deg,#ffffffc7,#fff5e4a8);-webkit-backdrop-filter:blur(30px) saturate(125%);backdrop-filter:blur(30px) saturate(125%)}
+ [data-theme=dark] .site-header .mobile-menu>nav.toolbar-ready {background:linear-gradient(135deg,#30303bd9,#242431c9)}
+}
+@media(prefers-reduced-motion:reduce) {.toolbar-selection {transition:none}}
+@media(forced-colors:active) {.toolbar-selection {background:Highlight;opacity:.2!important}.toolbar-search,.site-header .mobile-menu>nav.toolbar-ready {background:Canvas!important;border:1px solid CanvasText}.toolbar-icon {opacity:1}.desktop-nav a[aria-current] {outline:1px solid Highlight}}
+`;
+let toolbarStyle;
 export function enhanceToolbars(){
+ if (!toolbarStyle) {
+  toolbarStyle = document.createElement('style');
+  toolbarStyle.textContent = toolbarStyles;
+  document.head.append(toolbarStyle);
+ }
  for(const nav of document.querySelectorAll('.site-header .desktop-nav,.site-header .mobile-menu>nav')){
   let state=states.get(nav);
   if(!state){

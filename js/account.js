@@ -2,6 +2,27 @@ import {getSession,signOut} from './account-client.mjs';
 const host=document.querySelector('[data-account-controls]');
 if(host){
  const initial=host.querySelector('a').cloneNode(true),fa=()=>document.documentElement.lang!=='en',t=(a,b)=>fa()?a:b;
+ let menuStyle;
+ function installMenuStyles(){
+  if (menuStyle) return;
+  menuStyle = document.createElement('style');
+  menuStyle.textContent = `
+.account-menu {position:absolute;inset-inline-end:0;top:calc(100% + 12px);width:min(270px,calc(100vw - 30px));padding:10px;border:1px solid #ffffff80;border-radius:24px;background:linear-gradient(145deg,#fffffff2,#ebeef0eb);box-shadow:inset 0 1px 0 #fff,0 18px 48px #15182d2b;backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);color:var(--ink);font-size:.86rem;z-index:40;box-sizing:border-box}
+.account-menu[hidden] {display:none!important}
+.account-menu {max-height:calc(100vh - var(--header-clearance,144px));max-height:calc(100dvh - var(--header-clearance,144px));overflow-y:auto;overscroll-behavior:contain}
+.account-menu::before {content:'';position:absolute;top:-14px;inset-inline:0;height:14px}
+[data-theme=dark] .account-menu {background:linear-gradient(145deg,#353848f5,#242632ef);border-color:#ffffff45;box-shadow:inset 0 1px 0 #ffffff25,0 18px 48px #0005}
+.account-menu-heading {display:grid;gap:1px;padding:8px 12px 12px;margin-bottom:5px;border-bottom:1px solid #9296ab35;overflow-wrap:anywhere}
+.account-menu-heading strong {font-size:.86rem}.account-menu-heading small {color:var(--muted);font-size:.73rem}
+.account-menu a,.account-menu>button {display:flex;align-items:center;gap:10px;min-height:44px;width:100%;padding:9px 12px;border:0;border-radius:13px;background:transparent;text-decoration:none;color:inherit;font:inherit;text-align:start;box-sizing:border-box;cursor:pointer}
+.account-menu a:hover,.account-menu>button:hover,.account-menu a:focus-visible,.account-menu>button:focus-visible {background:#a5afcf30;outline:2px solid transparent}
+.account-menu a:focus-visible,.account-menu>button:focus-visible {outline-color:var(--ink);outline-offset:-2px}
+.account-menu-icon {display:grid;place-items:center;width:23px;height:23px;color:#a07945;font-size:1.15rem;font-weight:500}
+.account-menu .account-menu-logout {margin-top:5px;border-top:1px solid #9296ab35;border-radius:0 0 13px 13px;color:var(--ink)}
+.account-menu-status {margin:6px 10px;font-size:.75rem;color:var(--muted)}
+`;
+  document.head.append(menuStyle);
+ }
  let account=null,key='',timer,signingOut=false,button,menu;
  const isOpen=()=>host.dataset.accountOpen==='true';
  function open(){if(menu){clearTimeout(timer);host.dataset.accountOpen='true';menu.hidden=false;button.setAttribute('aria-expanded','true');menu.style.transform='';const rect=menu.getBoundingClientRect(),width=document.documentElement.clientWidth;const shift=rect.left<12?12-rect.left:rect.right>width-12?width-12-rect.right:0;menu.style.transform=`translateX(${shift}px)`;}}
@@ -11,6 +32,7 @@ if(host){
   const wasOpen=isOpen(),focus=document.activeElement?.id;close();
   const label=account?t('حساب کاربری','Your account'):t('ورود به حساب کاربری','Sign in');
   if(!account){menu=null;button=null;const link=initial.cloneNode(true);link.setAttribute('aria-label',label);link.title=label;link.querySelector('span').textContent=label;host.replaceChildren(link);return;}
+  installMenuStyles();
   button=document.createElement('button');button.type='button';button.className='account-signin is-authenticated';button.id='account-trigger';button.setAttribute('aria-label',label);button.setAttribute('aria-expanded','false');button.setAttribute('aria-controls','account-menu');
   button.append(...[...initial.childNodes].map(el=>el.cloneNode(true)));button.querySelector('span').textContent=label;button.addEventListener('click',()=>isOpen()?close():open());
   menu=document.createElement('nav');menu.id='account-menu';menu.className='account-menu';menu.hidden=true;menu.setAttribute('aria-label',t('منوی حساب کاربری','Account navigation'));
@@ -19,7 +41,10 @@ if(host){
   const role=document.createElement('small');role.textContent=account.role==='admin'?t('مدیر','Administrator'):account.role==='secretary'?t('منشی','Secretary'):t('کاربر','User');heading.append(name,role);menu.append(heading);
   function entry(href,text,mark,id){const a=document.createElement('a');a.href=href;if(id)a.id=id;const icon=document.createElement('b');icon.className='account-menu-icon';icon.setAttribute('aria-hidden','true');icon.textContent=mark;const span=document.createElement('span');span.textContent=text;a.append(icon,span);menu.append(a);return a;}
   entry('/pages/account.html',t('حساب کاربری','Your account'),'◉','account-profile-link');
-  if(account.role==='admin')entry('/admin/',t('مدیریت سایت','Manage website'),'⌘','account-admin-link');
+  if(account.role==='admin'){
+   entry('/admin/#dashboard',t('داشبورد مدیریتی سایت','Site dashboard'),'⚙︎','account-dashboard-link');
+   entry('/admin/#pages',t('مدیریت سایت','Manage website'),'⌘','account-admin-link');
+  }
   entry('/intmed/',t('ورود به IntMed','Open IntMed'),'✦','account-intmed-link');
   const staff=['admin','secretary'].includes(account.role);
   entry(staff?'/clinic/':'/clinic/portal/',account.role==='admin'?t('پنل پزشک','Physician panel'):staff?t('پنل کلینیک','Clinic panel'):t('پنل بیمار','Patient panel'),'✚','account-clinic-link');
