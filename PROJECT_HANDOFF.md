@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Home reading and profile links · 2026-11-25
+
+Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard and the page editor. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.
+
 ## Admin dashboard · 2026-11-25
 
 The website Studio is at `/admin/`. Its teal gear and gold ECG emblem, tab icon, touch icon and scoped installation manifest are in `assets/identity/admin/`. The shortcut starts at the server-protected Studio. The dashboard links directly to the private automated suggestions and discussion queues. Each queue uses its own authenticated API and loads independently of public CMS documents. Public draft publishing and the page preview belong to the content editor. Sidebar selection and the top heading use the same navigation labels. Test with `scripts/test_admin.mjs` and `scripts/test_editorial_browser.mjs`.

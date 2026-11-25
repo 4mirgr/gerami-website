@@ -36,6 +36,8 @@
     document.querySelectorAll('[data-label-fa][data-label-en]').forEach(element => {
       element.setAttribute('aria-label', element.dataset[language === 'fa' ? 'labelFa' : 'labelEn']);
     });
+    const homeSearch=document.getElementById('home-search');
+    if(homeSearch)homeSearch.placeholder=language==='fa'?'موضوع یا بیماری':'Topic or condition';
     applyLanguageImages();
     const title = document.querySelector('title');
     document.title = title.dataset[language] || title.textContent;

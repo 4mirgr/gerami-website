@@ -61,8 +61,8 @@
       "en": "Advancing health literacy and medical education"
     },
     "text-103": {
-      "fa": "اینجا می‌توانید درباره سلامت به زبان ساده بخوانید، با IntMed درس بخوانید یا وارد پیش‌نمایش کلینیک شوید.",
-      "en": "Read about your health in plain language, study with IntMed, or explore the clinic preview."
+      "fa": "در این وبسایت قصد داریم محتوای پزشکی برای عموم و کادر درمان و علم آموزان رشته های پزشکی و درمانی را به زبانی ساده بازگو کنیم.",
+      "en": "We explain medical knowledge in plain language for the public, healthcare professionals and students."
     },
     "text-106": {
       "fa": "تازه ها در مجموعه پست ها و مطالب",
@@ -147,6 +147,10 @@
     "text-126": {
       "fa": "دکترنکست",
       "en": "DrNext"
+    },
+    "text-127": {
+      "fa": "case های پزشکی را به اشتراک بگذاریم و با قابلیت های نوین تکنولوژی با تکیه بر علم در ارتقا فرهنگ سلامت و آموزش پزشکی قدم برداریم. از پروژه ها و اپلیکیشن های کاربردی پزشکی دیدن کنید و پنل سلامت و پرونده شخصی خود را بسازید و ارتقا دهید.",
+      "en": "We share medical cases and explore new technology grounded in science to advance health literacy and medical education. Explore practical medical projects and apps, and build and develop your personal health panel and record."
     }
   },
   "links": {

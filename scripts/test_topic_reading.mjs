@@ -17,9 +17,15 @@ try{
  await p.route('**/content/articles.json',r=>r.fulfill({json:{articles:[...records,{...records[0],slug:'hidden-draft',status:'draft',title_fa:'Hidden'}]}}));
  await p.goto('http://127.0.0.1:4173/');
  assert.equal(await p.locator('[data-topic-card=cardiology]').count(),1,'Homepage must be organized around clinical reading topics');
- await p.waitForSelector('.cms-article');assert.equal(await p.locator('.cms-article').count(),7);
+ await p.waitForSelector('.cms-article');for(const audience of ['patients','professional']){
+  const row=p.locator('[data-audience="'+audience+'"] .audience-rail');
+  const ids=await row.locator('details').evaluateAll(nodes=>nodes.map(node=>node.id.slice(8)));
+  assert.equal(ids.length,7);
+  assert.ok(ids.every(id=>records.find(record=>record.slug===id)?.audience===audience));
+  assert.ok(await row.evaluate(el=>el.scrollWidth>el.clientWidth));
+ }
  await checkRow(p);
- const preview=p.locator('.cms-article').first();await preview.locator('summary').click();assert.doesNotMatch(await preview.innerText(),/پاراگراف دوم/);assert.match(await p.locator('.post-permalink').first().getAttribute('href'),/^\/articles\/lesson-1\/$/);
+ const preview=p.locator('.cms-article').first();await preview.locator('summary').click();assert.doesNotMatch(await preview.innerText(),/پاراگراف دوم/);assert.match(await p.locator('.post-permalink').first().getAttribute('href'),/^\/articles\/lesson-11\/$/);
  await checkRow(p);
  await p.locator('[data-topic-card=cardiology]').click();await p.waitForSelector('[data-topic-filter]');
  assert.equal(new URL(p.url()).searchParams.get('topic'),'cardiology');assert.equal(await p.locator('.cms-article').count(),12);assert.match(await p.locator('[data-article-count]').textContent(),/14/);

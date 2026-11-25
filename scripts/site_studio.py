@@ -203,14 +203,30 @@ def bake_settings(root, text, ident):
         # Ordinary links keep the latest articles reachable during a failed feed request
         # and without JS. The enhanced cards replace these once their data arrives.
         articles = public_document(root / 'content/articles.json')['articles']
-        ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: (a.get('published_at', ''), a['slug']), reverse=True)
-        links = []
-        for article in (ordered[:7] if ident=='home' else ordered):
-            path = article.get('url') or '/articles/' + article['slug'] + '/'
-            if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
-                title = article.get('title_fa') or article.get('title_en') or ''
-                links.append('<li><a href="' + path + '">' + html.escape(title[:150]) + '</a></li>')
-        text = text.replace('<!--recent-links-->', '<ul data-recent-links>' + ''.join(links) + '</ul>' if links else '')
+        ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: a['slug'])
+        ordered.sort(key=lambda a: a.get('published_at', ''), reverse=True)
+
+        def article_links(items):
+            links = []
+            for article in items:
+                path = article.get('url') or '/articles/' + article['slug'] + '/'
+                if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
+                    title = article.get('title_fa') or article.get('title_en') or ''
+                    links.append('<li><a href="' + path + '">' + html.escape(title[:150]) + '</a></li>')
+            return ''.join(links)
+
+        fallback = ''
+        if ordered and ident == 'home':
+            groups = []
+            for professional, fa, en in [(False, 'برای عموم', 'For the public'), (True, 'ویژه پزشکان', 'For clinicians')]:
+                items = [a for a in ordered if (a.get('audience') == 'professional') == professional][:7]
+                links = article_links(items)
+                if links:
+                    groups.append(f'<section><h3 data-fa="{fa}" data-en="{en}">{fa}</h3><ul class="fallback-rail">{links}</ul></section>')
+            fallback = '<div data-recent-links>' + ''.join(groups) + '</div>'
+        elif ordered:
+            fallback = '<ul data-recent-links>' + article_links(ordered) + '</ul>'
+        text = text.replace('<!--recent-links-->', fallback)
     escape = lambda value: html.escape(str(value), quote=True)
     appearance = public_document(root / 'content/appearance.json')
     navigation = public_document(root / 'content/navigation.json')
