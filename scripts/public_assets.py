@@ -80,6 +80,8 @@ def optimize_public_assets(site):
     inline_css_max_bytes=0
     for page in pages:
         text=page.read_text()
+        if page == site/'index.html':
+            text = re.sub(r'(<img class="post-cover"[^>]* src=")([^"]+)(")', lambda m: m[1]+article_images.get(m[2],m[2])+m[3], text)
         if page.is_relative_to(site/'articles'):
             def responsive_cover(match):
                 original = match[1]

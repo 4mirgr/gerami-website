@@ -34,6 +34,10 @@ class HomeLoading(unittest.TestCase):
                 self.assertEqual(data, {'blocks': {}, 'links': {}})
                 self.assertIn(expected['blocks']['text-113']['fa'], text)
                 continue
+            if path == 'content/topics.json':
+                for topic in expected['topics']:
+                    for node in [topic, *topic['children']]:
+                        node.update(description_fa='', description_en='')
             if path == 'content/site.json': expected.update(cv=[], bio_fa='', bio_en='')
             self.assertEqual(data, expected)
         self.assertLessEqual(len(json.dumps(snapshot, ensure_ascii=False).encode()), 65536)

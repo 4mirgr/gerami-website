@@ -57,6 +57,81 @@ function saveFilter(push=false){
 }
 function changed(key,value,push){filter[key]=value;filter.page=1;saveFilter(push);}
 function arrowButton(label,forward,action){const b=el('button',label,'button button-secondary');b.type='button';b.onclick=action;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('class','ui-arrow');svg.setAttribute('aria-hidden','true');const p=document.createElementNS(svg.namespaceURI,'path');const left=forward?root.dir==='rtl':root.dir!=='rtl';p.setAttribute('d',left?'M20 12H4m6-6-6 6 6 6':'M4 12h16m-6-6 6 6-6 6');svg.append(p);b.append(svg);return b;}
+// The list is enhanced after first paint. Keep styles for its generated controls with the renderer.
+if(isHome||isBlog){
+ const style=document.createElement('style');
+ style.textContent=`
+.article-toolbar input,.article-toolbar select { min-height:48px; border-radius:16px; }
+.article-pagination button:disabled { opacity:.45; cursor:default; }
+.article-toolbar { border-radius:22px; padding:12px; gap:10px; margin-top:24px; }
+.article-toolbar input,.article-toolbar select { min-width:0; background:color-mix(in srgb,var(--white) 38%,transparent); }
+.article-toolbar input { min-width:160px; flex:1 1 240px; }
+.article-toolbar select { flex:1 1 180px; }
+.article-result-count { margin:18px 0; font-size:.85rem; color:var(--muted); }
+.post-card { display:flex; flex-direction:column; min-width:0; padding:24px; }
+.post-meta time { white-space:nowrap; }
+.post-card:has(details[open]) { grid-column:1/-1; }
+.post-card .cms-article { margin-bottom:0; }
+.post-card summary { padding-block:12px; line-height:1.9; font-size:1.1rem; }
+.post-meta { font-size:.72rem; color:var(--muted); margin-top:12px; }
+.post-card:has(details[open]) .post-excerpt { display:none; }
+.post-permalink { display:inline-block; font-size:.75rem; color:var(--teal); margin-top:14px; }
+.reading-empty { display:flex; align-items:center; gap:20px; padding:32px; grid-column:1/-1; color:var(--muted); }
+.reading-empty svg { width:42px; height:42px; flex-shrink:0; color:var(--teal); }
+.article-pagination { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:28px; }
+.article-result-count { background:var(--white); border:1px solid var(--line); border-radius:20px; padding:16px 22px; }
+.article-result-count { width:fit-content; max-width:100%; }
+.post-actions {display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;border-block-start:1px solid var(--line);margin-block-start:auto}
+.post-actions a {display:inline-flex;align-items:center;min-height:44px;margin:0;font-size:.86rem;text-underline-offset:.25em}
+.post-actions .post-permalink {font-weight:700}
+#recent-posts .post-card:has(details[open]) {grid-column:auto}
+.rail-window { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:4px; }
+.rail-window>.button { inline-size:44px; block-size:44px; min-height:44px; padding:0; }
+.rail-window>.button:disabled { opacity:.38; }
+.rail-window .ui-arrow { width:20px; height:20px; }
+#recent-posts .topic-cover { display:grid; place-items:center; background:var(--wash); }
+.topic-cover :is(img,svg) { width:38%; height:80%; object-fit:contain; }
+@supports (grid-template-rows:subgrid) {
+ @media(min-width:541px) {
+  #recent-posts .post-card { display:grid; grid-row:span 5; grid-template-rows:subgrid; row-gap:0; }
+  #recent-posts .post-cover { grid-row:1; }
+  #recent-posts .post-meta { grid-row:2; }
+  #recent-posts details { grid-row:3; }
+  #recent-posts .post-excerpt { grid-row:4; }
+  #recent-posts .post-actions { grid-row:5; margin-block-start:10px; }
+ }
+}
+@media(max-width:700px){.post-actions{justify-content:center}}
+@media(max-width:540px){.audience-rail .post-card{padding:12px}}
+`;
+ document.head.append(style);
+}
+// One logical card per click. Native scrolling keeps wheel, swipe and keyboard support.
+const railSizes=new ResizeObserver(entries=>{for(const {target} of entries)updateRail(target);});
+function updateRail(rail){
+ const distance=Math.abs(rail.scrollLeft);
+ rail.previousElementSibling.disabled=distance<2;
+ rail.nextElementSibling.disabled=distance>=rail.scrollWidth-rail.clientWidth-2;
+}
+function addRailControls(rail){
+ const track=el('div','','rail-window');
+ rail.replaceWith(track);
+ const buttons=[false,true].map(forward=>{
+  const label=forward?text('مطلب بعدی','Next post'):text('مطلب قبلی','Previous post');
+  const button=arrowButton('',forward,()=>{
+   const rtl=getComputedStyle(rail).direction==='rtl';
+   const step=rail.firstElementChild.offsetWidth+parseFloat(getComputedStyle(rail).columnGap);
+   rail.scrollBy({left:step*(forward?1:-1)*(rtl?-1:1),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  });
+  button.setAttribute('aria-label',label);
+  button.setAttribute('aria-controls',rail.id);
+  return button;
+ });
+ track.append(buttons[0],rail,buttons[1]);
+ rail.onscroll=()=>updateRail(rail);
+ railSizes.observe(rail);
+ updateRail(rail);
+}
 function buildArticleHost(){
  articleHost=document.querySelector('[data-site-section=articles]')||el('section','','container section reading-section');articleHost.dataset.siteSection='articles';
  heading=articleHost.querySelector('h1,h2')||el('h2');if(!heading.parentNode)articleHost.append(heading);
@@ -79,7 +154,8 @@ function renderArticles(){
  const size=12,pages=Math.max(1,Math.ceil(matches.length/size));filter.page=Math.min(filter.page,pages);const selected=isHome?matches:matches.slice((filter.page-1)*size,filter.page*size);
  if(!heading.dataset.contentKey)heading.textContent=filter.topic&&byId.has(filter.topic)?byId.get(filter.topic)[lang()]:text('تازه‌ترین مطالب','Latest posts');
  count.textContent=matches.length?text(matches.length+' مقاله',matches.length+' articles')+(isHome?'':text(' · صفحه '+filter.page+' از '+pages,' · Page '+filter.page+' of '+pages)):all.length?text('مقاله‌ای با این انتخاب پیدا نشد.','No posts match these filters.'):text('مطالب آموزشی در حال آماده‌سازی‌اند؛ موضوع موردنظر را انتخاب کنید.','Educational posts are being prepared. Explore a topic to get started.');
- const opened=new Set([...list.querySelectorAll('details[open]')].map(n=>n.id));clear(list);pagination.replaceChildren();
+ const opened=new Set([...list.querySelectorAll('details[open]')].map(n=>n.id));for(const rail of list.querySelectorAll('.audience-rail'))railSizes.unobserve(rail);
+ clear(list);pagination.replaceChildren();
  if(isHome&&matches.length){
   for(const [audience,label] of [['patients',text('برای عموم','For the public')],['professional',text('ویژه پزشکان','For clinicians')]]){
    const group=el('section','','audience-group'),title=el('h3',label);
@@ -91,7 +167,7 @@ function renderArticles(){
     const rail=el('div','','audience-rail');
     rail.tabIndex=0;rail.setAttribute('role','region');rail.setAttribute('aria-labelledby',title.id);
     for(const item of items)rail.append(postCard(item,byId,opened));
-    group.append(rail);
+    rail.id='rail-'+audience;group.append(rail);addRailControls(rail);
    }else group.append(el('p',text('هنوز مطلبی برای این گروه منتشر نشده است.','No posts for this audience yet.')));
    list.append(group);
   }
@@ -105,7 +181,12 @@ function renderArticles(){
 function postCard(item,byId,opened){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
-  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.hidden=true);tile.append(img);}
+  function topicThumbnail(){
+   const art=topicIcon(topic?.icon||'medicine');
+   const frame=el('div','','post-cover topic-cover');frame.append(art);return frame;
+  }
+  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>{if(isHome)img.replaceWith(topicThumbnail());else img.hidden=true;},{once:true});tile.append(img);}
+  else if(isHome)tile.append(topicThumbnail());
   const meta=el('p',[item.audience==='professional'?text('ویژه پزشکان','For clinicians'):'',topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
   for(const [label,date] of [['',item.published_at],[text('بازبینی: ','Reviewed: '),item.reviewed_at]]){
    if(!date)continue;
@@ -118,14 +199,23 @@ function postCard(item,byId,opened){
   if(!isHome&&item.hashtags?.length)card.append(el('p',item.hashtags.join(' '),'post-meta'));
   const share=el('a',text('ادامه مطلب','Read more'),'post-permalink');
   share.href=/^\/articles\/[a-z0-9/-]+\/$/.test(item.url)?item.url:'/articles/'+item.slug+'/';
-  if(!isHome){
-   const excerpt=el('p',copy.body.replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_`>~]/g,'').slice(0,145),'post-excerpt');
-   excerpt.dir=body.dir;tile.append(excerpt);
-  }
+  const intro=copy.body.split(/\r?\n/).map(line=>line.trim()).find(line=>line&&!/^#{1,6}\s|^!\[/.test(line))||copy.body;
+  const plain=(isHome?intro:copy.body).replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_`>~]/g,'').trim();
+  const short=plain.length>145?plain.slice(0,145).replace(/\s+\S*$/,'')+'…':plain;
+  const excerpt=el('p',short,'post-excerpt');excerpt.dir=body.dir;tile.append(excerpt);
   const links=el('div','','post-actions'),discussion=el('a',text('دیدگاه و کامنت','Comments'));
   discussion.href=share.href+'#discussion';links.append(share,discussion);tile.append(links);return tile;
  }
 json('site.json').then(value=>{if(!previewActive){profile=value;renderProfile();}}).catch(()=>{});
+function fallbackControls(){
+ for(const rail of document.querySelectorAll('.fallback-rail')){
+  if(rail.parentNode.classList.contains('rail-window')){
+   const wrapper=rail.parentNode;wrapper.replaceWith(rail);
+  }
+  addRailControls(rail);
+ }
+}
+if(isHome)fallbackControls();
 if(isHome||isBlog)Promise.allSettled([json('topics.json'),json('articles.json')]).then(([topicsResult,articleResult])=>{
  if(previewActive)return;
  try{catalog=topicsResult.status==='fulfilled'?validateTopics(topicsResult.value):{topics:[]};}catch{catalog={topics:[]};}
@@ -133,6 +223,6 @@ if(isHome||isBlog)Promise.allSettled([json('topics.json'),json('articles.json')]
  articles=articleResult.status==='fulfilled'&&Array.isArray(articleResult.value.articles)?articleResult.value.articles:[];
  renderTopics();renderArticles();
 });
-new MutationObserver(()=>{renderProfile();renderTopics();renderArticles();}).observe(root,{attributes:true,attributeFilter:['lang']});
+new MutationObserver(()=>{if(isHome)fallbackControls();renderProfile();renderTopics();renderArticles();}).observe(root,{attributes:true,attributeFilter:['lang']});
 for(const name of ['hashchange','popstate'])window.addEventListener(name,()=>{filter=readFilter();renderArticles();});
 window.addEventListener('site-studio-content',event=>{previewActive=true;if(event.detail.profile)profile=event.detail.profile;if(event.detail.articles)articles=event.detail.articles.articles;if(event.detail.topics)catalog=event.detail.topics;previewAssets=event.detail.assets||{};previewDrafts=event.detail.preview===true;renderProfile();renderTopics();renderArticles();});

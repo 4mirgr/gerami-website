@@ -24,6 +24,26 @@ try{
   assert.ok(ids.every(id=>records.find(record=>record.slug===id)?.audience===audience));
   assert.ok(await row.evaluate(el=>el.scrollWidth>el.clientWidth));
  }
+ for(const [language,width,sign] of [['fa',1440,-1],['en',390,1]]){
+  await p.setViewportSize({width,height:900});
+  if(await p.locator('html').getAttribute('lang')!==language)await p.locator('[data-language-toggle]').click();
+  const publicRow=p.locator('#rail-patients'),clinicalRow=p.locator('#rail-professional');
+  for(const row of [publicRow,clinicalRow]){
+   const first=row.locator('article').first();
+   assert.ok(await first.locator('.post-cover').isVisible());
+   assert.ok((await first.locator('.post-excerpt').innerText()).trim());
+   assert.ok(await first.locator('summary').isVisible());
+   const group=row.locator('..'),back=group.locator(':scope>button').first(),next=group.locator(':scope>button').last();
+   assert.ok(await back.isDisabled());
+   await next.click();
+   await p.waitForFunction(([id,sign])=>document.getElementById(id).scrollLeft*sign>30,[await row.getAttribute('id'),sign]);
+   if(row===publicRow)assert.equal(await clinicalRow.evaluate(e=>e.scrollLeft),0);
+   await p.waitForFunction(id=>!document.getElementById(id).previousElementSibling.disabled,await row.getAttribute('id'));
+   await back.click();
+   await p.waitForFunction(id=>document.getElementById(id).previousElementSibling.disabled,await row.getAttribute('id'));
+  }
+ }
+ await p.setViewportSize({width:1440,height:1000});await p.locator('[data-language-toggle]').click();
  await checkRow(p);
  const preview=p.locator('.cms-article').first();await preview.locator('summary').click();assert.doesNotMatch(await preview.innerText(),/پاراگراف دوم/);assert.match(await p.locator('.post-permalink').first().getAttribute('href'),/^\/articles\/lesson-11\/$/);
  await checkRow(p);
