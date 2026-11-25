@@ -13,7 +13,16 @@ try{
    return new Set(rects.map(r=>Math.round(r.top))).size===1&&rects.every(r=>r.left>=button.left&&r.right<=button.right);
   }));
   assert.ok(labels.length===7&&labels.every(Boolean),'Each translated action label fits on one line inside its button at '+width+'px');
-  if(await p.locator('.mobile-menu summary').isVisible()){await p.locator('.mobile-menu summary').click();for(const link of await p.locator('.mobile-menu>nav a').all()){const r=await link.boundingBox();assert.ok(r.x>=0&&r.x+r.width<=width,'Open floating menu must fit');}await p.keyboard.press('Escape');}
+  if (await p.locator('.mobile-menu>summary').isVisible()) {
+   await p.locator('.mobile-menu>summary').click();
+   const links = p.locator('.mobile-menu>nav a:visible');
+   assert.ok(await links.count() >= 5);
+   for (const link of await links.all()) {
+    const r = await link.boundingBox();
+    assert.ok(r.x >= 0 && r.x + r.width <= width, 'Open floating menu must fit');
+   }
+   await p.keyboard.press('Escape');
+  }
  }
  await p.goto('http://127.0.0.1:4173/#topics');await p.waitForTimeout(100);const target=await p.locator('#topics').boundingBox(),h=await p.locator('.site-header').boundingBox();assert.ok(target.y>=h.y+h.height,'Anchored topics must clear the floating header');
  assert.equal(await p.locator('[data-topic-rail]').count(),0);
