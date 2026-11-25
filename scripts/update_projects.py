@@ -11,7 +11,7 @@ from validate_content import ROOT, validate
 def candidates(pins, resolve):
     result = json.loads(json.dumps(pins))
     for name, spec in result.items():
-        # Ventilator updates require review of the mounted files at each pin.
+        # Respiratory simulator updates require review of the mounted files at each pin.
         if name not in ('intmed', 'aus'):
             continue
         head = resolve(spec['repository'], spec['commit'])
