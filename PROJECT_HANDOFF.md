@@ -6,7 +6,7 @@ Use plain Persian ه in site copy, including words like «درباره من» an
 
 ## Editorial comparison · 2026-11-25
 
-The private inbox groups complete topics across pagination, with separate public and clinician columns. Both the dashboard and Telegram can authorize an exact saved revision with a selected cover. Dashboard approval locks the draft and uses the existing publisher. Apply backend/editorial/dashboard-review.sql before deploying the editorial Edge bundle and Pages. Newly allocated pairs consume distinct library images across drafts.
+The private inbox groups complete topics across pagination, with separate public and clinician columns. Both the dashboard and Telegram can authorize an exact saved revision with a selected cover. Dashboard approval locks the draft and uses the existing publisher. Apply backend/editorial/dashboard-review.sql before deploying the editorial Edge bundle and Pages. Each draft consumes two unused clinical images. Rank eligible captions against the individual article and exclude site branding, including its JPEG transport copies. The light dashboard uses violet navigation and pastel state cards. The night palette uses navy and cyan.
 
 ## Site review · 2026-11-25
 
@@ -18,7 +18,7 @@ The public-site footer offers «تنظیمات ظاهر» in Persian and English
 
 ## Home reading and profile links · 2026-11-25
 
-Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently with touch, keyboard or its two directional buttons. Cards show a thumbnail and the opening excerpt before expansion, including in the baked home listing. Approved covers use the existing bounded previews and missing covers use topic artwork. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.
+Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently with touch, keyboard or its two directional buttons. Cards show a thumbnail and the opening excerpt before expansion, including in the baked home listing. Approved covers use the existing bounded previews. Missing or unreadable covers leave the article title and excerpt visible. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.
 
 ## Admin dashboard · 2026-11-25
 

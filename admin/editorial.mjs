@@ -52,7 +52,7 @@ function edition(host,d){
   send.disabled=busy||dirty()||d.status!=='draft';
   publish.disabled=busy||d.status!=='draft'||dirty()||!selectedVisible||!d.cover_selected;
   hint.textContent=d.status!=='draft'?'':dirty()?'ابتدا ویرایش را ذخیره کنید.':!loaded?'برای انتشار، تصویر این نسخه باید بارگیری شود.':!d.cover_selected?'برای انتشار یک تصویر انتخاب کنید.':'';
-  for(const b of gallery.querySelectorAll('[data-choice]'))b.disabled=busy||!mutable||dirty()||b.dataset.choice!=='available';
+  for(const b of gallery.querySelectorAll('[data-choice]'))b.disabled=busy||!loaded||!mutable||dirty()||b.dataset.choice!=='available';
  }
  async function run(task){if(busy)return;busy=true;message.textContent='';delete message.dataset.error;sync();
   try{await task();}catch(e){message.textContent=e.message;message.dataset.error='true';}finally{busy=false;sync();}
@@ -75,14 +75,18 @@ function edition(host,d){
     const figure=el('figure'),img=el('img');img.src=o.preview;img.alt=o.label;
     const select=actionButton(o.selected?'تصویر انتخاب‌شده':'انتخاب تصویر',()=>run(async()=>{
      await api('choose',{...meta,candidate_id:o.id});await refresh('تصویر انتخاب شد.');
-    }));select.dataset.choice=!o.selected&&o.id?'available':'selected';
+    }));select.disabled=true;select.dataset.choice=!o.selected&&o.id?'available':'selected';
     figure.append(img,el('figcaption',o.label),select);gallery.append(figure);
    }
    if(!options.length){if(v.preview){const img=el('img');img.src=v.preview;img.alt='تصویر ذخیره‌شده';gallery.append(img);}
     else gallery.append(el('p','تصویر تازه برای این موضوع هنوز آماده نشده است.'));}
-   if(d.cover_selected){const selected=gallery.querySelector('figure:has([data-choice=selected]) img')||gallery.querySelector(':scope > img');if(selected){await selected.decode();selectedVisible=true;}}
+   await Promise.all([...gallery.querySelectorAll('img')].map(img=>img.decode()));
+   selectedVisible=d.cover_selected&&!!gallery.querySelector('figure:has([data-choice=selected]) img, :scope > img');
    loaded=true;
-  }catch{gallery.replaceChildren(el('p','تصاویر بارگیری نشدند.'),actionButton('تلاش دوباره برای تصاویر',covers));}
+  }catch(e){
+   const problem=e.message===messages.image_options_pending?'هنوز دو تصویر بالینی تازه برای این مطلب آماده نشده است.':'تصاویر بارگیری نشدند.';
+   gallery.replaceChildren(el('p',problem),actionButton('تلاش دوباره برای تصاویر',covers));
+  }
   finally{delete gallery.dataset.loading;sync();}
  }
  fields.forEach(f=>f.addEventListener('input',sync));
