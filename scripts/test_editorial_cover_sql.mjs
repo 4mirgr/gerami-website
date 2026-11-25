@@ -31,8 +31,18 @@ try{
  await assert.rejects(db.transaction(async tx=>{
   await tx.exec('set local role service_role');
   for(let i=0;i<2;i++)assert.equal((await tx.query('select gerami_editorial_dashboard_publish($1,3,$2,$3) as result',[id,cap('5'),owner])).rows[0].result,'approved');
+  const inbox=async()=> (await tx.query("select gerami_editorial_review_groups('drafts',0) result")).rows[0].result.drafts;
+  assert.equal((await inbox())[0].status,'approved');
   const claimed=(await tx.query("select gerami_editorial_claim('lease','panel-test') d")).rows[0].d;
-  assert.equal(claimed.selected_cover_id,one);throw Error('rollback fixture');
+  assert.equal(claimed.selected_cover_id,one);
+  assert.equal((await inbox())[0].status,'publishing');
+  for(const status of ['publish_error','verifying','published']){
+   await tx.query('update gerami_editorial_drafts set status=$1 where id=$2',[status,id]);
+   const rows=await inbox();
+   assert.equal(rows[0]?.status,status==='published'?undefined:status);
+  }
+  const history=(await tx.query("select gerami_editorial_review_groups('history',0) result")).rows[0].result;
+  assert.equal(history.drafts[0].slug,'test-only');throw Error('rollback fixture');
  }),/rollback fixture/);
  await begin(3,cap('6'));await register(3,cap('5'),cap('6'),entries(310,cap('7'),cap('8')));await q("select gerami_editorial_preview_action($1,310,$2,'approve','123')",[cap('7'),owner]);
  const claimed=(await q(`select gerami_editorial_claim('lease','test') as d`)).rows[0].d;assert.equal(claimed.cover_sha256,hash);assert.equal(claimed.image,'/assets/uploads/editorial-'+hash+'.jpg');

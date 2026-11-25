@@ -50,13 +50,13 @@ end $$;
 create or replace function public.gerami_editorial_review_groups(p_view text,p_offset integer)
 returns jsonb language sql stable security invoker set search_path='' as $$
  with rows as (select d,coalesce(nullif(d.source->>'topic_id',''),d.topic,d.slug) as key
- from public.gerami_editorial_drafts d where (p_view='drafts' and status='draft') or (p_view='history' and status<>'draft')),
- topics as (select key,max((d).created_at) newest from rows group by key order by newest desc,key limit 13 offset greatest(p_offset,0)),
+ from public.gerami_editorial_drafts d where (p_view='drafts' and status in ('draft','approved','publishing','verifying','publish_error')) or (p_view='history' and status<>'draft')),
+ topics as (select key,max((d).updated_at) newest from rows group by key order by newest desc,key limit 13 offset greatest(p_offset,0)),
  selected as (select key from topics order by newest desc,key limit 12)
  select jsonb_build_object('next',(select count(*)>12 from topics),'drafts',coalesce((
- select jsonb_agg(jsonb_build_object('id',(d).id,'revision',(d).revision,'status',(d).status,'content',(d).content,
+ select jsonb_agg(jsonb_build_object('id',(d).id,'slug',(d).slug,'revision',(d).revision,'status',(d).status,'content',(d).content,
  'topic',(d).topic,'category',(d).category,'source',(d).source,'created_at',(d).created_at,'cover_selected',(d).cover_selected,
- 'snapshot_hash',(d).snapshot_hash,'error_code',(d).error_code) order by (d).created_at desc,(d).id desc)
+ 'snapshot_hash',(d).snapshot_hash,'error_code',(d).error_code) order by (select newest from topics where topics.key=rows.key) desc,rows.key,(d).created_at desc,(d).id desc)
  from rows join selected using(key)),'[]'::jsonb))
 $$;
 revoke all on function public.gerami_editorial_review_groups(text,integer) from public,anon,authenticated;

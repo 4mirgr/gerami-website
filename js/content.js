@@ -1,3 +1,4 @@
+import {postDate} from './post-date.mjs';
 import {richText} from './rich-text.mjs';
 import {displayText,searchText,articleImage,publicPath,readPublicDocument} from './site-model.mjs';
 import {validateTopics,flattenTopics,topicIds,topicIcon} from './topics.mjs';
@@ -81,9 +82,10 @@ if(isHome||isBlog){
 .article-pagination { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:28px; }
 .article-result-count { background:var(--white); border:1px solid var(--line); border-radius:20px; padding:16px 22px; }
 .article-result-count { width:fit-content; max-width:100%; }
-.post-actions {display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;border-block-start:1px solid var(--line);margin-block-start:auto}
-.post-actions a {display:inline-flex;align-items:center;min-height:44px;margin:0;font-size:.86rem;text-underline-offset:.25em}
-.post-actions .post-permalink {font-weight:700}
+.post-actions {display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;padding-block-start:10px;border-block-start:1px solid var(--line);margin-block-start:auto}
+.post-actions a {display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:99px;background:var(--white);color:var(--ink);margin:0;font-size:.8rem;text-decoration:none}
+.post-actions .post-permalink {background:var(--button);color:var(--buttonText);font-weight:700}
+.post-actions a:hover {border-color:var(--accent)}
 #recent-posts .post-card:has(details[open]) {grid-column:auto}
 .rail-window { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:4px; }
 .rail-window>.button { inline-size:44px; block-size:44px; min-height:44px; padding:0; }
@@ -101,7 +103,7 @@ if(isHome||isBlog){
   #recent-posts .post-actions { grid-row:5; margin-block-start:10px; }
  }
 }
-@media(max-width:700px){.post-actions{justify-content:center}}
+
 @media(max-width:540px){.audience-rail .post-card{padding:12px}}
 `;
  document.head.append(style);
@@ -137,7 +139,7 @@ function buildArticleHost(){
  heading=articleHost.querySelector('h1,h2')||el('h2');if(!heading.parentNode)articleHost.append(heading);
  const toolbar=el('div','','article-toolbar glass-surface');search=el('input');search.type='search';search.dataset.articleSearch='';audienceSelect=el('select');audienceSelect.dataset.audienceFilter='';topicSelect=el('select');topicSelect.dataset.topicFilter='';
  toolbar.append(search,topicSelect,audienceSelect);toolbar.hidden=isHome;search.addEventListener('input',()=>changed('q',search.value,false));topicSelect.addEventListener('change',()=>changed('topic',topicSelect.value,true));audienceSelect.addEventListener('change',()=>changed('audience',audienceSelect.value,true));
- count=el('p','','article-result-count');count.dataset.articleCount='';count.setAttribute('role','status');count.setAttribute('aria-live','polite');list=el('div','',isHome?'home-audiences':'post-grid');pagination=el('nav','','article-pagination');pagination.setAttribute('aria-label','صفحه‌های مطالب / Article pages');articleHost.append(toolbar,count,list,pagination);if(!articleHost.parentNode)main.append(articleHost);
+ count=el('p','','article-result-count');count.dataset.articleCount='';count.setAttribute('role','status');count.setAttribute('aria-live','polite');list=el('div','',isHome?'home-audiences':'post-grid');pagination=el('nav','','article-pagination');pagination.setAttribute('aria-label','صفحه‌های مطالب / Article pages');articleHost.append(toolbar);if(!isHome)articleHost.append(count);articleHost.append(list,pagination);if(!articleHost.parentNode)main.append(articleHost);
 }
 function renderArticles(){
  if(!isBlog&&!isHome)return;if(!articleHost)buildArticleHost();const all=published(),flat=flattenTopics(catalog),byId=new Map(flat.map(t=>[t.id,t]));
@@ -185,7 +187,7 @@ function postCard(item,byId,opened){
   const meta=el('p',[item.audience==='professional'?text('ویژه پزشکان','For clinicians'):'',topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
   for(const [label,date] of [['',item.published_at],[text('بازبینی: ','Reviewed: '),item.reviewed_at]]){
    if(!date)continue;
-   const time=el('time',date);time.dateTime=date;time.dir='ltr';
+   const time=el('time',postDate(date,lang()));time.dateTime=date;time.dir='auto';
    meta.append((meta.textContent?' · ':'')+label,time);
   }
   tile.append(meta,card);
@@ -211,13 +213,22 @@ function fallbackControls(){
  }
 }
 if(isHome)fallbackControls();
-if(isHome||isBlog)Promise.allSettled([json('topics.json'),json('articles.json')]).then(([topicsResult,articleResult])=>{
+function loadListings(){return Promise.allSettled([json('topics.json'),json('articles.json')]).then(([topicsResult,articleResult])=>{
  if(previewActive)return;
  try{catalog=topicsResult.status==='fulfilled'?validateTopics(topicsResult.value):{topics:[]};}catch{catalog={topics:[]};}
  articleFeedFailed=articleResult.status==='rejected';
  articles=articleResult.status==='fulfilled'&&Array.isArray(articleResult.value.articles)?articleResult.value.articles:[];
  renderTopics();renderArticles();
-});
+});}
+const initialListings=isHome&&document.querySelector('#recent-posts [data-recent-links] .fallback-rail');
+if(initialListings&&document.querySelector('script[src*="/assets/runtime/home-documents."]')&&'IntersectionObserver' in window){
+ // The published cards are already in the document. Fetch the full archive
+ // only when the reader approaches the rails or navigates to them by keyboard.
+ const section=initialListings.closest('#recent-posts');
+ const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting))start();},{rootMargin:'400px'});
+ function start(){observer.disconnect();section.removeEventListener('focusin',start);loadListings();}
+ section.addEventListener('focusin',start);observer.observe(section);
+}else if(isHome||isBlog)loadListings();
 new MutationObserver(()=>{if(isHome)fallbackControls();renderProfile();renderTopics();renderArticles();}).observe(root,{attributes:true,attributeFilter:['lang']});
 for(const name of ['hashchange','popstate'])window.addEventListener(name,()=>{filter=readFilter();renderArticles();});
 window.addEventListener('site-studio-content',event=>{previewActive=true;if(event.detail.profile)profile=event.detail.profile;if(event.detail.articles)articles=event.detail.articles.articles;if(event.detail.topics)catalog=event.detail.topics;previewAssets=event.detail.assets||{};previewDrafts=event.detail.preview===true;renderProfile();renderTopics();renderArticles();});

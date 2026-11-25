@@ -44,10 +44,22 @@ def add_public_asset_recovery(root, site):
     root, site = Path(root), Path(site)
     mirrors = public_mirrors(root, site)
     code = (root / 'deploy/public-asset-recovery.js').read_text()
-    marker = 'const assets=/* public-asset-mirror */{}'
+    marker = "/* public-asset-mirror */['',[]]"
     if code.count(marker) != 1 or re.search(r'</script', code, re.I):
         raise ValueError('Review safe inline public recovery adapter')
-    code = code.replace(marker, 'const assets=' + json.dumps(mirrors, separators=(',', ':')))
+    # One pinned origin and one digest per file. Rebuild the same lookup without
+    # repeating URLs, MIME types and derived CSS variables in each HTML page.
+    prefix = next(iter(mirrors.values()))['url'].split('/assets/', 1)[0]
+    entries = []
+    for path, entry in mirrors.items():
+        source = entry['url'].removeprefix(prefix)
+        if not source.startswith('/assets/'):
+            raise ValueError('Expected one reviewed mirror revision')
+        row = [path, entry['sha256'], entry['bytes']]
+        if source != path:
+            row.append(source)
+        entries.append(row)
+    code = code.replace(marker, json.dumps([prefix, entries], separators=(',', ':')))
     if len(code.encode()) > 18000:
         raise ValueError('Public recovery must fit the small first response')
     font = next(path for path, entry in mirrors.items() if entry['type'] == 'font/woff2')

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateDocument,managedPaths,clone,safeLink,pageSlug,prepareArticlesForPublication} from '../js/site-model.mjs';
+import {validateDocument,managedPaths,clone,safeLink,pageSlug} from '../js/site-model.mjs';
+import {prepareArticlesForPublication} from '../admin/publication-model.mjs';
 import {SiteStore} from '../admin/site-store.mjs';
 const documents={};for(const path of managedPaths)documents[path]=validateDocument(path,JSON.parse(await readFile(new URL('../'+path,import.meta.url))));
 for(const unsafe of ['javascript:alert(1)','//evil.example','/\\evil','https://user:password@example.org','/assets/../admin','data:text/html,x'])assert.equal(safeLink(unsafe),false);

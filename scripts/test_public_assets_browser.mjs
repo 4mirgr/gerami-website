@@ -248,6 +248,18 @@ try{
  assert.equal(await page.locator('script[src],link[rel="stylesheet"]').count(),0);
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
  console.log('PASS built delivery diagnostic: identical font/image bytes decode through primary and independent origins.');
+ const listings=await browser.newPage({viewport:{width:390,height:844}});
+ try{
+  await listings.goto(origin);
+  if(await listings.locator('.fallback-rail li').count()){
+   await listings.locator('#recent-posts').scrollIntoViewIfNeeded();
+   const card=listings.locator('.post-card').first();
+   await card.locator('time').waitFor();
+   assert.match(await card.locator('time').first().textContent(),/[۰-۹]{4}/);
+   assert.equal(await card.locator('.post-actions a').count(),2);
+   assert.equal(await card.locator('img.post-cover').getAttribute('src').then(src=>src.startsWith('/assets/uploads/editorial-')),false);
+  }
+ }finally{await listings.close();}
  const noJS=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
  try{
   const plain=await noJS.newPage();await plain.goto(origin,{waitUntil:'networkidle'});

@@ -16,7 +16,8 @@ def validate(root=ROOT):
 import {readFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
 const root=process.argv[1];
-const {managedPaths,validateSite}=await import(pathToFileURL(root+'/js/site-model.mjs'));
+const {managedPaths}=await import(pathToFileURL(root+'/js/site-model.mjs'));
+const {validateSite}=await import(pathToFileURL(root+'/admin/publication-model.mjs'));
 validateSite(Object.fromEntries(managedPaths.map(path=>[path,JSON.parse(readFileSync(root+'/'+path,'utf8'))])));
 """
     subprocess.run(['node', '--input-type=module', '-e', script, str(root)], check=True, capture_output=True, text=True)

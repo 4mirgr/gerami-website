@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateDocument,validateSite,managedPaths,clone} from '../js/site-model.mjs';
+import {validateDocument,managedPaths,clone} from '../js/site-model.mjs';
+import {validateSite} from '../admin/publication-model.mjs';
 const topic=(id,children=[])=>({id,fa:'موضوع '+id,en:id,description_fa:'شرح موضوع',description_en:'Description',icon:'heart',children});
 const catalog={topics:[topic('cardiology',[topic('heart-failure')]),topic('endocrinology')]};
 assert.doesNotThrow(()=>validateDocument('content/topics.json',catalog),'Topic catalog must be an owner-managed document');

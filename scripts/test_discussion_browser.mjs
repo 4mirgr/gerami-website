@@ -22,6 +22,14 @@ try{
    await page.goto(origin+route);
    const card=page.locator('.post-card').first();await card.locator('summary').click();
    assert.equal(await card.locator('.post-actions a[href$="#discussion"]').textContent(),'دیدگاه و کامنت');
+   const date=card.locator('time').first();
+   assert.match(await date.textContent(),/[۰-۹]{4}/);
+   const actions=card.locator('.post-actions');
+   assert.equal(await actions.evaluate(n=>getComputedStyle(n).justifyContent),'space-between');
+   await page.locator('[data-language-toggle]').click();
+   await page.waitForFunction(()=>/[0-9]{4}/.test(document.querySelector('.post-card time')?.textContent));
+   assert.equal(await date.getAttribute('datetime'),await date.evaluate(n=>n.dateTime));
+   await page.locator('[data-language-toggle]').click();
    assert.equal(await card.locator('.article-body p').first().evaluate(p=>getComputedStyle(p).textAlign),'center');
   }
  }
