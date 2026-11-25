@@ -32,6 +32,10 @@ The archive and navigation share a Persian search normalizer. The account page c
 
 The public-site account menu offers «تنظیمات ظاهر» in Persian and English. Golden Gate remains the default and keeps the header day/night shortcut. Glass Wave lets visitors choose independently between five palettes and two brightness modes. Choices stay in browser storage; the CMS preview, mounted apps, accounts and authentication are unchanged. The wallpaper derivatives in `assets/glass/waves/` include the eight owner-supplied styles plus matching derived green-light and neutral-dark variants. Run `scripts/test_appearance_settings.mjs` through the preview server and check the combined build before release.
 
+## Ventilator name · 2026-11-26
+
+The simulator identifies itself as «ونتیلاتور» in Persian and `Ventilator` in English in its header, browser tab, scoped install manifests and accessible project label. Its respiratory route, website account gate and logo remain at the reviewed mount. The release pin and production receipt belong to the final annotated release tag.
+
 ## Simulator path · 2026-11-25
 
 The owner moved the simulator from `/ventilator/` to `/respiratory/ventilator/`. The old address and its old launcher assets redirect through the Pages middleware to the new path. The new mount keeps the same website account gate. Signup, password login, OAuth return, public portfolio links and the scoped install manifest use the new path. The new path is the reviewed public mount in the combined build.
