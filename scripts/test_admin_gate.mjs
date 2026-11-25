@@ -11,6 +11,7 @@ for(const entry of ['/ventilator','/ventilator/','/ventilator/index.html']){
  assert.equal(guest.status,302);assert.equal(guest.headers.get('Location'),'/pages/account.html?next=%2Fventilator%2F');
 }
 assert.equal((await visit('/ventilator/content.js')).status,401);
+assert.equal((await visit('/ventilator/manifest.webmanifest')).status,200);
 for(const method of ['GET','HEAD']){
  const response=await gate({request:new Request(origin+'/aus?mailOpportunity=synthetic',{method,headers:{Cookie:'private=synthetic'}}),
   env:{ASSETS:{fetch:async request=>{
