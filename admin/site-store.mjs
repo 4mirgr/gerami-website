@@ -1,4 +1,5 @@
-import {managedPaths,validateDocument,validateSite,clone,prepareArticlesForPublication} from '../js/site-model.mjs';
+import {managedPaths,validateDocument,clone} from '../js/site-model.mjs';
+import {validateSite,prepareArticlesForPublication} from './publication-model.mjs';
 import {repository} from './github-session.mjs';
 const prefix='/repos/'+repository;
 const DRAFT_KEY='gerami-studio-drafts-v1';

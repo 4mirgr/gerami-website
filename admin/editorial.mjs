@@ -35,7 +35,7 @@ function edition(host,d){
  let busy=false,loaded=false,selectedVisible=false;
  const publish=actionButton(d.status==='draft'?'انتشار '+readership(audienceKey(d)):labels[d.status]||d.status,()=>run(async()=>{
   const result=await api('publish',{...meta,snapshot_hash:d.snapshot_hash});
-  const load=edition(host,{...d,status:result.status});await load();host.querySelector('.edition-message').textContent='درخواست انتشار این نسخه ثبت شد. وضعیت آن را در تاریخچه ببینید.';
+  const load=edition(host,{...d,status:result.status});await load();host.querySelector('.edition-message').textContent='درخواست انتشار این نسخه ثبت شد. تا زمان انتشار، وضعیت آن را با تازه‌سازی همین فهرست ببینید.';
  }),'edition-publish');
  const save=actionButton('ذخیره ویرایش',()=>run(async()=>{
   const hashtags=tags.value.split(/[,،\n]/).map(t=>t.trim()).filter(Boolean);
@@ -95,7 +95,14 @@ function edition(host,d){
  tools.append(save,uploadLabel,send);
  host.replaceChildren(info,heading,el('p',d.content.summary,'edition-summary'),read,gallery);
  if(mutable)host.append(tools);
- if(d.error_code)host.append(el('p','وضعیت سرویس · '+d.error_code));
+ if(d.error_code)host.append(el('p',d.error_code==='publication_checks_failed'?'بررسی پیش از انتشار ناموفق بود. متن و تصویر تاییدشده محفوظ است.':'وضعیت سرویس · '+d.error_code));
+ if(d.status==='published'){
+  const taxonomy=d.source?.taxonomy;
+  const parts=d.source?.topic_id?[taxonomy?.root,taxonomy?.child,d.slug]:[d.slug];
+  if(parts.every(part=>typeof part==='string'&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(part))){
+   const link=el('a','مشاهده مطلب در سایت');link.href='/articles/'+parts.join('/')+'/';host.append(link);
+  }
+ }
  if(d.status==='publish_error')host.append(actionButton('تلاش دوباره انتشار',()=>run(async()=>{await api('retry',meta);await refresh('درخواست دوباره ثبت شد.');})));
  host.append(message,hint,publish);sync();host.loadCovers=covers;return covers;
 }
@@ -120,6 +127,8 @@ export async function editorialEditor(host,offset=0,view='drafts'){
   for(const rows of groups.values()){
    const group=el('details','','panel editorial-topic'),title=el('summary');
    title.append(el('strong',rows[0].source?.taxonomy?.path_fa||rows[0].category),el('small',new Intl.NumberFormat('fa').format(rows.length)+' نسخه'));
+   const pending=[...new Set(rows.map(d=>d.status).filter(status=>['approved','publishing','verifying','publish_error'].includes(status)))];
+   if(pending.length)title.append(el('small',pending.map(status=>labels[status]).join(' · ')));
    const columns=el('div','','edition-columns'),loads=[];
    for(const key of ['patients','professional']){
     const column=el('section','','edition-column');column.append(el('h3',readership(key)));

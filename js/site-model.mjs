@@ -1,4 +1,4 @@
-import {validateTopics,flattenTopics} from './topics.mjs';
+import {validateTopics} from './topics.mjs';
 /* Shared, dependency-free contract for the public site and its manager. */
 export function publicPath(value){const path=value.replace(/\/+$/,'').replace(/\.html$/,'');return path===''||path==='/index'?'/':path;}
 export const pages={home:'صفحه اصلی',about:'درباره من',services:'حوزه‌های فعالیت',blog:'آموزش و مقالات',projects:'پروژه‌ها',contact:'ارتباط',appointments:'اطلاعات مراجعه',beyond:'فراتر از پزشکی',privacy:'حریم خصوصی'};
@@ -36,12 +36,6 @@ async function loadPublicDocument(path){
  if(!response.ok)throw Error('Unavailable');return response.json();
 }
 export const clone=value=>JSON.parse(JSON.stringify(value));
-export function prepareArticlesForPublication(data,clock=new Date()){
- const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Tehran',calendar:'gregory',numberingSystem:'latn',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(clock).map(part=>[part.type,part.value]));
- const today=`${parts.year}-${parts.month}-${parts.day}`,next=clone(data);
- for(const article of next.articles)if(article.status==='published'&&!article.published_at)article.published_at=today;
- return next;
-}
 export function safeLink(value){
  if(typeof value!=='string'||value.length>2000||/[\s\\\u0000-\u001f]/.test(value))return false;
  if(value.startsWith('/')&&!value.startsWith('//')&&!value.includes('..'))return true;
@@ -105,15 +99,4 @@ export function validateDocument(path,data){
   for(const [key,value] of Object.entries(data.links))must(/^link-\d{3}$/.test(key)&&safeLink(value),'نشانی پیوند معتبر نیست.');
  }
  must(JSON.stringify(data).length<=750000,'حجم فایل بیش از حد مجاز است.');return data;
-}
-export function validateSite(documents){
- for(const path of managedPaths)validateDocument(path,documents[path]);
- const topicSet=new Set(flattenTopics(documents['content/topics.json']).map(t=>t.id));
- for(const article of documents['content/articles.json'].articles)if(article.topic&&!topicSet.has(article.topic))throw Error('موضوع مقاله وجود ندارد؛ ابتدا موضوع مقاله را تغییر دهید.');
- const available=new Set(['/','/index.html',...Object.keys(pages).filter(id=>id!=='home').map(id=>'/pages/'+id+'.html'),...documents['content/extra-pages.json'].pages.filter(item=>item.published).map(item=>'/pages/'+item.slug+'.html')]);
- const check=url=>{const path=url.split(/[?#]/)[0];if(path.startsWith('/pages/')&&!available.has(path))throw Error('پیوند به صفحه ناموجود یا منتشرنشده: '+path);};
- const menu=items=>{for(const item of items){check(item.url);menu(item.children||[]);}};
- menu(documents['content/navigation.json'].header);menu(documents['content/navigation.json'].footer);
- for(const id of Object.keys(pages))for(const url of Object.values(documents[`content/pages/${id}.json`].links))check(url);
- return documents;
 }

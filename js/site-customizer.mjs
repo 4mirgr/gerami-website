@@ -35,7 +35,10 @@ function appearance(){
   if(key)img.dataset.siteImage=key;
   if(key){img.dataset.themeLight=source(value.light[key]);img.dataset.themeDark=source(value.dark[key]);img.src=source(colors[key]);}
  }
- if(page==='home'){const main=document.querySelector('main');for(const section of value.sections){const node=main.querySelector(`[data-site-section="${section.id}"]`);if(node){node.hidden=!section.visible||node.dataset.empty==='true';main.append(node);}}}
+ if(page==='home'){const main=document.querySelector('main');for(const section of value.sections){const node=main.querySelector(`[data-site-section="${section.id}"]`);if(node){node.hidden=!section.visible||node.dataset.empty==='true';main.append(node);}}
+  const profile=main.querySelector('[data-home-profile]');
+  if(profile){profile.hidden=main.querySelector('[data-site-section=about]').hidden;main.querySelector('[data-site-section=hero]').before(profile);}
+ }
 }
 function textBlocks(){
  const value=documents[`content/pages/${page}.json`];if(!value)return;

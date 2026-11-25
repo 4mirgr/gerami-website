@@ -1,7 +1,8 @@
 /* Run only from the protected scheduled main workflow; no PAT or service-role key. */
 import fs from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
-import {validateSite,managedPaths} from '../js/site-model.mjs';
+import {managedPaths} from '../js/site-model.mjs';
+import {validateSite} from '../admin/publication-model.mjs';
 import {sourceTopic,ensureArticleTopic,articlePath} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';
 import {sha,stable} from '../backend/editorial/functions/gerami-editorial/core.mjs';
 const endpoint='https://upwbktvnybsjugdegjji.supabase.co/functions/v1/gerami-editorial/publisher';

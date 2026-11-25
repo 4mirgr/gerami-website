@@ -76,11 +76,27 @@ def optimize_public_assets(site):
 
     for path in sources:emit(path)
     pages=[site/'index.html',*sorted((site/'pages').glob('*.html')),*sorted((site/'topics').rglob('*.html')),*sorted((site/'articles').rglob('*.html'))]
-    preloads=[mapping[p] for p in sources if p.suffix=='.mjs']
+    preloads=[mapping[p] for p in sources if p.suffix=='.mjs' and p.name!='account-page.mjs']
     inline_css_max_bytes=0
     for page in pages:
         text=page.read_text()
         if page == site/'index.html':
+            # Static links, titles and previews paint immediately. The interactive
+            # homepage shares one cacheable snapshot for all managed settings.
+            snapshot_pattern = r'<script id="site-public-data" type="application/json">(.*?)</script>'
+            snapshot_match = re.search(snapshot_pattern, text, flags=re.S)
+            if snapshot_match:
+                snapshot = json.loads(snapshot_match[1])
+                # Keep source JSON as text (including its HTML-safe escapes).
+                # A failed bundle leaves the normal per-document fallback usable.
+                payload = json.dumps(snapshot_match[1], ensure_ascii=False)
+                bundle = ("document.getElementById('site-public-data').textContent=" + payload + ";").encode()
+                filename = 'home-documents.' + fingerprint(bundle) + '.js'
+                (runtime / filename).write_bytes(bundle)
+                snapshot['documents'] = {}
+                inline = '<script id="site-public-data" type="application/json">' + json.dumps(snapshot, separators=(',', ':')) + '</script>'
+                text = text.replace(snapshot_match[0], inline, 1)
+                text = text.replace('</title>', '</title><script defer src="/assets/runtime/' + filename + '"></script>', 1)
             text = re.sub(r'(<img class="post-cover"[^>]* src=")([^"]+)(")', lambda m: m[1]+article_images.get(m[2],m[2])+m[3], text)
         if page.is_relative_to(site/'articles'):
             def responsive_cover(match):

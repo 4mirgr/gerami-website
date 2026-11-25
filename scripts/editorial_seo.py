@@ -1,5 +1,5 @@
 """Static, crawlable pages for the pinned taxonomy and approved public articles only."""
-import html,json,re,xml.etree.ElementTree as ET
+import html,json,re,subprocess,xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
 from physician_profile import SITE, article_author, write_discovery
@@ -9,6 +9,10 @@ def generate(root,output):
  data=public_document(root/'backend/editorial/functions/gerami-editorial/taxonomy.json')
  topics={t['source_id']:(c,t) for c in data['categories'] for t in c['topics']}
  posts=[p for p in public_document(root/'content/articles.json')['articles'] if p.get('status')=='published']
+ # Reuse the browser formatter for crawlable bilingual dates, including first paint without JS.
+ dates=sorted({p['published_at'] for p in posts if p.get('published_at')})
+ formatter="import {postDate} from './js/post-date.mjs';import fs from 'node:fs';const dates=JSON.parse(fs.readFileSync(0,'utf8'));console.log(JSON.stringify(Object.fromEntries(dates.map(d=>[d,[postDate(d,'fa'),postDate(d,'en')]]))))"
+ date_labels=json.loads(subprocess.run(['node','--input-type=module','-e',formatter],cwd=Path(__file__).resolve().parent.parent,input=json.dumps(dates),text=True,capture_output=True,check=True).stdout) if dates else {}
  def topic_path(c,t=None):return '/topics/'+c['root']['id']+'/'+(t['id']+'/' if t else '')
  def post_path(p):
   if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*',p.get('slug','')):raise ValueError('Invalid article slug')
@@ -43,7 +47,10 @@ def generate(root,output):
    byline=escape(author['name']) if author else ''
    if author and 'url' in author:
     byline='<a rel="author" href="'+author['url']+'">'+byline+'</a>'
-   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+audience_label+(byline+' · ' if byline else '')+'<time dir="ltr">'+escape(article.get('published_at',''))+'</time></p></header>'
+   day=article.get('published_at','')
+   fa_date,en_date=date_labels.get(day,('',''))
+   time='<time datetime="'+escape(day)+'" dir="auto" data-fa="'+escape(fa_date)+'" data-en="'+escape(en_date)+'">'+escape(fa_date)+'</time>'
+   header='<header>'+trail+'<h1 dir="auto">'+escape(title)+'</h1><p class="byline">'+audience_label+(byline+' · ' if byline else '')+time+'</p></header>'
    discussion='<section class="discussion" data-discussion="'+escape(article['slug'])+'" id="discussion"><h2 data-fa="دیدگاه خوانندگان" data-en="Reader discussion">دیدگاه خوانندگان</h2><div data-discussion-ui></div><noscript>برای ثبت دیدگاه یا پسندیدن، جاوااسکریپت را فعال کنید.</noscript></section>'
    main='<main class="reader" id="main" tabindex="-1"><article class="reader-sheet">'+header+body+'</article>'+discussion+'</main>'
    text=text.replace('</head>','<link rel="stylesheet" href="/css/article.css"><script type="module" src="/js/discussion.js"></script></head>',1)

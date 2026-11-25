@@ -112,6 +112,18 @@ try{
  assert.ok(cards.filter(c=>c.src.startsWith('/assets/optimized/post-')&&c.width).every(c=>c.width<=480));
  assert.ok(cold.bytes<450000,'public homepage transfer budget: '+JSON.stringify(cold));
  assert.ok(cold.bytes+cold.navigationBytes<550000,'HTML and subresources together must stay within the public transfer budget');
+ const listings=await browser.newPage({viewport:{width:390,height:844}});
+ try{
+  await listings.goto(origin);
+  if(await listings.locator('.fallback-rail li').count()){
+   await listings.locator('#recent-posts').scrollIntoViewIfNeeded();
+   const card=listings.locator('.post-card').first();
+   await card.locator('time').waitFor();
+   assert.match(await card.locator('time').first().textContent(),/[۰-۹]{4}/);
+   assert.equal(await card.locator('.post-actions a').count(),2);
+   assert.equal(await card.locator('img.post-cover').getAttribute('src').then(src=>src.startsWith('/assets/uploads/editorial-')),false);
+  }
+ }finally{await listings.close();}
  const sharedBefore=new Set(hits.filter(p=>/^\/assets\/(runtime|optimized)\//.test(p))),before=hits.length;
  for(const path of ['/pages/about.html','/pages/blog.html','/pages/appointments.html','/pages/projects.html']){
   await page.goto(origin+path,{waitUntil:'networkidle'});
