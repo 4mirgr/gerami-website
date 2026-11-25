@@ -220,6 +220,13 @@ try{
  const noJS=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
  try{
   const plain=await noJS.newPage();await plain.goto(origin,{waitUntil:'networkidle'});
+  const cards=plain.locator('.fallback-rail li');
+  for(const card of await cards.all()){
+   assert.ok((await card.locator('a').innerText()).trim());
+   assert.ok((await card.locator('.post-excerpt').innerText()).trim());
+   assert.ok(await card.locator('img.post-cover').isVisible());
+   assert.doesNotMatch(await card.locator('img').getAttribute('src'),/^\/assets\/uploads\/editorial-/);
+  }
   assert.equal(await plain.locator('.brand-logo').count(),1);
   assert.ok(await plain.locator('.brand-logo').evaluate(image=>image.complete&&image.naturalWidth>0));
   assert.ok((await plain.locator('main').innerText()).trim().length>20);

@@ -6,7 +6,7 @@ Use plain Persian ه in site copy, including words like «درباره من» an
 
 ## Home reading and profile links · 2026-11-25
 
-Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard and the page editor. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.
+Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently with touch, keyboard or its two directional buttons. Cards show a thumbnail and the opening excerpt before expansion, including in the baked home listing. Approved covers use the existing bounded previews and missing covers use topic artwork. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard and the page editor. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.
 
 ## Admin dashboard · 2026-11-25
 

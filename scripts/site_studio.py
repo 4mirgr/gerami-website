@@ -163,6 +163,11 @@ def home_bootstrap(root, text, ident="home"):
         value = public_document(root / path)
         if path == 'content/extra-pages.json':
             value = visible_entries(path, value)
+        if ident == 'home' and path == 'content/topics.json':
+            # The home directory shows topic names. Its card captions use the article introduction.
+            for topic in value['topics']:
+                for node in [topic, *topic['children']]:
+                    node.update(description_fa='', description_en='')
         if path == 'content/pages/home.json':
             # Home's editable copy and links are already baked into both language
             # attributes and native destinations. Studio supplies full drafts separately.
@@ -206,23 +211,37 @@ def bake_settings(root, text, ident):
         ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: a['slug'])
         ordered.sort(key=lambda a: a.get('published_at', ''), reverse=True)
 
-        def article_links(items):
+        def article_links(items, previews=False):
             links = []
             for article in items:
                 path = article.get('url') or '/articles/' + article['slug'] + '/'
                 if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
                     title = article.get('title_fa') or article.get('title_en') or ''
-                    links.append('<li><a href="' + path + '">' + html.escape(title[:150]) + '</a></li>')
+                    link = '<a href="' + path + '">' + html.escape(title[:150]) + '</a>'
+                    if previews:
+                        from validate_content import remote_article_image
+                        image = article.get('image') or ''
+                        if not (re.fullmatch(r'/assets/(?:uploads|optimized)/[a-zA-Z0-9._-]+', image) or remote_article_image(image)):
+                            image = '/assets/topics/' + topic_art.get(article.get('topic'), 'education') + '.webp'
+                        body = article.get('body_fa') or article.get('body_en') or ''
+                        intro = next((line.strip() for line in body.splitlines() if line.strip() and not re.match(r'^#{1,6}\s|^!\[', line.strip())), body)
+                        intro = re.sub(r'[#*_`>~]', '', re.sub(r'!?\[([^\]]*)\]\([^)]*\)', r'\1', intro)).strip()
+                        if len(intro) > 145:
+                            intro = re.sub(r'\s+\S*$', '', intro[:145]) + '…'
+                        link = f'<img class="post-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{html.escape(image, quote=True)}" alt=""><strong>{link}</strong><p class="post-excerpt">{html.escape(intro)}</p>'
+                    links.append('<li>' + link + '</li>')
             return ''.join(links)
 
         fallback = ''
         if ordered and ident == 'home':
+            topics = public_document(root / 'content/topics.json')['topics']
+            topic_art = {node['id']: TOPIC_ART.get(node['icon'], 'education') for topic in topics for node in [topic, *topic['children']]}
             groups = []
             for professional, fa, en in [(False, 'برای عموم', 'For the public'), (True, 'ویژه پزشکان', 'For clinicians')]:
                 items = [a for a in ordered if (a.get('audience') == 'professional') == professional][:7]
-                links = article_links(items)
+                links = article_links(items, previews=True)
                 if links:
-                    groups.append(f'<section><h3 data-fa="{fa}" data-en="{en}">{fa}</h3><ul class="fallback-rail">{links}</ul></section>')
+                    groups.append(f'<section><h3 data-fa="{fa}" data-en="{en}">{fa}</h3><ul class="fallback-rail" id="initial-rail-{int(professional)}">{links}</ul></section>')
             fallback = '<div data-recent-links>' + ''.join(groups) + '</div>'
         elif ordered:
             fallback = '<ul data-recent-links>' + article_links(ordered) + '</ul>'
