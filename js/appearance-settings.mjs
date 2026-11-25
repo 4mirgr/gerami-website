@@ -22,7 +22,7 @@ if (host && !preview && window.HTMLDialogElement) {
   dialog.className = 'appearance-dialog';
   dialog.setAttribute('aria-labelledby','appearance-heading');
   dialog.innerHTML = `
-    <form method="dialog">
+    <div class="appearance-content">
       <h2 id="appearance-heading" data-fa="نمای ظاهری سایت" data-en="Site appearance">نمای ظاهری سایت</h2>
       <p data-fa="انتخاب‌ها در همین مرورگر ذخیره می‌شوند." data-en="Your choices are saved in this browser.">انتخاب‌ها در همین مرورگر ذخیره می‌شوند.</p>
       <label><span data-fa="تم" data-en="Theme">تم</span>
@@ -34,8 +34,8 @@ if (host && !preview && window.HTMLDialogElement) {
           <select name="brightness">${choices([['light','روشن','Light'],['dark','تیره','Dark']])}</select>
         </label>
       </div>
-      <button class="appearance-close" data-fa="بستن" data-en="Close">بستن</button>
-    </form>`;
+      <button type="button" class="appearance-close" data-fa="بستن" data-en="Close">بستن</button>
+    </div>`;
   const mode = dialog.querySelector('[name=style]');
   const color = dialog.querySelector('[name=color]');
   const brightness = dialog.querySelector('[name=brightness]');
@@ -65,6 +65,7 @@ if (host && !preview && window.HTMLDialogElement) {
     sync();
   });
   launch.addEventListener('click', () => { sync(); dialog.showModal(); });
+  dialog.querySelector('.appearance-close').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => launch.focus());
   new MutationObserver(sync).observe(root,{attributes:true,attributeFilter:['lang','data-theme']});
   if (read('ahg-appearance') === 'wave') root.dataset.wave = color.value;

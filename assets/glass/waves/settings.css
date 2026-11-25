@@ -19,8 +19,8 @@
 .appearance-launch:focus-visible,.appearance-dialog :is(select,button):focus-visible {outline:2px solid currentColor;outline-offset:2px}
 .appearance-dialog {box-sizing:border-box;inline-size:min(28rem,calc(100% - 2rem));max-block-size:calc(100% - 2rem);margin:auto;padding:clamp(1rem,5vw,1.75rem);border:1px solid var(--line);border-radius:24px;background:var(--paper);color:var(--ink);box-shadow:0 24px 72px #0005}
 .appearance-dialog::backdrop {background:#14142182}
-.appearance-dialog form,.appearance-dialog label {display:grid;gap:.35rem}
-.appearance-dialog form {gap:.85rem}
+.appearance-dialog .appearance-content,.appearance-dialog label {display:grid;gap:.35rem}
+.appearance-dialog .appearance-content {gap:.85rem}
 .appearance-dialog :is(h2,p) {margin:0}
 .appearance-dialog p {color:var(--muted)}
 .appearance-dialog select {width:100%;min-width:0;min-height:44px}
