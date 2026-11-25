@@ -48,6 +48,8 @@ The Cloudflare Pages build mounts the approved release of `4mirgr/Respiratory-ve
 
 Fullscreen and artificial-airway update, 2026-11-23. The monitor fits the viewport with its three traces and active controls. Simulator details and lessons use selectable pages. The new airway tab exposes relative narrowing, thick secretions, an expiration-predominant mobile clot, and a fully blocked tube. The fully blocked model reports zero delivered flow and volume with unavailable pressure estimates. The live receipt belongs in `release/ventilator-fullscreen-airway-2026-11-23`.
 
+Browser and home-screen icons, 2026-11-25. The simulator ships its own lung emblem for browser tabs, Apple touch shortcuts and Android launchers. Its manifest and icon files are explicitly allowed under `/ventilator/`. New shortcuts open the simulator directly. The public site keeps its independent manifest at the domain root.
+
 ## Two daily Telegram editions · 2026-11-22
 
 The existing private editorial queue produces one patient and one physician draft per Tehran date. Physician text is taken verbatim from the verified, published IntMed bundle. The private source record identifies the section or flashcards. Both audiences use the two topic-specific images, Telegram edits, a revision-bound owner approval, and the existing publisher. A repeat run fills only a missing edition. The dashboard shows audience on the job and draft, and the website audience filter reads the approved edition. Deployment order and the scheduler contract are in backend/editorial/README.md.
