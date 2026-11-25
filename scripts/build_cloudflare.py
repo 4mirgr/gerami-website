@@ -28,6 +28,7 @@ VENTILATOR_FILES = (
 SPIROMETRY_FILES = (
     'index.html', 'styles.css', 'app.mjs', 'cases.mjs', 'charts.mjs',
     'curriculum.mjs', 'model.mjs', 'lesson-notes.mjs', 'notebook.mjs', 'notebook.css',
+    'locale.mjs', 'curriculum.en.mjs', 'cases.en.mjs', 'lesson-notes.en.mjs',
     'assets/Vazirmatn.woff2',
     'assets/Vazirmatn-OFL.txt', 'assets/lungs.webp', 'assets/icon.png',
 )
