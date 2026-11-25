@@ -1,6 +1,6 @@
 {
   "repository": "4mirgr/gerami-website",
-  "commit": "50c41180b8ef66a942fc80e0599550e9c7cdba54",
+  "commit": "2706ab85db703e230f653cb8f6aff18e7bf9d08f",
   "assets": {
     "/assets/fonts/Vazirmatn.woff2": "4e3fa217d38fdafc1fea4414ceb58ca5e662cf0ab5fa735a8c8c20e8b42cad92",
     "/assets/glass/ribbon-day.webp": "b722cf5791f180499dfaae18a5d743f9a9d0bb7df15ad316148f7567cd2a16b7",
@@ -25,6 +25,10 @@
     "/assets/optimized/intmed-poster-en.0827f8605019ca9d.webp": "0827f8605019ca9dd7b694d691b986f3e5d5236ff69c85cde86b2ed646edfc7e",
     "/assets/optimized/intmed-poster-fa.e0b786e1529138e3.webp": "e0b786e1529138e33cbb28bd55527259ffdf26e8255693db6d337fe5f8bff0ce",
     "/assets/optimized/patient-portal.2f4af27e1bd2ceef.webp": "2f4af27e1bd2ceef63a27646b7b7ddb6f19e463bfdce461d0326360e03dd68a1",
-    "/assets/optimized/gerami-portrait.e236052487cb3fc1.webp": "e236052487cb3fc18b3b47e39e422ef3cf18e368a503e37bea275a3d2e45b014"
+    "/assets/optimized/gerami-portrait.e236052487cb3fc1.webp": "e236052487cb3fc18b3b47e39e422ef3cf18e368a503e37bea275a3d2e45b014",
+    "/assets/optimized/ventilator-poster.ebc416eab32ef935.webp": "ebc416eab32ef93599f880a6c9d3cae6a53b54b2e317dbbeefe95c5f0fa1e70e",
+    "/assets/optimized/ventilator-emblem.1207dbb932c94b0d.webp": "1207dbb932c94b0d409caa00987934489bd967f948439c720aec9cefbaafa946",
+    "/assets/optimized/intmed-preview-en.1d9a2d66cbbc255e.webp": "1d9a2d66cbbc255e0994820d6cd5a7f60be64fb99766e686bf4fa15222aa7bc4",
+    "/assets/optimized/intmed-preview-fa.bdc371af2a92f157.webp": "bdc371af2a92f1572360c000b5883a793b1de3608a852ec5d219b1ed6ab4dd65"
   }
 }

@@ -13,12 +13,17 @@ globalThis.fetch=async(url,options={})=>{
  if(String(url).includes('/auth/v1/logout'))return new Response(null,{status:204});
  if(String(url).includes('/auth/v1/user'))return Response.json({id:'synthetic-user',email_confirmed_at:'2026-01-01',user_metadata:{role:'admin'}});
  if(String(url).endsWith('/rpc/gerami_account'))return revoked?Response.json({message:'session revoked'},{status:403}):Response.json({id:'synthetic-user',role,username:'member',email:'member@example.test',name:'Member'});
+ if(String(url).includes('/auth/v1/signup?'))return Response.json({id:'pending'});
  if(String(url).includes('/token?')||String(url).endsWith('/intmed-login'))return Response.json(session);
  throw Error('Unexpected upstream '+url);
 };
 try{
  assert.equal(safeNext(undefined),'/');assert.equal(safeNext('/'),'/');assert.equal(safeNext('//evil.test'),'/');
  for(const kind of ['login','signup','recovery']){const {flow}=await newFlow(kind);const callback=await invoke('callback?flow='+flow.state+'&code=synthetic-code',undefined,{Cookie:COOKIE_FLOW+'='+encode(flow)});assert.equal(callback.status,303);assert.equal(callback.headers.get('Location'),kind==='recovery'?'/pages/account.html?reset=1':'/');}
+ const signup=await invoke('signup',{email:'learner@example.test',username:'learner',name:'Learner',password:'synthetic-password',next:'/ventilator/'});
+ const flowCookie=signup.headers.getSetCookie()[0].split(';')[0],pending=JSON.parse(Buffer.from(flowCookie.split('=')[1],'base64url').toString());
+ const confirmed=await invoke('callback?flow='+pending.state+'&code=synthetic',undefined,{Cookie:flowCookie});
+ assert.equal(confirmed.headers.get('Location'),'/ventilator/');
  calls=[];
  assert.equal((await invoke('session')).status,200);assert.equal(calls.length,0);
  assert.equal((await invoke('login',{identity:'member',password:'valid-password'},{Origin:'https://evil.test'})).status,403);assert.equal(calls.length,0);
@@ -27,6 +32,8 @@ try{
  const cookies=login.headers.getSetCookie();assert.equal(cookies.length,2);for(const c of cookies){assert.match(c,/^__Host-gerami-/);assert.match(c,/Path=\/; HttpOnly; Secure; SameSite=Lax/);}
  assert(calls.some(c=>c.url.endsWith('/intmed-login')));
  const cookie=cookies.map(c=>c.split(';')[0]).join('; ');
+ const simulation=await gate({request:new Request(origin+'/ventilator/',{headers:{Cookie:cookie}}),env:{},next:()=>new Response('monitor')});
+ assert.equal(await simulation.text(),'monitor');assert.match(simulation.headers.get('Cache-Control'),/private, no-store/);
  role='secretary';assert.equal((await (await invoke('session',undefined,{Cookie:cookie})).json()).account.role,'secretary');
  const enter=()=>gate({request:new Request(origin+'/admin/',{headers:{Cookie:cookie,Accept:'text/html'}}),env:{},next:()=>new Response('private editor')});
  assert.equal((await enter()).status,302);role='user';assert.equal((await enter()).status,302);

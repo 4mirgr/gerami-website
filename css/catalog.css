@@ -45,3 +45,5 @@
 
 .project-feature + .project-feature { margin-block-start: 2rem; }
 .project-feature > img { width: 100%; height: auto; border-radius: 16px; }
+
+@media(max-width:700px) { .project-feature-copy h2 { text-align:center; } }

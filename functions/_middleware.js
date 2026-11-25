@@ -9,6 +9,24 @@ export async function onRequest({request,env,next}){
  }
  try{for(let i=0;i<3&&decoded.includes('%');i++)decoded=decodeURIComponent(decoded);}catch{return new Response('Invalid path',{status:400});}
  const normalized=new URL(url.origin+decoded.replaceAll('\\','/').replace(/\/{2,}/g,'/')).pathname;
+ if(/^\/ventilator(?:\/|$)/i.test(normalized)){
+  const headers=new Headers({'Cache-Control':'private, no-store','Vary':'Cookie','X-Robots-Tag':'noindex, nofollow'});
+  if(url.pathname!==normalized||!/^\/ventilator(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers});
+  let account;
+  try{account=await accountFromRequest(request);}catch(error){
+   if(error.status!==400&&error.status!==401&&error.status!==403)return new Response('Account service unavailable',{status:503,headers});
+  }
+  if(!account){
+   if(['/ventilator','/ventilator/','/ventilator/index','/ventilator/index.html'].includes(normalized)){
+    headers.set('Location','/pages/account.html?next=%2Fventilator%2F');
+    return new Response(null,{status:302,headers});
+   }
+   return new Response('Sign in required',{status:401,headers});
+  }
+  const response=await next(),privateHeaders=new Headers(response.headers);
+  for(const [name,value] of headers)privateHeaders.set(name,value);
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers:privateHeaders});
+ }
  if(!protectedPath(url.pathname)&&!protectedPath(normalized))return next();
  if(url.pathname!==normalized||/%|\\|\/\//.test(url.pathname)||!/^\/(?:admin|dash)(?:\/|$)/.test(url.pathname))return new Response('Invalid path',{status:400,headers:{'Cache-Control':'no-store'}});
  if(['/admin/login','/admin/login.html'].includes(url.pathname))return new Response(null,{status:302,headers:{Location:'/pages/account.html?next=%2Fadmin%2F','Cache-Control':'no-store'}});

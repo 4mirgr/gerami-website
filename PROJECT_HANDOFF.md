@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Educational project entry · 2026-11-25
+
+Home opens with the Projects section in both source HTML and Studio configuration. IntMed comes first and Ventilator second. Use the compact bilingual IntMed images on home and the original bilingual posters in the portfolio. The owner supplied the Persian ventilator poster and lung emblem. Personal-site accounts of all verified roles can enter the simulator via the exact /ventilator/ destination. Pages middleware gates the mount, and signup confirmation and enabled OAuth return to it through the existing account system. Future paid access belongs to a separate Ventilator entitlement validated on the server. Pricing, availability of free modules, payment provider and unlocked modules await owner definition. The Clinic and IntMed entitlements are independent.
+
 ## Browser and home screen identity · 2026-11-25
 
 Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.
