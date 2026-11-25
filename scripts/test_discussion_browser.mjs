@@ -40,7 +40,11 @@ try{
   assert.deepEqual(await paragraph.evaluate(p=>[getComputedStyle(p).textAlign,getComputedStyle(p).textAlignLast]),['center','auto']);
   await page.setViewportSize({width:1024,height:844});
   assert.equal(await paragraph.evaluate(p=>getComputedStyle(p).textAlign),'justify');
-  await page.setViewportSize({width:390,height:844});
+  for(const width of [1440,768,390]){
+   await page.setViewportSize({width,height:844});
+   const bounds=await page.locator('.site-header,.reader-sheet').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return [Math.round(r.left),Math.round(r.right)];}));
+   assert.deepEqual(bounds[0],bounds[1],'Article and toolbar edges align at '+width+'px');
+  }
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   if(post.image)await page.waitForFunction(()=>document.querySelector('.article-cover img')?.naturalWidth>0);
  }
