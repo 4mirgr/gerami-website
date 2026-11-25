@@ -18,6 +18,8 @@ Home opens with the Projects section in both source HTML and Studio configuratio
 
 If a visitor submits the shared login form before its JavaScript loads, the account page accepts the native form submission, establishes the same session and redirects to the authorized destination. Failed native attempts show a Persian message and a link back to the shared form with the requested destination. Opening the login API as a browser document returns to the shared login form. This also applies when entering from the Ventilator shortcut. The release tag records the production checks.
 
+The simulator header pairs the owner’s metallic monogram with «دکتر گرامی» on its left edge on mobile and desktop. The combined build copies the reviewed mark from `assets/dr-gerami.webp` in the pinned simulator source.
+
 ## Browser and home screen identity · 2026-11-25
 
 Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.

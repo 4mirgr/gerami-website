@@ -23,7 +23,7 @@ VENTILATOR_FILES = (
     'assets/Vazirmatn-OFL.txt', 'assets/Vazirmatn.woff2', 'assets/alveoli.webp',
     'assets/heart-lungs.webp', 'assets/ventilator-housing.webp', 'assets/favicon.png',
     'assets/apple-touch-icon.png', 'assets/icon-192.png', 'assets/icon-512.png',
-    'assets/icon-maskable-512.png',
+    'assets/icon-maskable-512.png', 'assets/dr-gerami.webp',
 )
 VENTILATOR_CHECK = ('--test',)
 
