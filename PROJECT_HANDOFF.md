@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Visitor appearance settings · 2026-11-25
+
+The public-site footer offers «تنظیمات ظاهر» in Persian and English. Golden Gate remains the default and keeps the header day/night shortcut. Glass Wave lets visitors choose independently between five palettes and two brightness modes. Choices stay in browser storage; the CMS preview, mounted apps, accounts and authentication are unchanged. The wallpaper derivatives in `assets/glass/waves/` include the eight owner-supplied styles plus matching derived green-light and neutral-dark variants. Run `scripts/test_appearance_settings.mjs` through the preview server and check the combined build before release.
+
 ## Home reading and profile links · 2026-11-25
 
 Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently with touch, keyboard or its two directional buttons. Cards show a thumbnail and the opening excerpt before expansion, including in the baked home listing. Approved covers use the existing bounded previews and missing covers use topic artwork. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard and the page editor. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.

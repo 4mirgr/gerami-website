@@ -1,3 +1,4 @@
+import './appearance-settings.mjs';
 import {displayDocument,validateDocument,pages,safeLink,asset,publicPath,readPublicDocument} from './site-model.mjs';
 import {richText} from './rich-text.mjs';
 import {enhanceToolbars} from './toolbar.mjs';
