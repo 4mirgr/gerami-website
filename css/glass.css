@@ -428,7 +428,11 @@ body::before { background:var(--glass-art) center/cover no-repeat; background-co
 .learning-projects .reading-project .button { margin-block-start:22px; }
 .learning-projects .intmed-poster { max-width:440px; }
 @media(max-width:700px) {
- main { text-align:center; }
+ main,.site-footer { text-align:center; }
+ .article-body :is(p,li,blockquote),.post-excerpt { text-align:center; text-align-last:auto; }
+ .post-actions,.footer-bottom { justify-content:center; }
+ .footer-grid nav { justify-items:center; }
+ .footer-grid p { margin-inline:auto; }
  .learning-projects .reading-project { grid-template-columns:minmax(0,1fr); text-align:center; }
  .feature-portrait { justify-self:center; }
  main :is(.actions,.booking-links,.feature-actions,.profile-byline,.atlas-category,.atlas-heading nav) { justify-content:center; }

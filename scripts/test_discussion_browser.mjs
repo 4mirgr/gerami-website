@@ -22,14 +22,17 @@ try{
    await page.goto(origin+route);
    const card=page.locator('.post-card').first();await card.locator('summary').click();
    assert.equal(await card.locator('.post-actions a[href$="#discussion"]').textContent(),'دیدگاه و کامنت');
-   assert.equal(await card.locator('.article-body p').first().evaluate(p=>getComputedStyle(p).textAlign),'justify');
+   assert.equal(await card.locator('.article-body p').first().evaluate(p=>getComputedStyle(p).textAlign),'center');
   }
  }
  for(const post of posts.slice(0,3)){
   await page.goto(origin+(post.url||'/articles/'+post.slug+'/'));await page.locator('.reader h1').waitFor();
   const paragraph=page.locator('.reader .article-body p').first();
   assert.equal(await paragraph.isVisible(),true);
+  assert.deepEqual(await paragraph.evaluate(p=>[getComputedStyle(p).textAlign,getComputedStyle(p).textAlignLast]),['center','auto']);
+  await page.setViewportSize({width:1024,height:844});
   assert.equal(await paragraph.evaluate(p=>getComputedStyle(p).textAlign),'justify');
+  await page.setViewportSize({width:390,height:844});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   if(post.image)await page.waitForFunction(()=>document.querySelector('.article-cover img')?.naturalWidth>0);
  }

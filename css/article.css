@@ -23,3 +23,7 @@
 .discussion li p { white-space:pre-wrap; overflow-wrap:anywhere; }
 .discussion h2 { font-size:1.35rem; margin-block-end:1rem; }
 @media(max-width:540px){.reader{width:calc(100% - 1.2rem)}.reader-sheet,.discussion{border-radius:1.1rem}}
+@media(max-width:700px) {
+ .reader nav { justify-content:center; }
+ .discussion button { justify-self:center; }
+}
