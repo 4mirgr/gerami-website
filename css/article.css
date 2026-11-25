@@ -8,7 +8,7 @@
 .reader .byline { font-size:.88em; color:var(--muted); margin:0 0 1.3rem; }
 .reader .article-cover { display:block; margin:0 auto 1.5rem; }
 .reader .article-cover img { display:block; width:100%; height:auto; object-fit:contain; border-radius:.9rem; }
-.reader .article-body { max-width:65ch; margin:auto; font-size:clamp(1.03rem,2.3vw,1.18rem); line-height:2; }
+.reader .article-body { width:94%; margin-inline:auto; font-size:calc(clamp(1.03rem,2.3vw,1.18rem) + 2px); line-height:2; }
 .reader .article-body p+p { margin-block-start:1.05em; }
 .reader .article-source { border-block-start:1px solid var(--line); padding-block-start:1rem; margin-block-start:1.7rem; }
 .reader .article-tags { color:var(--muted); font-size:.9em; margin-top:.5rem; }
@@ -24,6 +24,7 @@
 .discussion h2 { font-size:1.35rem; margin-block-end:1rem; }
 @media(max-width:540px){.reader-sheet,.discussion{border-radius:1.1rem}}
 @media(max-width:700px) {
+ .reader .article-body { width:100%; }
  .reader nav { justify-content:center; }
  .discussion button { justify-self:center; }
 }

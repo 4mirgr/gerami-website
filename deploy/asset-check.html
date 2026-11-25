@@ -1,5 +1,14 @@
-<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>بررسی دریافت فایل‌های سایت</title>
-<style>body{font:16px/1.9 Tahoma,system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;background:#f1f8f5;color:#183d33}button{font:inherit;padding:.5rem 1rem}table{width:100%;border-collapse:collapse}td,th{padding:.5rem;text-align:right;border-bottom:1px solid #b9d7cb}pre{direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}#sample{padding:1rem;background:#d0f8e7}</style>
-<main><h1>بررسی دریافت فونت و تصاویر — نسخه ۳</h1><p>این صفحه فایل‌های عمومی سایت را با همان فایل‌ها از مسیر مستقل GitHub مقایسه می‌کند. بررسی حداکثر ۴۲ ثانیه طول می‌کشد. درخواست‌های فایل بدون کوکی ارسال می‌شوند؛ اطلاعات حساب یا پزشکی خوانده یا ارسال نمی‌شود. نتیجه روی همین دستگاه می‌ماند.</p><button id="run">شروع بررسی</button><button id="copy" disabled>کپی نتیجه</button><p id="status" role="status"></p><p id="sample">نمونه متن فارسی برای بررسی نمایش فونت وزیرمتن</p><table><thead><tr><th>فایل</th><th>نتیجه</th><th>زمان</th></tr></thead><tbody id="results"></tbody></table><pre id="report"></pre><a href="/">بازگشت به سایت</a></main>
+<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title data-en="Website file delivery check">بررسی دریافت فایل‌های سایت</title>
+<style>body{font:16px/1.9 Tahoma,system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;background:#f1f8f5;color:#183d33}button{font:inherit;padding:.5rem 1rem}table{width:100%;border-collapse:collapse}td,th{padding:.5rem;text-align:start;border-bottom:1px solid #b9d7cb}pre{direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere}#sample{padding:1rem;background:#d0f8e7}</style>
+<main><h1 data-en="Font and image delivery check — version 3">بررسی دریافت فونت و تصاویر — نسخه ۳</h1><p data-en="Compare the public files on this site with their copies on GitHub. The check takes up to 42 seconds. Requests are sent without cookies and do not include account or medical data. The report stays on this device.">این صفحه فایل‌های عمومی سایت را با همان فایل‌ها از مسیر مستقل GitHub مقایسه می‌کند. بررسی حداکثر ۴۲ ثانیه طول می‌کشد. درخواست‌های فایل بدون کوکی ارسال می‌شوند؛ اطلاعات حساب یا پزشکی خوانده یا ارسال نمی‌شود. نتیجه روی همین دستگاه می‌ماند.</p><button id="run" data-en="Run checks">شروع بررسی</button><button id="copy" disabled data-en="Copy results">کپی نتیجه</button><p id="status" role="status"></p><p id="sample" data-en="Sample text for checking the Vazirmatn font">نمونه متن فارسی برای بررسی نمایش فونت وزیرمتن</p><table><thead><tr><th data-en="File">فایل</th><th data-en="Result">نتیجه</th><th data-en="Time">زمان</th></tr></thead><tbody id="results"></tbody></table><pre id="report"></pre><a href="/" data-en="Back to the website">بازگشت به سایت</a></main>
+<script>
+try {
+  if(localStorage.getItem('ahg-lang')==='en'){
+    document.documentElement.lang='en';
+    document.documentElement.dir='ltr';
+    for(const node of document.querySelectorAll('[data-en]'))node.textContent=node.dataset.en;
+  }
+} catch {}
+</script>
 <!-- public-asset-check-script -->
 </html>

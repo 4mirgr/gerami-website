@@ -18,21 +18,21 @@ def build_asset_check(root, site):
         data = legacy.read_bytes()
         digest = hashlib.sha256(data).hexdigest()
         (controls / (legacy.stem + '.' + digest[:16] + '.txt')).write_bytes(base64.b64encode(data))
-    specs = [{'label': 'آیکون کوچک', 'path': '/favicon.svg'}]
-    for label, source, kind in (
-        ('فونت', next((site / 'assets/runtime').glob('Vazirmatn.*.woff2')), 'font'),
-        ('پس‌زمینه', site / appearance['light']['wallpaper'].lstrip('/'), 'image'),
+    specs = [{'label': 'آیکون کوچک', 'label_en': 'Site icon', 'path': '/favicon.svg'}]
+    for label, english, source, kind in (
+        ('فونت', 'Font', next((site / 'assets/runtime').glob('Vazirmatn.*.woff2')), 'font'),
+        ('پس‌زمینه', 'Background image', site / appearance['light']['wallpaper'].lstrip('/'), 'image'),
     ):
         data = source.read_bytes()
         digest = hashlib.sha256(data).hexdigest()
         common = {'kind': kind, 'sha256': digest, 'sourceBytes': len(data)}
         path = '/' + source.relative_to(site).as_posix()
-        specs.append({**common, 'label': label + '؛ مسیر واقعی سایت', 'path': path})
+        specs.append({**common, 'label': label + '؛ مسیر واقعی سایت', 'label_en': english + ' from this site', 'path': path})
         if path in mirrors:
-            specs.append({**common, 'label': label + '؛ مسیر مستقل GitHub', 'path': mirrors[path]['url']})
+            specs.append({**common, 'label': label + '؛ مسیر مستقل GitHub', 'label_en': english + ' from GitHub', 'path': mirrors[path]['url']})
     specs.extend([
-        {'label': 'بخش ۸ کیلوبایتی فونت', 'path': '/assets/fonts/Vazirmatn.woff2', 'range': 'bytes=0-8191'},
-        {'label': 'آیکون موضوع', 'path': '/assets/optimized/heart.012d14fb0e841a4f.webp', 'kind': 'image'},
+        {'label': 'بخش ۸ کیلوبایتی فونت', 'label_en': '8 KB font sample', 'path': '/assets/fonts/Vazirmatn.woff2', 'range': 'bytes=0-8191'},
+        {'label': 'آیکون موضوع', 'label_en': 'Topic icon', 'path': '/assets/optimized/heart.012d14fb0e841a4f.webp', 'kind': 'image'},
     ])
     html = (root / 'deploy/asset-check.html').read_text()
     code = (root / 'deploy/asset-check.js').read_text()

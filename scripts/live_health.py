@@ -9,9 +9,9 @@ ORIGIN = 'https://drgerami-md.ir'
 CHECKS = {
     '/': b'id="site-public-data"',
     '/pages/appointments': b'data-booking-consent',
-    '/pages/projects': b'id="ventilator"',
+    '/projects': b'id="ventilator"',
     '/sitemap.xml': b'http://www.sitemaps.org/schemas/sitemap/0.9',
-    '/llms.txt': b'/pages/projects#ventilator',
+    '/llms.txt': b'/projects#ventilator',
     '/pages/account': b'id="account-forms"',
     '/api/cms/status': b'"configured":true',
     '/intmed/': b'<title>IntMed</title>',
@@ -30,7 +30,7 @@ def probe(item):
     if path == '/sitemap.xml':
         namespace = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
         urls = [loc.text for loc in ElementTree.fromstring(body).findall(f'{namespace}url/{namespace}loc')]
-        required = {ORIGIN + path for path in ('/', '/pages/about', '/pages/projects', '/pages/blog', '/topics/')}
+        required = {ORIGIN + path for path in ('/', '/pages/about', '/projects', '/pages/blog', '/topics/')}
         if not required.issubset(urls) or len(urls) != len(set(urls)):
             raise RuntimeError('Missing canonical pages or duplicate URLs in the sitemap')
     return f'PASS production: {path}'

@@ -1,5 +1,7 @@
+import {ENGLISH_PROMPT,englishMaterial,validateEnglish} from '../backend/editorial/functions/gerami-editorial/english.mjs';
 import {clinicalEdition} from '../backend/editorial/functions/gerami-editorial/clinical.mjs';
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {verifyPublicDelivery} from '../backend/editorial/functions/gerami-editorial/publication.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
+let claimed,claimReceipt,englishAnswer,translationCalls=0,translationStatus=200,translationFinish='STOP';
 let audience,handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus;
 const topic={lesson:[{id:'bp',heading:'ارزیابی فشار خون',paragraphs:[1,2,3].map(n=>({id:'bp-'+n,text:'اندازه‌گیری فشار خون در شرایط استاندارد و مقایسه با ثبت‌های پیشین در ارزیابی اهمیت دارد. '.repeat(3)+n}))}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
@@ -11,6 +13,9 @@ const fakeFetch=async(url,options={})=>{
  if(url.includes('/rpc/gerami_account'))return Response.json({id:'owner',role:enabledRole});
  if(url.includes('/rest/v1/')){
   const path=url.split('/rest/v1/')[1],body=options.body?JSON.parse(options.body):null;
+  if(path==='rpc/gerami_editorial_claim')return Response.json(claimed||null);
+  if(path==='rpc/gerami_editorial_mutate'&&body.p_action==='receipt'){claimReceipt=body;return Response.json({ok:true});}
+  if(path.includes('lease_hash=eq.')&&options.method==='PATCH'){assert(path.includes('snapshot_hash=eq.'+claimed.snapshot_hash));Object.assign(claimed,body);return Response.json([{id:claimed.id}]);}
   if(path==='rpc/gerami_editorial_claim_job')return Response.json(body.p_hash===await core.sha('a'.repeat(64))?{id:body.p_id,day:'2026-11-20',audience}:null);
   if(path==='rpc/gerami_editorial_claim_signal')return Response.json(false);
   if(path==='rpc/gerami_editorial_telegram_owner')return Response.json(true);
@@ -46,7 +51,12 @@ const fakeFetch=async(url,options={})=>{
  if(url.endsWith('assets/optimized/manifest.json'))return Response.json({images:{'/assets/topics/heart.webp':'/assets/optimized/heart.012d14fb0e841a4f.webp'}});
  if(url.endsWith('/intmed/content/topics/cardio-htn.json'))return new Response(bytes);
  if(url.endsWith('/cardio/cardio-htn/data.json'))return Response.json({sourceNote:'بر پایهٔ بانک سؤال؛ بررسی مستقل هاریسون ادعا نمی‌شود.'});
- if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
+ if(url.includes('generativelanguage.googleapis.com')&&JSON.parse(options.body).systemInstruction.parts[0].text===ENGLISH_PROMPT){
+  translationCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');const sent=JSON.parse(JSON.parse(options.body).contents[0].parts[0].text);
+  assert.deepEqual(Object.keys(sent).sort(),['audience','hashtags','image_alt','paragraphs','title']);
+  return Response.json({candidates:[{finishReason:translationFinish,content:{parts:[{text:JSON.stringify(englishAnswer)}]}}]},{status:translationStatus});
+ }
+ if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
  if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
  if(url.endsWith('/assets/editorial/heart.jpg'))return new Response(new Uint8Array([255,216,255,...new Uint8Array(197)]),{headers:{'Content-Type':'image/jpeg'}});
  if(url.includes('/storage/v1/object/sign/'))return Response.json({signedURL:'/object/sign/test/preview.jpg'});
@@ -55,8 +65,8 @@ const fakeFetch=async(url,options={})=>{
  throw Error('Unexpected network '+url);
 };
 const source=(await fs.readFile('backend/editorial/functions/gerami-editorial/index.ts','utf8')).replace(/^import[^\n]+\n/gm,'');
-const bindings={clinicalEdition,createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
-run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(bindings),...Object.values(core));
+const bindings={ENGLISH_PROMPT,englishMaterial,validateEnglish,clinicalEdition,createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
+run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(bindings),...Object.entries(core).map(([key,value])=>key==='verifyOIDC'?async token=>{assert.equal(token,'fixture-publisher');return {run_id:'123'};}:value));
 const post=(action,body={},authorization='Bearer valid.session.token.value')=>handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/'+action,{method:'POST',headers:{Authorization:authorization},body:JSON.stringify(body)}));
 assert.equal((await handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/list'))).status,405);
 for(enabledRole of ['user','secretary'])assert.equal((await post('list')).status,403);enabledRole='admin';assert.equal((await post('list')).status,200);
@@ -100,3 +110,23 @@ const selected={id:specialist.id,revision:specialist.revision};
 assert.equal((await post('covers',{...selected,revision:selected.revision-1})).status,409);
 assert.equal((await (await post('covers',selected)).json()).options.length,2);
 enabledRole='user';assert.equal((await post('covers',selected)).status,403);
+
+// A new approved snapshot gets one English edition. Failed validation keeps the
+// approval recoverable; both restaging and live verification use the cached edition.
+env.GEMINI_API_KEY='private-gemini';
+claimed={...specialist,cover_selected:true,media_path:covers[0].media_path,cover_sha256:covers[0].sha256,image:covers[0].image,
+ content:{...copy,paragraphs:[paragraph,paragraph,paragraph+' مقدار ≥۳۰۰ با ICS سنجیده می‌شود.']},snapshot_hash:'e'.repeat(64)};
+const healthyParagraph='Blood pressure can rise without causing symptoms. Taking accurate measurements and following up regularly can help you understand your health and make care decisions.';
+englishAnswer={title:'Understanding blood pressure',paragraphs:[healthyParagraph,healthyParagraph,healthyParagraph+' Consider a threshold of ≥300 with ICS.'],image_alt:'Blood pressure illustration',hashtags:['#BloodPressure','#Health']};
+const claim=()=>post('publisher',{action:'claim'},'Bearer fixture-publisher');
+const initialClaim=await claim(),claimPayload=await initialClaim.json();assert.equal(initialClaim.status,200,JSON.stringify({response:claimPayload.error,source:englishMaterial(core.publicArticle(claimed))}));const translated=claimPayload.draft.article;assert.equal(translated.body_en,englishAnswer.paragraphs.join('\n\n'));assert.equal(translated.author_en,'Dr. Amir Houshang Gerami');assert.equal(translated.body_fa,claimed.content.paragraphs.join('\n\n'));assert.equal(translationCalls,1);
+assert.deepEqual(core.publicArticle(claimed),translated);
+assert.deepEqual((await (await claim()).json()).draft.article,translated);assert.equal(translationCalls,1);
+claimed.snapshot_hash='f'.repeat(64);englishAnswer.paragraphs[2]=healthyParagraph+' Consider a threshold of ≤300 with ICS.';assert.equal((await claim()).status,503);
+assert.equal(claimReceipt.p_data.error,'translation_failed');assert.equal(translationCalls,2);
+englishAnswer.paragraphs[2]='Threshold ≥300 with ICS.';assert.equal((await claim()).status,503,'reject obvious truncation');
+englishAnswer.paragraphs[2]=healthyParagraph+' Consider a threshold of ≥300 with ICS.';
+translationFinish='MAX_TOKENS';assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_failed');
+translationFinish='STOP';translationStatus=429;assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_quota');
+assert.equal(claimed.english_edition.snapshot_hash,'e'.repeat(64),'a failed translation must not replace the existing edition');
+console.log('PASS approved English translation, snapshot-scoped reuse, quantity protection and retry receipt.');

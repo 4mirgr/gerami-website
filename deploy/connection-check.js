@@ -1,3 +1,4 @@
+const t=(fa,en)=>typeof document!=='undefined'&&document.documentElement.lang==='en'?en:fa;
 // Public, read-only probes. Never read storage, cookies, account data or tokens.
 export async function probe(label, url, kind, fetcher = fetch, timeoutMs = 8000) {
   const started = performance.now();
@@ -82,13 +83,13 @@ export async function probe(label, url, kind, fetcher = fetch, timeoutMs = 8000)
 
 export async function runChecks(origin, fetcher = fetch, mode = 'parallel') {
   const specs = [
-    ['فایل کوچک سایت', '/favicon.svg', 'asset'],
-    ['صفحه IntMed', '/intmed/', 'intmed-html'],
-    ['فهرست مباحث IntMed', '/intmed/content/manifest.json', 'json'],
-    ['صفحه AUS', '/aus/', 'aus-html'],
-    ['پیکربندی ورود AUS', '/aus/api/public-config', 'aus-config'],
-    ['درگاه API فعلی IntMed', 'https://api.drgerami-md.ir/auth/v1/health', 'health'],
-    ['مسیر جایگزین فعلی IntMed', 'https://upwbktvnybsjugdegjji.supabase.co/auth/v1/health', 'health'],
+    [t('فایل کوچک سایت','Small website file'), '/favicon.svg', 'asset'],
+    [t('صفحه IntMed','IntMed page'), '/intmed/', 'intmed-html'],
+    [t('فهرست مباحث IntMed','IntMed topic index'), '/intmed/content/manifest.json', 'json'],
+    [t('صفحه AUS','AUS page'), '/aus/', 'aus-html'],
+    [t('پیکربندی ورود AUS','AUS sign-in configuration'), '/aus/api/public-config', 'aus-config'],
+    [t('درگاه API فعلی IntMed','IntMed API gateway'), 'https://api.drgerami-md.ir/auth/v1/health', 'health'],
+    [t('مسیر جایگزین فعلی IntMed','IntMed alternative gateway'), 'https://upwbktvnybsjugdegjji.supabase.co/auth/v1/health', 'health'],
   ];
   const run = ([label, path, kind]) => probe(label, new URL(path, origin).href, kind, fetcher);
   const results = [];
@@ -96,7 +97,7 @@ export async function runChecks(origin, fetcher = fetch, mode = 'parallel') {
     for (const spec of specs) results.push(await run(spec));
   } else results.push(...await Promise.all(specs.map(run)));
   const script = results.find(result => result.entryScript)?.entryScript;
-  if (script) results.push(await probe('فایل اجرایی AUS', new URL(script, origin).href, 'script', fetcher));
+  if (script) results.push(await probe(t('فایل اجرایی AUS','AUS application script'), new URL(script, origin).href, 'script', fetcher));
   return results;
 }
 
@@ -108,7 +109,7 @@ if (typeof document !== 'undefined') {
     run.disabled = true; copy.disabled = true;
     const mode = modePicker.value;
     modePicker.disabled = true;
-    document.getElementById('status').textContent = 'در حال بررسی؛ هر مسیر حداکثر ۸ ثانیه. بررسی تکی ممکن است حدود یک دقیقه طول بکشد…';
+    document.getElementById('status').textContent = t('در حال بررسی؛ هر مسیر حداکثر ۸ ثانیه. بررسی تکی ممکن است حدود یک دقیقه طول بکشد…','Checking each endpoint for up to 8 seconds. Sequential checks may take about a minute…');
     document.getElementById('results').replaceChildren();
     const results = await runChecks(location.origin, fetch, mode);
     for (const result of results) {
@@ -124,11 +125,11 @@ if (typeof document !== 'undefined') {
       downloadMs: Math.round(nav.responseEnd - nav.responseStart), protocol: nav.nextHopProtocol || 'unknown', serviceWorker: nav.workerStart > 0} : null;
     document.getElementById('report').textContent = JSON.stringify({version:2, mode, origin: location.origin,
       checkedAt: new Date().toISOString(), navigation, results}, null, 2);
-    document.getElementById('status').textContent = 'بررسی تمام شد. وضعیت VPN و نام اپراتور را همراه گزارش بفرستید.';
+    document.getElementById('status').textContent = t('بررسی تمام شد. وضعیت VPN و نام اپراتور را همراه گزارش بفرستید.','Check complete. Please include your VPN status and carrier name with the report.');
     run.disabled = false; copy.disabled = false; modePicker.disabled = false;
   });
   copy.addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(document.getElementById('report').textContent); }
-    catch { document.getElementById('status').textContent = 'متن گزارش پایین صفحه را انتخاب و کپی کنید.'; }
+    catch { document.getElementById('status').textContent = t('متن گزارش پایین صفحه را انتخاب و کپی کنید.','Select and copy the report at the bottom of the page.'); }
   });
 }

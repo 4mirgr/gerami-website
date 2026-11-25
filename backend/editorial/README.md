@@ -87,3 +87,8 @@ same two topic-specific recommendations. Selection ranks captions against the dr
 title, summary, and body. The media service rejects site artwork fingerprints from
 site-artwork.json and excludes logos and emblems in discovery. If suitable unused
 pictures run out, the draft waits for new artwork.
+
+
+## English edition
+
+Apply `english-edition.sql` before deploying the editorial function including `english.mjs`. On a publication claim, the function translates only the approved public text through the existing Gemini configuration. It checks completion, language, paragraph count, obviously shortened paragraphs, numeric values and explicit Latin medical terms. A valid edition is cached privately on the draft for the same snapshot hash. Retries reuse it, and reconciliation compares both editions and the chosen cover. A quota or translation failure marks the approval for retry in the dashboard. Manual articles go to the public site with titles and complete bodies in both languages.

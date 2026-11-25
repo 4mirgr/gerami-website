@@ -45,19 +45,21 @@
   return {label:spec.label,path:spec.path,encoding:spec.encoding||'binary',cacheMode,outcome,phase,status,firstByteMs,bytes,ms:Math.round(performance.now()-started),headers,...(range?{range}:{}),...(spec.kind?{decoded}:{}),...(sourceBytes!==undefined?{sourceBytes}:{}),...(matchesSource!==undefined?{matchesSource}:{}),...(entry?{network:{protocol:entry.nextHopProtocol,transferSize:entry.transferSize,encodedBodySize:entry.encodedBodySize,durationMs:Math.round(entry.duration)}}:{})};
  }
  if(typeof document==='undefined'){globalThis.GERAMI_ASSET_PROBE=probe;return;}
+ const t=(fa,en)=>document.documentElement.lang==='en'?en:fa;
  const run=document.getElementById('run'),copy=document.getElementById('copy'),status=document.getElementById('status'),rows=document.getElementById('results'),report=document.getElementById('report');
  const specs=/* public-delivery-controls */[];
  run.addEventListener('click',async()=>{
   run.disabled=true;copy.disabled=true;rows.replaceChildren();report.textContent='';const results=[];
-  for(const spec of specs){
-   status.textContent='در حال بررسی '+spec.label+'؛ حداکثر ۶ ثانیه…';const result=await probe(spec,location.origin);results.push(result);
-   const row=document.createElement('tr');for(const text of [spec.label,result.outcome==='ok'?'دریافت کامل':result.outcome==='timeout'?'پایان مهلت؛ '+(result.phase==='waiting_headers'?'پاسخ نرسید':result.bytes+' بایت دریافت شد'):result.outcome,result.ms+' ms']){const cell=document.createElement('td');cell.textContent=text;row.append(cell);}rows.append(row);
+  for(const input of specs){
+   const spec={...input,label:t(input.label,input.label_en)};
+   status.textContent=t('در حال بررسی '+spec.label+'؛ حداکثر ۶ ثانیه…','Checking '+spec.label+' for up to 6 seconds…');const result=await probe(spec,location.origin);results.push(result);
+   const row=document.createElement('tr');for(const text of [spec.label,result.outcome==='ok'?t('دریافت کامل','Received'):result.outcome==='timeout'?t('پایان مهلت؛ ','Timed out: ')+(result.phase==='waiting_headers'?t('پاسخ نرسید','no response'):t(result.bytes+' بایت دریافت شد',result.bytes+' bytes received')):result.outcome,result.ms+' ms']){const cell=document.createElement('td');cell.textContent=text;row.append(cell);}rows.append(row);
    if(result.decoded&&spec.kind==='font')document.getElementById('sample').style.fontFamily='VazirmatnCheck,Tahoma,sans-serif';
   }
   const nav=performance.getEntriesByType('navigation')[0],controller=navigator.serviceWorker?.controller;let worker='';try{if(controller){const u=new URL(controller.scriptURL);if(u.origin===location.origin)worker=u.pathname;}}catch{}
   report.textContent=JSON.stringify({version:3,checkedAt:new Date().toISOString(),navigation:nav?{dnsMs:Math.round(nav.domainLookupEnd-nav.domainLookupStart),connectMs:Math.round(nav.connectEnd-nav.connectStart),firstByteMs:Math.round(nav.responseStart-nav.requestStart),protocol:nav.nextHopProtocol}:null,controllingWorker:worker,results},null,2);
-  status.textContent='بررسی تمام شد. کپی نتیجه را بزنید و همراه نام اینترنت و وضعیت VPN بفرستید.';run.disabled=false;copy.disabled=false;
+  status.textContent=t('بررسی تمام شد. کپی نتیجه را بزنید و همراه نام اینترنت و وضعیت VPN بفرستید.','Checks complete. Copy the report and send it with your carrier name and VPN status.');run.disabled=false;copy.disabled=false;
  });
- copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(report.textContent);status.textContent='نتیجه کپی شد.';}catch{status.textContent='متن نتیجه را از پایین صفحه انتخاب و کپی کنید.';}});
+ copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(report.textContent);status.textContent=t('نتیجه کپی شد.','Results copied.');}catch{status.textContent=t('متن نتیجه را از پایین صفحه انتخاب و کپی کنید.','Select and copy the results at the bottom of the page.');}});
  if(new URLSearchParams(location.search).get('run')==='1')run.click();
 })();

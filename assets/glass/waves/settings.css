@@ -14,9 +14,9 @@
 :root[data-wave] .signature-hero {background-image:none}
 :root[data-wave]:not([data-theme=dark]) :is(.glass-surface,.signature-copy,.card,.project-card,.page-intro>.container,.site-footer) {background-color:#ffffffc9}
 :root[data-wave][data-theme=dark] :is(.glass-surface,.signature-copy,.card,.project-card,.page-intro>.container,.site-footer) {background-color:#181823da}
-.appearance-launch,.appearance-close,.appearance-dialog select {font:inherit;color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:12px;padding:.4rem .75rem}
-.appearance-launch,.appearance-close {cursor:pointer;min-height:44px}
-.appearance-launch:focus-visible,.appearance-dialog :is(select,button):focus-visible {outline:2px solid currentColor;outline-offset:2px}
+.appearance-close,.appearance-dialog select {font:inherit;color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:12px;padding:.4rem .75rem}
+.appearance-close {cursor:pointer;min-height:44px}
+.appearance-dialog :is(select,button):focus-visible {outline:2px solid currentColor;outline-offset:2px}
 .appearance-dialog {box-sizing:border-box;inline-size:min(28rem,calc(100% - 2rem));max-block-size:calc(100% - 2rem);margin:auto;padding:clamp(1rem,5vw,1.75rem);border:1px solid var(--line);border-radius:24px;background:var(--paper);color:var(--ink);box-shadow:0 24px 72px #0005}
 .appearance-dialog::backdrop {background:#14142182}
 .appearance-dialog .appearance-content,.appearance-dialog label {display:grid;gap:.35rem}

@@ -41,11 +41,11 @@ await store.publish('publication dates');
 const articleBlob=calls.filter(call=>call.path.endsWith('/git/blobs')).map(call=>JSON.parse(call.body)).find(blob=>JSON.parse(blob.content).articles);
 const posted=JSON.parse(articleBlob.content).articles[0];assert.match(posted.published_at,/^\d{4}-\d{2}-\d{2}$/);assert.equal(posted.reviewed_at,'');assert.equal(store.documents['content/articles.json'].articles[0].published_at,posted.published_at);assert.equal(store.count,0);
 ({store}=fixture({refConflict:true}));store.edit('content/articles.json',{articles:[article]});await assert.rejects(store.publish('failed publication'),/concurrent/);assert.equal(store.documents['content/articles.json'].articles[0].published_at,'');
-assert.doesNotThrow(()=>validateDocument('content/articles.json',{articles:[{...article,title_en:'',body_en:'',author:'',category:'',published_at:'2026-11-16'}]}));
+assert.throws(()=>validateDocument('content/articles.json',{articles:[{...article,title_en:'',body_en:'',author:'',category:'',published_at:'2026-11-16'}]}));
 ({store}=fixture());store.edit('content/articles.json',{articles:[article]});const originalApi=store.session.api;
 store.session.api=async(path,options)=>{if(path.endsWith('/git/refs/heads/main')){const pending=clone(store.documents['content/articles.json']);pending.articles[0].body_fa='ویرایش تازه هنگام ثبت نسخه';store.edit('content/articles.json',pending);}return originalApi(path,options);};
 await store.publish('concurrent typing');assert.equal(store.documents['content/articles.json'].articles[0].body_fa,'ویرایش تازه هنگام ثبت نسخه');assert.equal(store.documents['content/articles.json'].articles[0].published_at,store.base['content/articles.json'].articles[0].published_at);assert.equal(store.count,1);
-console.log('PASS: atomic publication, automatic publication date, optional truthful review metadata, one-language articles and draft preservation.');
+console.log('PASS: atomic publication, automatic publication date, optional truthful review metadata, bilingual articles and draft preservation.');
 // Incomplete local forms survive both reload and remote synchronization.
 for(const [path,next] of [['content/site.json',{...clone(documents['content/site.json']),bio_fa:'Saved biography',cv:[{title_fa:'',title_en:'',detail_fa:'',detail_en:''}]}],['content/navigation.json',{...clone(documents['content/navigation.json']),header:[{fa:'',en:'',url:'',children:[]}]}]]){
  const draft={base:clone(documents[path]),next};const pending=new SiteStore({});pending.drafts[path]=clone(draft);pending.install(path,documents[path],'sha');assert.deepEqual(pending.documents[path],next);assert.deepEqual(pending.drafts[path],draft);assert.throws(()=>validateDocument(path,next));
