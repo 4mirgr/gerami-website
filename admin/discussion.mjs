@@ -1,3 +1,4 @@
+import {formatTehranDate} from './tehran-calendar.mjs';
 import {displayText} from '../js/site-model.mjs';
 export function discussionEditor(host){
  const section=document.createElement('section');section.className='studio-group';host.append(section);
@@ -11,7 +12,7 @@ export function discussionEditor(host){
  let cursor=null,busy=false;
  const more=button('نمایش موارد بیشتر',()=>load(true));more.hidden=true;
  const refresh=button('تازه‌سازی',()=>load(false));
- section.append(element('h2','دیدگاه‌ها و پسندهای خوانندگان'),select,refresh,sender,notice,rows,more);
+ section.append(element('h2','دیدگاه‌ها و پسندهای خوانندگان'),element('p','زمان ثبت دیدگاه‌ها و پسندها به وقت تهران است.'),select,refresh,sender,notice,rows,more);
  async function api(action,body){
   const r=await fetch('/api/discussion/'+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store',signal:AbortSignal.timeout(24000)});
   if(!r.ok)throw Error('دریافت یا ثبت تغییر ممکن نشد. دوباره تلاش کنید.');return r.json();
@@ -26,7 +27,7 @@ export function discussionEditor(host){
    for(const item of data.items){
     const row=element('article','');row.className='panel';
     const link=element('a','مشاهده مطلب');link.href=item.path;
-    row.append(element('h3',item.kind==='comment'?'دیدگاه · '+item.display_name:'پسند'),link,element('p',item.body),element('small',new Date(item.created_at).toLocaleString('fa-IR')));
+    row.append(element('h3',item.kind==='comment'?'دیدگاه · '+item.display_name:'پسند'),link,element('p',item.body),element('small',formatTehranDate(item.created_at,{time:true})));
     if(item.email)row.append(element('p','ایمیل تأیید · '+(item.email==='sent'?'پذیرفته‌شده توسط فرستنده':item.email==='queued'?'در صف ارسال':'نیازمند بررسی ارسال')));
     if(item.status==='pending')for(const [decision,label] of [['approved','تأیید'],['rejected','رد']]){
      row.append(button(label,async()=>{

@@ -49,5 +49,52 @@ try{
  await assert.rejects(call('edit',2,{content:{},image:'x',snapshot_hash:'x'}),/draft_locked/);
  await call('retry',2);assert.equal((await db.query('select status,publication_attempts from public.gerami_editorial_drafts')).rows[0].status,'approved');
  await assert.rejects(call('edit',2,{content:{},image:'x',snapshot_hash:'x'}),/draft_locked/,'Retrying an uncertain publication must not make its snapshot editable');
+ // Upgrade the existing per-audience job rows in-place, then exercise the real cron and manual paths.
+ for(const file of ['telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql','publication-schedule.sql','generation-schedule.sql']){
+  await db.exec(await fs.readFile('backend/editorial/'+file,'utf8'));
+ }
+ const slots=(count)=>db.query("select day::text,slot_index,audience,scheduled_at from gerami_editorial_private.generation_slots('2026-11-26 09:00:00 Asia/Tehran',9,$1) order by scheduled_at",[count]);
+ for(const count of [1,2,3,5,10,96]){
+  const rows=(await slots(count)).rows;
+  assert.equal(rows.length,2*count);
+  assert.equal(rows.filter(s=>s.day==='2026-11-26').length,count);
+  assert.equal(rows.filter(s=>s.audience==='patients').length,count);
+  for(let i=1;i<rows.length;i++){
+   assert.notEqual(rows[i].audience,rows[i-1].audience);
+   assert.equal(+rows[i].scheduled_at-rows[i-1].scheduled_at,86400000/count);
+  }
+ }
+ for(const role of ['anon','authenticated']){
+  await db.exec('set role '+role);
+  await assert.rejects(db.query("select gerami_editorial_request_generation(gen_random_uuid(),'patients')"),/permission denied/);
+  await db.exec('reset role');
+ }
+ await db.exec("update gerami_editorial_jobs set status='complete',token_hash=null;update gerami_editorial_drafts set status='rejected'");
+ const manualKey='00000000-0000-4000-8000-000000000009',manual=async(audience)=>(await serviceQuery('select gerami_editorial_request_generation($1,$2) id',[manualKey,audience])).rows[0].id;
+ const manualId=await manual('professional');assert.equal(await manual('professional'),manualId);
+ await assert.rejects(manual('patients'),/request_audience_mismatch/);
+ const remembered=(await db.query('select kind,status,attempts from gerami_editorial_jobs where id=$1',[manualId])).rows[0];
+ assert.deepEqual(remembered,{kind:'manual',status:'queued',attempts:1},'Manual request dispatches once even when daily generation is disabled');
+ await db.exec("update gerami_editorial_jobs set status='complete',token_hash=null where kind='manual';update gerami_editorial_settings set enabled=true,daily_count=10,hour=extract(hour from now() at time zone 'Asia/Tehran')::integer");
+ assert.equal((await db.query("select count(*)::int c from gerami_editorial_jobs where kind='daily' and slot_index is null")).rows[0].c,0);
+ // Simulate scheduler activation before this cycle's first slot. Repeated ticks may never duplicate it.
+ await db.exec("delete from gerami_editorial_jobs where kind='daily';update gerami_editorial_settings set generation_effective_at=now()-interval '24 hours'");
+ await serviceQuery("select gerami_editorial_tick()");await serviceQuery("select gerami_editorial_tick()");
+ assert.equal((await db.query("select count(*)::int c from gerami_editorial_jobs where kind='daily'")).rows[0].c,1);
+ assert.ok((await serviceQuery('select gerami_editorial_next_generation() next')).rows[0].next > new Date());
+ const dispatched=(await db.query("select id, token_hash from gerami_editorial_jobs where kind='daily' and token_hash is not null")).rows[0];
+ await db.exec("update gerami_editorial_settings set enabled=false");
+ const claimJob=async(job,hash)=>(await serviceQuery('select gerami_editorial_claim_job($1,$2) j',[job,hash])).rows[0].j;
+ assert.equal(await claimJob(dispatched.id,dispatched.token_hash),null,'Pausing invalidates an outstanding daily capability');
+ await db.exec("update gerami_editorial_jobs set token_hash='fresh',expires_at=now()+interval '2 minutes',status='queued' where kind in ('manual','maintenance','daily')");
+ assert.equal(await claimJob(dispatched.id,'fresh'),null);
+ assert.equal((await claimJob(manualId,'fresh')).status,'processing');
+ const maintenance=(await db.query("select id from gerami_editorial_jobs where kind='maintenance'")).rows[0].id;
+ assert.equal((await claimJob(maintenance,'fresh')).status,'processing');
+ await db.exec("update gerami_editorial_settings set enabled=true");
+ assert.equal((await claimJob(dispatched.id,'fresh')).status,'processing');
+ await db.exec("update gerami_editorial_settings set enabled=false");
+ assert.equal((await db.query("select status from gerami_editorial_jobs where id=$1",[dispatched.id])).rows[0].status,'processing');
+ console.log('PASS generation cadence: individual posts, 10-way/odd schedules, Tehran boundaries, private RPCs, preserved rows and idempotent manual requests.');
  console.log('Editorial PostgreSQL: RLS, stale revision/message/token, disabled owner, one-time approval, serialized claim, publication locks and receipt binding passed.');
 }catch(error){console.error(error);throw error;}finally{await db.close();}

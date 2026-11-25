@@ -1,3 +1,4 @@
+import {createTehranPicker,formatTehranDate} from './tehran-calendar.mjs';
 import '../js/contact-marks.js';
 import {discussionEditor} from './discussion.mjs';
 import {editorialEditor} from './editorial.mjs';
@@ -99,7 +100,16 @@ function articleEditor(){
   field(box,'شاخه یا زیرشاخه',item.topic||'',value=>{item.topic=value;edit(path,data);},{options:Object.fromEntries([['','بدون موضوع'],...flattenTopics(store.documents['content/topics.json']).map(t=>[t.id,t.path_fa])])});
   field(box,'مخاطب',item.audience,value=>{item.audience=value;edit(path,data);},{options:{patients:'بیماران و خانواده‌ها',professional:'پزشکان و همکاران'}});
   markdown(box,'متن فارسی',displayText(item.body_fa||''),value=>{item.body_fa=value;edit(path,data);});markdown(box,'English content',item.body_en,value=>{item.body_en=value;edit(path,data);}).dir='ltr';
-  for(const [key,title] of [['published_at','تاریخ انتشار'],['reviewed_at','تاریخ بازبینی']])field(box,title,item[key],value=>{item[key]=value;edit(path,data);},{type:'date',help:key==='published_at'?'اگر خالی باشد، هنگام انتشار تاریخ امروز ثبت می‌شود.':'اختیاری؛ فقط تاریخ بازبینی انجام‌شده را وارد کنید.'});
+  for(const [key,title] of [['published_at','تاریخ انتشار'],['reviewed_at','تاریخ بازبینی']]){
+   const picker=createTehranPicker({label:title,value:item[key]||'',dateOnly:true,allowEmpty:true});
+   picker.element.addEventListener('change',()=>{item[key]=picker.value;edit(path,data);});
+   const field=node('div',undefined,'field');
+   const hint=node('small',key==='published_at'?'اگر خالی بماند، تاریخ روز انتشار به وقت تهران ثبت می‌شود.':'اختیاری؛ تاریخ آخرین بازبینی انجام‌شده.');
+   hint.id='field-help-'+(++fieldSequence);
+   picker.element.querySelector('button').setAttribute('aria-describedby',hint.id);
+   field.append(node('span',title),picker.element,hint);
+   box.append(field);
+  }
   const cover=node('div',undefined,'article-cover'),coverImage=node('img'),coverStatus=node('p',undefined,'muted');coverStatus.setAttribute('role','status');
   coverImage.alt='پیش‌نمایش تصویر مقاله';coverImage.referrerPolicy='no-referrer';coverImage.decoding='async';coverImage.addEventListener('load',()=>{coverStatus.textContent='';});coverImage.addEventListener('error',()=>{coverImage.hidden=true;coverStatus.textContent='تصویر باز نشد؛ لینک مستقیم تصویر را بررسی کنید یا فایل را بارگذاری کنید.';});
   let coverTimer;function showCover(){clearTimeout(coverTimer);removeCover.hidden=!item.image;coverImage.hidden=!articleImage(item.image);if(coverImage.hidden){coverImage.removeAttribute('src');coverStatus.textContent=item.image?'لینک مستقیم HTTPS تصویر یا نشانی رسانه بارگذاری‌شده را وارد کنید.':'';}else{coverStatus.textContent='در حال دریافت تصویر…';coverImage.src=store.assetPreviews.get(item.image)||item.image;}}
@@ -203,9 +213,9 @@ function drawImage(){
 for(const id of ['image-ratio','image-brightness','image-contrast','image-x','image-y'])$(id).addEventListener('input',drawImage);
 $('image-rotate').addEventListener('click',()=>{rotation=(rotation+90)%360;drawImage();});
 $('image-save').addEventListener('click',attempt(async()=>{if(imageSaving)return;imageSaving=true;const generation=imageGeneration,apply=imageApply;$('image-save').disabled=true;status();try{const blob=await new Promise(resolve=>$('image-canvas').toBlob(resolve,'image/webp',0.88));if(generation!==imageGeneration||!$('image-dialog').open)return;if(!blob)throw Error('ساخت تصویر ممکن نشد.');const path=await store.stageImage(blob);if(generation!==imageGeneration||!$('image-dialog').open){const key=path.slice(1),file=store.media.get(key);if(file)URL.revokeObjectURL(file.url);store.media.delete(key);store.assetPreviews.delete(path);store.changed();await store.mediaSave;return;}apply?.(path);$('image-dialog').close();notice(apply?'تصویر به مقاله اضافه شد و همراه آن منتشر می‌شود.':'تصویر به پیش‌نویس اضافه شد: '+path);render();}finally{imageSaving=false;$('image-save').disabled=false;status();}}));
-async function historyEditor(){const section=group('تاریخچه و بازیابی','بازیابی، نسخه انتخابی را به پیش‌نویس تبدیل می‌کند. پیش از انتشار آن را در پیش‌نمایش بررسی کنید. تاریخچه شامل متن‌ها، ظاهر، منوها، مقاله‌ها و رزومه است.');
+async function historyEditor(){const section=group('تاریخچه و بازیابی','بازیابی، نسخه انتخابی را به پیش‌نویس تبدیل می‌کند. پیش از انتشار آن را در پیش‌نمایش بررسی کنید. تاریخچه شامل متن‌ها، ظاهر، منوها، مقاله‌ها و رزومه است. زمان هر تغییر به وقت تهران نمایش داده می‌شود.');
  if(session.state!=='connected'){section.append(node('p','پس از اتصال GitHub، تاریخچه فایل‌های سایت در دسترس است.'));return;}
- section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',new Date(commit.commit.author.date).toLocaleString('fa-IR')));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخه انتخابی در پیش‌نویس آماده بررسی است.');render();})));rows.append(row);}})));
+ section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',formatTehranDate(commit.commit.author?.date,{time:true})));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخه انتخابی در پیش‌نویس آماده بررسی است.');render();})));rows.append(row);}})));
 }
 const reviewEditors=new Map([['discussion',discussionEditor],['auto-posts',editorialEditor]]);
 function render(){

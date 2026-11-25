@@ -6,14 +6,14 @@ const origin=process.env.DISCUSSION_TEST_ORIGIN||'http://127.0.0.1:4173';
 const posts=JSON.parse(await readFile('content/articles.json','utf8')).articles.filter(p=>p.status==='published');
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
- const page=await browser.newPage({viewport:{width:390,height:844}});page.setDefaultTimeout(7000);
+ const page=await browser.newPage({timezoneId:'America/Los_Angeles',viewport:{width:390,height:844}});page.setDefaultTimeout(7000);
  let signed=false,mine=null,status='pending',submitted;
  await page.route('**/api/discussion/*',async route=>{
   const action=route.request().url().split('/').pop(),body=route.request().postDataJSON();
   if(action==='read')return route.fulfill({json:{signedIn:signed,comments:[],likes:0,mine}});
   if(action==='comment'){submitted=body;return route.fulfill({json:{status:'pending'}});}
   if(action==='like'){mine='pending';return route.fulfill({json:{status:mine}});}
-  if(action==='list')return route.fulfill({json:{senderReady:false,items:status===body.status?[{id:1,display_name:'Reader',kind:'comment',body:'Synthetic comment',path:'/articles/lesson/',created_at:'2026-01-01',status}]:[]}});
+  if(action==='list')return route.fulfill({json:{senderReady:false,items:status===body.status?[{id:1,display_name:'Reader',kind:'comment',body:'Synthetic comment',path:'/articles/lesson/',created_at:'2026-03-20T21:15:00Z',status}]:[]}});
   if(action==='review'){status=body.decision;return route.fulfill({json:{status}});}
   throw Error(action);
  });
@@ -85,6 +85,7 @@ try{
   await page.getByRole('button',{name:/پسندیدن/}).click();await page.getByRole('button',{name:/در انتظار تأیید/}).waitFor();
  }
  await page.goto(origin+'/admin/#discussion');await page.getByText('Synthetic comment').waitFor();
+ assert.match(await page.locator('#studio-fields article small').textContent(),/(?=.*فروردین)(?=.*۱۴۰۵)(?=.*۰۰:۴۵)/);
  await page.getByRole('button',{name:'تأیید',exact:true}).click();await page.getByText('موردی با این وضعیت وجود ندارد.').waitFor();
  await page.getByLabel('وضعیت بازبینی').selectOption('approved');await page.getByText('Synthetic comment').waitFor();
  assert.equal(status,'approved');
