@@ -222,20 +222,19 @@ def bake_settings(root, text, ident):
                         from validate_content import remote_article_image
                         image = article.get('image') or ''
                         if not (re.fullmatch(r'/assets/(?:uploads|optimized)/[a-zA-Z0-9._-]+', image) or remote_article_image(image)):
-                            image = '/assets/topics/' + topic_art.get(article.get('topic'), 'education') + '.webp'
+                            image = ''
                         body = article.get('body_fa') or article.get('body_en') or ''
                         intro = next((line.strip() for line in body.splitlines() if line.strip() and not re.match(r'^#{1,6}\s|^!\[', line.strip())), body)
                         intro = re.sub(r'[#*_`>~]', '', re.sub(r'!?\[([^\]]*)\]\([^)]*\)', r'\1', intro)).strip()
                         if len(intro) > 145:
                             intro = re.sub(r'\s+\S*$', '', intro[:145]) + '…'
-                        link = f'<img class="post-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{html.escape(image, quote=True)}" alt=""><strong>{link}</strong><p class="post-excerpt">{html.escape(intro)}</p>'
+                        cover = f'<img class="post-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{html.escape(image, quote=True)}" alt="">' if image else ''
+                        link = f'{cover}<strong>{link}</strong><p class="post-excerpt">{html.escape(intro)}</p>'
                     links.append('<li>' + link + '</li>')
             return ''.join(links)
 
         fallback = ''
         if ordered and ident == 'home':
-            topics = public_document(root / 'content/topics.json')['topics']
-            topic_art = {node['id']: TOPIC_ART.get(node['icon'], 'education') for topic in topics for node in [topic, *topic['children']]}
             groups = []
             for professional, fa, en in [(False, 'برای عموم', 'For the public'), (True, 'ویژه پزشکان', 'For clinicians')]:
                 items = [a for a in ordered if (a.get('audience') == 'professional') == professional][:7]

@@ -79,3 +79,11 @@ It records the manifest hash, build, Git pin and source item IDs. If a text cann
 fit, the selector tries another complete unit. It uses the same two-cover review
 and topic taxonomy. Sources and daily rotation are scoped to the selected audience.
 Each edition needs its own Telegram image choice and final approval.
+
+Apply dashboard-review.sql after cover-choice.sql. Each review topic contains independent
+public and clinician editions. Dashboard approval pins the selected image and exact saved
+revision before queueing the same publisher as Telegram. Both media channels use the
+same two topic-specific recommendations. Selection ranks captions against the draft
+title, summary, and body. The media service rejects site artwork fingerprints from
+site-artwork.json and excludes logos and emblems in discovery. If suitable unused
+pictures run out, the draft waits for new artwork.

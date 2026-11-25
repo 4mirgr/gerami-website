@@ -181,12 +181,7 @@ function renderArticles(){
 function postCard(item,byId,opened){
   const copy=articleText(item),topic=byId.get(item.topic),tile=el('article','','card post-card glass-surface'),card=el('details','','cms-article');card.id='article-'+item.slug;card.open=opened.has(card.id)||location.hash==='#'+card.id;
   const title=el('summary',copy.title);title.dir=copy.language==='fa'?'rtl':'ltr';card.append(title);
-  function topicThumbnail(){
-   const art=topicIcon(topic?.icon||'medicine');
-   const frame=el('div','','post-cover topic-cover');frame.append(art);return frame;
-  }
-  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>{if(isHome)img.replaceWith(topicThumbnail());else img.hidden=true;},{once:true});tile.append(img);}
-  else if(isHome)tile.append(topicThumbnail());
+  if(articleImage(item.image)){const img=el('img');img.loading='lazy';img.referrerPolicy='no-referrer';img.src=previewAssets[item.image]||articleImageSources[item.image]||item.image;img.alt=item.image_alt||copy.title;img.decoding='async';img.className='post-cover';img.addEventListener('error',()=>img.remove(),{once:true});tile.append(img);}
   const meta=el('p',[item.audience==='professional'?text('ویژه پزشکان','For clinicians'):'',topic?.[lang()]||item.category,item.author].filter(Boolean).join(' · '),'post-meta');
   for(const [label,date] of [['',item.published_at],[text('بازبینی: ','Reviewed: '),item.reviewed_at]]){
    if(!date)continue;

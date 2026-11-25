@@ -13,7 +13,7 @@ const safeError=e=>['stale_revision','draft_locked','stale_approval','owner_disa
 async function remote(url,options={}){const r=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(15000),...options});if(!r.ok)throw Error('source_unavailable');return r;}
 async function db(path,body,method=body===undefined?'GET':'POST'){
  const r=await fetch(PROJECT+'/rest/v1/'+path,{method,headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'application/json',Prefer:path.startsWith('gerami_editorial_trend_snapshots')?'resolution=merge-duplicates,return=representation':'return=representation'},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(12000)});
- if(!r.ok){let e;try{e=await r.json();}catch{};throw Error(['stale_revision','draft_locked','stale_approval','owner_disabled','edit_expired','wrong_edit_prompt','cover_required','invalid_options'].find(c=>e?.message?.includes(c))||'database_failed');}return r.status===204?null:r.json();
+ if(!r.ok){let e;try{e=await r.json();}catch{};throw Error(['stale_revision','draft_locked','stale_approval','owner_disabled','edit_expired','wrong_edit_prompt','cover_required','invalid_options','image_options_pending'].find(c=>e?.message?.includes(c))||'database_failed');}return r.status===204?null:r.json();
 }
 const rpc=(name,body={})=>db('rpc/gerami_editorial_'+name,body);
 const mutate=(d,action,data={})=>rpc('mutate',{p_id:d.id,p_revision:d.revision,p_action:action,p_data:data});
@@ -37,7 +37,7 @@ async function telegram(method,body){
 }
 async function chat(){const rows=await db('intmed_notification_settings?key=eq.telegram&select=chat_id');const v=String(rows[0]?.chat_id||'');if(!/^\d{1,18}$/.test(v))throw Error('telegram_not_configured');return v;}
 async function storage(path,options={}){const r=await fetch(PROJECT+'/storage/v1/'+path,{headers:{apikey:service,Authorization:'Bearer '+service,...options.headers},...Object.fromEntries(Object.entries(options).filter(([k])=>k!=='headers')),signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('media_failed');return r;}
-async function preview(d){if(!d.media_path)return d.image;const data=await(await storage('object/sign/gerami-editorial/'+d.media_path,{method:'POST',body:JSON.stringify({expiresIn:3600}),headers:{'Content-Type':'application/json'}})).json();return PROJECT+'/storage/v1'+data.signedURL;}
+async function preview(d){if(!d.media_path)return null;const data=await(await storage('object/sign/gerami-editorial/'+d.media_path,{method:'POST',body:JSON.stringify({expiresIn:3600}),headers:{'Content-Type':'application/json'}})).json();return PROJECT+'/storage/v1'+data.signedURL;}
 const snapshot=snapshotHash;
 const media=createEditorialMedia({db,rpc,storage,remote,snapshot});
 const controls=createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,storage,remote,snapshot,media,githubToken:()=>Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')||'',background:p=>EdgeRuntime.waitUntil(p.catch(()=>{}))});
@@ -77,7 +77,7 @@ async function generate(job){
   let input;
   if(audience==='patients'){try{input=sourceText(topicData);}catch(e){if(e.message==='insufficient_source')continue;throw e;}}
   hasSource=true;
-  if(ready.get(topic.id)?.size!==2){try{await media.discover(topic.id);}catch{continue;}}
+  if((await rpc('unused_pair',{p_topic:topic.id})).length!==2){try{await media.discover(topic.id,clinical?.copy||{title:destination.child.fa,paragraphs:[input]});if((await rpc('unused_pair',{p_topic:topic.id})).length!==2)continue;}catch{continue;}}
   const canonical=await(await remote(base+'content/'+category.id+'/'+topic.id+'/data.json')).json();
   const generated=clinical?{copy:clinical.copy,model:'intmed-verbatim'}:await patientEdition(topic,canonical,input,history);
   const path=destination.root.fa+' / '+destination.child.fa;
@@ -121,7 +121,7 @@ async function jobRun(job){
  }catch(e){await db('gerami_editorial_jobs?id=eq.'+job.id,{status:e.message==='provider_quota'?'waiting_provider':'error',error_code:safeError(e),next_attempt_at:new Date(Date.now()+900000).toISOString(),updated_at:new Date().toISOString()},'PATCH');}
 }
 async function draftCovers(d){
- const options=d.cover_pack?await media.options(d):[];
+ const options=d.cover_pack?await media.options(d,{includeBoth:true}):[];
  const signed=await Promise.all(options.map(async o=>({
   id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview(o)
  })));
@@ -184,6 +184,7 @@ Deno.serve(async req=>{
    }return reply({error:'invalid_action'},400);
   }
   const actor=await admin(req);
+  if(action==='review-groups')return reply(await rpc('review_groups',{p_view:body.view==='history'?'history':'drafts',p_offset:Number.isInteger(body.offset)&&body.offset>=0?body.offset:0}));
   if(action==='list'){
    const offset=Number.isInteger(body.offset)&&body.offset>=0&&body.offset<=100000?body.offset:0;
    const filter=body.view==='drafts'?'&status=eq.draft':body.view==='history'?'&status=neq.draft':'';
@@ -201,10 +202,23 @@ Deno.serve(async req=>{
    await db('gerami_editorial_settings?singleton=eq.true',{enabled:body.enabled,hour:body.hour,categories:[...new Set(body.categories)],updated_at:new Date().toISOString()},'PATCH');return reply({ok:true});
   }
   if(action==='run'){await db('gerami_editorial_jobs?day=eq.'+new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tehran'}).format(new Date())+'&status=in.(error,waiting_provider)',{attempts:0,status:'queued',next_attempt_at:new Date().toISOString()},'PATCH');await rpc('tick',{p_force:true});return reply({queued:true});}
+  if(action==='detail'&&uuid(body.id)){
+   const rows=await db('gerami_editorial_drafts?id=eq.'+body.id+'&select=id,revision,status,content,category,topic,source,cover_selected,snapshot_hash,created_at,error_code');
+   return rows.length?reply({draft:rows[0]}):reply({error:'stale_revision'},409);
+  }
   if(!uuid(body.id)||!Number.isInteger(body.revision))return reply({error:'invalid_draft'},400);
   const d=(await db('gerami_editorial_drafts?id=eq.'+body.id+'&select=*'))[0];if(!d||d.revision!==body.revision)throw Error('stale_revision');
-  if(action==='covers')return reply(await draftCovers(d));
-  if(action==='choose'){const option=(await media.options(d)).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
+  if(action==='publish'){
+   if(typeof body.snapshot_hash!=='string'||body.snapshot_hash!==d.snapshot_hash||await snapshot(d)!==d.snapshot_hash)throw Error('stale_revision');
+   const status=await rpc('dashboard_publish',{p_id:d.id,p_revision:d.revision,p_snapshot:body.snapshot_hash,p_owner:actor});
+   if(status==='approved')EdgeRuntime.waitUntil(controls.wake().catch(()=>{}));
+   return reply({status});
+  }
+  if(action==='covers'){
+   const current=d.status==='draft'?await media.ensure(d):d;
+   return reply({...await draftCovers(current),revision:current.revision});
+  }
+  if(action==='choose'){const option=(await media.options(d,{includeBoth:true})).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
   if(action==='retry'){await mutate(d,'retry');EdgeRuntime.waitUntil(controls.wake().catch(()=>{}));return reply({ok:true});}
   if(action==='notify'){if(d.status!=='draft')throw Error('draft_locked');await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notification_attempts:0,next_notification_at:new Date().toISOString()},'PATCH');await notify({...d,notified_revision:null,notification_attempts:0,next_notification_at:new Date().toISOString()});return reply({ok:true});}
   if(action==='edit'||action==='image'){

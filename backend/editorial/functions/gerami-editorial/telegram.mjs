@@ -14,14 +14,8 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   for(const id of ids){await telegram('editMessageReplyMarkup',{chat_id:await chat(),message_id:id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});await db('gerami_editorial_previews?draft_id=eq.'+d.id+'&control_message_id=eq.'+id+scope,{retired_at:new Date().toISOString()},'PATCH');}
  }
  async function cover(d){
-  let r;if(d.media_path)r=await storage('object/gerami-editorial/'+d.media_path);
-  else{
-   if(d.image!==d.source.default_image)throw Error('image_selection_mismatch');
-   const selected=new Uint8Array(await(await remote(new URL(d.image,SITE).href)).arrayBuffer());
-   if(await sha(selected)!==d.source.image_sha)throw Error('image_selection_mismatch');
-   const u=new URL(d.source.telegram_image);if(u.origin!==SITE||!/^\/assets\/editorial\/[a-z-]+\.jpg$/.test(u.pathname))throw Error('invalid_image');
-   r=await remote(u.href);
-  }
+  if(!d.media_path)throw Error('image_options_pending');
+  const r=await storage('object/gerami-editorial/'+d.media_path);
   const bytes=new Uint8Array(await r.arrayBuffer()),mime=(r.headers.get('Content-Type')||'image/jpeg').split(';')[0];
   if(!validImage(bytes,mime))throw Error('invalid_image');return {bytes,mime,hash:await sha(bytes)};
  }
@@ -30,7 +24,7 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   await verifiedOwner();
   const sessions=await db('gerami_editorial_telegram_sessions?draft_id=eq.'+d.id+'&revision=eq.'+d.revision+'&select=expires_at');
   if(sessions.some(s=>Date.parse(s.expires_at)>Date.now()))return false;
-  if(d.cover_required){const prepared=await media.ensure(d);if(prepared.revision!==d.revision)await retire(d);return notifyChoices(prepared);}
+  if(media||d.cover_required){const prepared=await media.ensure(d);if(prepared.revision!==d.revision)await retire(d);return notifyChoices(prepared);}
   const selected=await cover(d);await retire(d);
   const capability=crypto.randomUUID().replaceAll('-',''),hash=await sha(capability),target=await chat();
   await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:hash});

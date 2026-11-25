@@ -5,7 +5,8 @@ const records=Array.from({length:27},(_,i)=>({slug:'lesson-'+(i+1),status:'publi
 records[3].tags=['پیگیری کلیوی ۲۴'];
 records[9].author='گروه آموزش بیماری‌های داخلی و پیگیری درمان بیمارستان';
 records[9].title_fa='یک عنوان طولانی برای بررسی هم‌ترازی کارت‌ها و پیوندهای مطالعه در صفحه اصلی';
-records[9].image='/assets/optimized/heart.012d14fb0e841a4f.webp';
+records.forEach(record=>{record.image='/assets/uploads/editorial-144aec866a6e19ae1a9d002dee8cbc9d6eb19b258befc1723476194e17ba488d.jpg';});
+delete records[2].image;
 async function checkRow(page) {
  const boxes=await page.locator('#recent-posts .post-card').evaluateAll(cards=>cards.slice(0,3).map(card=>{
   const rect=card.getBoundingClientRect();

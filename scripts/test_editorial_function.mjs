@@ -19,7 +19,8 @@ const fakeFetch=async(url,options={})=>{
   if(path.startsWith('gerami_editorial_trend_snapshots'))return Response.json([{signals:[]}]);
   if(path.startsWith('gerami_editorial_cover_library'))return Response.json(covers);
   if(path.startsWith('gerami_editorial_cover_options'))return Response.json(coverOptions);
-  if(path==='rpc/gerami_editorial_prepare_covers'){const d=drafts.find(d=>d.id===body.p_id);Object.assign(d,{source:body.p_source,topic:body.p_topic,category:body.p_category,cover_pack:body.p_pack,cover_selected:false,cover_required:true,selected_cover_id:null,cover_sha256:null,image:body.p_options[0].image,media_path:null,snapshot_hash:body.p_snapshot,revision:d.revision+1});coverOptions=body.p_options;return Response.json(d);}
+  if(['rpc/gerami_editorial_unused_pair','rpc/gerami_editorial_unused_candidates'].includes(path))return Response.json(covers);
+  if(path==='rpc/gerami_editorial_prepare_unique'){const d=drafts.find(d=>d.id===body.p_id);Object.assign(d,{source:body.p_source,topic:body.p_topic,category:body.p_category,cover_pack:body.p_pack,cover_selected:false,cover_required:true,selected_cover_id:null,cover_sha256:null,image:body.p_options[0].image,media_path:null,snapshot_hash:body.p_snapshot,revision:d.revision+1});coverOptions=body.p_options;return Response.json(d);}
   if(path==='rpc/gerami_editorial_register_choices'){const d=drafts.find(d=>d.id===body.p_id);d.notified_revision=d.revision;d.telegram_message_id=body.p_entries[0].message_id;d.approval_hash=null;return Response.json(true);}
   if(path==='rpc/gerami_editorial_begin_preview'){const d=drafts.find(d=>d.id===body.p_id);d.notification_nonce=body.p_hash;d.approval_hash=body.p_hash;return Response.json(true);}
   if(path==='rpc/gerami_editorial_register_preview')return Response.json(true);
