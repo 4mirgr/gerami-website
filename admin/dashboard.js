@@ -10,15 +10,38 @@
  setTheme();$('theme').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';setTheme();try{localStorage.setItem('ahg-admin-theme',theme);}catch(_){}});
  $('today').textContent=new Intl.DateTimeFormat('fa-IR',{dateStyle:'long'}).format(new Date());
  const sidebar=$('sidebar');
- function menu(open){sidebar.classList.toggle('open',open);$('menu').setAttribute('aria-expanded',String(open));$('scrim').hidden=!open;}
- $('menu').addEventListener('click',()=>menu(!sidebar.classList.contains('open')));$('scrim').addEventListener('click',()=>menu(false));
- document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sidebar.classList.contains('open')){menu(false);$('menu').focus();}});
- const routes={discussion:'دیدگاه‌ها و پسندها',dashboard:'داشبورد',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',media:'تصاویر و رسانه',profile:'رزومه و سوابق',contact:'اطلاعات تماس',editor:'ویرایشگر پیشرفته',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',history:'تاریخچه و بازیابی'};
+ const mobileMenu=matchMedia('(max-width:900px)');
+ function menu(open){
+  const expanded=mobileMenu.matches&&open;
+  sidebar.classList.toggle('open',expanded);
+  sidebar.inert=mobileMenu.matches&&!expanded;
+  document.querySelector('.app').inert=expanded;
+  $('menu').setAttribute('aria-expanded',String(expanded));
+  $('scrim').hidden=!expanded;
+  if(expanded)sidebar.querySelector('[aria-current="page"]')?.focus();
+ }
+ function closeMenu(){menu(false);$('menu').focus();}
+ $('menu').addEventListener('click',()=>menu(true));
+ $('scrim').addEventListener('click',closeMenu);
+ mobileMenu.addEventListener('change',()=>menu(false));
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&sidebar.classList.contains('open'))closeMenu();
+ });
+ sidebar.addEventListener('click',event=>{
+  if(sidebar.classList.contains('open')&&event.target.closest('a[href^="#"]')){
+   menu(false);$('page-title').focus();
+  }
+ });
+ const navigation=[...sidebar.querySelectorAll('[data-nav]')];
  let frame;window.addEventListener('cms-editor-reset',()=>{frame=undefined;route();});
  function route(){
-  const selected=location.hash.slice(1);const page=Object.hasOwn(routes,selected)?selected:'dashboard';
-  $('page-title').textContent=routes[page];document.title=routes[page]+' | مدیریت سایت دکتر گرامی';
-  document.querySelectorAll('[data-nav]').forEach(link=>{link.classList.toggle('active',link.dataset.nav===page);if(link.dataset.nav===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
+  const selected=navigation.find(link=>link.hash===location.hash)||navigation.find(link=>link.dataset.nav==='dashboard');
+  const page=selected.dataset.nav,title=selected.querySelector('.nav-label').textContent;
+  $('page-title').textContent=title;document.title=title+' | مدیریت سایت دکتر گرامی';
+  for(const link of navigation){
+   link.classList.toggle('active',link===selected);
+   if(link===selected)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+  }
   $('dashboard-view').hidden=page!=='dashboard';$('media-view').hidden=true;const editing=page==='editor';$('editor-view').hidden=!editing;
   if(editing){
    const fragment=page==='articles'?'#/collections/website/entries/articles':['profile','contact'].includes(page)?'#/collections/website/entries/profile':'#/';

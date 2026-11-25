@@ -9,8 +9,14 @@ try{
   if(action==='choose'){draft.options.forEach(o=>o.selected=o.id===body.candidate_id);draft.revision++;}
   if(action==='edit'){draft.content=body.content;draft.revision++;}return r.fulfill({json:{ok:true}});
  });
- await page.goto('http://127.0.0.1:4173/admin/#auto-posts');await page.getByText('زمان و موضوعات',{exact:true}).waitFor();
- assert.equal(await page.locator('a[data-nav=auto-posts]').count(),1);
+ // The private inbox has its own API. It must work if a Studio document or the first list request fails.
+ await page.route('**/content/appearance.json',r=>r.fulfill({status:503,body:'temporarily offline'}));
+ await page.route('**/api/editorial/list',r=>r.fulfill({status:503,json:{error:'unavailable'}}),{times:1});
+ await page.goto('http://127.0.0.1:4173/admin/#auto-posts');
+ await page.getByRole('button',{name:'تلاش دوباره'}).click();await page.getByText('زمان و موضوعات',{exact:true}).waitFor();
+ assert.equal(await page.locator('a[data-nav=auto-posts]').getAttribute('aria-current'),'page');
+ assert.equal(await page.locator('#page-title').textContent(),'پیشنهادهای خودکار');
+ for(const selector of ['#dashboard-view','.preview-panel','#publish-bar'])assert.equal(await page.locator(selector).isVisible(),false);
  await page.locator('#studio-fields details summary').click();
  assert.equal(await page.getByRole('button',{name:'انتخاب این تصویر',exact:true}).count(),2);assert.equal(await page.getByLabel('تگ‌ها با ویرگول',{exact:true}).count(),0);await page.getByRole('button',{name:'انتخاب این تصویر',exact:true}).nth(1).click();await page.waitForFunction(()=>document.querySelector('#studio-fields details summary')?.textContent.includes('نسخه 2'));await page.locator('#studio-fields details summary').click();assert.equal(await page.getByRole('button',{name:'✅ تصویر انتخاب‌شده',exact:true}).count(),1);
  await page.getByLabel('عنوان',{exact:true}).fill('عنوان ویرایش‌شده');await page.getByRole('button',{name:'ذخیره ویرایش و باطل‌کردن تأیید قبلی',exact:true}).click();

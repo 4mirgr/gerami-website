@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Admin dashboard · 2026-11-25
+
+The website Studio is at `/admin/`. Its teal gear and gold ECG emblem, tab icon, touch icon and scoped installation manifest are in `assets/identity/admin/`. The shortcut starts at the server-protected Studio. The dashboard links directly to the private automated suggestions and discussion queues. Each queue uses its own authenticated API and loads independently of public CMS documents. Public draft publishing and the page preview belong to the content editor. Sidebar selection and the top heading use the same navigation labels. Test with `scripts/test_admin.mjs` and `scripts/test_editorial_browser.mjs`.
+
 ## Educational project entry · 2026-11-25
 
 Home opens with the Projects section in both source HTML and Studio configuration. IntMed comes first and Ventilator second. Use the compact bilingual IntMed images on home and the original bilingual posters in the portfolio. The owner supplied the Persian ventilator poster and lung emblem. Personal-site accounts of all verified roles can enter the simulator via the exact /ventilator/ destination. Pages middleware gates the mount, and signup confirmation and enabled OAuth return to it through the existing account system. Future paid access belongs to a separate Ventilator entitlement validated on the server. Pricing, availability of free modules, payment provider and unlocked modules await owner definition. The Clinic and IntMed entitlements are independent.
