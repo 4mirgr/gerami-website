@@ -17,7 +17,7 @@ try{
  const existingSubmenus=await submenus.count();
  await page.getByRole('button',{name:'افزودن زیرمنو',exact:true}).first().click();
  assert.equal(await submenus.count(),existingSubmenus+1);
- await frame.locator('.desktop-nav .nav-group').first().waitFor();
+ await frame.locator('.desktop-nav .nav-group').first().waitFor({state:'attached'});
  assert.equal(await frame.locator('.desktop-nav .topic-navigation a[href="/topics/nephrology/"]').count(),1);
  await page.locator('#preview-language').selectOption('en');await page.waitForTimeout(250);assert.equal(await page.frameLocator('#site-preview').locator('html').getAttribute('dir'),'ltr');
  await page.locator('#preview-theme').selectOption('dark');await page.waitForTimeout(250);assert.equal(await page.frameLocator('#site-preview').locator('html').getAttribute('data-theme'),'dark');
