@@ -54,8 +54,10 @@ for file in [ROOT / 'index.html', *sorted((ROOT / 'pages').glob('*.html'))]:
 
 for path in ('index.html', 'pages/projects.html'):
     expected = [('intmed', 'https://drgerami-md.ir/intmed/')]
+    if path == 'pages/projects.html':
+        expected.append(('spirometry', 'https://drgerami-md.ir/respiratory/spirometry/'))
     if pages[(ROOT / path).resolve()].app_entries != expected:
-        errors.append(f'{path}: expected the public IntMed entry on the .ir domain')
+        errors.append(f'{path}: expected the public project entries on the .ir domain')
 
 for file, page in pages.items():
     for reference in page.refs:

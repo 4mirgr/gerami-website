@@ -12,6 +12,8 @@ DOI = 'https://doi.org/10.3389/fmed.2022.872528'
 PROJECTS = (
     ('intmed', '/intmed/', 'EducationalApplication', 'IntMed', 'A study platform for internal medicine and cardiology with lessons, flashcards and exam simulations.'),
     ('ventilator', '/pages/projects#ventilator', 'EducationalApplication', 'Respiratory Ventilator Simulator', 'An educational simulator for exploring pressure, flow and volume waveforms in fictional clinical cases.'),
+    ('spirometry', '/respiratory/spirometry/', 'EducationalApplication', 'Spirometry Lab',
+     'A Persian spirometry course with interactive curves, lung volumes and fictional clinical cases for internal medicine residents.'),
     ('clinic-demo', '/pages/projects#clinic-demo', 'HealthApplication', 'Patient Health Record Preview',
      'A demonstration of organizing symptoms, medications and history before a visit, using fictional records.'),
 )

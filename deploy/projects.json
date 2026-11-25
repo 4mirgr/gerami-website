@@ -16,5 +16,11 @@
     "commit": "1856e871b097800f679207d15ef2be19f3b2bc1f",
     "public_directory": ".",
     "mount": "ventilator"
+  },
+  "spirometry": {
+    "repository": "https://github.com/4mirgr/spiromery.git",
+    "commit": "6e1e6ee083103efa8b50a37e43a59ac35d244b74",
+    "public_directory": ".",
+    "mount": "respiratory/spirometry"
   }
 }

@@ -8,9 +8,10 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 PROJECTS = {
-    'intmed': ('https://github.com/4mirgr/intMed-study-plan.git', 'docs'),
-    'aus': ('https://github.com/4mirgr/immi-arash-amir.git', 'dist'),
-    'ventilator': ('https://github.com/4mirgr/Respiratory-ventilator.git', '.'),
+    'intmed': ('https://github.com/4mirgr/intMed-study-plan.git', 'docs', 'intmed'),
+    'aus': ('https://github.com/4mirgr/immi-arash-amir.git', 'dist', 'aus'),
+    'ventilator': ('https://github.com/4mirgr/Respiratory-ventilator.git', '.', 'ventilator'),
+    'spirometry': ('https://github.com/4mirgr/spiromery.git', '.', 'respiratory/spirometry'),
 }
 
 
@@ -38,9 +39,9 @@ def validate(root=ROOT):
         raise ValueError('Content must contain a profile object and an articles list')
     if set(pins) != set(PROJECTS):
         raise ValueError('Unexpected set of independent project integrations')
-    for name, (repository, directory) in PROJECTS.items():
+    for name, (repository, directory, mount) in PROJECTS.items():
         spec = pins[name]
-        if (spec.get('repository'), spec.get('public_directory'), spec.get('mount')) != (repository, directory, name):
+        if (spec.get('repository'), spec.get('public_directory'), spec.get('mount')) != (repository, directory, mount):
             raise ValueError(f'{name}: integration repository, public directory and mount are protected')
         if not re.fullmatch(r'[0-9a-f]{40}', spec.get('commit', '')):
             raise ValueError(f'{name}: pin must be an immutable full commit SHA')
