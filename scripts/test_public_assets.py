@@ -155,7 +155,9 @@ class PublicAssets(unittest.TestCase):
             mirrors = public_mirrors(ROOT, site)
             appearance = json.loads((ROOT / 'content/appearance.json').read_text())
             self.assertTrue({appearance['light']['wallpaper'], appearance['dark']['wallpaper']}.issubset(mirrors))
-            self.assertLessEqual(len(mirrors), 24)
+            project_art = {path for path in mirrors if re.fullmatch(r'/assets/optimized/(?:intmed-preview-(?:en|fa)|ventilator-(?:emblem|poster|preview))\.[a-f0-9]{16}\.webp', path)}
+            self.assertEqual(len(project_art), 5)
+            self.assertLessEqual(len(set(mirrors) - project_art), 24)
             for path, entry in mirrors.items():
                 self.assertEqual(hashlib.sha256((site / path.lstrip('/')).read_bytes()).hexdigest(), entry['sha256'])
                 self.assertNotIn('/api/', path)

@@ -1,4 +1,4 @@
-import {AccountError,upstream,readAccount,accountFromRequest,cookieValue,cookie,clearAccountCookies,sessionCookies,newFlow,decode,safeNext,COOKIE_ACCESS,COOKIE_REFRESH,COOKIE_FLOW} from '../../../server/account.mjs';
+import {AccountError,upstream,readAccount,accountFromRequest,cookieValue,cookie,clearAccountCookies,sessionCookies,newFlow,encode,decode,safeNext,COOKIE_ACCESS,COOKIE_REFRESH,COOKIE_FLOW} from '../../../server/account.mjs';
 import {AUTH_URL} from '../../../server/shared-auth-config.mjs';
 import {clearCMSCookie} from '../../../server/cms-access.mjs';
 const reply=(data,status=200,cookies=[])=>{
@@ -70,7 +70,6 @@ export async function onRequest({request}){
    const settings=await upstream('/auth/v1/settings');if(settings.external?.google!==true)throw new AccountError(409,'google_not_configured');
    const value=await newFlow();value.flow.next=safeNext(data.next);
    // Re-encode after setting the safe return path. The verifier stays HttpOnly.
-   const {encode}=await import('../../../server/account.mjs');
    const target=new URL(AUTH_URL+'/auth/v1/authorize');target.search=new URLSearchParams({provider:'google',redirect_to:flowRedirect(request,value.flow),code_challenge:value.challenge,code_challenge_method:'s256',scopes:'openid email profile'}).toString();
    return reply({url:target.href},200,[cookie(COOKIE_FLOW,encode(value.flow),600)]);
   }
@@ -79,6 +78,8 @@ export async function onRequest({request}){
    const value=await newFlow(path==='recover'?'recovery':'signup');
    const body={email:data.email.trim().toLowerCase(),code_challenge:value.challenge,code_challenge_method:'s256'};
    if(path==='signup'){
+    value.flow.next=safeNext(data.next);
+    value.cookie=cookie(COOKIE_FLOW,encode(value.flow),600);
     if(!validPassword(data.password)||typeof data.username!=='string'||!/^[a-z0-9_.-]{3,64}$/.test(data.username)||typeof data.name!=='string'||!data.name.trim()||data.name.length>100)throw new AccountError(400,'invalid_signup');
     Object.assign(body,{password:data.password,data:{app:'gerami',username:data.username,fullName:data.name.trim()}});
    }

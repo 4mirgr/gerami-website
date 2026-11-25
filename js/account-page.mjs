@@ -2,6 +2,17 @@ import {accountAPI,getSession,changed,signOut} from './account-client.mjs';
 const root=document.documentElement,status=document.querySelector('#account-status'),forms=document.querySelector('#account-forms'),profile=document.querySelector('#account-profile');
 let account=null,mode='login',busy=false;
 const t=(fa,en)=>root.lang==='en'?en:fa;
+const ventilatorEntry=new URLSearchParams(location.search).get('next')==='/ventilator/';
+if(ventilatorEntry){
+ const badge=document.querySelector('#ventilator-identity');
+ const image=badge.querySelector('img');
+ image.src=image.dataset.icon;
+ badge.hidden=false;
+ const intro=document.querySelector('.account-intro');
+ intro.dataset.fa='برای ورود به شبیه‌ساز از حساب همین سایت استفاده کنید یا حساب بسازید.';
+ intro.dataset.en='Sign in with your website account or create one to open the simulator.';
+ intro.textContent=t(intro.dataset.fa,intro.dataset.en);
+}
 const errors={
  account_unavailable:['سرویس حساب پاسخ نداد. دوباره تلاش کنید.','The account service did not respond. Please retry.'],
  account_rejected:['اطلاعات ورود یا تأیید معتبر نیست.','The credentials or confirmation are not valid.'],
@@ -38,10 +49,10 @@ async function action(task){
 }
 for(const form of document.querySelectorAll('form[data-account-form]'))form.addEventListener('submit',event=>{
  event.preventDefault();action(async()=>{
-  const data=Object.fromEntries(new FormData(form)),result=await accountAPI(form.dataset.accountForm,data);
+  const data=Object.fromEntries(new FormData(form)),result=await accountAPI(form.dataset.accountForm,form.dataset.accountForm==='signup'&&ventilatorEntry?{...data,next:'/ventilator/'}:data);
   form.querySelectorAll('input[type=password]').forEach(el=>el.value='');
   if(result.authenticated){account=result.account;changed(account);status.textContent='';render();
-   const next=new URLSearchParams(location.search).get('next');if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
+   const next=new URLSearchParams(location.search).get('next');if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if(ventilatorEntry)location.assign('/ventilator/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
   }else{status.textContent=t('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
@@ -61,6 +72,7 @@ async function initialize(){try{
  if(params.has('logout')&&account)status.textContent=t('برای خروج، دکمه خروج از حساب را بزنید.','Use Sign out to end your session.');
  if(params.has('reauth')&&account)status.textContent=t('برای ادامه، از حساب خارج شوید و دوباره وارد شوید.','To continue, sign out and sign in again.');
  if(['invalid_callback','account_unavailable'].includes(params.get('error')))message({message:params.get('error')});
+ if(account&&ventilatorEntry&&!['reset','error','reauth','logout'].some(key=>params.has(key)))location.replace('/ventilator/');
  if(account&&/^\/clinic\/(?:portal\/)?$/.test(params.get('next')||'')&&!['error','reauth','logout'].some(key=>params.has(key)))location.replace(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');
 }catch(error){message(error);}
 try{const providers=await accountAPI('providers');document.querySelector('#google-note').hidden=providers.google;document.querySelector('#google-signin').setAttribute('aria-describedby',providers.google?'':'google-note');}catch{/* A retry checks the real provider state. */}

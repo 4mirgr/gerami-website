@@ -4,6 +4,10 @@ Updated 2026-11-24 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Educational project entry · 2026-11-25
+
+Home opens with the Projects section in both source HTML and Studio configuration. IntMed comes first and Ventilator second. Use the compact bilingual IntMed images on home and the original bilingual posters in the portfolio. The owner supplied the Persian ventilator poster and lung emblem. Personal-site accounts of all verified roles can enter the simulator via the exact /ventilator/ destination. Pages middleware gates the mount, and signup confirmation and enabled OAuth return to it through the existing account system. Future paid access belongs to a separate Ventilator entitlement validated on the server. Pricing, availability of free modules, payment provider and unlocked modules await owner definition. The Clinic and IntMed entitlements are independent.
+
 ## Browser and home screen identity · 2026-11-25
 
 Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.
@@ -514,4 +518,4 @@ Database setup in the existing IntMed project is tracked in `backend/community/s
 
 The first production smoke test of PR51 loaded all three first-paragraph links and the reader layout. The direct discussion Edge read returned 200 while the same public request through Pages returned 503. The relay now uses the fixed-origin manual redirect mode used by the existing account proxy, rejects 3xx and sends a bounded byte buffer. Check the custom-domain POST after deployment as well as browser rendering.
 
-Public post cards label the discussion link «دیدگاه و کامنت» in Persian and “Comments” in English. Article prose and excerpts use justified lines with the final line aligned to the start of the content's own writing direction. Home feature and visit buttons keep each label on one line and can move the whole button to the next row when space is tight.
+Public post cards label the discussion link «دیدگاه و کامنت» in Persian and “Comments” in English. At widths up to 700 CSS pixels, public text, including post excerpts and the entire article, is centered in both languages. Desktop article prose and excerpts keep justified lines with the final line aligned to the start of the content's writing direction. Home feature and visit buttons keep each label on one line and can move the whole button to the next row when space is tight.

@@ -11,7 +11,7 @@ ENGLISH = 'Amir Houshang Gerami'
 DOI = 'https://doi.org/10.3389/fmed.2022.872528'
 PROJECTS = (
     ('intmed', '/intmed/', 'EducationalApplication', 'IntMed', 'A study platform for internal medicine and cardiology with lessons, flashcards and exam simulations.'),
-    ('ventilator', '/ventilator/', 'EducationalApplication', 'Respiratory Ventilator Simulator', 'An educational simulator for exploring pressure, flow and volume waveforms in fictional clinical cases.'),
+    ('ventilator', '/pages/projects#ventilator', 'EducationalApplication', 'Respiratory Ventilator Simulator', 'An educational simulator for exploring pressure, flow and volume waveforms in fictional clinical cases.'),
     ('clinic-demo', '/pages/projects#clinic-demo', 'HealthApplication', 'Patient Health Record Preview',
      'A demonstration of organizing symptoms, medications and history before a visit, using fictional records.'),
 )

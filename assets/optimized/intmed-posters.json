@@ -20,5 +20,21 @@
       "width": 1199,
       "height": 1312
     }
+  },
+  "homeImages": {
+    "en": {
+      "path": "/assets/optimized/intmed-preview-en.1d9a2d66cbbc255e.webp",
+      "width": 704,
+      "height": 770,
+      "bytes": 87514,
+      "sha256": "1d9a2d66cbbc255e0994820d6cd5a7f60be64fb99766e686bf4fa15222aa7bc4"
+    },
+    "fa": {
+      "path": "/assets/optimized/intmed-preview-fa.bdc371af2a92f157.webp",
+      "width": 704,
+      "height": 770,
+      "bytes": 77758,
+      "sha256": "bdc371af2a92f1572360c000b5883a793b1de3608a852ec5d219b1ed6ab4dd65"
+    }
   }
 }

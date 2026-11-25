@@ -35,6 +35,10 @@
   },
   "sections": [
     {
+      "id": "projects",
+      "visible": true
+    },
+    {
       "id": "about",
       "visible": true
     },
@@ -44,10 +48,6 @@
     },
     {
       "id": "education",
-      "visible": true
-    },
-    {
-      "id": "projects",
       "visible": true
     },
     {

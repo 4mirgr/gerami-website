@@ -110,12 +110,12 @@ try{
  assert.deepEqual(errors,[]);assert.deepEqual(bad,[]);
  assert.deepEqual(normalMirrors,[],'healthy primary delivery must not download alternate copies');
  console.log('PASS built performance: '+JSON.stringify({...cold,sharedAssetNetworkRequestsAfterNavigation:sharedReloads.length,newPageAssetNetworkRequests:added.length,publicJsonRequestsBeforeFallback:jsonRequests.length-1}));
- const posters=JSON.parse(await readFile(resolve(root,'assets/optimized/intmed-posters.json'))).images;
+ const {homeImages}=JSON.parse(await readFile(resolve(root,'assets/optimized/intmed-posters.json')));
  for(const language of ['fa','en']){
   if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
   const poster=page.locator('[data-intmed-poster]');await poster.scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>document.querySelector('[data-intmed-poster]').complete&&document.querySelector('[data-intmed-poster]').naturalWidth===1199);
-  assert.equal(await poster.getAttribute('src'),posters[language].path);
+  await page.waitForFunction(width=>document.querySelector('[data-intmed-poster]').complete&&document.querySelector('[data-intmed-poster]').naturalWidth===width,homeImages[language].width);
+  assert.equal(await poster.getAttribute('src'),homeImages[language].path);
  }
  console.log('PASS built localized IntMed posters: selected asset decodes and language swaps after fingerprinting.');
 
@@ -173,9 +173,9 @@ try{
   for(const language of ['en','fa']){
    if(await failed.locator('html').getAttribute('lang')!==language)await failed.locator('[data-language-toggle]').click();
    await failed.locator('[data-intmed-poster]').scrollIntoViewIfNeeded();
-   await failed.waitForFunction(()=>{const i=document.querySelector('[data-intmed-poster]');return i.src.startsWith('blob:')&&i.complete&&i.naturalWidth===1199;},{},{timeout:9000});
+   await failed.waitForFunction(()=>{const i=document.querySelector('[data-intmed-poster]');return i.src.startsWith('blob:')&&i.complete&&i.naturalWidth===704;},{},{timeout:9000});
    const digest=await failed.evaluate(async()=>{const data=await(await fetch(document.querySelector('[data-intmed-poster]').src)).arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data)),b=>b.toString(16).padStart(2,'0')).join('');});
-   assert.equal(digest,posters[language].sha256,'Recovered poster must match its active language byte for byte');
+   assert.equal(digest,homeImages[language].sha256,'Recovered poster must match its active language byte for byte');
   }
   assert.deepEqual(recoveryErrors,[]);
   console.log('PASS carrier fault reproduction: blocked primary font/art recover from byte-identical public mirror; theme remains usable.');
