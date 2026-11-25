@@ -4,6 +4,10 @@ Updated 2026-11-25 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Site review · 2026-11-25
+
+The archive and navigation share a Persian search normalizer. The account page checks whether Google login is available and retries that check with the session. The admin gate reports temporary provider failures separately from sign-in. Editing a draft title preserves its editorial tags. Daily production checks now include the booking guide, project directory, sitemap, AI discovery file and the return destination for Ventilator sign-in. The standalone 404 offers article search and direct links to topics and booking.
+
 ## Visitor appearance settings · 2026-11-25
 
 The public-site footer offers «تنظیمات ظاهر» in Persian and English. Golden Gate remains the default and keeps the header day/night shortcut. Glass Wave lets visitors choose independently between five palettes and two brightness modes. Choices stay in browser storage; the CMS preview, mounted apps, accounts and authentication are unchanged. The wallpaper derivatives in `assets/glass/waves/` include the eight owner-supplied styles plus matching derived green-light and neutral-dark variants. Run `scripts/test_appearance_settings.mjs` through the preview server and check the combined build before release.
@@ -539,3 +543,5 @@ Database setup in the existing IntMed project is tracked in `backend/community/s
 The first production smoke test of PR51 loaded all three first-paragraph links and the reader layout. The direct discussion Edge read returned 200 while the same public request through Pages returned 503. The relay now uses the fixed-origin manual redirect mode used by the existing account proxy, rejects 3xx and sends a bounded byte buffer. Check the custom-domain POST after deployment as well as browser rendering.
 
 Public post cards label the discussion link «دیدگاه و کامنت» in Persian and “Comments” in English. At widths up to 700 CSS pixels, public text, including post excerpts and the entire article, is centered in both languages. Desktop article prose and excerpts keep justified lines with the final line aligned to the start of the content's writing direction. Home feature and visit buttons keep each label on one line and can move the whole button to the next row when space is tight.
+
+The booking instructions and provider controls share a reading surface so the wallpaper does not obscure the visit details on mobile.

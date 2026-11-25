@@ -3,10 +3,10 @@ import {chromium} from 'playwright';
 const origin='http://127.0.0.1:4173';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
- const page=await browser.newPage({viewport:{width:390,height:844}});let account=null,failLogout=false,loginRole='user',rejectLogin=false,googleNext,logins=[];
+ const page=await browser.newPage({viewport:{width:390,height:844}});let account=null,failLogout=false,loginRole='user',rejectLogin=false,googleEnabled=false,googleNext,logins=[];
  await page.route('**/api/account/*',async route=>{
   const name=new URL(route.request().url()).pathname.split('/').at(-1);
-  if(name==='providers')return route.fulfill({json:{google:false,email:true,signup:true}});
+  if(name==='providers')return route.fulfill({json:{google:googleEnabled,email:true,signup:true}});
   if(name==='google'){googleNext=route.request().postDataJSON().next;return route.fulfill({status:409,json:{error:'google_not_configured'}});}
   if(name==='login'){
    if(rejectLogin)return route.fulfill({status:401,json:{error:'account_rejected'}});
@@ -50,6 +50,9 @@ try{
   account=null;loginRole=role;await page.goto(origin+'/pages/account.html'+(next?'?next='+encodeURIComponent(next):''));if(next==='/ventilator/')assert.equal(await page.locator('#ventilator-identity').innerText(),'Ventilator');await page.locator('[data-account-form=login] [name=identity]').fill('member');await page.locator('[data-account-form=login] [name=password]').fill('synthetic-password');await page.locator('[data-account-form=login] button').click();await page.waitForURL(origin+target);
  }
  account=null;rejectLogin=true;await page.goto(origin+'/pages/account.html');await page.locator('[data-account-form=login] [name=identity]').fill('member');await page.locator('[data-account-form=login] [name=password]').fill('synthetic-password');await page.locator('[data-account-form=login] button').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(new URL(page.url()).pathname,'/pages/account.html');
+ assert(await page.locator('#google-signin').isDisabled());
+ assert.equal(googleNext,undefined);
+ googleEnabled=true;await page.locator('#account-retry').click();
  await page.locator('#google-signin').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(googleNext,'/');
  const slow=await browser.newPage();let release;const held=new Promise(resolve=>release=resolve);
  await slow.route('**/api/account/*',async route=>{await held;await route.fulfill({json:{authenticated:false}}).catch(()=>{});});

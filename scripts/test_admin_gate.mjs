@@ -35,6 +35,12 @@ assert.equal(api.status,401);
 const {onRequestGet:get,onRequestPost:post,onRequestDelete:logout}=await import('../functions/api/cms/session.js');
 const {hasCMSAccess}=await import('../server/cms-access.mjs');
 const realFetch=globalThis.fetch;
+try{
+ globalThis.fetch=async()=>new Response('{}',{status:503});
+ const unavailable=await visit('/admin/',{Cookie:'__Host-gerami-access=session.fixture'});
+ assert.equal(unavailable.status,503);assert.equal(unavailable.headers.get('Location'),null);
+ assert(!(await unavailable.text()).includes('private-editor-document'));
+}finally{globalThis.fetch=realFetch;}
 let identity={id:208800626,login:'4mirgr'},permission=true;
 globalThis.fetch=async request=>new Response(JSON.stringify(String(request).endsWith('/user')?identity:{permissions:{push:permission}}),{headers:{'Content-Type':'application/json'}});
 const signedRequest=(headers={})=>new Request(origin+'/api/cms/session',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json',Authorization:'Bearer synthetic-owner-proof',...headers},body:'{}'});

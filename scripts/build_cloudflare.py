@@ -225,7 +225,7 @@ def assemble(sources, output):
             page.write_text(html, encoding='utf-8')
         (stage / '_redirects').write_text('/intmed /intmed/ 308\n/ventilator /ventilator/ 308\n/newsletter.html /intmed/newsletter.html 302\n', encoding='utf-8')
         (stage / '_routes.json').write_text(json.dumps({'version': 1, 'include': ['/*'], 'exclude': ['/aus/assets/*', '/aus/fonts/*']}) + '\n', encoding='utf-8')
-        (stage / '404.html').write_text('<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>صفحه پیدا نشد</title><h1>صفحه پیدا نشد</h1><a href="/">صفحه اصلی</a></html>\n', encoding='utf-8')
+        shutil.copy2(ROOT / 'deploy/404.html', stage / '404.html')
         (stage / '_headers').write_text('/\n  Cache-Control: no-cache\n/pages/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n/css/*\n  Cache-Control: no-cache\n/content/*\n  Cache-Control: no-cache\n/admin/*\n  Cache-Control: no-cache\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/intmed/sw.js\n  Cache-Control: no-cache\n/intmed/config.js\n  Cache-Control: no-cache\n/intmed/content/*.json\n  Cache-Control: no-cache\n/ventilator/\n  Cache-Control: no-cache\n/ventilator/*\n  Cache-Control: no-cache\n/aus/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/aus/fonts/*\n  Cache-Control: public, max-age=86400\n', encoding='utf-8')
         from version_assets import version_assets
         version_assets(stage)

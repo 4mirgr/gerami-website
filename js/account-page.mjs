@@ -1,6 +1,7 @@
 import {accountAPI,getSession,changed,signOut} from './account-client.mjs';
 const root=document.documentElement,status=document.querySelector('#account-status'),forms=document.querySelector('#account-forms'),profile=document.querySelector('#account-profile');
-let account=null,mode='login',busy=false;
+let account=null,mode='login',busy=false,googleEnabled=false;
+const googleButton=document.querySelector('#google-signin'),googleNote=document.querySelector('#google-note');
 const t=(fa,en)=>root.lang==='en'?en:fa;
 const ventilatorEntry=new URLSearchParams(location.search).get('next')==='/ventilator/';
 if(ventilatorEntry){
@@ -44,8 +45,8 @@ function render(){
 document.querySelectorAll('[data-account-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.accountMode;status.textContent='';render();}));
 async function action(task){
  if(busy)return;busy=true;status.textContent=t('در حال بررسی…','Working…');status.dataset.kind='pending';
- const buttons=[...document.querySelectorAll('button')];buttons.forEach(el=>el.disabled=true);
- try{await task();}catch(error){message(error);}finally{busy=false;buttons.forEach(el=>el.disabled=false);}
+ const buttons=[...document.querySelectorAll('#account-forms button:not(:disabled),#account-profile button:not(:disabled),#account-retry:not(:disabled)')];buttons.forEach(el=>el.disabled=true);
+ try{await task();}catch(error){message(error);}finally{busy=false;buttons.forEach(el=>el.disabled=false);googleButton.disabled=!googleEnabled;}
 }
 for(const form of document.querySelectorAll('form[data-account-form]'))form.addEventListener('submit',event=>{
  event.preventDefault();action(async()=>{
@@ -56,14 +57,14 @@ for(const form of document.querySelectorAll('form[data-account-form]'))form.addE
   }else{status.textContent=t('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
-document.querySelector('#google-signin').addEventListener('click',()=>action(async()=>{
+googleButton.addEventListener('click',()=>action(async()=>{
  const result=await accountAPI('google',{next:new URLSearchParams(location.search).get('next')||'/'});location.assign(result.url);
 }));
 document.querySelector('#account-logout').addEventListener('click',()=>action(async()=>{await signOut();account=null;status.textContent=t('از حساب خارج شدید.','Signed out.');render();}));
 document.querySelector('#password-form').addEventListener('submit',event=>{event.preventDefault();const form=event.currentTarget;action(async()=>{
  const data=Object.fromEntries(new FormData(form));await accountAPI('password',data);form.reset();status.textContent=t('رمز ذخیره شد.','Password saved.');status.dataset.kind='success';
 });});
-document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();status.textContent='';render();}));
+document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();status.textContent='';render();await checkProviders();}));
 new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
 addEventListener('account:changed',event=>{account=event.detail;render();});
 async function initialize(){try{
@@ -75,6 +76,17 @@ async function initialize(){try{
  if(account&&ventilatorEntry&&!['reset','error','reauth','logout'].some(key=>params.has(key)))location.replace('/ventilator/');
  if(account&&/^\/clinic\/(?:portal\/)?$/.test(params.get('next')||'')&&!['error','reauth','logout'].some(key=>params.has(key)))location.replace(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');
 }catch(error){message(error);}
-try{const providers=await accountAPI('providers');document.querySelector('#google-note').hidden=providers.google;document.querySelector('#google-signin').setAttribute('aria-describedby',providers.google?'':'google-note');}catch{/* A retry checks the real provider state. */}
+await checkProviders();
+}
+async function checkProviders(){
+ const providers=await accountAPI('providers').catch(()=>null);
+ googleEnabled=providers?.google===true;
+ googleButton.disabled=busy||!googleEnabled;
+ googleNote.hidden=googleEnabled;
+ googleNote.dataset.fa=providers?'در حال حاضر می‌توانید با رمز عبور وارد شوید.':'وضعیت ورود با گوگل در دسترس نیست. اتصال را دوباره بررسی کنید.';
+ googleNote.dataset.en=providers?'Password sign-in is currently available.':'Google sign-in status is unavailable. Check the connection again.';
+ googleNote.textContent=t(googleNote.dataset.fa,googleNote.dataset.en);
+ if(googleEnabled)googleButton.removeAttribute('aria-describedby');
+ else googleButton.setAttribute('aria-describedby','google-note');
 }
 initialize();

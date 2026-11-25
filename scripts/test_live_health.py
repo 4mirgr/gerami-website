@@ -28,6 +28,12 @@ class LiveHealth(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 probe(('/', CHECKS['/']))
 
+    def test_partial_sitemap_is_reported(self):
+        sample=b'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://drgerami-md.ir/</loc></url></urlset>'
+        with patch('live_health.urlopen', return_value=self.response(sample)):
+            with self.assertRaises(RuntimeError):
+                probe(('/sitemap.xml', CHECKS['/sitemap.xml']))
+
     def test_aus_requires_its_mounted_application_assets(self):
         with patch('live_health.urlopen', return_value=self.response(b'<script src="/aus/assets/app.js"></script>')):
             self.assertEqual(probe(('/aus/', CHECKS['/aus/'])), 'PASS production: /aus/')
