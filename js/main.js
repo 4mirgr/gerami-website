@@ -126,6 +126,8 @@
   applyLanguage(language);
   document.querySelectorAll('.mobile-menu').forEach(menu => {
     let hoverClose,openedByHover=false;
+    menu.addEventListener('toggle',()=>{if(menu.open)document.dispatchEvent(new CustomEvent('toolbar:disclose',{detail:menu}));});
+    document.addEventListener('toolbar:disclose',event=>{if(!menu.contains(event.detail))menu.open=false;});
     menu.addEventListener('pointerenter',event=>{clearTimeout(hoverClose);if(event.pointerType==='mouse'&&matchMedia('(hover:hover)').matches&&!menu.open){menu.open=true;openedByHover=true;}});
     menu.querySelector('summary').addEventListener('click',event=>{if(openedByHover&&event.detail>0)event.preventDefault();openedByHover=false;});
     menu.addEventListener('pointerleave',()=>{hoverClose=setTimeout(()=>{if(!menu.contains(document.activeElement))menu.open=false;},180);});

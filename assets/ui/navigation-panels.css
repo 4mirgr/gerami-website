@@ -1,0 +1,21 @@
+.desktop-nav .topic-navigation .nav-submenu {min-width:min(17rem,80vw);max-height:min(62vh,35rem);overflow:auto;overscroll-behavior:contain;gap:2px;padding:8px;border-radius:18px;background:var(--white);box-shadow:0 14px 38px #17182430}
+.desktop-nav .topic-navigation .nav-submenu a {display:block;padding:8px 12px;white-space:normal;line-height:1.5}
+.site-header .mobile-menu>nav.toolbar-ready {padding:12px;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;border:1px solid #fff9;box-shadow:inset 1px 1px 0 #fff9,inset -1px -1px 0 #fff3,0 20px 50px #26213126;background:linear-gradient(135deg,#ffffffed,#fff6e9ed)}
+.toolbar-search {position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px;min-height:48px;padding:4px 6px;margin-bottom:10px;border:1px solid #b296633b;border-radius:16px;background:#fff4eaf5;box-shadow:inset 0 1px 3px #634c2510}
+.toolbar-search input {font:inherit;font-size:.85rem;min-width:0;width:100%;height:40px;padding:4px 10px;border:0;border-radius:10px;background:transparent;color:inherit;outline-offset:-2px}
+.toolbar-search input::placeholder {color:var(--muted);opacity:1}
+.toolbar-search button {display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:0;border-radius:50%;font:24px/1 sans-serif;background:#d8b77124;color:inherit;cursor:pointer}
+.toolbar-links {display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:6px;padding:2px}
+.site-header .toolbar-links a {display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 14px;box-sizing:border-box}
+.toolbar-links .nav-group {min-width:0}.toolbar-links .nav-submenu {position:static;min-width:0;box-shadow:none}
+.toolbar-links .topic-navigation {flex-wrap:wrap}
+.toolbar-links .topic-directory {flex:1}
+.toolbar-links .topic-disclosure {min-width:44px}
+.toolbar-links .topic-navigation .nav-submenu {flex-basis:100%;margin:0}
+.toolbar-empty {margin:12px;padding:10px;color:var(--muted);font-size:.85rem}
+[data-theme=dark] .site-header .mobile-menu>nav.toolbar-ready {background:linear-gradient(135deg,#30303bf2,#242431f2);border-color:#ffffff45}
+[data-theme=dark] .toolbar-search {background:#292833f5;border-color:#e2cba33b}
+@supports ((backdrop-filter:blur(24px)) or (-webkit-backdrop-filter:blur(24px))) {
+ .site-header .mobile-menu>nav.toolbar-ready {background:linear-gradient(135deg,#ffffffc7,#fff5e4a8);-webkit-backdrop-filter:blur(30px) saturate(125%);backdrop-filter:blur(30px) saturate(125%)}
+ [data-theme=dark] .site-header .mobile-menu>nav.toolbar-ready {background:linear-gradient(135deg,#30303bd9,#242431c9)}
+}

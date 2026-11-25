@@ -25,9 +25,14 @@ try {
         assert.equal(await page.locator('a[href*="aus"]').count(),0,'No public AUS promotion');
         if(await page.locator('.mobile-menu summary').isVisible()) {
           await page.locator('.mobile-menu summary').click();
+          const topics = page.locator('.mobile-menu .topic-disclosure');
+          await topics.waitFor();
+          if (await topics.getAttribute('aria-expanded') === 'false') await topics.click();
+          await page.locator('.mobile-menu a[href="/topics/nephrology/"]').waitFor();
           for(const link of await page.locator('.mobile-menu>nav a').all()) {
             const box=await link.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width,`Open menu links must fit ${width}/${language}`);
           }
+          await topics.click();
           await page.keyboard.press('Escape');
         }
         const rectangles=await page.locator('[data-topic-directory]>article').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));

@@ -56,7 +56,7 @@ def optimize_public_assets(site):
                 target=resolve(match[2],path)
                 if target not in sources:return match[0]
                 return match[1]+emit(target)+match[3]
-            text=re.sub(r"((?:\bfrom\s*|\bimport\s*)['\"])(\.[^'\"]+)(['\"])",dependency,text)
+            text=re.sub(r"((?:\bfrom\s*|\bimport\s*(?:\(\s*)?)['\"])(\.[^'\"]+)(['\"])",dependency,text)
             # Source modules live under /js; emitted ones live under /assets/runtime.
             text=re.sub(r"new URL\(['\"]\.\./['\"],\s*import\.meta\.url\)","new URL('/',import.meta.url)",text)
             text=re.sub(r"new URL\(['\"]\.\./['\"]\s*\+\s*path,\s*import\.meta\.url\)","new URL('/'+path,import.meta.url)",text)
@@ -76,7 +76,7 @@ def optimize_public_assets(site):
 
     for path in sources:emit(path)
     pages=[site/'index.html',*sorted((site/'pages').glob('*.html')),*sorted((site/'topics').rglob('*.html')),*sorted((site/'articles').rglob('*.html'))]
-    preloads=[mapping[p] for p in sources if p.suffix=='.mjs' and p.name!='account-page.mjs']
+    preloads=[mapping[p] for p in sources if p.suffix=='.mjs' and p.name not in ('account-page.mjs','toolbar-search.mjs','search-index.mjs')]
     inline_css_max_bytes=0
     for page in pages:
         text=page.read_text()

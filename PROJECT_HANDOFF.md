@@ -4,6 +4,12 @@ Updated 2026-11-25 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Toolbar navigation and live search · 2026-11-25
+
+On desktop the navigation capsule sits at the center of the header. The Topics disclosure lists the twelve medical specialties and keeps the link to the public directory. The search control also appears directly on mobile. Both menus support touch and keyboard navigation in Persian and English.
+
+The publishing build generates `/content/search-index.json` from the public article feed, published extra pages, product cards and medical atlas. The toolbar downloads it on demand. Titles, keywords and article bodies are matched locally. Keep the English specialty and subtopic labels in the editorial taxonomy in sync with the directory and the search index.
+
 ## English reading, project catalog and appearance · 2026-11-25
 
 The six published medical articles have full English editions with the author credited as Dr. Amir Houshang Gerami. Keep each edition's title, paragraphs, image description and citation together when updating an article. Studio accepts incomplete drafts and requires both editions at publication. The editorial publisher derives English from the exact approved Persian snapshot and stores it privately for retries. Apply backend/editorial/english-edition.sql before releasing the matching Edge function. Paragraphs use 94% of the cover width on desktop and its full width on mobile, with equal side margins.

@@ -12,7 +12,15 @@ try{
  assert.equal(await frame.locator('body').evaluate(el=>getComputedStyle(el).fontSize),'19px');
  await page.reload();await page.waitForFunction(()=>document.querySelector('#studio-fields input')!==null);assert.equal(await page.getByLabel('اندازه متن پایه',{exact:true}).inputValue(),'19');
  await page.locator('a[data-nav=pages]').click();const block=page.locator('.text-block').first();await block.locator('summary').click();await block.getByLabel('فارسی',{exact:true}).fill('عنوان جدید آزمون');await page.waitForTimeout(350);assert.equal(await page.frameLocator('#site-preview').locator('title').textContent(),'عنوان جدید آزمون');
- await page.locator('a[data-nav=menus]').click();await page.getByRole('button',{name:'افزودن زیرمنو',exact:true}).first().click();assert.equal(await page.locator('.menu-item .menu-item').count(),1);await page.waitForTimeout(350);assert.equal(await page.frameLocator('#site-preview').locator('.desktop-nav .nav-group').count(),1);
+ await page.locator('a[data-nav=menus]').click();
+ const firstMenu=page.locator('.menu-item').first();
+ const addSubmenu=firstMenu.getByRole('button',{name:'افزودن زیرمنو',exact:true}).first();
+ await addSubmenu.waitFor();
+ const existingSubmenus=await firstMenu.locator('.menu-item').count();
+ await addSubmenu.click();
+ assert.equal(await firstMenu.locator('.menu-item').count(),existingSubmenus+1);
+ await frame.locator('.desktop-nav .nav-group').first().waitFor({state:'attached'});
+ assert.equal(await frame.locator('.desktop-nav .topic-navigation a[href="/topics/nephrology/"]').count(),1);
  await page.locator('#preview-language').selectOption('en');await page.waitForTimeout(250);assert.equal(await page.frameLocator('#site-preview').locator('html').getAttribute('dir'),'ltr');
  await page.locator('#preview-theme').selectOption('dark');await page.waitForTimeout(250);assert.equal(await page.frameLocator('#site-preview').locator('html').getAttribute('data-theme'),'dark');
  await page.locator('#preview-device').selectOption('390');await page.waitForTimeout(150);assert.equal(await page.locator('#site-preview').evaluate(e=>e.style.width),'390px');

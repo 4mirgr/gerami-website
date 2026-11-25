@@ -3,6 +3,22 @@ import html,json,re,subprocess,xml.etree.ElementTree as ET
 from pathlib import Path
 from urllib.parse import urlsplit
 from physician_profile import SITE, NAME, ENGLISH, article_author, write_discovery
+def article_path(post, topics):
+    """The canonical path shared by static readers, topic links and public search."""
+    slug = post.get('slug', '')
+    if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug):
+        raise ValueError('Invalid article slug')
+    source = post.get('source_topic_id')
+    if not source:
+        return '/articles/' + slug + '/'
+    if source not in topics:
+        raise ValueError('Unknown pinned IntMed source topic')
+    category, topic = topics[source]
+    if post.get('topic') != topic['id']:
+        raise ValueError('Article topic differs from pinned IntMed source')
+    return '/articles/' + category['root']['id'] + '/' + topic['id'] + '/' + slug + '/'
+
+
 def generate(root,output):
  from site_studio import TOPIC_ART, bake_settings, public_document
  root,output=Path(root),Path(output);escape=lambda s:html.escape(str(s),quote=True)
@@ -14,13 +30,7 @@ def generate(root,output):
  formatter="import {postDate} from './js/post-date.mjs';import fs from 'node:fs';const dates=JSON.parse(fs.readFileSync(0,'utf8'));console.log(JSON.stringify(Object.fromEntries(dates.map(d=>[d,[postDate(d,'fa'),postDate(d,'en')]]))))"
  date_labels=json.loads(subprocess.run(['node','--input-type=module','-e',formatter],cwd=Path(__file__).resolve().parent.parent,input=json.dumps(dates),text=True,capture_output=True,check=True).stdout) if dates else {}
  def topic_path(c,t=None):return '/topics/'+c['root']['id']+'/'+(t['id']+'/' if t else '')
- def post_path(p):
-  if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*',p.get('slug','')):raise ValueError('Invalid article slug')
-  if p.get('source_topic_id'):
-   c,t=topics[p['source_topic_id']]
-   if p.get('topic')!=t['id']:raise ValueError('Article topic differs from pinned IntMed source')
-   return '/articles/'+c['root']['id']+'/'+t['id']+'/'+p['slug']+'/'
-  return '/articles/'+p['slug']+'/'
+ def post_path(post):return article_path(post,topics)
  audience_names={'patients':('برای عموم','For patients and families'),'professional':('ویژه پزشکان','For clinicians')}
  def english_author(p):
   return p.get('author_en') or ('Dr. '+ENGLISH if p.get('author')==NAME else p.get('author',''))
