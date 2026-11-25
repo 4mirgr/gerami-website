@@ -32,6 +32,41 @@ try{
  const cookies=login.headers.getSetCookie();assert.equal(cookies.length,2);for(const c of cookies){assert.match(c,/^__Host-gerami-/);assert.match(c,/Path=\/; HttpOnly; Secure; SameSite=Lax/);}
  assert(calls.some(c=>c.url.endsWith('/intmed-login')));
  const cookie=cookies.map(c=>c.split(';')[0]).join('; ');
+ // The password form must work even before the account-page module attaches.
+ const accountPage='/pages/account?next=%2Fventilator%2F';
+ const validForm={identity:'member',password:'valid-password'};
+ function nativeLogin(path,fields=validForm,headers={}){
+  const request=new Request(origin+path,{method:'POST',headers:{Origin:origin,Accept:'text/html',...headers},body:new URLSearchParams(fields)});
+  if(path.startsWith('/api/account/'))return onRequest({request});
+  return gate({request,env:{},next:()=>new Response('unexpected asset fallback',{status:405})});
+ }
+ for(const path of [accountPage,'/pages/account.html?next=%2Fventilator%2F','/api/account/login']){
+  const headers=path.startsWith('/api/')?{Referer:origin+accountPage}:{};
+  const completed=await nativeLogin(path,validForm,headers);
+  assert.equal(completed.status,303);
+  assert.equal(new URL(completed.headers.get('Location'),origin).href,origin+'/ventilator/');
+  assert.deepEqual(completed.headers.getSetCookie(),cookies);
+ }
+ const direct=await invoke('login?next=%2Fventilator%2F',undefined,{Accept:'text/html'});
+ assert([302,303].includes(direct.status));
+ const entry=new URL(direct.headers.get('Location'),origin);
+ assert.equal(entry.origin,origin);
+ assert.match(entry.pathname,/^\/pages\/account(?:\.html)?$/);
+ assert.equal(entry.searchParams.get('next'),'/ventilator/');
+ const rejectedForm=await nativeLogin(accountPage,{identity:'',password:'never-echo-this-value'});
+ assert.equal(rejectedForm.status,400);
+ assert.match(rejectedForm.headers.get('Content-Type'),/^text\/html/i);
+ const retry=await rejectedForm.text();
+ assert.match(retry,/[آ-ی]/u);
+ assert.match(retry,/href=["'][^"']*\/pages\/account(?:\.html)?\?[^"']*next=%2Fventilator%2F/i);
+ assert(!retry.includes('never-echo-this-value'));
+ const beforeRejectedForm=calls.length;
+ assert.equal((await nativeLogin(accountPage,validForm,{Origin:'https://different.example'})).status,403);
+ assert.equal((await nativeLogin(accountPage,{identity:'member',password:'x'.repeat(8300)})).status,413);
+ assert.equal(calls.length,beforeRejectedForm);
+ assert.equal((await nativeLogin('/api/account/signup')).status,415);
+ const clinic=await nativeLogin('/pages/account?next=%2Fclinic%2F');
+ assert.equal(new URL(clinic.headers.get('Location'),origin).href,origin+'/clinic/portal/');
  const simulation=await gate({request:new Request(origin+'/ventilator/',{headers:{Cookie:cookie}}),env:{},next:()=>new Response('monitor')});
  assert.equal(await simulation.text(),'monitor');assert.match(simulation.headers.get('Cache-Control'),/private, no-store/);
  role='secretary';assert.equal((await (await invoke('session',undefined,{Cookie:cookie})).json()).account.role,'secretary');
