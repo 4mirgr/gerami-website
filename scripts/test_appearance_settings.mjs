@@ -14,10 +14,22 @@ try {
  const color=dialog.locator('[name=color]');
  const brightness=dialog.locator('[name=brightness]');
  const bg=()=>page.evaluate(()=>getComputedStyle(document.body,'::before').backgroundImage);
+ // A built page paints verified wallpaper bytes through a browser-local blob URL.
+ async function expectGoldenGateDay(){
+  await page.waitForFunction(()=>/golden-gate-day|blob:/.test(getComputedStyle(document.body,'::before').backgroundImage));
+  const image=await bg();
+  if(!image.includes('blob:')){assert.match(image,/golden-gate-day/);return;}
+  const matches=await page.evaluate(async css=>{
+   const url=css.match(/url\("(blob:[^"]+)"\)/)[1];
+   const digest=async path=>new Uint8Array(await crypto.subtle.digest('SHA-256',await (await fetch(path)).arrayBuffer())).join(',');
+   return await digest(url)===await digest('/assets/glass/golden-gate-day.webp');
+  },image);
+  assert.ok(matches,'default wallpaper must be the Golden Gate day image');
+ }
  await page.goto(origin);
  await launcher.waitFor();
  assert.deepEqual(themeRequests,['/assets/glass/waves/entry.js'],'default never fetches optional settings or art');
- assert.match(await bg(),/golden-gate-day/);
+ await expectGoldenGateDay();
  await launcher.click();
  assert.equal(await style.inputValue(),'classic');
  assert.equal(await color.isVisible(),false);
@@ -41,7 +53,7 @@ try {
  assert.equal(await dialog.isVisible(),false);
  assert.equal(await launcher.evaluate(el=>document.activeElement===el),true);
  await page.goto(origin+'/pages/about.html');
- assert.equal(await root.getAttribute('data-wave'),'neutral');
+ await page.locator('html[data-wave=neutral]').waitFor();
  assert.match(await bg(),/neutral-dark/);
  await page.locator('[data-theme-toggle]').click();
  assert.match(await bg(),/neutral-light/);
@@ -50,10 +62,10 @@ try {
  assert.equal(await launcher.textContent(),'Appearance settings');
  assert.equal(await dialog.locator('h2').textContent(),'Site appearance');
  await style.selectOption('classic');
- assert.match(await bg(),/golden-gate-day/);
+ await expectGoldenGateDay();
  await page.reload();
  assert.equal(await root.getAttribute('data-wave'),null);
- assert.match(await bg(),/golden-gate-day/);
+ await expectGoldenGateDay();
  assert.deepEqual(errors,[]);
  console.log('PASS appearance settings: all ten assets, RTL mobile bounds, keyboard, English, navigation persistence, default and quick toggle.');
 } finally {await browser.close();}
