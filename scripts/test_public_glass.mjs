@@ -25,7 +25,7 @@ try {
         assert.equal(await page.locator('a[href*="aus"]').count(),0,'No public AUS promotion');
         if(await page.locator('.mobile-menu summary').isVisible()) {
           await page.locator('.mobile-menu summary').click();
-          const topics = page.locator('.mobile-menu .topic-disclosure');
+          const topics = page.locator('.mobile-menu button.topic-directory');
           await topics.waitFor();
           if (await topics.getAttribute('aria-expanded') === 'false') await topics.click();
           await page.locator('.mobile-menu a[href="/topics/nephrology/"]').waitFor();

@@ -40,39 +40,47 @@ const toolbarStyles = `
 .toolbar-selection {position:absolute;top:0;left:0;z-index:-1;border-radius:15px;background:linear-gradient(145deg,#fffaf1ad,#e9c88955);box-shadow:inset 0 1px 0 #fff,0 2px 8px #70522d18;pointer-events:none;opacity:0;transition:transform .24s cubic-bezier(.2,.8,.2,1),width .24s,height .24s,opacity .15s}
 .topic-navigation {position:relative;display:flex;align-items:center;min-width:0}
 .topic-navigation[hidden],.topic-navigation .nav-submenu[hidden] {display:none!important}
-.topic-disclosure {flex:none;display:grid;place-items:center;min-height:44px;min-width:30px;background:none;color:inherit;border:0;border-radius:10px;cursor:pointer}
-.topic-disclosure::before {content:'';width:7px;height:7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);margin-block-end:3px}
-.topic-disclosure[aria-expanded=true]::before {transform:rotate(225deg);margin-block:4px 0}
-.topic-disclosure:hover,.topic-disclosure:focus-visible {background:#b994512e}
 [data-theme=dark] .toolbar-selection {background:linear-gradient(145deg,#e9cc8540,#e2b97720);box-shadow:inset 0 1px 0 #fff5,0 2px 8px #0002}
 @media(prefers-reduced-motion:reduce) {.toolbar-selection {transition:none}}
 @media(forced-colors:active) {.toolbar-selection {background:Highlight;opacity:.2!important}.toolbar-search,.site-header .mobile-menu>nav.toolbar-ready {background:Canvas!important;border:1px solid CanvasText}.toolbar-icon {opacity:1}.desktop-nav a[aria-current] {outline:1px solid Highlight}}
 `;
-// Keep the directory a normal link. The adjacent disclosure also works on touch screens.
+// The desktop title links to the directory. On mobile the title opens the whole list.
 function splitTopicDirectory(nav){
  const group=[...nav.querySelectorAll(':scope>details.nav-group')].find(el=>el.querySelector(':scope>.nav-submenu>a')?.pathname==='/topics/');
  if(!group)return;
  const popup=group.querySelector(':scope>.nav-submenu'),directory=popup.querySelector(':scope>a');
  const wrapper=document.createElement('div');wrapper.className='topic-navigation';
- directory.classList.add('topic-directory');
- const toggle=document.createElement('button');toggle.type='button';toggle.className='topic-disclosure';
- toggle.setAttribute('aria-label',t('نمایش شاخه‌های پزشکی','Medical specialties'));
- popup.id='topic-specialties-'+(nav.classList.contains('desktop-nav')?'desktop':'mobile');
- toggle.setAttribute('aria-controls',popup.id);toggle.setAttribute('aria-expanded','false');
+ const desktop=nav.classList.contains('desktop-nav');
+ const title=desktop ? directory : document.createElement('button');
+ if(!desktop){
+  title.type='button';
+  icon(directory);
+  title.append(...directory.childNodes);
+  const label=document.createElement('span');
+  label.dataset.fa='همه موضوعات';label.dataset.en='All topics';
+  label.textContent=t(label.dataset.fa,label.dataset.en);directory.append(label);
+ }
+ title.classList.add('topic-directory');
+ popup.id='topic-specialties-'+(desktop?'desktop':'mobile');
+ title.setAttribute('aria-controls',popup.id);
  function show(open){
   if(open&&popup.hidden)document.dispatchEvent(new CustomEvent('toolbar:disclose',{detail:wrapper}));
-  popup.hidden=!open;toggle.setAttribute('aria-expanded',String(open));
+  popup.hidden=!open;
+  title.setAttribute('aria-expanded',String(open));
  }
- let timer,openedOnHover=false;
+ let timer;
  wrapper.addEventListener('pointerenter',event=>{
   clearTimeout(timer);
-  if(event.pointerType==='mouse'&&nav.classList.contains('desktop-nav')&&popup.hidden){openedOnHover=true;show(true);}
+  if(desktop&&event.pointerType==='mouse')show(true);
  });
  wrapper.addEventListener('pointerleave',()=>{timer=setTimeout(()=>{if(!wrapper.contains(document.activeElement))show(false);},180);});
- toggle.onclick=event=>{show(popup.hidden||(event.detail>0&&openedOnHover));openedOnHover=false;};
+ title.addEventListener('click',event=>{
+  if(!desktop)show(popup.hidden);
+  else if(popup.hidden&&event.pointerType==='touch'){event.preventDefault();show(true);}
+ });
  wrapper.addEventListener('focusout',event=>{if(!wrapper.contains(event.relatedTarget))show(false);});
  wrapper.addEventListener('keydown',event=>{
-  if(event.key==='Escape'&&!popup.hidden){event.stopPropagation();event.preventDefault();show(false);toggle.focus();return;}
+  if(event.key==='Escape'&&!popup.hidden){event.stopPropagation();event.preventDefault();show(false);title.focus();return;}
   if(!['ArrowDown','ArrowUp','Home','End'].includes(event.key))return;
   const links=[...popup.querySelectorAll('a')].filter(a=>!a.hidden);
   if(!links.length)return;
@@ -81,12 +89,12 @@ function splitTopicDirectory(nav){
   const next=event.key==='Home'?0:event.key==='End'||(event.key==='ArrowUp'&&i<0)?links.length-1:(i+(event.key==='ArrowDown'?1:-1)+links.length)%links.length;
   links[next].focus();
  });
- group.replaceWith(wrapper);wrapper.append(directory,toggle,popup);show(false);
+ group.replaceWith(wrapper);wrapper.append(title,popup);show(false);
 }
 function dismissOtherTopics(active){
  for(const wrapper of document.querySelectorAll('.topic-navigation'))if(!wrapper.contains(active)){
   wrapper.querySelector('.nav-submenu').hidden=true;
-  wrapper.querySelector('.topic-disclosure').setAttribute('aria-expanded','false');
+  wrapper.querySelector('.topic-directory').setAttribute('aria-expanded','false');
  }
 }
 document.addEventListener('pointerdown',event=>dismissOtherTopics(event.target));

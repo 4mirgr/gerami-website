@@ -17,3 +17,5 @@ body h1,body h2,body h3,body h4{font-weight:var(--heading-weight,700)!important}
 @media(max-width:1000px){.desktop-nav .nav-submenu{min-width:170px}.nav-submenu .nav-submenu{inset-inline-start:0;position:static;box-shadow:none}}
 
 [data-custom-background=true] .signature-hero{background-image:var(--site-background);background-position:center;background-size:cover}
+
+.site-header .nav-group:has(>.nav-submenu>a:first-child[href="/topics/"])>summary::after{content:none}
