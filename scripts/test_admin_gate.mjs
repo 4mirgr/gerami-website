@@ -12,6 +12,7 @@ for(const entry of ['/respiratory/ventilator','/respiratory/ventilator/','/respi
 }
 assert.equal((await visit('/respiratory/ventilator/content.js')).status,401);
 assert.equal((await visit('/respiratory/ventilator/manifest.webmanifest')).status,200);
+assert.equal((await visit('/respiratory/ventilator/manifest.en.webmanifest')).status,200);
 for(const old of ['/ventilator','/ventilator/','/ventilator/index.html','/ventilator/manifest.webmanifest','/ventilator/assets/favicon.png']){
  const moved=await visit(old);
  assert.equal(moved.status,308);
