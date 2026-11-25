@@ -3,7 +3,7 @@ const root=document.documentElement,status=document.querySelector('#account-stat
 let account=null,mode='login',busy=false,googleEnabled=false;
 const googleButton=document.querySelector('#google-signin'),googleNote=document.querySelector('#google-note');
 const t=(fa,en)=>root.lang==='en'?en:fa;
-const ventilatorEntry=new URLSearchParams(location.search).get('next')==='/respiratory/ventilator/';
+const ventilatorEntry=['/ventilator/','/respiratory/ventilator/'].includes(new URLSearchParams(location.search).get('next'));
 if(ventilatorEntry){
  const badge=document.querySelector('#ventilator-identity');
  const image=badge.querySelector('img');

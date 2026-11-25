@@ -18,7 +18,7 @@ globalThis.fetch=async(url,options={})=>{
  throw Error('Unexpected upstream '+url);
 };
 try{
- assert.equal(safeNext(undefined),'/');assert.equal(safeNext('/'),'/');assert.equal(safeNext('//evil.test'),'/');
+ assert.equal(safeNext('/ventilator/'),'/respiratory/ventilator/'); assert.equal(safeNext(undefined),'/');assert.equal(safeNext('/'),'/');assert.equal(safeNext('//evil.test'),'/');
  for(const kind of ['login','signup','recovery']){const {flow}=await newFlow(kind);const callback=await invoke('callback?flow='+flow.state+'&code=synthetic-code',undefined,{Cookie:COOKIE_FLOW+'='+encode(flow)});assert.equal(callback.status,303);assert.equal(callback.headers.get('Location'),kind==='recovery'?'/pages/account.html?reset=1':'/');}
  const signup=await invoke('signup',{email:'learner@example.test',username:'learner',name:'Learner',password:'synthetic-password',next:'/respiratory/ventilator/'});
  const flowCookie=signup.headers.getSetCookie()[0].split(';')[0],pending=JSON.parse(Buffer.from(flowCookie.split('=')[1],'base64url').toString());
@@ -40,6 +40,8 @@ try{
   if(path.startsWith('/api/account/'))return onRequest({request});
   return gate({request,env:{},next:()=>new Response('unexpected asset fallback',{status:405})});
  }
+ const oldNative=await nativeLogin('/pages/account?next=%2Fventilator%2F');
+ assert.equal(oldNative.headers.get('Location'),'/respiratory/ventilator/');
  for(const path of [accountPage,'/pages/account.html?next=%2Frespiratory%2Fventilator%2F','/api/account/login']){
   const headers=path.startsWith('/api/')?{Referer:origin+accountPage}:{};
   const completed=await nativeLogin(path,validForm,headers);
