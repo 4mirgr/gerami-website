@@ -46,6 +46,10 @@ The lecture notebook opens at `/respiratory/spirometry/#notebook`. Add reviewed 
 
 The Persian course is mounted publicly at `/respiratory/spirometry/`. The short address redirects to the directory URL so module, font and image requests resolve within the course. The Projects page links to the same origin in assembled previews and production. The Cloudflare build imports only the reviewed public files at the immutable `4mirgr/spiromery` pin, runs its Node tests, and checks published files against the source bytes. Course progress uses browser storage and cases use fictional data. Review source and tests before updating the pin. Read the release tag for the production receipt.
 
+## Respiratory teaching handout · 2026-11-25
+
+The simulator source pin now includes the first bilingual respiratory mechanics chapters. The lessons cover tidal volume, respiratory rate, minute and alveolar ventilation, dead space, compliance, resistance, peak and plateau pressures with worked tables, review prompts and a downloadable HTML handout. Persian and English terms and full expansions accompany abbreviations. The tutorial uses the existing protected simulator mount at `/respiratory/ventilator/`. Verify normal lesson navigation and handout download in the reviewed source browser, then record production deployment evidence in the release tag.
+
 ## Browser and home screen identity · 2026-11-25
 
 Use the owner's black-on-white monogram in docs/references/gerami-site-mark.jpg for the personal site's tab and home screen. The common page templates declare the multi-size ICO, 180 px Apple touch PNG and root web manifest. The Android manifest includes standard and mask-safe square icons. The root fallback ICO must match assets/favicon.ico when assembling the site. Mounted applications keep their own manifests and icons.
@@ -137,7 +141,7 @@ Latest AUS-only continuation 2026-11-21: [quota-aware interface and reviewed GP 
 | Public website, account API, CMS, assembled static apps | `4mirgr/gerami-website`, Cloudflare Pages `gerami-website` | This repo; `deploy/projects.json` pins full reviewed IntMed/AUS commits |
 | IntMed learning app and existing Auth | `4mirgr/intMed-study-plan`, `/intmed/` | Independent source; public docs only imported into combined build |
 | AUS | `4mirgr/immi-arash-amir`, `/aus/` | Independent identity, backend and secrets; preserve its existing Worker binding |
-| Respiratory ventilator simulator | `4mirgr/Respiratory-ventilator`, `/ventilator/` | Independent simulator source, reviewed public files imported by full commit pin |
+| Respiratory ventilator simulator | `4mirgr/Respiratory-ventilator`, `/respiratory/ventilator/` | Independent simulator source, reviewed public files imported by full commit pin |
 | Spirometry Lab | `4mirgr/spiromery`, `/respiratory/spirometry/` | Independent course and simulator, reviewed public files imported by full commit pin |
 | Clinic native Django and synthetic preview | `4mirgr/Clinic`, public `/clinic/` | Its canonical `PROJECT_HANDOFF.md`; native backend remains inactive |
 
