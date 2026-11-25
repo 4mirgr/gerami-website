@@ -120,6 +120,22 @@ async function jobRun(job){
   await db('gerami_editorial_jobs?id=eq.'+job.id,{status:'complete',error_code:null,updated_at:new Date().toISOString()},'PATCH');
  }catch(e){await db('gerami_editorial_jobs?id=eq.'+job.id,{status:e.message==='provider_quota'?'waiting_provider':'error',error_code:safeError(e),next_attempt_at:new Date(Date.now()+900000).toISOString(),updated_at:new Date().toISOString()},'PATCH');}
 }
+async function draftCovers(d){
+ const options=d.cover_pack?await media.options(d):[];
+ const signed=await Promise.all(options.map(async o=>({
+  id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview(o)
+ })));
+ const selected=signed.find(o=>o.selected);
+ return {options:signed,preview:selected?.preview??(d.cover_required&&!d.cover_selected&&!d.media_path?null:await preview(d))};
+}
+async function scheduleStatus(){
+ const [jobs,settings,trendStatus]=await Promise.all([
+  db('gerami_editorial_jobs?select=id,day,audience,status,attempts,error_code,updated_at&order=day.desc&limit=10'),
+  db('gerami_editorial_settings'),
+  db('gerami_editorial_trend_snapshots?select=day,source,region,observed_at,error_code&order=day.desc&limit=6')
+ ]);
+ return {jobs,settings:settings[0],trendStatus,searchConfigured:Boolean(Deno.env.get('GERAMI_GSC_SERVICE_ACCOUNT_JSON'))};
+}
 Deno.serve(async req=>{
  try{
   if(req.method!=='POST')return reply({error:'method'},405);
@@ -170,9 +186,16 @@ Deno.serve(async req=>{
   const actor=await admin(req);
   if(action==='list'){
    const offset=Number.isInteger(body.offset)&&body.offset>=0&&body.offset<=100000?body.offset:0;
-   const [drafts,jobs,settings,trendStatus]=await Promise.all([db('gerami_editorial_drafts?select=id,slug,status,revision,content,category,topic,image,media_path,source,cover_required,cover_selected,selected_cover_id,cover_sha256,cover_pack,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at&order=created_at.desc,id.desc&limit=25&offset='+offset),db('gerami_editorial_jobs?select=id,day,audience,status,attempts,error_code,updated_at&order=day.desc&limit=10'),db('gerami_editorial_settings'),db('gerami_editorial_trend_snapshots?select=day,source,region,observed_at,error_code&order=day.desc&limit=6')]);
-   for(const d of drafts){d.preview=d.cover_required&&!d.cover_selected&&!d.media_path?null:await preview(d);d.options=[];if(d.cover_pack)for(const o of await media.options(d))d.options.push({id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview({...d,image:o.image,media_path:o.media_path})});}return reply({drafts,jobs,settings:settings[0],trendStatus,searchConfigured:Boolean(Deno.env.get('GERAMI_GSC_SERVICE_ACCOUNT_JSON')),next:drafts.length===25});
+   const filter=body.view==='drafts'?'&status=eq.draft':body.view==='history'?'&status=neq.draft':'';
+   const fields='id,slug,status,revision,content,category,topic,image,media_path,source,cover_required,cover_selected,selected_cover_id,cover_sha256,cover_pack,snapshot_hash,notified_revision,approved_at,publication_date,commit_sha,error_code,created_at,updated_at';
+   const rows=await db('gerami_editorial_drafts?select='+fields+filter+'&order=created_at.desc,id.desc&limit=26&offset='+offset);
+   const drafts=rows.slice(0,25),next=rows.length>25;
+   if(filter)return reply({drafts,next});
+   // Clients opened before deployment still use the combined response.
+   for(const d of drafts)Object.assign(d,await draftCovers(d));
+   return reply({drafts,next,...await scheduleStatus()});
   }
+  if(action==='schedule')return reply(await scheduleStatus());
   if(action==='settings'){
    if(typeof body.enabled!=='boolean'||!Number.isInteger(body.hour)||body.hour<0||body.hour>23||!Array.isArray(body.categories)||!body.categories.length||body.categories.some(c=>!sourceCategories.includes(c)))return reply({error:'invalid_settings'},400);
    await db('gerami_editorial_settings?singleton=eq.true',{enabled:body.enabled,hour:body.hour,categories:[...new Set(body.categories)],updated_at:new Date().toISOString()},'PATCH');return reply({ok:true});
@@ -180,6 +203,7 @@ Deno.serve(async req=>{
   if(action==='run'){await db('gerami_editorial_jobs?day=eq.'+new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tehran'}).format(new Date())+'&status=in.(error,waiting_provider)',{attempts:0,status:'queued',next_attempt_at:new Date().toISOString()},'PATCH');await rpc('tick',{p_force:true});return reply({queued:true});}
   if(!uuid(body.id)||!Number.isInteger(body.revision))return reply({error:'invalid_draft'},400);
   const d=(await db('gerami_editorial_drafts?id=eq.'+body.id+'&select=*'))[0];if(!d||d.revision!==body.revision)throw Error('stale_revision');
+  if(action==='covers')return reply(await draftCovers(d));
   if(action==='choose'){const option=(await media.options(d)).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
   if(action==='retry'){await mutate(d,'retry');EdgeRuntime.waitUntil(controls.wake().catch(()=>{}));return reply({ok:true});}
   if(action==='notify'){if(d.status!=='draft')throw Error('draft_locked');await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notification_attempts:0,next_notification_at:new Date().toISOString()},'PATCH');await notify({...d,notified_revision:null,notification_attempts:0,next_notification_at:new Date().toISOString()});return reply({ok:true});}

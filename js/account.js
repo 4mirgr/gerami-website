@@ -43,7 +43,6 @@ if(host){
   entry('/pages/account.html',t('حساب کاربری','Your account'),'◉','account-profile-link');
   if(account.role==='admin'){
    entry('/admin/#dashboard',t('داشبورد مدیریتی سایت','Site dashboard'),'⚙︎','account-dashboard-link');
-   entry('/admin/#pages',t('مدیریت سایت','Manage website'),'⌘','account-admin-link');
   }
   entry('/intmed/',t('ورود به IntMed','Open IntMed'),'✦','account-intmed-link');
   const staff=['admin','secretary'].includes(account.role);
