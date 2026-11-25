@@ -46,7 +46,7 @@ function edition(host,d){
  const send=actionButton('فرستادن نسخه ذخیره‌شده به تلگرام',()=>run(async()=>{await api('notify',meta);message.textContent='نسخه ذخیره‌شده به تلگرام ارسال شد.';}));
  const hint=el('small','','edition-hint');
  function sync(){
-  fields.forEach(f=>f.disabled=busy||!mutable);
+  fields.forEach(f=>f.disabled=busy||!mutable||gallery.dataset.loading==='true');
   save.disabled=busy||!mutable||!dirty();
   upload.disabled=busy||!mutable||dirty()||!loaded;
   send.disabled=busy||dirty()||d.status!=='draft';
@@ -57,16 +57,19 @@ function edition(host,d){
  async function run(task){if(busy)return;busy=true;message.textContent='';delete message.dataset.error;sync();
   try{await task();}catch(e){message.textContent=e.message;message.dataset.error='true';}finally{busy=false;sync();}
  }
- async function refresh(note){
+ async function refresh(note,preserve=false){
   const {draft}=await api('detail',{id:d.id});
-  const load=edition(host,draft);host.querySelector('.edition-message').textContent=note;await load();
+  const editing=preserve&&dirty()?fields.map(f=>f.value):null;
+  const load=edition(host,draft);
+  if(editing){host.querySelector('.edition-tools').open=true;host.querySelectorAll('.edition-tools .field :is(input:not([type=file]),textarea)').forEach((f,i)=>{f.value=editing[i];f.dispatchEvent(new Event('input'));});}
+  host.querySelector('.edition-message').textContent=note;await load();
  }
  async function covers(){
   if(loaded||gallery.dataset.loading)return;
-  gallery.dataset.loading='true';gallery.replaceChildren(el('small','در حال دریافت تصاویر…'));
+  gallery.dataset.loading='true';sync();gallery.replaceChildren(el('small','در حال دریافت تصاویر…'));
   try{
    const v=await api('covers',meta);
-   if(v.revision&&v.revision!==d.revision){await refresh('تصاویر این نسخه آماده شدند.');return;}
+   if(v.revision&&v.revision!==d.revision){await refresh('تصاویر این نسخه آماده شدند.',true);return;}
    const options=v.options||[];gallery.replaceChildren();
    for(const o of options){
     const figure=el('figure'),img=el('img');img.src=o.preview;img.alt=o.label;
@@ -96,7 +99,7 @@ export async function editorialEditor(host,offset=0,view='drafts'){
  if(location.hash!=='#auto-posts')return;
  const notice=el('p','','notice');notice.setAttribute('role','status');
  host.replaceChildren(el('h2',view==='drafts'?'پیش‌نویس‌های تلگرام':'تاریخچه پیشنهادها'),notice);
- const work=async(fn,b)=>{if(b)b.disabled=true;try{await fn();}catch(e){notice.textContent=e.message;}finally{if(b)b.disabled=false;}};
+ const work=async(fn,b)=>{if(b)b.disabled=true;delete notice.dataset.error;try{await fn();}catch(e){notice.textContent=e.message;notice.dataset.error='true';}finally{if(b)b.disabled=false;}};
  const button=(label,fn)=>actionButton(label,b=>work(()=>fn(b),b));
  try{
   notice.textContent='در حال دریافت پیش‌نویس‌ها…';
@@ -144,7 +147,7 @@ export async function editorialEditor(host,offset=0,view='drafts'){
  schedule.ontoggle=()=>{if(schedule.open&&!scheduleRequested)showSchedule();};
  }catch(e){
   if(!notice.isConnected)return;
-  notice.textContent='دریافت پیشنهادها ممکن نشد. '+e.message;
+  notice.dataset.error='true';notice.textContent='دریافت پیشنهادها ممکن نشد. '+e.message;
   host.append(button('تلاش دوباره',()=>editorialEditor(host,offset,view)));
  }
 }

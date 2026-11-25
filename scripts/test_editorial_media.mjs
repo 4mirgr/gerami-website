@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';import {commonsCandidate,boundedBytes,createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';
+import assert from 'node:assert/strict';import {rankedPair,commonsCandidate,boundedBytes,createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';
 const generic={pageid:99,title:'File:Acute football.jpg',imageinfo:[{mime:'image/jpeg',thumburl:'https://upload.wikimedia.org/wikipedia/commons/a/ab/Football.jpg',extmetadata:{LicenseShortName:{value:'Public domain'},ImageDescription:{value:'A football player holding a camera after an acute sports event'}}}]};assert.equal(commonsCandidate(generic,'acute kidney injury'),null,'A generic token cannot establish medical relevance');
 const file={pageid:12,title:'File:Asthma clinical view.jpg',imageinfo:[{mime:'image/jpeg',thumburl:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Asthma.jpg/1000px-Asthma.jpg',extmetadata:{LicenseShortName:{value:'Public domain'},Artist:{value:'Original author'},ImageDescription:{value:'Asthma inhaler in clinical use'}}}]};
 assert.equal(commonsCandidate(file,'asthma').provenance.kind,'public-domain');for(const changed of [{...file,imageinfo:[{...file.imageinfo[0],thumburl:'https://attacker.test/image.jpg'}]},{...file,imageinfo:[{...file.imageinfo[0],extmetadata:{LicenseShortName:{value:'CC BY-SA 4.0'}}}]},{...file,title:'File:Unrelated football.jpg',imageinfo:[{...file.imageinfo[0],extmetadata:{LicenseShortName:{value:'Public domain'}}}]}])assert.equal(commonsCandidate(changed,'asthma'),null);
@@ -7,3 +7,13 @@ let committed=false;const stored=new Map(),media=createEditorialMedia({db:async(
 await assert.rejects(media.saveLibrary('pulm-asthma',[{bytes:jpeg,label:'تصویر آسم'},{bytes:new Uint8Array(200),label:'تصویر نامعتبر'}]),/invalid_image/);assert.equal(committed,false,'A partial pair must not replace the active library');await assert.rejects(media.saveLibrary('pulm-asthma',[{bytes:jpeg,label:'تصویر آسم'},{bytes:jpeg,label:'تصویر یکسان'}]),/invalid_options/);assert.equal(committed,false);
 const webp=new Uint8Array([82,73,70,70,0,0,0,0,87,69,66,80,...new Uint8Array(120)]),loader=createEditorialMedia({storage:async()=>new Response(webp)});const loaded=await loader.load({media_path:'owner/example.webp',sha256:await (await import('../backend/editorial/functions/gerami-editorial/core.mjs')).sha(webp)});assert.equal(loaded.mime,'image/webp');
 console.log('Media bounds and provenance passed: public-domain only, exact host/MIME/topic match, header/body limits, duplicate rejection and atomic pair admission.');
+
+const logo={...file,title:'File:Asthma institute logo.jpg'};
+assert.equal(commonsCandidate(logo,'asthma'),null);
+const {readFile}=await import('node:fs/promises');
+const {sha}=await import('../backend/editorial/functions/gerami-editorial/core.mjs');
+const embedded=await readFile('assets/editorial/lungs.jpg');
+await assert.rejects(media.saveLibrary('pulm-asthma',[{bytes:embedded,label:'تصویر درمان'},{bytes:jpeg,label:'داروی تنفسی'}]),/invalid_image/);
+const candidate=(label,sha256)=>({label,sha256});
+const pictures=[candidate('نمای بالینی ریه','1'),candidate('Inhaler technique','2'),candidate('استفاده از اسپری','3'),candidate('اسپری آسم',await sha(embedded))];
+assert.deepEqual(rankedPair(pictures,{title:'روش استفاده از اسپری استنشاقی',paragraphs:[]}).map(o=>o.sha256).sort(),['2','3']);

@@ -37,7 +37,7 @@ async function telegram(method,body){
 }
 async function chat(){const rows=await db('intmed_notification_settings?key=eq.telegram&select=chat_id');const v=String(rows[0]?.chat_id||'');if(!/^\d{1,18}$/.test(v))throw Error('telegram_not_configured');return v;}
 async function storage(path,options={}){const r=await fetch(PROJECT+'/storage/v1/'+path,{headers:{apikey:service,Authorization:'Bearer '+service,...options.headers},...Object.fromEntries(Object.entries(options).filter(([k])=>k!=='headers')),signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('media_failed');return r;}
-async function preview(d){if(!d.media_path)return d.image;const data=await(await storage('object/sign/gerami-editorial/'+d.media_path,{method:'POST',body:JSON.stringify({expiresIn:3600}),headers:{'Content-Type':'application/json'}})).json();return PROJECT+'/storage/v1'+data.signedURL;}
+async function preview(d){if(!d.media_path)return null;const data=await(await storage('object/sign/gerami-editorial/'+d.media_path,{method:'POST',body:JSON.stringify({expiresIn:3600}),headers:{'Content-Type':'application/json'}})).json();return PROJECT+'/storage/v1'+data.signedURL;}
 const snapshot=snapshotHash;
 const media=createEditorialMedia({db,rpc,storage,remote,snapshot});
 const controls=createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,storage,remote,snapshot,media,githubToken:()=>Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')||'',background:p=>EdgeRuntime.waitUntil(p.catch(()=>{}))});
@@ -77,7 +77,7 @@ async function generate(job){
   let input;
   if(audience==='patients'){try{input=sourceText(topicData);}catch(e){if(e.message==='insufficient_source')continue;throw e;}}
   hasSource=true;
-  if((await rpc('unused_pair',{p_topic:topic.id})).length!==2){try{await media.discover(topic.id);if((await rpc('unused_pair',{p_topic:topic.id})).length!==2)continue;}catch{continue;}}
+  if((await rpc('unused_pair',{p_topic:topic.id})).length!==2){try{await media.discover(topic.id,clinical?.copy||{title:destination.child.fa,paragraphs:[input]});if((await rpc('unused_pair',{p_topic:topic.id})).length!==2)continue;}catch{continue;}}
   const canonical=await(await remote(base+'content/'+category.id+'/'+topic.id+'/data.json')).json();
   const generated=clinical?{copy:clinical.copy,model:'intmed-verbatim'}:await patientEdition(topic,canonical,input,history);
   const path=destination.root.fa+' / '+destination.child.fa;
@@ -121,7 +121,7 @@ async function jobRun(job){
  }catch(e){await db('gerami_editorial_jobs?id=eq.'+job.id,{status:e.message==='provider_quota'?'waiting_provider':'error',error_code:safeError(e),next_attempt_at:new Date(Date.now()+900000).toISOString(),updated_at:new Date().toISOString()},'PATCH');}
 }
 async function draftCovers(d){
- const options=d.cover_pack?await media.options(d):[];
+ const options=d.cover_pack?await media.options(d,{includeBoth:true}):[];
  const signed=await Promise.all(options.map(async o=>({
   id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview(o)
  })));
@@ -215,10 +215,10 @@ Deno.serve(async req=>{
    return reply({status});
   }
   if(action==='covers'){
-   const current=d.status==='draft'&&!d.cover_pack?await media.ensure(d):d;
+   const current=d.status==='draft'?await media.ensure(d):d;
    return reply({...await draftCovers(current),revision:current.revision});
   }
-  if(action==='choose'){const option=(await media.options(d)).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
+  if(action==='choose'){const option=(await media.options(d,{includeBoth:true})).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
   if(action==='retry'){await mutate(d,'retry');EdgeRuntime.waitUntil(controls.wake().catch(()=>{}));return reply({ok:true});}
   if(action==='notify'){if(d.status!=='draft')throw Error('draft_locked');await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notification_attempts:0,next_notification_at:new Date().toISOString()},'PATCH');await notify({...d,notified_revision:null,notification_attempts:0,next_notification_at:new Date().toISOString()});return reply({ok:true});}
   if(action==='edit'||action==='image'){

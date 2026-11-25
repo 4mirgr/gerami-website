@@ -10,6 +10,17 @@ language sql stable security invoker set search_path='' as $$
        and not exists(select 1 from public.gerami_editorial_drafts d where d.cover_sha256=l.sha256)
        order by l.active desc,l.created_at,l.ordinal,l.id limit 2) c
 $$;
+create or replace function public.gerami_editorial_unused_candidates(p_topic text) returns jsonb
+language sql stable security invoker set search_path='' as $$
+ select coalesce(jsonb_agg(to_jsonb(c) order by c.active desc,c.created_at,c.ordinal,c.id),'[]'::jsonb)
+ from (select l.* from public.gerami_editorial_cover_library l
+       where l.source_topic=p_topic
+       and not exists(select 1 from public.gerami_editorial_cover_options o where o.sha256=l.sha256)
+       and not exists(select 1 from public.gerami_editorial_drafts d where d.cover_sha256=l.sha256)
+       order by l.active desc,l.created_at,l.ordinal,l.id limit 64) c
+$$;
+revoke all on function public.gerami_editorial_unused_candidates(text) from public,anon,authenticated;
+grant execute on function public.gerami_editorial_unused_candidates(text) to service_role;
 create or replace function public.gerami_editorial_prepare_unique(p_id uuid,p_revision integer,p_source jsonb,p_topic text,p_category text,p_pack uuid,p_options jsonb,p_snapshot text)
 returns jsonb language plpgsql security invoker set search_path='' as $$
 begin

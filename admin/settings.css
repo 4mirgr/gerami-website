@@ -129,13 +129,22 @@ dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
 .editorial-cover-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),240px)); gap:16px; }
 .editorial-cover-options img,.editorial-cover-preview { width:100%; max-width:240px; border-radius:16px; }
 
-/* Shared Studio surfaces echo the dashboard's teal gear in both themes. */
-:root{--bg:#f0f5f4;--sidebar:#f8fbfa;--panel:#fff;--soft:#e5f2ee;--field:#f7faf9;--line:#cbd9d5;--muted:#526963;--accent:#14685d;--focus:#08776a;--button:#125f54;--button-text:#fff;--alert-bg:#fff3d7;--alert-ink:#704610}
-:root[data-theme=dark]{--bg:#101b1c;--sidebar:#132223;--panel:#1c2d2f;--soft:#243e3d;--field:#172627;--line:#395252;--muted:#b1c8c2;--accent:#91dbc8;--focus:#91dbc8;--button:#a7e4ce;--button-text:#12382e;--alert-bg:#42371f;--alert-ink:#ffe1a3}
-.sidebar nav a.active{border-inline-start:3px solid var(--accent);background:var(--soft)}
+/* Day follows the light violet dashboard; night uses the navy/cyan reference. */
+:root{--bg:#f5f4fa;--sidebar:#f0eef5;--panel:#fff;--soft:#f0eafa;--field:#faf9fc;--line:#d9d6e4;--text:#27243b;--muted:#59576d;--accent:#6336a0;--focus:#5935ac;--button:#573299;--button-text:#fff;--nav-bg:#6231a8;--nav-ink:white;--tone-cyan:#087e89;--tone-pink:#a03e73;--tone-green:#287355;--tone-purple:#7542b1;--alert-bg:#fff1d9;--alert-ink:#714511}
+:root[data-theme=dark]{--bg:#15182d;--sidebar:#191d38;--panel:#232844;--soft:#313757;--field:#1b203a;--line:#424969;--text:#f4f4fb;--muted:#bbc1db;--accent:#84e6ea;--focus:#84e6ea;--button:#85e0e5;--button-text:#112a37;--nav-bg:#32395a;--nav-ink:#abf8fa;--tone-cyan:#65d8e3;--tone-pink:#ff99c2;--tone-green:#74dcb2;--tone-purple:#c6a4ff;--alert-bg:#413448;--alert-ink:#ffd6a4}
+.sidebar nav a.active{border-inline-start:3px solid var(--accent);background:var(--nav-bg);color:var(--nav-ink)}
+.sidebar nav a.active>:is(.nav-icon,.chevron){background:transparent;color:inherit}
+.dashboard-header{background:linear-gradient(112deg,var(--soft),var(--panel) 70%);border-color:var(--line);color:var(--text)}
+.dashboard-heading #today{color:var(--muted)}
+.review-links a{border-color:var(--line);background:var(--panel);color:var(--accent)}
+.review-links a:first-child{background:var(--button);color:var(--button-text)}
+.stat.orange{--stat-tone:var(--tone-pink)}.stat.green{--stat-tone:var(--tone-green)}.stat.purple{--stat-tone:var(--tone-purple)}.stat.blue{--stat-tone:var(--tone-cyan)}
+.stat{background:linear-gradient(120deg,color-mix(in srgb,var(--stat-tone) 12%,var(--panel)),var(--panel));border-top:2px solid var(--stat-tone)}
+.stat-icon{background:color-mix(in srgb,var(--stat-tone) 13%,var(--panel));color:var(--stat-tone)}
+.edition-column:nth-child(2)>h3{color:var(--tone-cyan)}
 .profile .avatar img{border-radius:50%}
 :is(#studio-notice,.review-workspace .notice,.edition-message):not(:empty){border-inline-start:3px solid var(--accent);border-radius:6px;background:var(--soft);padding:9px 12px}
-#studio-notice.error:not(:empty),#conflict-list:not(:empty),.edition-message[data-error=true]:not(:empty){background:var(--alert-bg);color:var(--alert-ink);border-inline-start:3px solid currentColor;padding:10px;border-radius:6px}
+#studio-notice.error:not(:empty),#conflict-list:not(:empty),:is(.edition-message,.notice)[data-error=true]:not(:empty){background:var(--alert-bg);color:var(--alert-ink);border-inline-start:3px solid currentColor;padding:10px;border-radius:6px}
 .review-workspace .notice:empty,.edition-message:empty,.edition-hint:empty{display:none}
 .editorial-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .editorial-topic.panel{padding:0;border:1px solid var(--line);overflow:hidden}
