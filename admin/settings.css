@@ -125,3 +125,6 @@ dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
  .dashboard-heading img { transition:transform .45s ease-out; }
  .dashboard-heading:hover img { transform:rotate(12deg); }
 }
+
+.editorial-cover-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),240px)); gap:16px; }
+.editorial-cover-options img,.editorial-cover-preview { width:100%; max-width:240px; border-radius:16px; }

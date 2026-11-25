@@ -29,6 +29,7 @@ const fakeFetch=async(url,options={})=>{
   if(path.startsWith('gerami_editorial_jobs')){if(options.method==='PATCH')jobStatus=body.status;return Response.json([]);}
   if(path==='gerami_editorial_drafts'&&options.method==='POST'){inserted++;const d={...body,id:'00000000-0000-4000-8000-000000000002',revision:1,status:'draft',notification_attempts:0,next_notification_at:'2020-01-01'};drafts.push(d);return Response.json([d]);}
   if(path.startsWith('gerami_editorial_drafts')){
+   if(path.includes('limit=26'))return Response.json(drafts.filter(d=>!path.includes('&status=')||(path.includes('status=eq.draft')?d.status==='draft':d.status!=='draft')));
    if(path.includes('status=eq.draft')){assert(path.includes('notified_revision=is.null')&&path.includes('notification_attempts=lt.3')&&path.includes('next_notification_at=lte.'),'Three older notified drafts would starve the next notification');return Response.json(drafts);}
    if(path.includes('status=in.')||path.includes('or=(')){if(receiptFailure)return new Response('{}',{status:503});return Response.json([]);}
    if(path.includes('select=source'))return Response.json(drafts.map(d=>({source:d.source})));
@@ -47,6 +48,7 @@ const fakeFetch=async(url,options={})=>{
  if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
  if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
  if(url.endsWith('/assets/editorial/heart.jpg'))return new Response(new Uint8Array([255,216,255,...new Uint8Array(197)]),{headers:{'Content-Type':'image/jpeg'}});
+ if(url.includes('/storage/v1/object/sign/'))return Response.json({signedURL:'/object/sign/test/preview.jpg'});
  if(url.includes('/storage/v1/object/gerami-editorial/'))return new Response(url.endsWith('/0.jpg')?photo1:photo2,{headers:{'Content-Type':'image/jpeg'}});
  if(url.includes('api.telegram.org')){sent.push({method:url.split('/').pop(),...(options.body instanceof FormData?Object.fromEntries(options.body):JSON.parse(options.body))});return Response.json({ok:true,result:{message_id:sent.length+1}});}
  throw Error('Unexpected network '+url);
@@ -87,3 +89,13 @@ const cards=clinicalEdition(cardData,sourceTopic('cardio-htn'));
 assert.equal(cards.excerpt.kind,'flashcards');
 assert.deepEqual(cards.copy.paragraphs,cardData.flashcards.map(c=>c.front+'\n'+c.back));
 assert.equal(clinicalEdition({lesson:[{id:'empty',heading:'ناقص',paragraphs:[]}]},sourceTopic('cardio-htn')),null);
+
+const inbox=await (await post('list',{view:'drafts'})).json();
+assert.deepEqual(inbox.drafts.map(d=>d.id),[specialist.id]);
+assert.equal(inbox.drafts[0].options,undefined);
+assert.equal(inbox.drafts[0].notified_revision,specialist.revision);
+assert.deepEqual((await (await post('list',{view:'history'})).json()).drafts,[]);
+const selected={id:specialist.id,revision:specialist.revision};
+assert.equal((await post('covers',{...selected,revision:selected.revision-1})).status,409);
+assert.equal((await (await post('covers',selected)).json()).options.length,2);
+enabledRole='user';assert.equal((await post('covers',selected)).status,403);
