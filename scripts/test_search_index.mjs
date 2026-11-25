@@ -43,6 +43,8 @@ assert.ok(urls('asthma').includes('/topics/pulmonology/asthma/'));
 assert.ok(urls('kidney creatinine')[0].includes('nephro-azotemia'));
 assert.ok(urls('متاکولین FEV1')[0].includes('clinical-'));
 assert.ok(urls('اسپيرومتري')[0].endsWith('#spirometry'));
+assert.equal(results('spirometry')[0].title,'Spiromertry Lab');
+assert.equal(results('Spiromertry Lab','fa')[0].title,'اسپیرومتری');
 assert.ok(urls('Ventilator training')[0].endsWith('#ventilator'));
 assert.equal(urls('calcium intake')[0],'/pages/public-page.html');
 assert.ok(results('آسم').every(row=>!/[\u0600-\u06ff]/.test(row.title)));

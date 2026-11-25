@@ -61,7 +61,8 @@ try{
   assert.equal(await spirometry.locator('.project-feature').count(),4);
   await spirometry.locator('#spirometry [data-app-entry]').click();
   await spirometry.waitForURL(origin+'/respiratory/spirometry/');
-  await spirometry.getByRole('heading',{name:'آزمایشگاه اسپیرومتری',exact:true}).waitFor();
+  await spirometry.getByRole('heading',{name:'اسپیرومتری',exact:true}).waitFor();
+  assert.equal(await spirometry.title(),'اسپیرومتری');
   await spirometry.getByRole('link',{name:'ورود به شبیه‌ساز'}).click();
   await spirometry.getByRole('img',{name:/نمودار جریان/}).waitFor();
   await spirometry.locator('[data-nav=notebook]').click();
@@ -77,6 +78,7 @@ try{
   await session.getByRole('heading',{name:/^lung volumes and capacities$/i}).waitFor();
   assert.equal(await spirometry.locator('html').getAttribute('lang'),'en');
   assert.equal(await spirometry.locator('html').getAttribute('dir'),'ltr');
+  assert.equal(await spirometry.title(),'Spiromertry Lab');
   assert.equal(spirometry.url(),chapterUrl);
   await spirometry.reload();
   await session.getByRole('heading',{name:/^lung volumes and capacities$/i}).waitFor();

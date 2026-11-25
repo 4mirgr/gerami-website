@@ -5,13 +5,13 @@ const equivalents = [
  ['copd', 'chronic obstructive pulmonary disease', 'بیماری انسدادی مزمن ریه', 'بیماری مزمن انسدادی ریه', 'بیماری انسداد مزمن ریه', 'انسداد مزمن ریه', 'سی او پی دی'],
  ['asthma', 'آسم', 'اسم ریوی'], ['azotemia', 'azotaemia', 'آزوتمی', 'ازوتمی'],
  ['dysphagia', 'اختلال در بلع', 'اختلال بلع', 'دیسفاژی', 'swallowing difficulties', 'difficulty swallowing'],
- ['spirometry', 'اسپیرومتری', 'اسپیرومتری ریه'], ['ventilator', 'ونتیلاتور'],
+ ['spirometry', 'spiromertry lab', 'اسپیرومتری', 'اسپیرومتری ریه'], ['ventilator', 'ونتیلاتور'],
  ['intmed', 'int med', 'اینت مد', 'اینت‌مد'], ['cardiology', 'قلب و عروق'],
  ['kidney', 'kidneys', 'renal', 'کلیه'], ['lung', 'lungs', 'ریه'],
  ['breathlessness', 'shortness of breath', 'تنگی نفس', 'dyspnea', 'dyspnoea'],
  ['hypertension', 'high blood pressure', 'فشار خون بالا', 'پرفشاری خون'],
  ['diabetes', 'دیابت'], ['stroke', 'سکته مغزی'], ['heart failure', 'نارسایی قلبی','نارسایی قلب'],
- ['inhaler','inhalers','اسپری تنفسی','اسپری'], ['spirometry lab', 'آزمایشگاه اسپیرومتری'],
+ ['inhaler','inhalers','اسپری تنفسی','اسپری'],
  ['patient health record', 'پنل پرونده سلامت بیمار', 'پرونده سلامت بیمار'],
 ];
 const plain = value => searchText(String(value || '')).replace(/[^\p{L}\p{N}]+/gu, ' ').trim();

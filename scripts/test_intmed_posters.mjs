@@ -10,7 +10,10 @@ try {
  await page.goto(origin + '/');await page.waitForSelector('.toolbar-ready',{state:'attached'});
  const image=page.locator('img[data-intmed-poster]');assert.equal(await image.count(),1,'A single localized poster belongs in the IntMed section');
  assert.equal(await image.getAttribute('src'),homeImages.fa.path);assert.deepEqual(requests,[],'The first panel uses a compact preview');
+ const homeSpirometry=page.locator('.showcase-product[href$="/respiratory/spirometry/"] strong');
+ assert.equal(await homeSpirometry.textContent(),'اسپیرومتری');
  await page.locator('[data-language-toggle]').click();assert.equal(await image.getAttribute('src'),homeImages.en.path);
+ assert.equal(await homeSpirometry.textContent(),'Spiromertry Lab');
  const vent=page.locator('.showcase-product[href*=ventilator] img');assert.equal(await vent.getAttribute('src'),await vent.getAttribute('data-src-en'));
  await vent.scrollIntoViewIfNeeded();await vent.evaluate(img=>img.decode());
  assert.equal(await vent.evaluate(img=>img.naturalWidth/img.naturalHeight),.8,'Both languages show the complete 4:5 portrait artwork');
@@ -25,7 +28,6 @@ try {
  await page.getByRole('link',{name:'View all projects and their details'}).or(page.getByRole('link',{name:'توضیحات و مشاهده ی همه ی پروژه ها'})).click();
  assert.equal(new URL(page.url()).pathname,'/projects');
  assert.equal(await page.locator('.project-feature').count(),4);
- assert.equal(await page.locator('#spirometry h2').textContent(),'Spirometry Lab');
  for(const width of [320,390,768,1440]){
   await page.setViewportSize({width,height:900});
   for(const heading of await page.locator('#spirometry h2,#clinic-demo h2').all())assert.ok(await heading.evaluate(el=>el.offsetHeight<=parseFloat(getComputedStyle(el).lineHeight)+1),'single-line project title');
@@ -35,6 +37,11 @@ try {
  assert.equal(await project.locator('[data-app-entry]').getAttribute('href'),'https://drgerami-md.ir/intmed/');
  for(const language of ['fa','en','fa']){
   if(await page.locator('html').getAttribute('lang')!==language)await page.locator('[data-language-toggle]').click();
+  const spirometryName=language==='fa'?'اسپیرومتری':'Spiromertry Lab';
+  assert.equal(await page.locator('#spirometry h2').textContent(),spirometryName);
+  assert.equal(await page.locator('.project-index a[href="#spirometry"]').textContent(),spirometryName);
+  const entryLabel=language==='fa'?'ورود به اسپیرومتری':'Open Spiromertry Lab';
+  assert.equal(await page.locator('#spirometry [data-app-entry]').textContent(),entryLabel);
   const poster=project.locator('[data-intmed-poster]');await poster.scrollIntoViewIfNeeded();await poster.evaluate(img=>img.decode());
   assert.equal(await poster.getAttribute('src'),images[language].path);
   const ventilator=showcaseArt.locator('img');
