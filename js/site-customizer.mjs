@@ -41,7 +41,13 @@ function appearance(){
 }
 function textBlocks(){
  const value=documents[`content/pages/${page}.json`];if(!value)return;
- document.querySelectorAll('[data-content-key]').forEach(node=>{const block=value.blocks[node.dataset.contentKey];if(!block)return;node.dataset.fa=block.fa;node.dataset.en=block.en;if(node.tagName==='META')node.content=block[lang()];else node.textContent=block[lang()];});
+ for(const node of document.querySelectorAll('[data-content-key]')){
+  const block=value.blocks[node.dataset.contentKey];if(!block)continue;
+  if(window.SITE_SET_LABEL)window.SITE_SET_LABEL(node,block[lang()]);
+  else if(node.tagName==='META')node.content=block[lang()];
+  else if(!node.childElementCount)node.textContent=block[lang()];
+  node.dataset.fa=block.fa;node.dataset.en=block.en;
+ }
  document.querySelectorAll('[data-link-key]').forEach(node=>{const url=value.links[node.dataset.linkKey];if(safeLink(url))node.href=url;});
 }
 function extraPage(){

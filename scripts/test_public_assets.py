@@ -43,7 +43,12 @@ class PublicAssets(unittest.TestCase):
                 (site / source.lstrip('/')).write_bytes(raw); originals[source] = raw
                 data['articles'].append({'slug': 'synthetic-cover-' + str(i), 'status': 'published', 'image': source})
             (site / 'content/articles.json').write_text(json.dumps(data))
+            topic = site / 'topics/pulmonology/index.html'
+            topic.parent.mkdir(parents=True)
+            topic.write_text('<img class="post-cover" loading="lazy" src="' + next(iter(originals)) + '">')
             optimize_public_assets(site)
+            self.assertIn('src="/assets/optimized/post-', topic.read_text())
+            self.assertNotIn('/uploads/', topic.read_text())
             previews = list((site / 'assets/optimized').glob('post-*.webp'))
             self.assertEqual(len(previews), 6, 'Published cards must not request full-size originals')
             self.assertLessEqual(sum(p.stat().st_size for p in previews), 60000)

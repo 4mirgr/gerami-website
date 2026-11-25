@@ -98,7 +98,7 @@ def optimize_public_assets(site):
                 inline = '<script id="site-public-data" type="application/json">' + json.dumps(snapshot, ensure_ascii=True, separators=(',', ':')).replace('<', r'\u003c').replace('>', r'\u003e').replace('&', r'\u0026') + '</script>'
                 text = text.replace(snapshot_match[0], inline, 1)
                 text = text.replace('</title>', '</title><script defer src="/assets/runtime/' + filename + '"></script>', 1)
-            text = re.sub(r'(<img class="post-cover"[^>]* src=")([^"]+)(")', lambda m: m[1]+article_images.get(m[2],m[2])+m[3], text)
+        text = re.sub(r'(<img class="post-cover"[^>]* src=")([^"]+)(")', lambda m: m[1]+article_images.get(m[2],m[2])+m[3], text)
         if page.is_relative_to(site/'articles'):
             def responsive_cover(match):
                 original = match[1]

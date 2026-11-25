@@ -20,7 +20,8 @@ def article_path(post, topics):
 
 
 def generate(root,output):
- from site_studio import TOPIC_ART, bake_settings, public_document
+ from site_studio import TOPIC_ART, article_excerpt, bake_settings, public_document
+ from validate_content import remote_article_image
  root,output=Path(root),Path(output);escape=lambda s:html.escape(str(s),quote=True)
  data=public_document(root/'backend/editorial/functions/gerami-editorial/taxonomy.json')
  topics={t['source_id']:(c,t) for c in data['categories'] for t in c['topics']}
@@ -40,7 +41,6 @@ def generate(root,output):
   title=source.get('title') or url
   en=source.get('title_en') or (url if re.search(r'[\u0600-\u06ff]',title) else title)
   return '<p class="article-source"><a rel="noopener noreferrer" href="'+escape(url)+'">'+label(title,en)+'</a></p>'
- def linked(p):return '<li><a href="'+escape(post_path(p))+'">'+label(p.get('title_fa') or p['title_en'],p.get('title_en') or p['title_fa'])+'</a></li>'
  template=(root/'pages/services.html').read_text().replace('data-page="services"','data-page="editorial"')
  # Nested generated paths need root-relative owned resources, never ../css or pages.
  template=re.sub(r'((?:href|src)=")\.\./',r'\1/',template)
@@ -73,6 +73,8 @@ def generate(root,output):
    discussion='<section class="discussion" data-discussion="'+escape(article['slug'])+'" id="discussion"><h2 data-fa="دیدگاه خوانندگان" data-en="Reader discussion">دیدگاه خوانندگان</h2><div data-discussion-ui></div><noscript>برای ثبت دیدگاه یا پسندیدن، جاوااسکریپت را فعال کنید.</noscript></section>'
    main='<main class="reader" id="main" tabindex="-1"><article class="reader-sheet">'+header+body+'</article>'+discussion+'</main>'
    text=text.replace('</head>','<link rel="stylesheet" href="/css/article.css"><script type="module" src="/js/discussion.js"></script></head>',1)
+  if atlas_header or 'class="atlas-post-grid"' in body:
+   text=text.replace('</head>','<link rel="stylesheet" href="/css/clinical-taxonomy.css"></head>',1)
   text=re.sub(r'<main\b.*?</main>',lambda _:main,text,count=1,flags=re.S)
   graph=[{'@type':'BreadcrumbList','itemListElement':[{'@type':'ListItem','position':i+1,'name':n,'item':SITE+u} for i,(n,_,u) in enumerate([('خانه','Home','/'),*crumbs])]}]
   if article:
@@ -109,6 +111,37 @@ def generate(root,output):
   return '<header class="atlas-heading glass-surface">'+content+'</header>'
  def atlas_group(fa,en,body):
   return '<section class="atlas-listing glass-surface"><h2>'+label(fa,en)+'</h2>'+body+'</section>'
+ def article_thumb(p,decorative=False):
+  image=p.get('image') or ''
+  if not re.fullmatch(r'/assets/(?:uploads|optimized)/[a-zA-Z0-9._-]+',image) and not remote_article_image(image):
+   return ''
+  fa=p.get('image_alt') or p.get('title_fa') or p.get('title_en','')
+  en=p.get('image_alt_en') or p.get('title_en') or fa
+  alt='alt=""' if decorative else f'alt="{escape(fa)}" data-alt-fa="{escape(fa)}" data-alt-en="{escape(en)}"'
+  return f'<img class="post-cover" {alt} loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{escape(image)}">'
+ def article_card(p):
+  url=escape(post_path(p))
+  title=label(p.get('title_fa') or p['title_en'],p.get('title_en') or p['title_fa'])
+  day=p.get('published_at','')
+  fa_date,en_date=date_labels.get(day,('',''))
+  meta='<time datetime="'+escape(day)+'">'+label(fa_date,en_date)+'</time>' if day else ''
+  body_fa=p.get('body_fa') or p.get('body_en','')
+  excerpt=label(article_excerpt(body_fa),article_excerpt(p.get('body_en') or body_fa))
+  return (f'<article class="card post-card glass-surface" data-post="{escape(p["slug"])}">'
+          +article_thumb(p)+f'<h4><a href="{url}">{title}</a></h4>'+meta+
+          f'<p class="post-excerpt">{excerpt}</p><div class="post-actions"><a class="post-permalink" href="{url}">'+
+          label('ادامه مطلب','Read article')+f'</a><a href="{url}#discussion">'+label('دیدگاه‌ها','Comments')+'</a></div></article>')
+ def subtopic_links(category,members):
+  tiles=[]
+  for t in category['topics']:
+   # A cover may illustrate its own clinical topic only. Other topics share
+   # the specialty illustration in the heading rather than an unrelated photo.
+   matches=sorted((p for p in members if p.get('topic')==t['id'] and p.get('image')),
+                  key=lambda p:(p.get('audience')=='professional',p.get('published_at',''),p['slug']),reverse=True)
+   cover=next((image for p in matches if (image:=article_thumb(p,decorative=True))),'')
+   tiles.append('<li><a class="atlas-subtopic" href="'+topic_path(category,t)+'">'+cover+
+                label(t['fa'],t['en'])+'<span class="topic-chevron" aria-hidden="true"></span></a></li>')
+  return '<ul class="atlas-subtopics">' + ''.join(tiles) + '</ul>'
  def article_list(rows):
   if not rows:
    return '<p>'+label('هنوز مطلبی در این مبحث منتشر نشده است.','No articles have been published on this topic yet.')+'</p>'
@@ -116,20 +149,21 @@ def generate(root,output):
   for audience,(fa,en) in audience_names.items():
    matches=sorted((row for row in rows if row.get('audience','patients')==audience),key=lambda row:(row.get('published_at',''),row['slug']),reverse=True)
    if matches:
-    groups.append('<div class="audience-shelf"><h3>'+label(fa,en)+'</h3><ul class="atlas-links">'+''.join(map(linked,matches))+'</ul></div>')
+    groups.append('<div class="audience-shelf"><h3>'+label(fa,en)+'</h3><div class="atlas-post-grid">'+''.join(map(article_card,matches))+'</div></div>')
   return '<div class="audience-shelves">'+''.join(groups)+'</div>'
  directory=('موضوعات','Topics','/topics/')
  cards=[]
  for c in data['categories']:
   node=c['root'];root_url=topic_path(c)
   child_ids={t['id'] for t in c['topics']};members=[p for p in posts if p.get('topic') in child_ids or p.get('topic')==node['id']]
-  links='<ul class="atlas-links">'+''.join('<li><a href="'+topic_path(c,t)+'">'+label(t['fa'],t['en'])+'</a></li>' for t in c['topics'])+'</ul>'
+  links=subtopic_links(c,members)
+  desc='<p>'+label(node['description_fa'],node['description_en'])+'</p>' if node.get('description_fa') and node.get('description_en') else ''
   card='<article class="atlas-card glass-surface"><div class="atlas-category">'+topic_image(c)+'<h2><a href="'+root_url+'">'+label(node['fa'],node['en'])+'</a></h2></div>'
-  cards.append(card+'<details><summary>'+label('زیرموضوع‌ها','Subtopics')+' ('+str(len(c['topics']))+')</summary>'+links+'</details></article>')
+  cards.append(card+desc+'<details><summary>'+label('زیرموضوع‌ها','Subtopics')+' ('+str(len(c['topics']))+')</summary>'+links+'</details></article>')
   parent=(node['fa'],node['en'],root_url)
   page(root_url,node['fa'],'مطالب آموزشی و زیرموضوع‌های '+node['fa'],
        atlas_group('زیرموضوع‌ها','Subtopics',links)+atlas_group('مطالب این شاخه','Articles in this specialty',article_list(members)),
-       [directory,parent],bool(members),atlas_header=atlas_header(node['fa'],node['en'],[directory],c),title_en=node['en'],description_en='Medical articles and topics in '+node['en'])
+       [directory,parent],bool(members),atlas_header=atlas_header(node['fa'],node['en'],[directory],c,lead=desc),title_en=node['en'],description_en='Medical articles and topics in '+node['en'])
   for t in c['topics']:
    matches=[p for p in members if p.get('topic')==t['id']]
    page(topic_path(c,t),t['fa'],'مطالب آموزشی '+t['fa']+' در '+node['fa'],

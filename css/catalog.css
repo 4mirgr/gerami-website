@@ -54,13 +54,5 @@
 .project-feature[id] { scroll-margin-top:var(--header-clearance,144px); }
 @media(max-width:700px) { .project-index { justify-content:center; } }
 
-.ventilator-visual { position:relative; margin:0; overflow:hidden; aspect-ratio:4 / 5; border-radius:16px; background:#061d2f; container-type:inline-size; }
+.ventilator-visual { margin:0; border-radius:16px; overflow:hidden; }
 .ventilator-visual img { display:block; width:100%; height:auto; }
-.ventilator-visual figcaption { display:none; }
-html[lang=en] .ventilator-visual img { clip-path:inset(13% 0 51%); }
-html[lang=en] .ventilator-visual figcaption { display:block; position:absolute; inset:0; text-align:start; color:#effbff; }
-.ventilator-visual strong { display:flex; align-items:center; justify-content:center; height:13%; padding-inline:3%; font:700 6.3cqw/1.1 var(--site-font); text-align:center; }
-.ventilator-visual figcaption > div { position:absolute; inset:49% 6% 0; display:flex; flex-direction:column; justify-content:space-evenly; }
-.ventilator-visual figcaption p { margin:0; font-size:5.1cqw; line-height:1.4; }
-.ventilator-visual ul { list-style:none; margin:0; padding:0; }
-.ventilator-visual li { border-top:1px solid #61becc70; padding-block:1.6cqw; color:#a6eff0; font-size:3.9cqw; line-height:1.4; }

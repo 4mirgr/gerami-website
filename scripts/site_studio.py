@@ -87,11 +87,16 @@ def render_page(template, page):
     text = re.sub(r' data-(?:content|link)-key="[^"]+"', '', template)
     text = text.replace('data-page="services"', 'data-page="extra" data-extra-page="' + page['slug'] + '"')
     escape = lambda value: html.escape(value, quote=True)
-    text = re.sub(r'<title[^>]*>.*?</title>', lambda _: '<title>' + escape(page['title_fa']) + '</title>', text, count=1)
-    text = re.sub(r'<meta name="description"[^>]*>', lambda _: '<meta name="description" content="' + escape(page['description_fa']) + '">', text, count=1)
+    def labels(field):
+        return 'data-fa="' + escape(page[field+'_fa']) + '" data-en="' + escape(page[field+'_en']) + '"'
+
+    title = labels('title') + '>' + escape(page['title_fa'])
+    text = re.sub(r'<title[^>]*>.*?</title>', lambda _: '<title ' + title + '</title>', text, count=1)
+    text = re.sub(r'<meta name="description"[^>]*>', lambda _: '<meta name="description" ' + labels('description') + ' content="' + escape(page['description_fa']) + '">', text, count=1)
     text = re.sub(r'<link rel="canonical"[^>]*>', '<link rel="canonical" href="https://drgerami-md.ir/pages/' + page['slug'] + '.html">', text, count=1)
-    image = '<img src="' + escape(page['image']) + '" alt="">' if page.get('image') else ''
-    main = '<main id="main" tabindex="-1"><section class="page-intro"><div class="container"><h1>' + escape(page['title_fa']) + '</h1></div></section><section class="container section" data-extra-body>' + image + '<p>' + escape(page['body_fa']).replace('\n', '<br>') + '</p></section></main>'
+    image = '<img src="' + escape(page['image']) + '" alt="' + escape(page['title_fa']) + '" data-alt-fa="' + escape(page['title_fa']) + '" data-alt-en="' + escape(page['title_en']) + '">' if page.get('image') else ''
+    body = '<p class="extra-reading-copy" ' + labels('body') + '>' + escape(page['body_fa']) + '</p>'
+    main = '<main id="main" tabindex="-1"><section class="page-intro"><div class="container"><h1 ' + title + '</h1></div></section><section class="container section" data-extra-body>' + image + body + '</section></main>'
     return re.sub(r'<main\b.*?</main>', lambda _: main, text, count=1, flags=re.S)
 
 
@@ -104,7 +109,7 @@ def generate(root, output):
     for page in data['pages']:
         if page['published']:
             (output / 'pages' / (page['slug'] + '.html')).write_text(bake_settings(root, render_page(template, page), 'extra'))
-    preview = dict(slug='studio-preview', title_fa='پیش‌نمایش صفحه', description_fa='', body_fa='', image='')
+    preview = dict(slug='studio-preview', title_fa='پیش‌نمایش صفحه', title_en='Page preview', description_fa='', description_en='', body_fa='', body_en='', image='')
     text = render_page(template, preview).replace('</head>', '<meta name="robots" content="noindex,nofollow"></head>')
     (output / 'pages/studio-preview.html').write_text(bake_settings(root, text, 'extra'))
 
@@ -201,6 +206,12 @@ def home_bootstrap(root, text, ident="home"):
     return text
 
 
+def article_excerpt(body):
+    intro = next((line.strip() for line in body.splitlines() if line.strip() and not re.match(r'^#{1,6}\s|^!\[', line.strip())), body)
+    intro = re.sub(r'[#*_`>~]', '', re.sub(r'!?\[([^\]]*)\]\([^)]*\)', r'\1', intro)).strip()
+    return re.sub(r'\s+\S*$', '', intro[:145]) + '…' if len(intro) > 145 else intro
+
+
 def bake_settings(root, text, ident):
     if ident == 'home':
         for marker, directory in [('topic-rail', False), ('topic-directory', True)]:
@@ -212,31 +223,26 @@ def bake_settings(root, text, ident):
         ordered = sorted((a for a in articles if a.get('status') == 'published' and re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a.get('slug', ''))), key=lambda a: a['slug'])
         ordered.sort(key=lambda a: a.get('published_at', ''), reverse=True)
 
-        def excerpt(body):
-            intro = next((line.strip() for line in body.splitlines() if line.strip() and not re.match(r'^#{1,6}\s|^!\[', line.strip())), body)
-            intro = re.sub(r'[#*_`>~]', '', re.sub(r'!?\[([^\]]*)\]\([^)]*\)', r'\1', intro)).strip()
-            return re.sub(r'\s+\S*$', '', intro[:145]) + '…' if len(intro) > 145 else intro
-
         def localized(fa, en):
             return f'data-fa="{html.escape(fa)}" data-en="{html.escape(en)}">{html.escape(fa)}'
 
-        def article_links(items, previews=False):
+        def article_links(items):
             links = []
             for article in items:
                 path = article.get('url') or '/articles/' + article['slug'] + '/'
                 if re.fullmatch(r'/articles/(?:[a-z0-9-]+/){1,3}', path):
                     title = article.get('title_fa') or article.get('title_en') or ''
                     link = f'<a href="{path}" {localized(title[:150], (article.get("title_en") or title)[:150])}</a>'
-                    if previews:
-                        from validate_content import remote_article_image
-                        image = article.get('image') or ''
-                        if not (re.fullmatch(r'/assets/(?:uploads|optimized)/[a-zA-Z0-9._-]+', image) or remote_article_image(image)):
-                            image = ''
-                        body = article.get('body_fa') or article.get('body_en') or ''
-                        intro = localized(excerpt(body), excerpt(article.get('body_en') or body))
-                        cover = f'<img class="post-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{html.escape(image, quote=True)}" alt="">' if image else ''
-                        link = f'{cover}<strong>{link}</strong><p class="post-excerpt" {intro}</p>'
-                    links.append('<li>' + link + '</li>')
+                    from validate_content import remote_article_image
+                    image = article.get('image') or ''
+                    if not (re.fullmatch(r'/assets/(?:uploads|optimized)/[a-zA-Z0-9._-]+', image) or remote_article_image(image)):
+                        image = ''
+                    body = article.get('body_fa') or article.get('body_en') or ''
+                    intro = localized(article_excerpt(body), article_excerpt(article.get('body_en') or body))
+                    cover = f'<img class="post-cover" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="{html.escape(image, quote=True)}" alt="">' if image else ''
+                    link = f'{cover}<strong>{link}</strong><p class="post-excerpt" {intro}</p>'
+                    item_class = ' class="card glass-surface"' if ident == 'blog' else ''
+                    links.append('<li' + item_class + '>' + link + '</li>')
             return ''.join(links)
 
         fallback = ''
@@ -244,12 +250,12 @@ def bake_settings(root, text, ident):
             groups = []
             for professional, fa, en in [(False, 'برای عموم', 'For the public'), (True, 'ویژه پزشکان', 'For clinicians')]:
                 items = [a for a in ordered if (a.get('audience') == 'professional') == professional][:7]
-                links = article_links(items, previews=True)
+                links = article_links(items)
                 if links:
                     groups.append(f'<section><h3 data-fa="{fa}" data-en="{en}">{fa}</h3><ul class="fallback-rail" id="initial-rail-{int(professional)}">{links}</ul></section>')
             fallback = '<div data-recent-links>' + ''.join(groups) + '</div>'
         elif ordered:
-            fallback = '<ul data-recent-links>' + article_links(ordered) + '</ul>'
+            fallback = '<ul class="post-grid" data-recent-links>' + article_links(ordered) + '</ul>'
         text = text.replace('<!--recent-links-->', fallback)
     escape = lambda value: html.escape(str(value), quote=True)
     appearance = public_document(root / 'content/appearance.json')
@@ -262,12 +268,20 @@ def bake_settings(root, text, ident):
         return pattern.sub(lambda _: key + '="' + escape(value) + '"', tag)
 
     def block(match):
-        opening, tag, key, _, closing = match.groups()
+        opening, tag, key, body, closing = match.groups()
         value = data['blocks'].get(key)
         if not value:
             return match[0]
+        if '<' in body:
+            source = re.search(r' data-fa="([^"]*)"', opening)
+            if source:
+                # Replace only a complete text run. Keep the surrounding links and icons.
+                label = re.compile(r'(^|>)(\s*)' + re.escape(source[1]) + r'(\s*)(?=<|$)')
+                body = label.sub(lambda hit: hit[1] + hit[2] + escape(value['fa']) + hit[3], body, count=1)
+        else:
+            body = escape(value['fa'])
         opening = attr(attr(opening, 'data-fa', value['fa']), 'data-en', value['en'])
-        return opening + escape(value['fa']) + closing
+        return opening + body + closing
 
     text = re.sub(r'(<([a-z0-9]+)\b[^>]*data-content-key="([^"]+)"[^>]*>)(.*?)(</\2>)', block, text, flags=re.S)
 

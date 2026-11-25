@@ -26,6 +26,12 @@ class SiteStudioBuild(unittest.TestCase):
                 self.assertIn('private review text', (root / 'content' / file.name).read_text())
             self.assertNotIn('private review text', home_bootstrap(root, '<head></head>', 'extra'))
 
+    def test_decorated_labels_keep_icons_and_counts(self):
+        template = '<button data-content-key="text-004" data-fa="پزشک" data-en="Physician"><svg aria-hidden="true"></svg>پزشک<span>42</span></button>'
+        page = bake_settings(ROOT, template, 'about')
+        name = json.loads((ROOT/'content/pages/about.json').read_text())['blocks']['text-004']['fa']
+        self.assertIn('<svg aria-hidden="true"></svg>'+name+'<span>42</span>', page)
+
     def test_contact_cards_use_current_profile_before_javascript(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -97,6 +103,8 @@ class SiteStudioBuild(unittest.TestCase):
             self.assertIn('&lt;img onerror=bad()&gt;', custom)
             self.assertNotIn('<script>alert(1)</script>', custom)
             self.assertIn('data-extra-page="test-page"', custom)
+            self.assertIn('class="extra-reading-copy" data-fa=', custom)
+            self.assertIn('data-en="Safe">', custom)
             self.assertIn('noindex,nofollow', (output / 'pages/studio-preview.html').read_text())
             self.assertIn('id="site-settings"', html)
 
