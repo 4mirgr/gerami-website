@@ -221,7 +221,7 @@ function loadListings(){return Promise.allSettled([json('topics.json'),json('art
  renderTopics();renderArticles();
 });}
 const initialListings=isHome&&document.querySelector('#recent-posts [data-recent-links] .fallback-rail');
-if(initialListings&&'IntersectionObserver' in window){
+if(initialListings&&document.querySelector('script[src*="/assets/runtime/home-documents."]')&&'IntersectionObserver' in window){
  // The published cards are already in the document. Fetch the full archive
  // only when the reader approaches the rails or navigates to them by keyboard.
  const section=initialListings.closest('#recent-posts');
