@@ -63,7 +63,7 @@ for(const dialog of document.querySelectorAll('dialog')){dialog.querySelectorAll
 function previewURL(){const extra=previewPage.startsWith('extra:');if(extra){const slug=previewPage.slice(6);return '/pages/studio-preview.html?studio-preview=1&slug='+encodeURIComponent(slug);}return (previewPage==='home'?'/index.html':'/pages/'+previewPage+'.html')+'?studio-preview=1';}
 function setPreview(page=currentPage){previewPage=page;preview.src=previewURL();}
 function focusBlock(){if(!selectedBlock)return;requestAnimationFrame(()=>{const input=view.querySelector(`[data-block="${selectedBlock}"]`);input?.scrollIntoView({block:'center',behavior:'smooth'});input?.focus();});}
-function fitPreview(){const stage=$('preview-stage');const scale=Math.min(1,stage.clientWidth/previewSize);preview.style.width=previewSize+'px';preview.style.height=Math.round(780/scale)+'px';preview.style.transform=`scale(${scale})`;stage.style.height='780px';}
+function fitPreview(){const stage=$('preview-stage');if(!stage.clientWidth)return;const scale=Math.min(1,stage.clientWidth/previewSize);preview.style.width=previewSize+'px';preview.style.height=Math.round(780/scale)+'px';preview.style.transform=`scale(${scale})`;stage.style.height='780px';}
 new ResizeObserver(fitPreview).observe($('preview-stage'));
 $('preview-device').addEventListener('change',event=>{previewSize=Number(event.target.value);fitPreview();});
 $('preview-language').addEventListener('change',event=>{previewLanguage=event.target.value;sendPreview();});
@@ -205,11 +205,40 @@ async function historyEditor(){const section=group('تاریخچه و بازیا
  if(session.state!=='connected'){section.append(node('p','پس از اتصال GitHub، تاریخچه فایل‌های سایت در دسترس است.'));return;}
  section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',new Date(commit.commit.author.date).toLocaleString('fa-IR')));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخه انتخابی در پیش‌نویس آماده بررسی است.');render();})));rows.append(row);}})));
 }
-function render(){if(!loaded)return;view.replaceChildren();const route=location.hash.slice(1);if(!Object.hasOwn(routes,route))return;
- if(route==='discussion')discussionEditor(view);if(route==='auto-posts')editorialEditor(view);if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
+const reviewEditors=new Map([['discussion',discussionEditor],['auto-posts',editorialEditor]]);
+function render(){
+ const route=location.hash.slice(1);
+ if(!Object.hasOwn(routes,route)||reviewEditors.has(route)||!loaded)return;
+ view.replaceChildren();
+ if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
 }
-function route(){const route=location.hash.slice(1);$('studio-view').hidden=!Object.hasOwn(routes,route);$('publish-bar').hidden=!loaded||route==='discussion';document.querySelector('.preview-panel').hidden=route==='discussion';if(loaded&&Object.hasOwn(routes,route)){render();const target=({articles:'blog',topics:'home',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[route]||previewPage;if(route!=='discussion'&&(target!==previewPage||!preview.getAttribute('src')))setPreview(target);if(route==='pages')focusBlock();}}
+let reviewRoute='';
+function route(){
+ const key=location.hash.slice(1),isStudio=Object.hasOwn(routes,key),review=reviewEditors.get(key);
+ $('studio-view').hidden=!isStudio;
+ $('publish-bar').hidden=!loaded||!isStudio||!!review;
+ document.querySelector('.preview-panel').hidden=!!review;
+ document.querySelector('.studio-heading').hidden=!!review;
+ if(review){
+  if(reviewRoute!==key){
+   $('studio-view').classList.remove('preview-expanded');
+   const panel=node('div',undefined,'review-workspace');
+   view.replaceChildren(panel);
+   reviewRoute=key;
+   review(panel);
+  }
+  return;
+ }
+ if(reviewRoute)view.replaceChildren();
+ reviewRoute='';
+ if(!loaded||!isStudio)return;
+ render();
+ const target=({articles:'blog',topics:'home',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[key]||previewPage;
+ if(target!==previewPage||!preview.getAttribute('src'))setPreview(target);
+ if(key==='pages')focusBlock();
+}
 window.addEventListener('hashchange',route);
+route();
 window.addEventListener('beforeunload',event=>{if(store.storageError&&store.count||store.busy){event.preventDefault();event.returnValue='';}});
 try{await store.load();loaded=true;route();status();if(session.state==='connected')await synchronize();}catch(error){notice(error.message,true);}
 

@@ -13,7 +13,12 @@ await page.locator('a[data-nav=editor]').click();await page.waitForSelector('ifr
 await page.locator('a[data-nav=dashboard]').click();await page.locator('a[data-nav=editor]').click();assert.equal(await page.locator('iframe.editor-frame').count(),1);
 await page.locator('a[data-nav=media]').click();await page.waitForSelector('.studio-gallery');
 await page.locator('a[data-nav=dashboard]').click();await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-await page.locator('#menu').click();assert.equal(await page.locator('#menu').getAttribute('aria-expanded'),'true');await page.keyboard.press('Escape');assert.equal(await page.locator('#menu').getAttribute('aria-expanded'),'false');await page.screenshot({path:'/tmp/gerami-admin-mobile.png',fullPage:true});
+assert.equal(await page.locator('#sidebar').evaluate(el=>el.inert),true);
+const manifest=await (await page.request.get(await page.locator('link[rel=manifest]').evaluate(el=>el.href))).json();
+assert.equal(manifest.start_url,'/admin/');assert.equal(manifest.scope,'/admin/');
+assert.equal(await page.locator('.dashboard-heading img').evaluate(img=>img.complete&&img.naturalWidth===192),true);
+await page.locator('#menu').click();assert.equal(await page.locator('#menu').getAttribute('aria-expanded'),'true');assert.equal(await page.locator('.app').evaluate(el=>el.inert),true);
+await page.keyboard.press('Escape');assert.equal(await page.locator('#menu').getAttribute('aria-expanded'),'false');await page.screenshot({path:'/tmp/gerami-admin-mobile.png',fullPage:true});
 await page.route('**/content/articles.json',r=>r.fulfill({json:{articles:[{title_fa:'<img onerror=alert(1)>',status:'published',published_at:'2026-11-12'},{title_fa:'پیش‌نویس',status:'draft'}]}}));
 await page.goto('http://127.0.0.1:4173/admin/');await page.waitForFunction(()=>document.querySelector('#total').textContent==='۲');assert.equal(await page.locator('#published').textContent(),'۱');assert.equal(await page.locator('#drafts').textContent(),'۱');assert.equal(await page.locator('#recent-list img').count(),0);assert.equal(await page.locator('.recent').count(),2);
 const statusModule=await import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL('../functions/api/cms/status.js',import.meta.url))).toString('base64'));assert.deepEqual(await statusModule.onRequestGet({env:{}}).json(),{configured:false});const configured=statusModule.onRequestGet({env:{CMS_GITHUB_CLIENT_ID:'private-id',CMS_GITHUB_CLIENT_SECRET:'private-secret'}});assert.equal(configured.headers.get('cache-control'),'no-store');assert.equal(await configured.text(),'{"configured":true}');

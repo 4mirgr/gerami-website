@@ -1,7 +1,7 @@
 import {displayText} from '../js/site-model.mjs';
 /* Private server-backed drafts. Never copy this inbox into public SiteStore documents. */
 const messages={stale_revision:'نسخه تغییر کرده است؛ فهرست را تازه کنید.',draft_locked:'این نسخه در حال انتشار است و فعلاً قابل ویرایش نیست.',provider_quota:'سهمیه سرویس تولید متن کافی نیست؛ پیش‌نویس‌های قبلی محفوظ‌اند.',sign_in_required:'دوباره با حساب مدیر وارد شوید.'};
-async function api(action,data={}){const r=await fetch('/api/editorial/'+action,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify(data)});const v=await r.json();if(!r.ok)throw Error(messages[v.error]||'درخواست کامل نشد ('+(v.error||r.status)+').');return v;}
+async function api(action,data={}){const r=await fetch('/api/editorial/'+action,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',signal:AbortSignal.timeout(24000),body:JSON.stringify(data)});const v=await r.json();if(!r.ok)throw Error(messages[v.error]||'درخواست کامل نشد ('+(v.error||r.status)+').');return v;}
 const el=(tag,text='',cls='')=>{const n=document.createElement(tag);n.textContent=displayText(String(text));if(cls)n.className=cls;return n;};
 const labels={draft:'منتظر بازبینی',approved:'تأییدشده؛ در صف انتشار',publishing:'در حال بررسی و ثبت',verifying:'در انتظار نسخه زنده',published:'منتشرشده',rejected:'کنار گذاشته‌شده',publish_error:'خطای انتشار',queued:'در صف',processing:'تولید در حال انجام',complete:'انجام‌شده',error:'خطا',waiting_provider:'منتظر سرویس تولید متن'};
 const readership=value=>value==='professional'?'ویژه پزشکان':'برای عموم';
@@ -41,5 +41,8 @@ export async function editorialEditor(host,offset=0){
   if(d.status==='publish_error')card.append(button('تلاش دوباره انتشار همین نسخه تأییدشده',async()=>{await api('retry',{id:d.id,revision:d.revision});await editorialEditor(host,offset);}));
   if(d.error_code)card.append(el('p','نیازمند بررسی: '+d.error_code));host.append(card);
  }
- }catch(e){notice.textContent=e.message;}
+ }catch(e){
+  notice.textContent='دریافت پیشنهادها ممکن نشد. '+e.message;
+  host.append(button('تلاش دوباره',()=>editorialEditor(host,offset)));
+ }
 }
