@@ -19,9 +19,11 @@ SITE_FILES = ('index.html', 'favicon.svg', 'apple-touch-icon.png', 'site.webmani
 SITE_DIRS = ('pages', 'css', 'js', 'assets', 'content', 'admin', 'dash')
 VENTILATOR_FILES = (
     'index.html', 'app.js', 'content.js', 'model.js', 'organ-motion.js', 'waveforms.js',
-    'device.css', 'organ-motion.css', 'styles.css',
+    'device.css', 'organ-motion.css', 'styles.css', 'manifest.webmanifest',
     'assets/Vazirmatn-OFL.txt', 'assets/Vazirmatn.woff2', 'assets/alveoli.webp',
-    'assets/favicon.png', 'assets/heart-lungs.webp', 'assets/ventilator-housing.webp',
+    'assets/heart-lungs.webp', 'assets/ventilator-housing.webp', 'assets/favicon.png',
+    'assets/apple-touch-icon.png', 'assets/icon-192.png', 'assets/icon-512.png',
+    'assets/icon-maskable-512.png',
 )
 VENTILATOR_CHECK = ('--test',)
 
