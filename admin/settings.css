@@ -186,3 +186,8 @@ dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
 @media(max-width:550px){.editorial-generation{padding:14px}.editorial-generation>.tool-button{width:100%}.edition-timing{padding:8px}.edition-timing .field>span{font-size:.85rem}.editorial-categories{gap:12px}.editorial-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.edition-timing select{font-size:.85rem}.edition-timing h5{font-size:.95rem}}
 
 .skip:not(:focus){clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+
+.token-connect summary{cursor:pointer;font-weight:700}
+.token-connect form{display:grid;gap:.8rem;max-width:42rem;margin-block-start:.8rem}
+.token-connect .tool-button{justify-self:start}
+.token-connect p{margin:0}

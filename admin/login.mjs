@@ -17,6 +17,7 @@ const github=new GitHubSession({establishSession:true});
 github.addEventListener('change',()=>{
  connect.disabled=github.state==='checking'||github.state==='connecting';
  if(github.state==='connected')openPanel();
+ else if(github.state==='connecting')notice(github.message,'Choose how to connect in the sign-in window.');
  else if(['error','expired','forbidden'].includes(github.state))notice(github.message,'Sign-in could not be verified. Retry with your authorized account.');
 });
 connect.onclick=()=>github.state==='error'&&github.read()?github.verify():github.connect();

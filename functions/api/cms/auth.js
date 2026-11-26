@@ -7,5 +7,6 @@ export async function onRequestGet({ request, env }) {
   const state = Array.from(bytes, b => b.toString(16).padStart(2,'0')).join('');
   const url = new URL('https://github.com/login/oauth/authorize');
   url.search = new URLSearchParams({client_id:env.CMS_GITHUB_CLIENT_ID, redirect_uri:origin + '/api/cms/callback', scope:'public_repo', state}).toString();
-  return new Response(null, {status:302, headers:{Location:url.href,'Set-Cookie':`__Host-cms-state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,'Cache-Control':'no-store'}});
+  const target = new URL(request.url).searchParams.get('return') === 'dashboard' ? '.dashboard' : '';
+  return new Response(null, {status:302, headers:{Location:url.href,'Set-Cookie':`__Host-cms-state=${state}${target}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,'Cache-Control':'no-store'}});
 }

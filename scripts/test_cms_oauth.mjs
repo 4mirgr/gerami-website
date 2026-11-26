@@ -15,6 +15,39 @@ const success=await callback.onRequestGet({request:req(state),env});assert.equal
 assert.ok(success.headers.getSetCookie().some(value=>value.startsWith('__Host-gerami-cms=')&&value.includes('HttpOnly; Secure')));
 globalThis.fetch=async url=>new Response(JSON.stringify(String(url).includes('access_token')?{access_token:'mock-token'}:{login:'other'}));
 assert.equal((await callback.onRequestGet({request:req(state),env})).status,403);
+// GitHub can return HTTP 200 for OAuth errors. Never echo a provider response,
+// consume another tab's pending state, or issue an owner cookie on failure.
+const dashboardStart=await auth.onRequestGet({request:new Request(origin+'/api/cms/auth?return=dashboard'),env});
+const providerURL=new URL(dashboardStart.headers.get('location'));
+const dashboardCookie=dashboardStart.headers.get('set-cookie').split(';')[0];
+const dashboardState=providerURL.searchParams.get('state');
+const dashboardRequest=query=>new Request(origin+'/api/cms/callback?'+new URLSearchParams(query),{headers:{Cookie:dashboardCookie}});
+assert.equal(providerURL.searchParams.get('redirect_uri'),origin+'/api/cms/callback');
+const otherFlow=await callback.onRequestGet({request:dashboardRequest({code:'test',state:'b'.repeat(64)}),env});
+assert.equal(otherFlow.status,403);assert.equal(otherFlow.headers.get('set-cookie'),null);
+const denied=await callback.onRequestGet({request:dashboardRequest({error:'access_denied',state:dashboardState}),env});
+assert.match(await denied.text(),/oauth_denied/);
+for(const [error,status,expected] of [
+ ['bad_verification_code',400,'oauth_expired'],['incorrect_client_credentials',503,'oauth_config'],['redirect_uri_mismatch',503,'oauth_redirect'],['provider_private_string',502,'github_unavailable']
+]){
+ globalThis.fetch=async (url,options)=>{
+  assert.equal(url,'https://github.com/login/oauth/access_token');
+  assert.equal(options.method,'POST');assert.equal(options.redirect,'error');
+  assert.equal(options.body.get('code'),'private-auth-code');
+  assert.equal(options.body.get('redirect_uri'),providerURL.searchParams.get('redirect_uri'));
+  return Response.json({error,error_description:'private-upstream-details'});
+ };
+ const rejected=await callback.onRequestGet({request:dashboardRequest({state:dashboardState,code:'private-auth-code'}),env});
+ assert.equal(rejected.status,status);
+ const body=await rejected.text();
+ assert.match(body,new RegExp(expected));assert.match(body,/authorization:github:error:/);
+ assert.match(body,/href="\/api\/cms\/auth\?return=dashboard"/);
+ assert.doesNotMatch(body,/private-auth-code|private-upstream-details|provider_private_string|synthetic-secret/);
+ assert.ok(!rejected.headers.getSetCookie().some(value=>value.startsWith('__Host-gerami-cms=')));
+}
+globalThis.fetch=async url=>Response.json(String(url).includes('access_token')?{access_token:'test-token'}:String(url).endsWith('/user')?{id:208800626,login:'4mirgr'}:{permissions:{push:true}});
+const panel=await callback.onRequestGet({request:dashboardRequest({code:'test',state:dashboardState}),env});
+assert.match(await panel.text(),/location.replace\("https:\/\/drgerami-md\.ir\/admin\/"\)/);
 globalThis.fetch=realFetch;console.log('PASS CMS OAuth: config, origin, state, owner restriction, success, CSP');
 
 // A slow owner check must never consume a newer token, race logout or grant writes.
@@ -51,9 +84,8 @@ try{
 
  // Both OAuth notifications (storage and postMessage) can arrive from one verified callback.
  const popup={closed:false,close(){this.closed=true;}};
- window.open=()=>popup;
- const connecting=session.connect();
- requests[5].resolve(Response.json({configured:true}));await connecting;
+ window.open=url=>{assert.equal(url,'/admin/github-connect.html');return popup;};
+ session.connect();
  const event=(type,fields)=>Object.assign(new Event(type),fields);
  storeToken('popup-token');
  window.dispatchEvent(event('storage',{key:'decap-cms-user'}));
@@ -62,6 +94,6 @@ try{
  assert.equal(session.state,'connecting');
  window.dispatchEvent(event('message',{source:popup,origin,data:payload}));
  assert.equal(session.state,'connected');assert.equal(session.token,'popup-token');
- assert.equal(requests.length,6,'the completed, same-origin OAuth popup has already verified the owner on the server');
+ assert.equal(requests.length,5,'the completed, same-origin OAuth popup has already verified the owner on the server');
 }finally{globalThis.fetch=realFetch;}
 console.log('PASS single-flight GitHub verification, live permission recheck, stale reply isolation and verified popup delivery.');

@@ -40,14 +40,41 @@ import '../js/contact-marks.js';
  const navigation=[...sidebar.querySelectorAll('[data-nav]')];
  let frame;
  function canVerify(){return session.state==='connected'||(session.state==='error'&&!!session.read());}
+ const tokenForm=$('github-token-form');
+ const tokenSubmit=tokenForm.querySelector('[type="submit"]');
+ const tokenInput=$('github-repo-token');
+ function openTokenForm(){
+  const details=$('github-token-connect');
+  details.open=true;
+  details.scrollIntoView({block:'center'});
+  tokenInput.focus({preventScroll:true});
+ }
+ const openTokenHash=()=>{if(location.hash==='#github-token-connect')openTokenForm();};
+ window.addEventListener('cms-open-token-connect',openTokenForm);
+ window.addEventListener('hashchange',openTokenHash);openTokenHash();
+ tokenSubmit.disabled=false;
+ tokenForm.addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(tokenSubmit.disabled)return;
+  tokenSubmit.disabled=true;
+  const value=tokenInput.value;
+  tokenInput.value='';
+  const result=$('github-token-result');
+  result.textContent='در حال بررسی دسترسی مخزن…';
+  try{
+   await session.useSessionToken(value);
+   result.textContent='اتصال برای همین تب برقرار شد.';
+  }catch(error){result.textContent=error.message;}
+  finally{tokenSubmit.disabled=false;}
+ });
  function connectionStatus(){
   const connected=session.state==='connected';
   const checking=session.state==='checking';
-  const busy=checking||session.state==='connecting'||session.state==='disconnecting';
+  const busy=checking||session.state==='disconnecting';
   const labels={checking:'بررسی GitHub…',connecting:'در انتظار ورود…',error:'بررسی ناموفق',forbidden:'بدون مجوز انتشار',expired:'ورود منقضی شده',disconnecting:'در حال قطع اتصال…'};
   $('github-state').textContent=connected?'متصل · '+session.login:labels[session.state]||'قطع اتصال';
   $('github-state').dataset.state=session.state;
-  $('github-connect').textContent=checking?'در حال بررسی…':canVerify()?'بررسی مجدد':'اتصال به GitHub';
+  $('github-connect').textContent=checking?'در حال بررسی…':session.state==='connecting'?'لغو اتصال':canVerify()?'بررسی مجدد':'اتصال به GitHub';
   $('github-connect').disabled=busy;
   // The shell has its own entry cookie even if the publisher is disconnected.
   $('github-disconnect').hidden=false;
@@ -55,7 +82,7 @@ import '../js/contact-marks.js';
   $('github-disconnect').textContent=session.logoutPending?'تلاش دوباره برای خروج':connected?'قطع اتصال و خروج':'خروج از مدیریت';
   $('connection-title').textContent=connected?'GitHub متصل است':'وضعیت اتصال GitHub';
   $('connection-message').textContent=session.message;
-  $('connection-fallback').hidden=session.state!=='error';
+  $('connection-fallback').hidden=!['error','connecting','forbidden','expired'].includes(session.state);
  }
  connectionStatus();
  session.addEventListener('change',()=>{
@@ -65,7 +92,7 @@ import '../js/contact-marks.js';
    if(session.state!=='disconnecting')route();
   }
  });
- $('github-connect').addEventListener('click',()=>canVerify()?session.verify():session.connect());
+ $('github-connect').addEventListener('click',()=>session.state==='connecting'?session.cancelConnect():canVerify()?session.verify():session.connect());
  $('github-disconnect').addEventListener('click',()=>session.disconnect());
  const reviews={
   'auto-posts':()=>import('./editorial.mjs').then(module=>module.editorialEditor),
