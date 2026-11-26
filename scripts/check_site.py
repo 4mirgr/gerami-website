@@ -35,6 +35,7 @@ def main():
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_editorial_seo.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_home_loading.py'])
     run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts', '-p', 'test_public_assets.py'])
+    run(['npm', 'exec', '--offline', '--', 'workerd', 'test', 'scripts/fixtures/cms-workerd/config.capnp'])
     for script in UNITS:
         run(['node', 'scripts/' + script])
     for folder in ('js', 'admin', 'functions'):

@@ -74,7 +74,7 @@ export async function onRequest({request}){
   const token=request.headers.get('Authorization')?.match(/^Bearer (github_pat_[A-Za-z0-9_]+)$/)?.[1];
   await verifyCMSOwner(token);
   async function github(path,method='GET',body){
-   const result=await fetch(base+path,{method,redirect:'error',cache:'no-store',signal:AbortSignal.timeout(14000),
+   const result=await fetch(base+path,{method,redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(14000),
     headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','User-Agent':'Gerami-Site-Studio','Content-Type':'application/json'},
     ...(body===undefined?{}:{body:JSON.stringify(body)})});
    if(!result.ok){await result.body?.cancel();fail(result.status>=400?result.status:502,'github_request_failed');}

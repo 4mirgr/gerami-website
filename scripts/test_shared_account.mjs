@@ -49,6 +49,20 @@ try{
   assert.equal(new URL(completed.headers.get('Location'),origin).href,origin+'/respiratory/ventilator/');
   assert.deepEqual(completed.headers.getSetCookie(),cookies);
  }
+ const tokenPanel='/admin/#github-token-connect';
+ const tokenEntry=await gate({request:new Request(origin+'/admin/?section=github-token-connect',{headers:{Accept:'text/html'}}),env:{},next:()=>new Response('unexpected')});
+ const loginEntry=tokenEntry.headers.get('Location');
+ assert.equal(new URL(loginEntry,origin).searchParams.get('next'),tokenPanel);
+ for(const testRole of ['admin','user','secretary']){
+  role=testRole;
+  const expected=testRole==='admin'?tokenPanel:'/';
+  assert.equal((await nativeLogin(loginEntry)).headers.get('Location'),expected);
+  const {flow}=await newFlow();
+  flow.next=tokenPanel;
+  const callback=await invoke('callback?flow='+flow.state+'&code=synthetic-code',undefined,{Cookie:COOKIE_FLOW+'='+encode(flow)});
+  assert.equal(callback.headers.get('Location'),expected);
+ }
+ role='user';
  const direct=await invoke('login?next=%2Frespiratory%2Fventilator%2F',undefined,{Accept:'text/html'});
  assert([302,303].includes(direct.status));
  const entry=new URL(direct.headers.get('Location'),origin);

@@ -79,6 +79,39 @@ try{
  await entry.goto(entryUrl);await entry.waitForURL(adminTarget);
  await entry.goto(entryUrl+'&reset=1');await entry.locator('#account-profile').waitFor({state:'visible'});
  assert.equal(await entry.locator('#password-settings').getAttribute('open'),'');await entry.close();
+ // Simulate a valid response arriving after the former 16s browser deadline.
+ // Supabase may spend up to 12s on each of two consecutive login stages.
+ const delayed=await browser.newPage();
+ await delayed.clock.install();
+ await delayed.addInitScript(()=>{
+  AbortSignal.timeout=ms=>{
+   const controller=new AbortController();
+   setTimeout(()=>controller.abort(new DOMException('Timed out','TimeoutError')),ms);
+   return controller.signal;
+  };
+ });
+ let refreshAttempts=0,releaseLogin;
+ const upstreamPending=new Promise(resolve=>releaseLogin=resolve);
+ await delayed.route('**/api/account/*',async route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path.endsWith('/session'))return route.fulfill({json:{authenticated:false,canRefresh:true}});
+  if(path.endsWith('/refresh')){refreshAttempts++;return route.fulfill({status:401,json:{error:'sign_in_required'}});}
+  if(path.endsWith('/login')){
+   await upstreamPending;
+   return route.fulfill({json:{authenticated:true,account:manager}}).catch(()=>{});
+  }
+  return route.fulfill({json:{google:true}});
+ });
+ await delayed.route('**/admin/',route=>route.fulfill({contentType:'text/html',body:'<h1>Dashboard</h1>'}));
+ await delayed.goto(entryUrl);
+ await delayed.locator('[data-account-form=login] [name=identity]').fill('staff');
+ await delayed.locator('[data-account-form=login] [name=password]').fill('synthetic-password');
+ const submitted=delayed.waitForRequest('**/api/account/login');
+ await delayed.locator('[data-account-form=login] button').click();await submitted;
+ try{await delayed.clock.fastForward(18000);}finally{releaseLogin();}
+ await delayed.waitForURL(adminTarget,{timeout:3500});
+ assert.equal(refreshAttempts,1,'one invalid refresh credential is tried once per check');
+ await delayed.close();
  const slow=await browser.newPage();let release;const held=new Promise(resolve=>release=resolve);
  await slow.route('**/api/account/*',async route=>{await held;await route.fulfill({json:{authenticated:false}}).catch(()=>{});});
  await slow.goto(origin+'/pages/account.html',{waitUntil:'load',timeout:4000});assert.equal(await slow.locator('h1').isVisible(),true);release();await slow.close();

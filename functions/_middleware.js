@@ -55,7 +55,10 @@ export async function onRequest({request,env,next}){
   }
  }
  if(!administrator){
-  if(['GET','HEAD'].includes(request.method)&&(request.headers.get('Accept')||'').includes('text/html'))return new Response(null,{status:302,headers:{...denialHeaders,Location:'/pages/account.html?next=%2Fadmin%2F'}});
+  if(['GET','HEAD'].includes(request.method)&&(request.headers.get('Accept')||'').includes('text/html')){
+   const destination=url.pathname==='/admin/'&&url.searchParams.get('section')==='github-token-connect'?'/admin/#github-token-connect':'/admin/';
+   return new Response(null,{status:302,headers:{...denialHeaders,Location:'/pages/account.html?'+new URLSearchParams({next:destination})}});
+  }
   return new Response(JSON.stringify({error:'sign_in_required'}),{status:401,headers:{...denialHeaders,'Content-Type':'application/json'}});
  }
  if(/^\/admin\/editor\/?$/.test(url.pathname))return new Response(null,{status:302,headers:{Location:'/admin/#pages','Cache-Control':'no-store'}});

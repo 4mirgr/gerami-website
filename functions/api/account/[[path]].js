@@ -31,7 +31,7 @@ function loginNext(url,request){
 function accountPage(next){
  return '/pages/account.html'+(next==='/'?'':'?'+new URLSearchParams({next}));
 }
-function afterPasswordLogin(next,role){
+function afterLogin(next,role){
  if(next.startsWith('/clinic/'))return ['admin','secretary'].includes(role)?'/clinic/':'/clinic/portal/';
  if(next.startsWith('/admin/')&&role!=='admin')return '/';
  return next;
@@ -71,8 +71,8 @@ export async function handleAccountRequest(request,path){
    let flow;try{flow=decode(cookieValue(request,COOKIE_FLOW));}catch{throw new AccountError(400,'invalid_callback');}
    if(!flow||flow.exp<Date.now()||flow.exp>Date.now()+600000||typeof flow.verifier!=='string'||!/^[a-f0-9]{64}$/.test(flow.verifier)||flow.state!==url.searchParams.get('flow')||!url.searchParams.get('code'))throw new AccountError(400,'invalid_callback');
    const value=await upstream('/auth/v1/token?grant_type=pkce',{body:{auth_code:url.searchParams.get('code'),code_verifier:flow.verifier}});
-   await readAccount(value.access_token);
-   const headers=new Headers({'Location':flow.kind==='recovery'?'/pages/account.html?reset=1':safeNext(flow.next),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});
+   const account=await readAccount(value.access_token);
+   const headers=new Headers({'Location':flow.kind==='recovery'?'/pages/account.html?reset=1':afterLogin(safeNext(flow.next),account.role),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});
    for(const c of [...sessionCookies(value),cookie(COOKIE_FLOW,'',0)])headers.append('Set-Cookie',c);
    return new Response(null,{status:303,headers});
   }
@@ -87,7 +87,7 @@ export async function handleAccountRequest(request,path){
    if(formLogin){
     const account=await readAccount(value.access_token);
     if(!account)throw new AccountError(401,'sign_in_required');
-    const headers=new Headers({Location:afterPasswordLogin(loginNext(url,request),account.role),'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer'});
+    const headers=new Headers({Location:afterLogin(loginNext(url,request),account.role),'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer'});
     for(const c of sessionCookies(value))headers.append('Set-Cookie',c);
     return new Response(null,{status:303,headers});
    }

@@ -4,6 +4,10 @@ Updated 2026-11-26 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Account and repository login on Cloudflare · 2026-11-26
+
+The deployed Workers runtime throws before sending a request with `redirect: 'error'`. The OAuth exchange, rejected-token cleanup and Studio repository transport use manual redirects. They never forward credentials to a redirect target. Use the workerd tests to exercise this boundary alongside the browser and server tests. Password sign-in allows both server-side verification steps to finish. The manager's repository connection section survives the account gate, including native form submission.
+
 ## OAuth callback gateway recovery · 2026-11-26
 
 Cloudflare recorded an origin and edge 502 for the London callback at 10:36:05 UTC. On temporary provider failure, the callback redirects to a first-party recovery document. Reloading that document never exchanges an authorization code. The posted error returns control to the dashboard and the recovery links support either a fresh OAuth flow or the existing repository-token entry. During a callback only, an interrupted read of the GitHub account or repository permissions can be retried once within the shared deadline. Callback failure logs record the stage and exchange HTTP status without including provider payloads or authorization codes.
