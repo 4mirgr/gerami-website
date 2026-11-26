@@ -1,7 +1,10 @@
 // Account credentials stay in Secure HttpOnly cookies, never localStorage.
 let pending,queue=Promise.resolve();
+// These exchanges can use two consecutive 12s provider deadlines before the
+// server returns the verified session or confirms the password change.
+const twoStageRequests=new Set(['login','refresh','signup','password']);
 async function transport(path,body){
- const response=await fetch('/api/account/'+path,{method:body===undefined?'GET':'POST',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(16000)});
+ const response=await fetch('/api/account/'+path,{method:body===undefined?'GET':'POST',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json',...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(twoStageRequests.has(path)?30000:16000)});
  const data=await response.json();
  if(!response.ok){const error=new Error(data.error||'account_unavailable');error.status=response.status;throw error;}
  return data;
@@ -16,9 +19,8 @@ export function getSession(){
  if(pending)return pending;
  pending=(async()=>{
   let value;
-  try{value=await accountAPI('session');if(value.canRefresh)value=await accountAPI('refresh',{});}
-  catch(error){
-   if(error.status!==401)throw error;
+  try{value=await accountAPI('session');}catch(error){if(error.status!==401)throw error;}
+  if(!value||value.canRefresh){
    try{value=await accountAPI('refresh',{});}catch(error){if(error.status===400||error.status===401)return null;throw error;}
   }
   return value.authenticated===true?value.account:null;

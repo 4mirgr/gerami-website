@@ -33,7 +33,7 @@ for(const [error,status,expected] of [
 ]){
  globalThis.fetch=async (url,options)=>{
   assert.equal(url,'https://github.com/login/oauth/access_token');
-  assert.equal(options.method,'POST');assert.equal(options.redirect,'error');
+  assert.equal(options.method,'POST');assert.equal(options.redirect,'manual');
   assert.equal(options.body.get('code'),'private-auth-code');
   assert.equal(options.body.get('redirect_uri'),providerURL.searchParams.get('redirect_uri'));
   return Response.json({error,error_description:'private-upstream-details'});
@@ -47,7 +47,7 @@ for(const [error,status,expected] of [
   assert.ok(rejected.headers.getSetCookie().some(cookie=>cookie.startsWith('__Host-cms-state=;')));
   const document=recovery.onRequestGet({request:new Request(new URL(rejected.headers.get('location'),origin)),env});
   assert.equal(document.status,200);assert.equal(document.headers.get('set-cookie'),null);
-  body=await document.text();assert.match(body,/href="\/admin\/#github-token-connect"/);
+  body=await document.text();assert.match(body,/href="\/admin\/\?section=github-token-connect#github-token-connect"/);
  }
  assert.match(body,new RegExp(expected));assert.match(body,/authorization:github:error:/);
  assert.match(body,/href="\/api\/cms\/auth\?return=dashboard"/);

@@ -4,9 +4,9 @@ let account=null,mode='login',busy=false,googleEnabled=false,sessionUnavailable=
 const googleButton=document.querySelector('#google-signin'),googleNote=document.querySelector('#google-note');
 const t=(fa,en)=>root.lang==='en'?en:fa;
 const rawNext=new URLSearchParams(location.search).get('next');
-const adminSections=/^#(?:dashboard|pages|auto-posts)$/;
+const adminSections=/^#(?:dashboard|pages|auto-posts|github-token-connect)$/;
 const nextDestination=rawNext==='/admin/'&&adminSections.test(location.hash)?rawNext+location.hash:rawNext;
-const adminEntry=/^\/admin\/(?:#(?:dashboard|pages|auto-posts))?$/.test(nextDestination||'');
+const adminEntry=nextDestination==='/admin/'||(nextDestination?.startsWith('/admin/#')&&adminSections.test(nextDestination.slice('/admin/'.length)));
 const ventilatorEntry=['/ventilator/','/respiratory/ventilator/'].includes(nextDestination);
 if(ventilatorEntry){
  const badge=document.querySelector('#ventilator-identity');
@@ -53,7 +53,7 @@ function render(){
   document.querySelector('#profile-role').textContent=account.role==='admin'?t('مدیر','Administrator'):account.role==='secretary'?t('منشی','Secretary'):t('کاربر','User');
   const managerLink=document.querySelector('.account-actions [data-manager-only]');
   managerLink.hidden=account.role!=='admin';
-  managerLink.href=/^\/admin\/#(?:dashboard|pages|auto-posts)$/.test(nextDestination||'')?nextDestination:'/admin/';
+  managerLink.href=adminEntry?nextDestination:'/admin/';
   const params=new URLSearchParams(location.search),next=params.get('next'),continueLink=document.querySelector('#account-continue');
   continueLink.hidden=!/^\/(?:dash|clinic)\/(?:portal\/)?$/.test(next||'')||params.has('reauth');
   if(!continueLink.hidden)continueLink.href=next.startsWith('/clinic/')?(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/'):next;

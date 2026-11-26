@@ -47,11 +47,15 @@ export async function onRequestGet({request, env}) {
   try {
     stage = 'exchange';
     const response = await fetch('https://github.com/login/oauth/access_token',{
-      method:'POST',redirect:'error',signal:AbortSignal.timeout(15000),
+      method:'POST',redirect:'manual',signal:AbortSignal.timeout(15000),
       headers:{Accept:'application/json','User-Agent':'Gerami-CMS'},
       body:new URLSearchParams({client_id:env.CMS_GITHUB_CLIENT_ID,client_secret:env.CMS_GITHUB_CLIENT_SECRET,code,redirect_uri:origin+'/api/cms/callback'})
     });
     exchangeStatus = response.status;
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel();
+      return fail('github_unavailable');
+    }
     const token = await readExchange(response);
     if (!response.ok || !token || typeof token.access_token !== 'string' || !token.access_token) return fail(exchangeFailure(response,token?.error));
     const credential = token.access_token;
@@ -61,7 +65,7 @@ export async function onRequestGet({request, env}) {
       if (error.status === 429) return fail('github_rate_limited');
       if (error.status !== 403) return fail('github_unavailable');
       // Revoke rejected tokens rather than leaving a new authorization active.
-      await fetch('https://api.github.com/applications/'+env.CMS_GITHUB_CLIENT_ID+'/token',{method:'DELETE',redirect:'error',signal:AbortSignal.timeout(15000),headers:{Authorization:'Basic '+btoa(env.CMS_GITHUB_CLIENT_ID+':'+env.CMS_GITHUB_CLIENT_SECRET),'User-Agent':'Gerami-CMS','Content-Type':'application/json'},body:JSON.stringify({access_token:credential})}).catch(()=>{});
+      await fetch('https://api.github.com/applications/'+env.CMS_GITHUB_CLIENT_ID+'/token',{method:'DELETE',redirect:'manual',signal:AbortSignal.timeout(15000),headers:{Authorization:'Basic '+btoa(env.CMS_GITHUB_CLIENT_ID+':'+env.CMS_GITHUB_CLIENT_SECRET),'User-Agent':'Gerami-CMS','Content-Type':'application/json'},body:JSON.stringify({access_token:credential})}).catch(()=>{});
       return fail('github_owner_required');
     }
     stage = 'session';

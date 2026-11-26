@@ -43,10 +43,10 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'
 try{
  for(const role of ['user','secretary','admin']){
   const context=await browser.newContext({viewport:{width:390,height:844}}),page=await context.newPage();
-  await page.goto(origin+'/admin/');await page.waitForURL('**/pages/account.html?**');
+  await page.goto(origin+'/admin/#github-token-connect');await page.waitForURL('**/pages/account.html?**');
   await page.locator('[data-account-form=login] [name=identity]').fill(role);await page.locator('[data-account-form=login] [name=password]').fill('synthetic-browser-password');await page.locator('[data-account-form=login] button').click();
   if(role==='admin'){
-   await page.waitForURL(origin+'/admin/');assert.equal(await page.locator('h1').count(),1);
+   await page.waitForURL(origin+'/admin/#github-token-connect');await page.locator('#github-token-connect[open]').waitFor();assert.equal(await page.locator('h1').count(),1);
    const cookie=(await context.cookies()).find(c=>c.name==='__Host-gerami-access');assert(cookie.httpOnly&&cookie.secure);assert.equal(cookie.sameSite,'Lax');
    await page.goto(origin+'/admin/editor');await page.waitForURL(origin+'/admin/#pages');
    tokens.get('admin.signed.test').role='user';await page.goto(origin+'/admin/');await page.waitForURL('**/pages/account.html?**');

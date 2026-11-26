@@ -16,7 +16,7 @@ export function failurePage(code, headers, origin, dashboard, notify, status = f
   headers.set('Content-Type','text/html; charset=utf-8');
   headers.set('Content-Security-Policy',`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; frame-ancestors 'none'; base-uri 'none'`);
   const retry = '/api/cms/auth' + (dashboard ? '?return=dashboard' : '');
-  const alternate = code === 'github_unavailable' ? '<a href="/admin/#github-token-connect">اتصال با توکن مخزن در پنل</a>' : '';
+  const alternate = code === 'github_unavailable' ? '<a href="/admin/?section=github-token-connect#github-token-connect">اتصال با توکن مخزن در پنل</a>' : '';
   const payload = 'authorization:github:error:' + JSON.stringify({provider:'github',code,message});
   const script = notify ? `<script data-cfasync="false" nonce="${nonce}">try{window.opener?.postMessage(${safe(payload)},${safe(origin)});}catch(_){}</script>` : '';
   return new Response(`<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>اتصال به GitHub</title>
