@@ -1,8 +1,8 @@
-import {ENGLISH_PROMPT,englishMaterial,validateEnglish} from '../backend/editorial/functions/gerami-editorial/english.mjs';
+import {ENGLISH_PROMPT,ENGLISH_SCHEMA,englishMaterial,validateEnglish} from '../backend/editorial/functions/gerami-editorial/english.mjs';
 import {clinicalEdition} from '../backend/editorial/functions/gerami-editorial/clinical.mjs';
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {verifyPublicDelivery} from '../backend/editorial/functions/gerami-editorial/publication.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
 let imagesAvailable=true,discoveries=0,lastCoverEdit;
-let claimed,claimReceipt,englishAnswer,translationCalls=0,translationStatus=200,translationFinish='STOP';
+let claimed,claimReceipt,englishAnswer,firstAnswer,prompts=[],translationCalls=0,translationStatus=200,translationFinish='STOP';
 let audience,handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus,jobPhase,jobKind,slotIndex;
 const topic={lesson:[{id:'bp',heading:'ارزیابی فشار خون',paragraphs:[1,2,3].map(n=>({id:'bp-'+n,text:'اندازه‌گیری فشار خون در شرایط استاندارد و مقایسه با ثبت‌های پیشین در ارزیابی اهمیت دارد. '.repeat(3)+n}))}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
@@ -77,10 +77,12 @@ const fakeFetch=async(url,options={})=>{
  if(url.endsWith('assets/optimized/manifest.json'))return Response.json({images:{'/assets/topics/heart.webp':'/assets/optimized/heart.012d14fb0e841a4f.webp'}});
  if(url.endsWith('/intmed/content/topics/cardio-htn.json'))return new Response(bytes);
  if(url.endsWith('/cardio/cardio-htn/data.json'))return Response.json({sourceNote:'بر پایهٔ بانک سؤال؛ بررسی مستقل هاریسون ادعا نمی‌شود.'});
- if(url.includes('generativelanguage.googleapis.com')&&JSON.parse(options.body).systemInstruction.parts[0].text===ENGLISH_PROMPT){
-  translationCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');const sent=JSON.parse(JSON.parse(options.body).contents[0].parts[0].text);
+ if(url.includes('generativelanguage.googleapis.com')&&JSON.parse(options.body).systemInstruction.parts[0].text.startsWith(ENGLISH_PROMPT)){
+  translationCalls++;const request=JSON.parse(options.body);
+  assert.deepEqual(request.generationConfig.responseSchema,ENGLISH_SCHEMA);prompts.push(request.systemInstruction.parts[0].text);
+  assert.equal(options.headers['x-goog-api-key'],'private-gemini');const sent=JSON.parse(JSON.parse(options.body).contents[0].parts[0].text);
   assert.deepEqual(Object.keys(sent).sort(),['audience','hashtags','image_alt','paragraphs','title']);
-  return Response.json({candidates:[{finishReason:translationFinish,content:{parts:[{text:JSON.stringify(englishAnswer)}]}}]},{status:translationStatus});
+  const answer=firstAnswer??englishAnswer;firstAnswer=null;return Response.json({candidates:[{finishReason:translationFinish,content:{parts:[{text:JSON.stringify(answer)}]}}]},{status:translationStatus});
  }
  if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
  if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
@@ -91,7 +93,7 @@ const fakeFetch=async(url,options={})=>{
  throw Error('Unexpected network '+url);
 };
 const source=(await fs.readFile('backend/editorial/functions/gerami-editorial/index.ts','utf8')).replace(/^import[^\n]+\n/gm,'');
-const bindings={ENGLISH_PROMPT,englishMaterial,validateEnglish,clinicalEdition,createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
+const bindings={ENGLISH_PROMPT,ENGLISH_SCHEMA,englishMaterial,validateEnglish,clinicalEdition,createTelegramEditorial,createEditorialMedia,sourceTopic,sourceCategories,createTrendSelector,verifyPublicDelivery};const run=new Function('Deno','EdgeRuntime','fetch',...Object.keys(bindings),...Object.keys(core),source);
 run({env:{get:key=>env[key]},serve:fn=>handler=fn},{waitUntil:p=>pending.push(p)},fakeFetch,...Object.values(bindings),...Object.entries(core).map(([key,value])=>key==='verifyOIDC'?async token=>{assert.equal(token,'fixture-publisher');return {run_id:'123'};}:value));
 const post=(action,body={},authorization='Bearer valid.session.token.value')=>handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/'+action,{method:'POST',headers:{Authorization:authorization},body:JSON.stringify(body)}));
 assert.equal((await handler(new Request(core.PROJECT+'/functions/v1/gerami-editorial/list'))).status,405);
@@ -150,13 +152,24 @@ const initialClaim=await claim(),claimPayload=await initialClaim.json();assert.e
 assert.deepEqual(core.publicArticle(claimed),translated);
 assert.deepEqual((await (await claim()).json()).draft.article,translated);assert.equal(translationCalls,1);
 claimed.snapshot_hash='f'.repeat(64);englishAnswer.paragraphs[2]=healthyParagraph+' Consider a threshold of ≤300 with ICS.';assert.equal((await claim()).status,503);
-assert.equal(claimReceipt.p_data.error,'translation_failed');assert.equal(translationCalls,2);
+assert.equal(claimReceipt.p_data.error,'translation_invalid');assert.equal(translationCalls,3);
+assert.match(prompts.at(-1),/paragraph 3.*quantities.*≥300/);
 englishAnswer.paragraphs[2]='Threshold ≥300 with ICS.';assert.equal((await claim()).status,503,'reject obvious truncation');
 englishAnswer.paragraphs[2]=healthyParagraph+' Consider a threshold of ≥300 with ICS.';
-translationFinish='MAX_TOKENS';assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_failed');
-translationFinish='STOP';translationStatus=429;assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_quota');
+translationFinish='MAX_TOKENS';assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_incomplete');
+translationFinish='STOP';translationStatus=429;const beforeQuota=translationCalls;assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_quota');assert.equal(translationCalls,beforeQuota+1);
+translationStatus=503;assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_unavailable');
 assert.equal(claimed.english_edition.snapshot_hash,'e'.repeat(64),'a failed translation must not replace the existing edition');
-console.log('PASS approved English translation, snapshot-scoped reuse, quantity protection and retry receipt.');
+translationStatus=200;const beforeRepair=translationCalls;firstAnswer={...englishAnswer,paragraphs:[]};const repaired=await (await claim()).json();
+assert.equal(repaired.draft.article.body_en,englishAnswer.paragraphs.join('\n\n'));assert.equal(translationCalls,beforeRepair+2);
+assert.match(prompts.at(-1),/exactly 3 translated paragraph strings/);
+const ecg={...englishMaterial(core.publicArticle(claimed)),paragraphs:['aVL و V4R در این متن به طور کامل بررسی شدند.']};
+const ecgResponse={...englishAnswer,paragraphs:['The aVR and V4 leads were both discussed in detail here.']};
+assert.throws(()=>validateEnglish(ecg,ecgResponse),/translation_invalid/);
+ecgResponse.paragraphs=['Both aVL and V4R were discussed in detail in this text.'];assert.doesNotThrow(()=>validateEnglish(ecg,ecgResponse));
+const goodPath=claimed.media_path;claimed.media_path='bad-digest.jpg';assert.equal((await claim()).status,503);
+assert.equal(claimReceipt.p_data.error,'invalid_image');claimed.media_path=goodPath;
+console.log('PASS English snapshot reuse, constrained response and guided correction, clinical fidelity, provider errors and media failure receipts.');
 
 enabledRole='admin';
 const newJob='00000000-0000-4000-8000-000000000007';

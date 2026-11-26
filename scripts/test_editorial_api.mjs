@@ -15,7 +15,7 @@ try{
  assert.equal((await request('list',{Origin:'https://evil.test'})).status,403);
  assert.equal((await request('list',{Cookie:''})).status,401);
  for(role of ['user','secretary'])assert.equal((await request()).status,403);
- role='admin';assert.equal((await request('callback')).status,404);assert.equal((await request()).status,200);assert.equal((await request('covers')).status,200);assert.equal((await request('schedule')).status,200);assert.equal(forwarded,3);
+ role='admin';assert.equal((await request('callback')).status,404);assert.equal((await request()).status,200);assert.equal((await request('covers')).status,200);assert.equal((await request('schedule')).status,200);assert.equal((await request('reopen')).status,200);assert.equal(forwarded,4);
  redirect=true;
  const moved=await request();assert.equal(moved.status,502);assert.deepEqual(await moved.json(),{error:'editorial_upstream_redirect'});
  expired=true;

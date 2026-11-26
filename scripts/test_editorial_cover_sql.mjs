@@ -6,7 +6,7 @@ const register=(revision,snapshot,nonce,entries)=>q('select gerami_editorial_reg
 const entries=(m,h1,h2)=>[{message_id:m,hash:h1,candidate_id:one,photo_hash:hash},{message_id:m+1,hash:h2,candidate_id:two,photo_hash:other}];
 try{
  await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;create schema net;create table auth.users(id uuid primary key,email_confirmed_at timestamptz,deleted_at timestamptz,banned_until timestamptz);create table gerami_accounts(user_id uuid,role text,enabled boolean);create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;insert into auth.users values('${owner}',now(),null,null);insert into gerami_accounts values('${owner}','admin',true);`);
- for(const file of ['schema.sql','telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql','publication-schedule.sql','manual-cover.sql'])await db.exec(await fs.readFile('backend/editorial/'+file,'utf8'));
+ for(const file of ['schema.sql','telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql','publication-schedule.sql','manual-cover.sql','english-edition.sql','translation-retry.sql'])await db.exec(await fs.readFile('backend/editorial/'+file,'utf8'));
  await db.query(`insert into gerami_editorial_drafts(id,slug,content,category,topic,image,source,snapshot_hash,cover_pack) values($1,'test-only','{}','ریه / آسم','asthma','/assets/old.webp','{"topic_id":"pulm-asthma"}',$2,$3)`,[id,hash,pack]);
  const candidate=(cid,ordinal,sha)=>q(`insert into gerami_editorial_cover_options(id,draft_id,pack_id,ordinal,label,media_path,image,sha256,source_topic,provenance) values($1,$2,$3,$4,$5,$6,$7,$8,'pulm-asthma','{"kind":"original-illustration"}')`,[cid,id,pack,ordinal,'آسم '+ordinal,'library/'+sha+'.jpg','/assets/uploads/editorial-'+sha+'.jpg',sha]);await candidate(one,1,hash);await candidate(two,2,other);
  await assert.rejects(q("select gerami_editorial_schedule_publication($1,1,$2,$3,'auto',null)",[id,hash,owner]),/cover_required/);
@@ -94,6 +94,54 @@ try{
   const changed=(await tx.query('select scheduled_for,status,publication_mode from gerami_editorial_drafts where id=$1',[id])).rows[0];
   assert.deepEqual(changed,{scheduled_for:null,status:'draft',publication_mode:'now'});throw Error('rollback revised fixture');
  }),/rollback revised fixture/);
+ // A failed translation should release its lease and defer only its own revision.
+ await assert.rejects(db.transaction(async tx=>{
+  await tx.exec('set local role service_role');
+  const call=async(sql,args=[])=> (await tx.query(sql,args)).rows[0]?.r;
+  const claim=(run)=>call('select gerami_editorial_claim($1,$2) r',['lease-'+run,run]);
+  const receipt=(run,error)=>call("select gerami_editorial_mutate($1,'receipt',3,$2) r",[id,{lease_hash:'lease-'+run,run,error}]);
+  const reopen=(rev=3,snap=cap('5'),actor=owner)=>call('select gerami_editorial_reopen($1,$2,$3,$4) r',[id,rev,snap,actor]);
+  async function rejected(action,reason){
+   await tx.exec('savepoint expected_error');
+   await assert.rejects(action(),reason);
+   await tx.exec('rollback to savepoint expected_error');
+  }
+  const review=async()=> (await call("select gerami_editorial_review_groups('drafts',0) r")).drafts.find(d=>d.id===id);
+  const due=()=>tx.query("update gerami_editorial_drafts set publication_retry_at=now()-interval '1 second' where id=$1",[id]);
+  await call("select gerami_editorial_schedule_publication($1,3,$2,$3,'now',null) r",[id,cap('5'),owner]);
+  const original=await claim('first');
+  await rejected(()=>reopen(),/draft_locked/);
+  const waiting=await receipt('first','translation_invalid');
+  assert.equal(waiting.status,'approved');assert.equal(waiting.approved_at,original.approved_at);
+  assert.equal(waiting.snapshot_hash,original.snapshot_hash);assert.equal(waiting.cover_sha256,original.cover_sha256);
+  assert.equal((await review()).publication_retry_at,waiting.publication_retry_at);
+  assert.equal(await call("select publication_retry_at = now()+interval '5 minutes' r from gerami_editorial_drafts where id=$1",[id]),true);
+  assert.equal(await claim('early'),null);
+  await tx.query(`insert into gerami_editorial_drafts(slug,status,content,category,topic,image,source,snapshot_hash,
+    approved_by,approved_at,cover_required) values('other-waiting','approved','{}','test','test','/test.jpg','{}',$1,$2,now(),false)`,[hash,owner]);
+  assert.equal((await claim('other')).slug,'other-waiting');
+  await tx.exec("update gerami_editorial_drafts set status='published' where slug='other-waiting'");
+  await due();assert.equal((await claim('second')).publication_retry_at,null);
+  await rejected(()=>receipt('first','translation_failed'),/lease_expired/);
+  assert.equal((await receipt('second','translation_quota')).status,'approved');
+  assert.equal(await call("select publication_retry_at = now()+interval '30 minutes' r from gerami_editorial_drafts where id=$1",[id]),true);
+  await due();assert.equal((await claim('third')).publication_attempts,3);
+  assert.equal((await receipt('third','translation_invalid')).status,'publish_error');assert.equal(await claim('exhausted'),null);
+  await rejected(()=>reopen(2),/stale_revision/);await rejected(()=>reopen(3,hash),/stale_revision/);
+  await rejected(()=>reopen(3,cap('5'),two),/owner_disabled/);
+  await tx.query("update gerami_editorial_drafts set commit_sha=$2 where id=$1",[id,'4'.repeat(40)]);
+  await rejected(()=>reopen(),/draft_locked/);
+  await tx.query("update gerami_editorial_drafts set commit_sha=null,error_code='publication_checks_failed' where id=$1",[id]);
+  await rejected(()=>reopen(),/draft_locked/);
+  await tx.query("update gerami_editorial_drafts set error_code='translation_invalid',english_edition='{}' where id=$1",[id]);
+  assert.deepEqual(await reopen(),{status:'draft',revision:4});
+  const restored=await call('select to_jsonb(d) r from gerami_editorial_drafts d where id=$1',[id]);
+  for(const key of ['approval_hash','approved_by','approved_at','lease_hash','lease_run','lease_expires_at','english_edition','publication_retry_at','publication_date','scheduled_for','publication_claimed_at'])assert.equal(restored[key],null,key);
+  assert.deepEqual(restored.content,original.content);assert.equal(restored.cover_sha256,original.cover_sha256);
+  assert.equal(await claim('after-reopen'),null);
+  assert.equal(await call('select count(*)::int r from gerami_editorial_previews where draft_id=$1 and retired_at is null',[id]),0);
+  throw Error('rollback translation retry fixture');
+ }),/rollback translation retry fixture/);
  await begin(3,cap('6'));await register(3,cap('5'),cap('6'),entries(310,cap('7'),cap('8')));await q("select gerami_editorial_preview_action($1,310,$2,'approve','123')",[cap('7'),owner]);
  const claimed=(await q(`select gerami_editorial_claim('lease','test') as d`)).rows[0].d;assert.equal(claimed.cover_sha256,hash);assert.equal(claimed.image,'/assets/uploads/editorial-'+hash+'.jpg');
  await assert.rejects(schedule(3,cap('5'),owner,'manual','2040-01-02T00:15'),/draft_locked/);

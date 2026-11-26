@@ -7,7 +7,16 @@ import {sourceTopic,ensureArticleTopic,articlePath} from '../backend/editorial/f
 import {sha,stable} from '../backend/editorial/functions/gerami-editorial/core.mjs';
 const endpoint='https://upwbktvnybsjugdegjji.supabase.co/functions/v1/gerami-editorial/publisher';
 async function oidc(){const url=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);url.searchParams.set('audience','gerami-editorial-publisher');const r=await fetch(url,{headers:{Authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},signal:AbortSignal.timeout(10000)});if(!r.ok)throw Error('OIDC unavailable');return (await r.json()).value;}
-async function api(body){const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await oidc()},body:JSON.stringify(body),signal:AbortSignal.timeout(body.action==='claim'?100000:20000)});if(!r.ok)throw Error('Editorial publisher rejected request');return r.json();}
+async function api(body){
+ const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await oidc()},body:JSON.stringify(body),signal:AbortSignal.timeout(body.action==='claim'?125000:20000)});
+ if(!r.ok){
+  const result=await r.json().catch(()=>null);
+  const known=['translation_failed','translation_invalid','translation_incomplete','translation_quota','translation_unavailable','translation_save_failed','invalid_article','invalid_image','media_failed','publication_checks_failed','stale_revision','draft_locked'];
+  const reason=known.includes(result?.error)?' ('+result.error+')':'';
+  throw Error('Editorial '+body.action+' failed with HTTP '+r.status+reason);
+ }
+ return r.json();
+}
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8'}).trim();
 const state=process.env.RUNNER_TEMP+'/gerami-editorial-lease.json';
 const action=process.argv[2];

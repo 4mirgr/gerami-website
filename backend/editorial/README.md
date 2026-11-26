@@ -1,5 +1,9 @@
 # Editorial backend deployment and operations
 
+## Translation retries and failed publications
+
+Apply `translation-retry.sql` after the scheduling and manual-cover migrations, then deploy the Edge function and dashboard. The publisher can request a corrected English response within its claim deadline. The queue retries eligible translation failures with a delay and retains the approval and selected image. For a terminal pre-commit translation or media failure, the original approver can reopen the post, edit it and approve the new revision. Previously failed posts retain their recorded status until an editor acts on them.
+
 ## Drafts without suggested artwork
 
 On a scheduled installation, apply `manual-cover.sql` and then `manual-preview.sql` before deploying the Edge function and the dashboard. The worker saves each draft by job ID before searching for images. A failed search leaves a reviewable draft and Telegram can deliver the text. With no pair available, the owner can attach a file or import a direct image link in the panel. Link imports use a credential-free browser request and require the image host to allow cross-origin reads. Approval and publication use the stored copy of the selected image.
