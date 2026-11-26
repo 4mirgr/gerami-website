@@ -11,6 +11,8 @@ try{
  const clinician={...structuredClone(draft),id:'00000000-0000-4000-8000-000000000002',source:{...draft.source,audience:'professional'},options:[{id:'other1',preview:'/assets/uploads/editorial-1e627847ddb98c2030419de7b4e14f5854d1dfccc53bd5e37ff9ecb67d9e1b0e.jpg',label:'تصویر سوم'},{id:'other2',preview:'/assets/uploads/editorial-fed07c41362974017a2fba3a67a7aa9a93ebd3c0f7a45278451cd3113cc9b9b3.jpg',label:'تصویر چهارم'}]};
  await page.route('**/api/editorial/*',async r=>{const action=r.request().url().split('/').pop(),body=r.request().postDataJSON();calls.push({action,body});
   if(action==='detail')return r.fulfill({json:{draft:body.id==='00000000-0000-4000-8000-000000000003'?{...structuredClone(draft),id:body.id,job_id:manualId,status:'draft',content:{...draft.content,title:'پیشنهاد تازه آماده شد'}}:draft}});
+  if(action==='retry'){draft.status='approved';draft.error_code=null;draft.publication_retry_at=null;return r.fulfill({json:{ok:true}});}
+  if(action==='reopen'){draft.status='draft';draft.error_code=null;draft.publication_retry_at=null;draft.revision++;return r.fulfill({json:{ok:true}});}
   if(action==='publish'){draft.status='approved';draft.publication_mode=body.mode||'now';draft.scheduled_for=body.mode==='manual'?body.local_time+':00+03:30':body.mode==='auto'?'2026-11-27T05:30:00Z':null;return r.fulfill({json:{status:draft.status,publication_mode:draft.publication_mode,scheduled_for:draft.scheduled_for}});}
   if(action==='review-groups')return r.fulfill({json:{drafts:body.view==='history'?[]:[draft,clinician],next:false}});
   if(action==='schedule')return r.fulfill({json:{next_generation_at:'2026-11-26T05:30:00Z',jobs:manualPhase?[{id:manualId,draft_id:manualReady?'00000000-0000-4000-8000-000000000003':null,day:'2026-11-26',audience:'patients',kind:'manual',status:manualPhase==='complete'?'complete':'processing',phase:manualPhase,scheduled_at:'2026-11-25T21:30:00Z'}]:[],settings:{enabled:true,hour:9,daily_count:dailyCount,categories:['cardio']}}});
@@ -140,5 +142,48 @@ try{
  await card.getByLabel('بارگذاری تصویر دلخواه').setInputFiles({name:'cover.jpg',mimeType:'image/jpeg',buffer:bytes});
  await card.getByText('تصویر شاخص ذخیره شد.',{exact:true}).waitFor();
  assert.equal(calls.filter(c=>c.action==='image').length,2);
+ // The screenshot showed a bidi collision between an English topic suffix and the count,
+ // followed by a two-word error split across opposite edges of the phone.
+ const ecgPath='قلب و عروق / خواندن و تفسیر ECG';
+ draft.source.taxonomy={path_fa:ecgPath};draft.commit_sha=null;draft.status='publish_error';draft.error_code='translation_failed';
+ await page.reload();
+ const topicHeader=group.locator(':scope > summary');
+ for(const width of [320,390]){
+  await page.setViewportSize({width,height:900});
+  await topicHeader.getByText(ecgPath,{exact:true}).waitFor();
+  assert.equal(await topicHeader.locator('bdi').innerText(),ecgPath);
+  const badge=topicHeader.getByText('توقف در ترجمه انگلیسی',{exact:true});
+  assert(await badge.isVisible());
+  assert(await badge.evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);return range.getClientRects().length===1&&el.getBoundingClientRect().left>=0&&el.getBoundingClientRect().right<=innerWidth;}));
+ }
+ await topicHeader.click();
+ const tryAgain=card.getByRole('button',{name:'تلاش دوباره انتشار',exact:true});
+ await card.locator('.edition-problem').getByText('ترجمه انگلیسی آماده نشد.',{exact:false}).waitFor();
+ await page.route('**/api/editorial/retry',r=>r.fulfill({status:503,json:{error:'temporarily_unavailable'}}),{times:1});
+ await tryAgain.click();
+ await card.locator('.edition-message[data-error=true]').waitFor();
+ assert(await tryAgain.isEnabled());
+ await tryAgain.click();
+ await topicHeader.getByText('تأییدشده؛ در صف انتشار',{exact:true}).waitFor();
+ assert.equal(await tryAgain.count(),0);
+ draft.error_code='translation_unavailable';draft.publication_retry_at='2026-11-27T05:30:00Z';
+ await page.clock.fastForward(6200);
+ await topicHeader.getByText('در صف تلاش دوباره',{exact:true}).waitFor();
+ assert.match(await card.locator('.edition-problem[data-waiting=true]').innerText(),/۰۹:۰۰.*تهران.*خودکار/);
+ assert.equal(await card.getByRole('button',{name:'انتشار همین حالا برای عموم'}).count(),0);
+ const reopen=card.getByRole('button',{name:'بازگشت به پیش‌نویس برای ویرایش'});
+ assert(await reopen.isEnabled());
+ await reopen.click();
+ await card.getByText('نسخه برای ویرایش باز شد.',{exact:false}).waitFor();
+ assert.equal(await tryAgain.count(),0);
+ draft.status='publish_error';draft.error_code='translation_invalid';draft.publication_retry_at=null;draft.commit_sha='a'.repeat(40);
+ await page.clock.fastForward(6200);await tryAgain.waitFor();
+ assert.equal(await reopen.count(),0);
+ draft.commit_sha=null;draft.error_code='translation_review_required';await page.clock.fastForward(6200);
+ await topicHeader.getByText('توقف در بازبینی متن پزشکی',{exact:true}).waitFor();
+ await reopen.click();
+ await card.getByText('نسخه برای ویرایش باز شد.',{exact:false}).waitFor();
+ assert(await card.getByLabel('عنوان',{exact:true}).isEnabled());
+ assert.equal(calls.filter(c=>c.action==='reopen').at(-1).body.snapshot_hash,draft.snapshot_hash);
  await page.screenshot({path:'/tmp/gerami-editorial-inbox.png',fullPage:true});console.log('Private editorial UI: list/settings, revision edits, saved-version Telegram review and no public/local draft leakage passed.');
 }finally{await browser.close();}

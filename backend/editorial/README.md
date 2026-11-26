@@ -1,5 +1,9 @@
 # Editorial backend deployment and operations
 
+## Translation retries and failed publications
+
+After the scheduling and manual-cover migrations, apply `translation-retry.sql`, `translation-outage.sql` and `translation-health.sql` in order, then deploy the Edge function and dashboard. The publisher can request a corrected English response within its claim deadline. The queue retries eligible translation failures with a delay and retains the approval and selected image. For a terminal pre-commit translation or media failure, the original approver can reopen the post, edit it and approve the new revision. For transient provider, quota or cache outages, an eligible approved revision retries automatically with intervals increasing to 24 hours. An owner may withdraw a waiting approval. Invalid clinical output has bounded retries and explicit review blocks stop for the editor. The translation worker tries an available alternate Flash model using the same provider account. The service-only translation_health operation checks a fixed sample against the live provider and validator; it creates no draft.
+
 ## Drafts without suggested artwork
 
 On a scheduled installation, apply `manual-cover.sql` and then `manual-preview.sql` before deploying the Edge function and the dashboard. The worker saves each draft by job ID before searching for images. A failed search leaves a reviewable draft and Telegram can deliver the text. With no pair available, the owner can attach a file or import a direct image link in the panel. Link imports use a credential-free browser request and require the image host to allow cross-origin reads. Approval and publication use the stored copy of the selected image.

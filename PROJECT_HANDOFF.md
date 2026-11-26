@@ -4,6 +4,10 @@ Updated 2026-11-26 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Publication failures · 2026-11-26
+
+The publisher validates the English edition against the approved Persian text before sending either edition to the public site. It requests structured JSON and can ask the translator to correct a rejected field. A failed translation receipt identifies the stage and keeps the same approval for a bounded retry. The inbox shows the retry time or the terminal error. The server can switch to an available Flash model and retries an upstream outage with increasing intervals. The approving physician can withdraw a delayed approval or return an eligible, uncommitted failed post to a new draft revision for editing.
+
 ## Drafts awaiting an image · 2026-11-26
 
 Save the generated text before looking for cover options. A draft with no fresh clinical pair is available in the private inbox for review. The editor can attach a local file or import a direct HTTPS image from a host that permits browser reads. Both paths store the image bytes in private storage for the saved revision. Publishing still requires the selected cover and the physician's approval.
