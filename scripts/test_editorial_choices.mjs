@@ -9,18 +9,18 @@ async function db(path,body,method=body===undefined?'GET':'POST'){
  let sql;if(method==='PATCH'){const sets=Object.entries(body).map(([k,v])=>{assert(/^[a-z_]+$/.test(k));args.push(v);return k+'=$'+args.length;});sql='update '+table+' set '+sets.join(',');}else sql='select * from '+table;
  if(where.length)sql+=' where '+where.join(' and ');if(method==='GET'&&params.has('order')){const [key,dir]=params.get('order').split('.');assert(['ordinal','created_at','id'].includes(key)&&['asc','desc'].includes(dir));sql+=' order by '+key+' '+dir;}if(method==='GET'&&params.has('limit'))sql+=' limit '+Number(params.get('limit'));return(await service(sql,args)).rows;
 }
-const rpc=async(name,args={})=>{if(name==='register_choices'&&pauseRegistration){const gate=pauseRegistration;pauseRegistration=null;gate.ready();await gate.done;}const entries=Object.entries(args),values=entries.map(([k,v])=>Array.isArray(v)&&k==='p_text'?'{'+v.join(',')+'}':v&&typeof v==='object'?JSON.stringify(v):v);return(await service('select gerami_editorial_'+name+'('+entries.map(([k],i)=>k+'=> $'+(i+1)).join(',')+') as d',values)).rows[0].d;};
+const rpc=async(name,args={})=>{if(name==='save_telegram'&&args.p_data.cover_custom)assert.equal(args.p_data.cover_reset,true,'Owner re-upload must replace the previous cover metadata even when the public filename is identical');if(name==='register_choices'&&pauseRegistration){const gate=pauseRegistration;pauseRegistration=null;gate.ready();await gate.done;}const entries=Object.entries(args),values=entries.map(([k,v])=>Array.isArray(v)&&k==='p_text'?'{'+v.join(',')+'}':v&&typeof v==='object'?JSON.stringify(v):v);return(await service('select gerami_editorial_'+name+'('+entries.map(([k],i)=>k+'=> $'+(i+1)).join(',')+') as d',values)).rows[0].d;};
 const mutate=(d,action,data={})=>rpc('mutate',{p_id:d.id,p_action:action,p_revision:d.revision,p_data:data});
 async function storage(path,o={}){if(o.method==='POST'){if(objects.has(path))throw Error('exists');objects.set(path,o.body);return Response.json({ok:true});}const bytes=objects.get(path);if(!bytes)throw Error('missing');return new Response(bytes,{headers:{'Content-Type':'image/jpeg'}});}
 const media=createEditorialMedia({db,rpc,storage,remote:async()=>{throw Error('unexpected external request');},snapshot:snapshotHash});
-async function telegram(method,body){if(method==='sendMessage'&&failText&&body.reply_parameters)throw Error('delivery_failed');const value=body instanceof FormData?Object.fromEntries(body):structuredClone(body),message_id=++serial;sent.push({method,...value,...(!('message_id'in value)?{message_id}:{})});return {message_id};}
+async function telegram(method,body){if(method==='getFile')return {file_path:'photos/owner.jpg'};if(method==='downloadFile')return new Response(new Uint8Array([255,216,255,...new Uint8Array(197).fill(12)]));if(method==='sendMessage'&&failText&&body.reply_parameters)throw Error('delivery_failed');const value=body instanceof FormData?Object.fromEntries(body):structuredClone(body),message_id=++serial;sent.push({method,...value,...(!('message_id'in value)?{message_id}:{})});return {message_id};}
 const ctl=createTelegramEditorial({db,rpc,mutate,telegram,chat:async()=>chat,owner:async()=>owner,storage,remote:async()=>{throw Error('no category artwork');},snapshot:snapshotHash,media,githubToken:()=>'',background:p=>p.catch(()=>{})});
 const click=async(data,message_id)=>ctl.handle({acknowledged:true,callback_query:{id:'click'+update++,data,from:{id:123},message:{message_id,chat:{id:123,type:'private'}}}});
 const controls=()=>sent.filter(s=>s.method==='editMessageReplyMarkup'&&s.reply_markup.inline_keyboard.length).slice(-2);
 const paragraph='آسم می‌تواند باعث سرفه و تنگی نفس شود. پیگیری منظم و توجه به نشانه‌های تازه کمک می‌کند برای مراقبت از سلامت خودمان با پزشک تصمیم بگیریم.';
 try{
  await pg.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;create schema net;create table auth.users(id uuid primary key,email_confirmed_at timestamptz,deleted_at timestamptz,banned_until timestamptz);create table gerami_accounts(user_id uuid,role text,enabled boolean);create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;insert into auth.users values('${owner}',now(),null,null);insert into gerami_accounts values('${owner}','admin',true);`);
- for(const f of ['schema.sql','telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql'])await pg.exec(await fs.readFile('backend/editorial/'+f,'utf8'));
+ for(const f of ['schema.sql','telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql','manual-cover.sql','manual-preview.sql'])await pg.exec(await fs.readFile('backend/editorial/'+f,'utf8'));
  const make=value=>new Uint8Array([255,216,255,...new Uint8Array(197).fill(value)]);await media.saveLibrary('pulm-asthma',[{bytes:make(1),label:'نمای بالینی آسم'},{bytes:make(2),label:'راه هوایی در آسم'}]);
  await assert.rejects(service("insert into gerami_editorial_cover_library(source_topic,ordinal,label,media_path,image,sha256,provenance) values('pulm-asthma',1,'conflicting','path','image',$1,'{}')",['f'.repeat(64)]),/duplicate key/);
  const initial={content:{title:'آسم را بهتر بشناسیم',summary:'پیگیری نشانه‌ها کمک می‌کند.',paragraphs:[paragraph,paragraph,paragraph],tags:['آسم','سلامت'],hashtags:['#آسم','#سلامت']},source:{topic_id:'pulm-asthma'},category:'ریه',topic:'pulmonology',image:'/assets/old.webp'};
@@ -40,6 +40,34 @@ try{
  await pg.query('insert into gerami_editorial_drafts(id,slug,content,category,topic,image,media_path,source,snapshot_hash,cover_selected,cover_sha256) values($1,$2,$3,$4,$5,$6,$7,$8,$9,false,null)',[customId,'custom-only',JSON.stringify(custom.content),custom.category,custom.topic,custom.image,custom.media_path,JSON.stringify(custom.source),await snapshotHash(custom)]);
  const preparedCustom=await media.ensure(custom);assert.equal(preparedCustom.cover_selected,true,'Preparing the comparison pair must preserve an explicit owner upload');assert.equal(preparedCustom.image,customImage);assert.equal(preparedCustom.media_path,customPath);assert.equal((await media.options(preparedCustom))[0].id,null);assert.equal(preparedCustom.snapshot_hash,await snapshotHash(preparedCustom));
  assert.equal((await rpc('unused_pair',{p_topic:'pulm-asthma'})).length,0,'previous proposals cannot be offered again after rotating active media');
- await assert.rejects(media.ensure(preparedCustom,{force:true}),/unexpected external request/);
+ await assert.rejects(media.ensure(preparedCustom,{force:true}),/image_options_pending/);
+ // The full private text remains editable even when no automatic artwork exists.
+ const textId='00000000-0000-4000-8000-000000000019';
+ const textDraft={...initial,image:'',cover_required:true};
+ await pg.query('insert into gerami_editorial_drafts(id,slug,content,category,topic,image,source,snapshot_hash,cover_required) values($1,$2,$3,$4,$5,$6,$7,$8,true)',[textId,'text-only',JSON.stringify(textDraft.content),textDraft.category,textDraft.topic,'',JSON.stringify(textDraft.source),await snapshotHash(textDraft)]);
+ const textRow=async()=>(await service('select * from gerami_editorial_drafts where id=$1',[textId])).rows[0];
+ const start=sent.length;
+ assert.equal(await ctl.notify(await textRow()),true);
+ const messages=sent.slice(start);
+ assert(messages.some(m=>m.text?.includes(paragraph)));
+ assert(!messages.some(m=>m.method==='sendPhoto'));
+ const textCard=messages.find(m=>m.reply_markup?.inline_keyboard?.length);
+ const buttons=textCard.reply_markup.inline_keyboard.flat();
+ assert(!buttons.some(b=>b.callback_data?.startsWith('webpost:a:')));
+ assert(buttons.some(b=>b.url?.endsWith('/admin/#auto-posts')));
+ assert.equal((await textRow()).notified_revision,1);
+ assert.equal((await textRow()).approval_hash,null);
+ assert.equal(await ctl.notify(await textRow()),false);
+ const imageEdit=buttons.find(b=>b.callback_data?.startsWith('webpost:c:'));
+ assert.equal((await click(imageEdit.callback_data,textCard.message_id)).outcome,'editing_image');
+ const prompt=sent.findLast(m=>m.reply_markup?.force_reply);
+ const uploaded=await ctl.handle({update_id:update++,message:{message_id:++serial,chat:{id:123,type:'private'},from:{id:123},photo:[{file_id:'owner',file_size:200}],reply_to_message:{message_id:prompt.message_id}}});
+ assert.equal(uploaded.outcome,'edit_saved');
+ const saved=await textRow();
+ assert.equal(saved.revision,2);assert.equal(saved.cover_pack,null);assert.equal(saved.notified_revision,2);
+ const manualCard=sent.findLast(m=>m.reply_markup?.inline_keyboard?.length);
+ const approve=manualCard.reply_markup.inline_keyboard.flat().find(b=>b.callback_data?.startsWith('webpost:a:'));
+ assert(approve);assert.equal((await click(approve.callback_data,manualCard.message_id)).outcome,'approved');
+ assert.equal((await textRow()).cover_sha256,saved.cover_sha256);
  console.log('Real Telegram/media/PostgreSQL choice flow passed: exact topic backfill, two private uploads, no tags/badge, source, selection revision, full-text-before-arm, partial-delivery safety, immutable owner approval and library isolation.');
 }finally{await pg.close();}

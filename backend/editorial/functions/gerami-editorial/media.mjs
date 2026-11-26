@@ -71,14 +71,20 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
  async function discover(topic,copy={}){
   const query=imageQueries(topic)[0];
   const params=new URLSearchParams({action:'query',format:'json',generator:'search',gsrsearch:query+' filetype:bitmap',gsrnamespace:'6',gsrlimit:'28',prop:'imageinfo',iiprop:'url|mime|extmetadata',iiurlwidth:'1000'});
-  const response=await remote('https://commons.wikimedia.org/w/api.php?'+params,{signal:AbortSignal.timeout(10000)}),data=JSON.parse(new TextDecoder().decode(await boundedBytes(response,350000)));
+  const signal=AbortSignal.timeout(10000);
+  let data;
+  try{
+   const response=await remote('https://commons.wikimedia.org/w/api.php?'+params,{signal});
+   data=JSON.parse(new TextDecoder().decode(await boundedBytes(response,350000)));
+  }catch{throw Error('image_options_pending');}
   const prior=await db('gerami_editorial_cover_library?source_topic=eq.'+topic+'&select=sha256,provenance');
   const seen=new Set(prior.map(o=>o.sha256)),sources=new Set(prior.map(o=>o.provenance?.source).filter(Boolean));
   const candidates=Object.values(data.query?.pages||{}).map(page=>commonsCandidate(page,query)).filter(Boolean);
   candidates.sort((a,b)=>clinicalScore(b.label+' '+b.provenance.description,copy)-clinicalScore(a.label+' '+a.provenance.description,copy));
   const chosen=[];for(const c of candidates){
+   if(signal.aborted)break;
    if(sources.has(c.provenance.source)||chosen.some(o=>normalize(o.label)===normalize(c.label)))continue;
-   try{const bytes=await boundedBytes(await remote(c.url,{signal:AbortSignal.timeout(10000)}));if(!validImage(bytes,'image/jpeg'))continue;const digest=await sha(bytes);if(seen.has(digest)||siteArt[digest])continue;seen.add(digest);sources.add(c.provenance.source);chosen.push({...c,bytes,digest});if(chosen.length===2)break;}catch{}
+   try{const bytes=await boundedBytes(await remote(c.url,{signal}));if(!validImage(bytes,'image/jpeg'))continue;const digest=await sha(bytes);if(seen.has(digest)||siteArt[digest])continue;seen.add(digest);sources.add(c.provenance.source);chosen.push({...c,bytes,digest});if(chosen.length===2)break;}catch{}
   }
   if(chosen.length!==2)throw Error('image_options_pending');return saveLibrary(topic,chosen);
  }
@@ -89,7 +95,10 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
   if(d.media_path&&!d.selected_cover_id&&!d.source.cover&&oldImage){const bytes=await boundedBytes(await storage('object/gerami-editorial/'+d.media_path)),mime=oldImage[2]==='webp'?'image/webp':'image/jpeg';if(!validImage(bytes,mime)||await sha(bytes)!==oldImage[1])throw Error('invalid_image');d={...d,cover_selected:true,selected_cover_id:null,cover_sha256:oldImage[1],source:{...d.source,cover:{provider:'owner-upload',sha256:oldImage[1],label:'تصویر انتخابی پزشک'}}};}
   const topic=d.source.topic_id;const candidates=async()=>rankedPair(await rpc('unused_candidates',{p_topic:topic}),d.content);
   let library=await candidates();
-  if(library.length!==2){await discover(topic,d.content);library=await candidates();}
+  if(library.length!==2){
+   await discover(topic,d.content);
+   library=await candidates();
+  }
   if(library.length!==2||library[0].sha256===library[1].sha256)throw Error('image_options_pending');
   const t=sourceTopic(topic),pack=crypto.randomUUID(),options=library.map((o,i)=>({...o,id:crypto.randomUUID(),ordinal:i+1}));
   const keepCustom=d.cover_selected&&!d.selected_cover_id&&d.media_path&&d.source.cover?.provider==='owner-upload'&&d.source.cover.sha256===d.cover_sha256;
@@ -97,7 +106,9 @@ export function createEditorialMedia({db,rpc,storage,remote,snapshot}){
   const next={...d,topic:t.child.id,category:source.taxonomy.path_fa,source,cover_pack:pack,cover_required:true,cover_selected:!!keepCustom,selected_cover_id:null,cover_sha256:keepCustom?d.cover_sha256:null,media_path:keepCustom?d.media_path:null,image:keepCustom?d.image:options[0].image};next.snapshot_hash=await snapshot(next);
   await rpc('prepare_unique',{p_id:d.id,p_revision:d.revision,p_source:source,p_topic:next.topic,p_category:next.category,p_pack:pack,p_options:options,p_snapshot:next.snapshot_hash});return fresh(d.id);
  }
- async function options(d,{includeBoth=false}={}){let rows=await db('gerami_editorial_cover_options?draft_id=eq.'+d.id+'&pack_id=eq.'+d.cover_pack+'&select=*&order=ordinal.asc');if(rows.length!==2)throw Error('image_options_pending');
+ async function options(d,{includeBoth=false}={}){
+  let rows=d.cover_pack?await db('gerami_editorial_cover_options?draft_id=eq.'+d.id+'&pack_id=eq.'+d.cover_pack+'&select=*&order=ordinal.asc'):[];
+  if(d.cover_pack&&rows.length!==2)throw Error('image_options_pending');
   if(d.cover_selected&&!d.selected_cover_id)rows=[{id:null,label:'تصویر انتخابی پزشک',image:d.image,media_path:d.media_path,sha256:d.cover_sha256,provenance:{provider:'owner-upload'}},...(includeBoth?rows:rows.filter(o=>o.sha256!==d.cover_sha256).slice(0,1))];
   return rows;
  }

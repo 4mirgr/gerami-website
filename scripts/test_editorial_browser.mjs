@@ -1,3 +1,4 @@
+import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/usr/bin/chromium',args:['--no-sandbox']});
 try{
@@ -16,6 +17,10 @@ try{
   if(action==='settings'){dailyCount=body.daily_count;return r.fulfill({json:{ok:true}});}
   if(action==='run')return r.fulfill({json:{queued:true,job_id:manualId}});
   if(action==='covers')return r.fulfill({json:{options:body.id===clinician.id?clinician.options:draft.options}});
+  if(action==='image'){
+   draft.options=[{id:null,label:'تصویر انتخابی پزشک',selected:true,preview:'data:image/jpeg;base64,'+body.base64},{id:'unavailable',label:'تصویر پیشنهادشده',preview:'data:image/jpeg;base64,AAAA'}];
+   draft.cover_selected=true;draft.revision++;return r.fulfill({json:{ok:true}});
+  }
   if(action==='choose'){draft.options.forEach(o=>o.selected=o.id===body.candidate_id);draft.cover_selected=true;draft.revision++;}
   if(action==='edit'){draft.content=body.content;draft.cover_selected=true;draft.revision++;}return r.fulfill({json:{ok:true}});
  });
@@ -102,5 +107,38 @@ try{
  assert(!/2026-11/.test(await page.locator('.review-workspace').innerText()));
  // Private drafts never enter the public editor's preview or public articles storage.
  const stored=await page.evaluate(()=>Object.values(localStorage).join(''));assert(!stored.includes('عنوان ویرایش‌شده'));
+ // Missing suggestions and failed gallery requests still permit an owner-supplied cover.
+ const imagePath=draft.options[0].preview;
+ draft.status='draft';draft.cover_selected=false;draft.options=[];manualReady=false;
+ await page.reload();await group.locator(':scope > summary').click();
+ await card.getByText('متن پیش‌نویس ذخیره شده است. تصویر پیشنهادی در دسترس نیست.').waitFor();
+ assert.equal(await card.locator('.edition-publish').isDisabled(),true);
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ const bytes=await readFile(new URL('..'+imagePath,import.meta.url));
+ const imageUrl='https://images.example.org/cover.jpg';
+ const source=card.getByLabel('لینک مستقیم تصویر');
+ const useLink=card.getByRole('button',{name:'ذخیره تصویر از لینک'});
+ await source.fill('file:///private.jpg');await useLink.click();
+ await card.getByText('لینک مستقیم تصویر را با https وارد کنید.').waitFor();
+ assert.equal(calls.filter(c=>c.action==='image').length,0);
+ await page.route(imageUrl,route=>route.abort(),{times:1});
+ await source.fill(imageUrl);await useLink.click();
+ await card.getByText('تصویر از این لینک دریافت نشد.',{exact:false}).waitFor();
+ assert(await card.getByLabel('بارگذاری تصویر دلخواه').isEnabled());
+ await page.route(imageUrl,route=>route.fulfill({contentType:'image/jpeg',headers:{'Access-Control-Allow-Origin':'*'},body:bytes}));
+ await useLink.click();await card.getByText('تصویر شاخص ذخیره شد.',{exact:true}).waitFor();
+ await page.waitForFunction(()=>!document.querySelector('.edition-publish').disabled);
+ const imported=calls.filter(c=>c.action==='image').at(-1).body;
+ assert.equal(imported.id,draft.id);assert.equal(imported.mime,'image/jpeg');assert.match(imported.base64,/^\/9j\//);
+ assert(!JSON.stringify(imported).includes(imageUrl));
+ draft.cover_selected=false;draft.options=[];
+ await page.reload();
+ await page.route('**/api/editorial/covers',route=>route.request().postDataJSON().id===draft.id?
+   route.fulfill({status:503,json:{error:'image_options_pending'}}):route.fallback());
+ await group.locator(':scope > summary').click();
+ await card.getByRole('button',{name:'تلاش دوباره برای تصاویر'}).waitFor();
+ await card.getByLabel('بارگذاری تصویر دلخواه').setInputFiles({name:'cover.jpg',mimeType:'image/jpeg',buffer:bytes});
+ await card.getByText('تصویر شاخص ذخیره شد.',{exact:true}).waitFor();
+ assert.equal(calls.filter(c=>c.action==='image').length,2);
  await page.screenshot({path:'/tmp/gerami-editorial-inbox.png',fullPage:true});console.log('Private editorial UI: list/settings, revision edits, saved-version Telegram review and no public/local draft leakage passed.');
 }finally{await browser.close();}

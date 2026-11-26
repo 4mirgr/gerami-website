@@ -6,7 +6,7 @@ const register=(revision,snapshot,nonce,entries)=>q('select gerami_editorial_reg
 const entries=(m,h1,h2)=>[{message_id:m,hash:h1,candidate_id:one,photo_hash:hash},{message_id:m+1,hash:h2,candidate_id:two,photo_hash:other}];
 try{
  await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;create schema net;create table auth.users(id uuid primary key,email_confirmed_at timestamptz,deleted_at timestamptz,banned_until timestamptz);create table gerami_accounts(user_id uuid,role text,enabled boolean);create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language sql as $$select 1::bigint$$;insert into auth.users values('${owner}',now(),null,null);insert into gerami_accounts values('${owner}','admin',true);`);
- for(const file of ['schema.sql','telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql','publication-schedule.sql'])await db.exec(await fs.readFile('backend/editorial/'+file,'utf8'));
+ for(const file of ['schema.sql','telegram-controls.sql','operations.sql','cover-choice.sql','dashboard-review.sql','publication-schedule.sql','manual-cover.sql'])await db.exec(await fs.readFile('backend/editorial/'+file,'utf8'));
  await db.query(`insert into gerami_editorial_drafts(id,slug,content,category,topic,image,source,snapshot_hash,cover_pack) values($1,'test-only','{}','ریه / آسم','asthma','/assets/old.webp','{"topic_id":"pulm-asthma"}',$2,$3)`,[id,hash,pack]);
  const candidate=(cid,ordinal,sha)=>q(`insert into gerami_editorial_cover_options(id,draft_id,pack_id,ordinal,label,media_path,image,sha256,source_topic,provenance) values($1,$2,$3,$4,$5,$6,$7,$8,'pulm-asthma','{"kind":"original-illustration"}')`,[cid,id,pack,ordinal,'آسم '+ordinal,'library/'+sha+'.jpg','/assets/uploads/editorial-'+sha+'.jpg',sha]);await candidate(one,1,hash);await candidate(two,2,other);
  await assert.rejects(q("select gerami_editorial_schedule_publication($1,1,$2,$3,'auto',null)",[id,hash,owner]),/cover_required/);
@@ -98,6 +98,25 @@ try{
  const claimed=(await q(`select gerami_editorial_claim('lease','test') as d`)).rows[0].d;assert.equal(claimed.cover_sha256,hash);assert.equal(claimed.image,'/assets/uploads/editorial-'+hash+'.jpg');
  await assert.rejects(schedule(3,cap('5'),owner,'manual','2040-01-02T00:15'),/draft_locked/);
  assert.equal(claimed.publication_mode,'now','Telegram approval keeps its immediate semantics');
+ await q("update gerami_editorial_drafts set status='published' where id=$1",[id]);
+ // A text-only draft can be saved and edited, then approved using an explicit upload.
+ const ownId='00000000-0000-4000-8000-000000000099';
+ const ownImage='/assets/uploads/editorial-'+other+'.webp';
+ const ownPath=ownId+'/'+other+'.webp';
+ await q(`insert into gerami_editorial_drafts(id,slug,content,category,topic,image,source,snapshot_hash)
+   values($1,'manual-only','{}','category','asthma','','{"topic_id":"pulm-asthma"}',$2)`,[ownId,hash]);
+ const approveCustom=(revision,snapshot)=>q("select gerami_editorial_schedule_publication($1,$2,$3,$4,'now',null) result",[ownId,revision,snapshot,owner]);
+ await assert.rejects(approveCustom(1,hash),/cover_required/);
+ const upload={content:{},image:ownImage,media_path:ownPath,cover_reset:true,cover_custom:true,cover_sha256:other,snapshot_hash:other};
+ await q("select gerami_editorial_mutate($1,'edit',1,$2)",[ownId,upload]);
+ await assert.rejects(approveCustom(1,hash),/stale_revision/);
+ await q("update gerami_editorial_drafts set media_path='some-other-draft/photo.webp' where id=$1",[ownId]);
+ await assert.rejects(approveCustom(2,other),/cover_required/);
+ await q("update gerami_editorial_drafts set media_path=$2 where id=$1",[ownId,ownPath]);
+ assert.equal((await approveCustom(2,other)).rows[0].result.status,'approved');
+ const customClaim=(await q("select gerami_editorial_claim('manual-lease','manual-cover-test') result")).rows[0].result;
+ assert.equal(customClaim.media_path,ownPath);assert.equal(customClaim.cover_pack,null);assert.equal(customClaim.cover_sha256,other);
+
  for(const role of ['anon','authenticated']){await db.exec('set role '+role);await assert.rejects(db.query("select gerami_editorial_schedule_publication($1,3,$2,$3,'auto',null)",[id,cap('5'),owner]),/permission denied/);await assert.rejects(db.query('select * from gerami_editorial_cover_options'),/permission denied/);await db.exec('reset role');}
  console.log('Cover-choice PostgreSQL: attempt binding, atomic edit/reject invalidation, no resurrection, owner/revision/photo selection, approved re-selection and immutable publisher bytes passed.');
 }finally{await db.close();}

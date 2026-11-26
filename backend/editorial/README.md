@@ -1,5 +1,9 @@
 # Editorial backend deployment and operations
 
+## Drafts without suggested artwork
+
+On a scheduled installation, apply `manual-cover.sql` and then `manual-preview.sql` before deploying the Edge function and the dashboard. The worker saves each draft by job ID before searching for images. A failed search leaves a reviewable draft and Telegram can deliver the text. With no pair available, the owner can attach a file or import a direct image link in the panel. Link imports use a credential-free browser request and require the image host to allow cross-origin reads. Approval and publication use the stored copy of the selected image.
+
 ## Current cadence and publication schedule
 
 On an existing installation with the English-edition migration, apply `publication-schedule.sql` followed by `generation-schedule.sql`, then deploy the complete `functions/gerami-editorial/` bundle and the dashboard. The incremental migrations retain existing job IDs, drafts, approvals and preferences. The existing cron job is updated in place to poll once per minute. For a fresh installation, apply the historical migrations in order first and register the scheduler with `schedule.sql`.

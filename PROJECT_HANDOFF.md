@@ -4,6 +4,10 @@ Updated 2026-11-26 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## Drafts awaiting an image · 2026-11-26
+
+Save the generated text before looking for cover options. A draft with no fresh clinical pair is available in the private inbox for review. The editor can attach a local file or import a direct HTTPS image from a host that permits browser reads. Both paths store the image bytes in private storage for the saved revision. Publishing still requires the selected cover and the physician's approval.
+
 ## Editorial schedule · 2026-11-26
 
 The private editorial dashboard counts individual posts across both audiences. The configured Tehran hour starts a 24-hour cycle divided by the daily count. For ten posts this gives a slot every 144 minutes. A manual generation request uses a per-click request ID and stays a private draft until the physician approves its saved revision and chosen image.
