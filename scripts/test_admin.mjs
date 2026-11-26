@@ -1,11 +1,12 @@
 import {createRequire} from 'node:module';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 const require=createRequire(import.meta.url);const {chromium}=require('playwright');const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',args:['--no-sandbox']});
+const origin=process.env.ADMIN_TEST_ORIGIN||'http://127.0.0.1:4173';
 try{
 const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'light',timezoneId:'America/Los_Angeles'});
 await page.clock.setFixedTime(new Date('2026-03-20T21:15:00Z')); // Nowruz in Tehran; still March 20 in LA.
 await page.route('**/api/cms/status',r=>r.fulfill({json:{configured:false}}));
 await page.route('**/content/articles.json',r=>r.fulfill({json:{articles:[]}}));
-await page.goto('http://127.0.0.1:4173/admin/');await page.waitForFunction(()=>document.querySelector('#total').textContent!=='—');
+await page.goto(origin+'/admin/');await page.waitForFunction(()=>document.querySelector('#content-message').textContent.includes('هنوز مقاله'));
 assert.match(await page.locator('#today').textContent(),/(?=.*فروردین)(?=.*۱۴۰۵)/);assert.equal(await page.locator('#total').textContent(),'۰');assert.match(await page.locator('#content-message').textContent(),/هنوز مقاله/);await page.screenshot({path:'/tmp/gerami-admin-day.png',fullPage:true});
 await page.locator('#theme').click();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.reload();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');await page.screenshot({path:'/tmp/gerami-admin-night.png',fullPage:true});
 await page.locator('a[data-nav=articles]').click();await page.getByRole('button',{name:'نوشتن مقاله جدید'}).waitFor();
@@ -21,9 +22,53 @@ assert.equal(await page.locator('.dashboard-heading img').evaluate(img=>img.comp
 await page.locator('#menu').click();assert.equal(await page.locator('#menu').getAttribute('aria-expanded'),'true');assert.equal(await page.locator('.app').evaluate(el=>el.inert),true);
 await page.keyboard.press('Escape');assert.equal(await page.locator('#menu').getAttribute('aria-expanded'),'false');await page.screenshot({path:'/tmp/gerami-admin-mobile.png',fullPage:true});
 await page.route('**/content/articles.json',r=>r.fulfill({json:{articles:[{title_fa:'<img onerror=alert(1)>',status:'published',published_at:'2026-11-12'},{title_fa:'پیش‌نویس',status:'draft'}]}}));
-await page.goto('http://127.0.0.1:4173/admin/');await page.waitForFunction(()=>document.querySelector('#total').textContent==='۲');assert.equal(await page.locator('#published').textContent(),'۱');assert.equal(await page.locator('#drafts').textContent(),'۱');assert.equal(await page.locator('#recent-list img').count(),0);assert.equal(await page.locator('.recent').count(),2);
+await page.goto(origin+'/admin/');await page.waitForFunction(()=>document.querySelector('#total').textContent==='۲');assert.equal(await page.locator('#published').textContent(),'۱');assert.equal(await page.locator('#drafts').textContent(),'۱');assert.equal(await page.locator('#recent-list img').count(),0);assert.equal(await page.locator('.recent').count(),2);
 assert.match(await page.locator('.recent small').first().textContent(),/(?=.*۲۱)(?=.*آبان)(?=.*۱۴۰۵)/);
 assert.equal(await page.locator('.recent small').last().textContent(),'تاریخ انتشار تعیین نشده');
+// Deliberately hold independent responses until their consumers are already usable.
+const slow=await browser.newPage();
+await slow.addInitScript(()=>localStorage.setItem('decap-cms-user',JSON.stringify({backendName:'github',token:'test-only'})));
+let releaseProfile,releaseVerification;
+const profileGate=new Promise(resolve=>{releaseProfile=resolve;});
+const verifyGate=new Promise(resolve=>{releaseVerification=resolve;});
+const mainRequests=[];
+slow.on('request',request=>{
+ if(request.frame()===slow.mainFrame())mainRequests.push(new URL(request.url()).pathname);
+});
+await slow.route('**/content/site.json',async r=>{await profileGate;await r.continue();});
+let verifications=0;
+await slow.route('**/api/cms/session',async r=>{
+ await verifyGate;
+ if(++verifications===1)return r.fulfill({status:503,json:{}});
+ return r.fulfill({json:{authenticated:true,login:'4mirgr'}});
+});
+await slow.route('**/api/editorial/review-groups',r=>r.fulfill({json:{drafts:[],next:false}}));
+await slow.route('https://api.github.com/**',r=>r.fulfill({status:503,json:{}}));
+await slow.goto(origin+'/admin/');
+await slow.waitForFunction(()=>document.querySelector('.recent')||document.getElementById('content-message').textContent.includes('هنوز مقاله'));
+assert.notEqual(await slow.locator('#total').textContent(),'—');
+assert.equal(await slow.locator('#github-state').getAttribute('data-state'),'checking');
+assert.equal(await slow.locator('#github-disconnect').isEnabled(),true);
+const before=await slow.evaluate(()=>Math.round(performance.now()));
+await slow.locator('.review-links a[href="#auto-posts"]').click();
+await slow.getByRole('button',{name:'ساخت پیشنهاد همین حالا'}).waitFor();
+releaseVerification();
+await slow.waitForFunction(()=>document.getElementById('github-state').dataset.state==='error');
+assert.match(await slow.locator('#github-state').textContent(),/بررسی ناموفق/);
+await slow.getByRole('button',{name:'بررسی مجدد'}).click();
+await slow.waitForFunction(()=>document.getElementById('github-state').dataset.state==='connected');
+assert.equal(mainRequests.includes('/admin/studio.mjs'),false);
+assert.equal(mainRequests.includes('/admin/site-store.mjs'),false);
+assert.equal(mainRequests.some(path=>path.startsWith('/repos/')),false);
+assert.deepEqual(mainRequests.filter(path=>path.startsWith('/content/')).sort(),['/content/articles.json','/content/site.json']);
+releaseProfile();
+await slow.locator('[data-nav=pages]').click();
+await slow.locator('#studio-fields select').first().waitFor();
+assert.equal(mainRequests.filter(path=>path==='/api/cms/session').length,2);
+assert.equal(mainRequests.filter(path=>path==='/content/articles.json').length,1);
+assert.equal(mainRequests.filter(path=>path==='/content/site.json').length,1);
+console.log('Dashboard article metrics ready after '+before+' ms with GitHub and profile responses held; private draft review available before verification.');
+await slow.close();
 const statusModule=await import('data:text/javascript;base64,'+Buffer.from(await readFile(new URL('../functions/api/cms/status.js',import.meta.url))).toString('base64'));assert.deepEqual(await statusModule.onRequestGet({env:{}}).json(),{configured:false});const configured=statusModule.onRequestGet({env:{CMS_GITHUB_CLIENT_ID:'private-id',CMS_GITHUB_CLIENT_SECRET:'private-secret'}});assert.equal(configured.headers.get('cache-control'),'no-store');assert.equal(await configured.text(),'{"configured":true}');
 console.log('PASS: Dompet dashboard counts, empty state, safe text, theme persistence, editor routes/frame preservation, mobile menu/overflow, public setup status without secrets.');
 }finally{await browser.close();}

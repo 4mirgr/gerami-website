@@ -1,6 +1,7 @@
 import {managedPaths,validateDocument,clone} from '../js/site-model.mjs';
 import {validateSite,prepareArticlesForPublication} from './publication-model.mjs';
 import {repository} from './github-session.mjs';
+import {readSiteDocument} from './workspace-data.mjs';
 const prefix='/repos/'+repository;
 const DRAFT_KEY='gerami-studio-drafts-v1';
 const decode=value=>new TextDecoder().decode(Uint8Array.from(atob(value.replace(/\s/g,'')),c=>c.charCodeAt(0)));
@@ -19,7 +20,8 @@ export class SiteStore extends EventTarget{
   if(this.ready&&signature!==this.mediaSignature){this.mediaSignature=signature;const snapshot=[...this.media].map(([path,file])=>[path,{base64:file.base64}]);this.mediaSave=(this.mediaSave||Promise.resolve()).then(()=>mediaDB(snapshot)).then(()=>{this.mediaStorageError=false;this.storageError=this.localStorageError;}).catch(()=>{this.mediaStorageError=true;this.storageError=true;this.dispatchEvent(new Event('change'));});}
   this.dispatchEvent(new Event('change'));}
  async load(){
-  for(const path of managedPaths){const response=await fetch('/'+path,{cache:'no-store'});if(!response.ok)throw Error('دریافت محتوای سایت ممکن نشد.');const data=validateDocument(path,await response.json());this.install(path,data);}
+  const documents=await Promise.all(managedPaths.map(async path=>[path,validateDocument(path,await readSiteDocument(path))]));
+  for(const [path,data] of documents)this.install(path,data);
   try{for(const [path,base64] of await mediaDB()||[]){if(!/^assets\/uploads\/[a-z0-9-]+\.webp$/.test(path))continue;const blob=new Blob([Uint8Array.from(atob(base64),c=>c.charCodeAt(0))],{type:'image/webp'});const url=URL.createObjectURL(blob);this.media.set(path,{base64,url});this.assetPreviews.set('/'+path,url);}}catch{this.mediaStorageError=true;}
   this.ready=true;this.changed();
  }

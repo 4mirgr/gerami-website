@@ -13,8 +13,9 @@ export async function onRequestPost({request,env}){
   for(;;){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;if(size>4096){await reader.cancel();return response({error:'payload_too_large'},413);}text+=new TextDecoder().decode(value);}
   const data=JSON.parse(text);if(!data||Array.isArray(data)||typeof data!=='object'||Object.keys(data).length)return response({error:'invalid_payload'},400);
   const token=request.headers.get('Authorization')?.match(/^Bearer (\S+)$/)?.[1];
-  await verifyCMSOwner(token);
-  return response({authenticated:true},200,await issueCMSCookie(request,env));
+  const login=await verifyCMSOwner(token);
+  const cookie=request.headers.get('X-CMS-Check')==='verify'?undefined:await issueCMSCookie(request,env);
+  return response({authenticated:true,login},200,cookie);
  }catch(error){return response({error:error instanceof CMSAccessError?error.message:'cms_login_unavailable'},error instanceof CMSAccessError?error.status:502);}
 }
 export async function onRequestDelete({request}){

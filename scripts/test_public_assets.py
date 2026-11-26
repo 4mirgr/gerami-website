@@ -28,6 +28,49 @@ class PublicAssets(unittest.TestCase):
         (site / '_headers').write_text('/admin/*\n  Cache-Control: no-cache\n/js/*\n  Cache-Control: no-cache\n')
         return site
 
+    def test_admin_shell_styles_arrive_with_the_gated_document(self):
+        from build_cloudflare import inline_admin_styles
+        from rcssmin import cssmin
+        with tempfile.TemporaryDirectory() as folder:
+            admin = Path(folder) / 'admin'
+            shutil.copytree(ROOT / 'admin', admin)
+            inline_admin_styles(admin)
+            html = (admin / 'index.html').read_text()
+            self.assertNotIn('rel="stylesheet"', html)
+            styles = re.findall(r'<style data-admin-stylesheet="([^"]+)">(.*?)</style>', html, re.S)
+            self.assertEqual([name for name, css in styles], ['dompet.css', 'studio.css', 'settings.css'])
+            for name, css in styles:
+                self.assertEqual(css, cssmin((admin / name).read_text(), keep_bang_comments=True))
+            shutil.copy2(ROOT / 'admin/index.html', admin / 'index.html')
+            (admin / 'settings.css').write_text('/* </style> */')
+            with self.assertRaisesRegex(ValueError, 'Unsafe inline admin stylesheet'):
+                inline_admin_styles(admin)
+
+    def test_protected_shell_counts_match_release_feeds_without_embedding_content(self):
+        from build_cloudflare import fill_admin_counts
+        with tempfile.TemporaryDirectory() as folder:
+            stage = Path(folder)
+            admin, content = stage / 'admin', stage / 'content'
+            admin.mkdir()
+            content.mkdir()
+            template = (ROOT / 'admin/index.html').read_text()
+            for statuses, cv_count, expected in [
+                (['published', 'draft', 'published'], 1001, ['۳', '۲', '۱', '۱٬۰۰۱', '۳']),
+                ([], 0, ['۰', '۰', '۰', '۰', '۰'])
+            ]:
+                (admin / 'index.html').write_text(template)
+                articles = [{'status': status, 'title_fa': 'private fixture title'} for status in statuses]
+                (content / 'articles.json').write_text(json.dumps({'articles': articles}))
+                (content / 'site.json').write_text(json.dumps({'cv': ['private fixture CV'] * cv_count}))
+                fill_admin_counts(admin, content)
+                html = (admin / 'index.html').read_text()
+                original = html
+                for field, value in zip(('total', 'published', 'drafts', 'cv-count', 'donut-total'), expected):
+                    number = f'id="{field}">{value}<'
+                    self.assertIn(number, html)
+                    original = original.replace(number, f'id="{field}">—<')
+                self.assertEqual(original, template)
+
     def test_six_approved_covers_have_bounded_previews_and_unchanged_originals(self):
         import io, random
         from PIL import Image

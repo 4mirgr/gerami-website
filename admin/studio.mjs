@@ -1,18 +1,16 @@
 import {createTehranPicker,formatTehranDate} from './tehran-calendar.mjs';
-import '../js/contact-marks.js';
-import {discussionEditor} from './discussion.mjs';
-import {editorialEditor} from './editorial.mjs';
+import {getSession} from './workspace-data.mjs';
 import {topicEditor} from './topic-editor.mjs';
 import {flattenTopics} from '../js/topics.mjs';
-import {GitHubSession,repository} from './github-session.mjs';
+import {repository} from './github-session.mjs';
 import {SiteStore} from './site-store.mjs';
 import {displayText,pages,fonts,sections,clone,validateDocument,pageSlug,articleImage} from '../js/site-model.mjs';
 const $=id=>document.getElementById(id);
 const node=(tag,text,className)=>{const element=document.createElement(tag);if(text!==undefined)element.textContent=displayText(String(text));if(className)element.className=className;return element;};
 const button=(label,handler,className='tool-button')=>{const b=node('button',label,className);b.type='button';b.addEventListener('click',handler);return b;};
-const session=new GitHubSession();const store=new SiteStore(session);const view=$('studio-fields');const preview=$('site-preview');
+const session=getSession();const store=new SiteStore(session);const view=$('studio-fields');const preview=$('site-preview');
 let loaded=false,currentPage='home',previewPage='home',selectedBlock='',undo=[],lastSnapshot='',syncing=false,imageSaving=false;
-const routes={discussion:'دیدگاه‌ها و پسندها','auto-posts':'پیشنهادهای خودکار',pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانه رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
+const routes={pages:'صفحه‌ها و متن‌ها',appearance:'ظاهر و هویت بصری',menus:'منوها و زیرمنوها',media:'کتابخانه رسانه',history:'تاریخچه و بازیابی',articles:'مقالات و پیش‌نویس‌ها',topics:'شاخه‌ها و زیرشاخه‌ها',profile:'رزومه و سوابق',contact:'اطلاعات تماس'};
 const appearancePath='content/appearance.json';const menuPath='content/navigation.json';const extraPath='content/extra-pages.json';
 let previewLanguage='fa',previewTheme='light',previewSize=1280;
 function notice(message,error=false){$('studio-notice').textContent=message;$('studio-notice').classList.toggle('error',error);}
@@ -33,12 +31,7 @@ function field(parent,title,value,change,{type='text',help='',min,max,step,optio
 }
 function group(title,description){const section=node('section',undefined,'settings-group');section.append(node('h3',title));if(description)section.append(node('p',description,'muted'));view.append(section);return section;}
 function status(){
- const connected=session.state==='connected';const busy=['checking','connecting','disconnecting'].includes(session.state);
- $('github-state').textContent=connected?'متصل · '+session.login:session.state==='checking'?'بررسی اتصال…':session.state==='connecting'?'در انتظار ورود…':'قطع اتصال';
- $('github-state').dataset.state=session.state;$('github-connect').textContent=connected?'بررسی مجدد':'اتصال به GitHub';$('github-connect').disabled=busy;
- // The shell has its own entry cookie even if the editor token is missing.
- $('github-disconnect').hidden=false;$('github-disconnect').disabled=busy;$('github-disconnect').textContent=session.logoutPending?'تلاش دوباره برای خروج':connected?'قطع اتصال و خروج':'خروج از مدیریت';$('connection-title').textContent=connected?'GitHub متصل است':'وضعیت اتصال GitHub';$('connection-message').textContent=session.message;
- $('connection-fallback').hidden=session.state!=='error';
+ const connected=session.state==='connected';
  $('publish').disabled=imageSaving||!connected||!store.remoteReady||store.busy||store.count===0||store.conflicts.size>0;
  $('publish').textContent=imageSaving?'در حال آماده‌سازی تصویر…':store.busy?'در حال انجام…':'انتشار تغییرات'+(store.count?' ('+store.count+')':'' );
  const publishableDrafts=new Set((store.documents['content/articles.json']?.articles||[]).filter(item=>item.status==='draft').map(item=>item.slug));
@@ -47,12 +40,10 @@ function status(){
  $('sync').disabled=!connected||store.busy||imageSaving;
  const conflicts=$('conflict-list');conflicts.replaceChildren();for(const path of store.conflicts){const box=node('div',undefined,'conflict');box.append(node('p','این فایل هم‌زمان تغییر کرده است: '+path),button('استفاده از آخرین نسخه',()=>{store.resolve(path,false);render();}),button('حفظ ویرایش من روی نسخه جدید',()=>{if(confirm('نسخه مخزن را بررسی کرده‌اید؟ ویرایش شما جایگزین محتوای این فایل خواهد شد.')){store.resolve(path,true);render();}}));conflicts.append(box);}
 }
-function sendPreview(){if(!loaded||!preview.contentWindow)return;preview.contentWindow.postMessage({type:'studio-draft',documents:store.documents,assets:Object.fromEntries(store.assetPreviews),language:previewLanguage,theme:previewTheme},location.origin);}
+function sendPreview(){if(!loaded||!preview.getAttribute('src')||$('studio-view').hidden||document.querySelector('.preview-panel').hidden)return;preview.contentWindow.postMessage({type:'studio-draft',documents:store.documents,assets:Object.fromEntries(store.assetPreviews),language:previewLanguage,theme:previewTheme},location.origin);}
 let previewTimer;store.addEventListener('change',()=>{status();clearTimeout(previewTimer);previewTimer=setTimeout(sendPreview,150);});
 async function synchronize(){if(syncing||!loaded||session.state!=='connected')return;syncing=true;try{await store.synchronize();notice('آخرین نسخه مخزن دریافت شد. پیش‌نویس‌های شما حفظ شدند.');render();}catch(error){notice(error.message,true);}finally{syncing=false;}}
-session.addEventListener('change',()=>{status();if(session.state==='connected')synchronize();if(['disconnecting','disconnected','expired'].includes(session.state)){$('editor-slot').replaceChildren();window.dispatchEvent(new Event('cms-editor-reset'));}});
-$('github-connect').addEventListener('click',()=>session.state==='connected'?session.verify():session.connect());
-$('github-disconnect').addEventListener('click',()=>session.disconnect());
+session.addEventListener('change',()=>{status();if(session.state==='connected'&&Object.hasOwn(routes,location.hash.slice(1)))synchronize();});
 $('sync').addEventListener('click',synchronize);
 async function publishChanges(){
  if(imageSaving)throw Error('آماده‌سازی یا لغو تصویر هنوز تمام نشده است؛ چند لحظه صبر کنید.');
@@ -217,70 +208,26 @@ async function historyEditor(){const section=group('تاریخچه و بازیا
  if(session.state!=='connected'){section.append(node('p','پس از اتصال GitHub، تاریخچه فایل‌های سایت در دسترس است.'));return;}
  section.append(button('دریافت تاریخچه',attempt(async()=>{const rows=node('div');section.append(rows);for(const commit of await store.history()){const row=node('div',undefined,'history-row');row.append(node('strong',commit.commit.message.split('\n')[0]),node('small',formatTehranDate(commit.commit.author?.date,{time:true})));const link=node('a','مشاهده در GitHub');link.href='https://github.com/'+repository+'/commit/'+commit.sha;link.target='_blank';link.rel='noopener';row.append(link,button('بازیابی در پیش‌نویس',attempt(async()=>{if(!confirm('این نسخه در پیش‌نویس بارگذاری شود؟'))return;await store.restore(commit.sha);notice('نسخه انتخابی در پیش‌نویس آماده بررسی است.');render();})));rows.append(row);}})));
 }
-const reviewEditors=new Map([['discussion',discussionEditor],['auto-posts',editorialEditor]]);
 function render(){
  const route=location.hash.slice(1);
- if(!Object.hasOwn(routes,route)||reviewEditors.has(route)||!loaded)return;
+ if(!Object.hasOwn(routes,route)||!loaded)return;
  view.replaceChildren();
  if(route==='topics')topicEditor({store,group,node,field,button,edit,render,notice});if(route==='articles')articleEditor();if(route==='profile')profileEditor();if(route==='contact')profileEditor(true);if(route==='pages')pageEditor();if(route==='appearance')appearanceEditor();if(route==='menus')menuEditor();if(route==='media')mediaEditor();if(route==='history')historyEditor();status();sendPreview();
 }
-let reviewRoute='';
-function route(){
- const key=location.hash.slice(1),isStudio=Object.hasOwn(routes,key),review=reviewEditors.get(key);
- $('studio-view').hidden=!isStudio;
- $('publish-bar').hidden=!loaded||!isStudio||!!review;
- document.querySelector('.preview-panel').hidden=!!review;
- document.querySelector('.studio-heading').hidden=!!review;
- if(review){
-  if(reviewRoute!==key){
-   $('studio-view').classList.remove('preview-expanded');
-   const panel=node('div',undefined,'review-workspace');
-   view.replaceChildren(panel);
-   reviewRoute=key;
-   review(panel);
-  }
-  return;
+let loading;
+export async function openStudio(panel){
+ if(!loaded){
+  // Joining the same hydration preserves edits when the route changes mid-load.
+  loading??=store.load().then(()=>{loaded=true;}).finally(()=>{loading=null;});
+  await loading;
  }
- if(reviewRoute)view.replaceChildren();
- reviewRoute='';
- if(!loaded||!isStudio)return;
+ const key=location.hash.slice(1);
+ if(!panel.isConnected||!Object.hasOwn(routes,key))return;
+ $('publish-bar').hidden=false;
  render();
  const target=({articles:'blog',topics:'home',profile:'about',contact:'contact',pages:currentPage,appearance:'home',menus:'home'})[key]||previewPage;
  if(target!==previewPage||!preview.getAttribute('src'))setPreview(target);
  if(key==='pages')focusBlock();
+ if(!store.remoteReady&&session.state==='connected')synchronize();
 }
-window.addEventListener('hashchange',route);
-route();
 window.addEventListener('beforeunload',event=>{if(store.storageError&&store.count||store.busy){event.preventDefault();event.returnValue='';}});
-try{await store.load();loaded=true;route();status();if(session.state==='connected')await synchronize();}catch(error){notice(error.message,true);}
-
-const bookingReport=document.getElementById('booking-report');
-bookingReport?.addEventListener('toggle',async()=>{
- if(!bookingReport.open)return;
- const results=bookingReport.querySelector('[data-booking-results]');
- results.textContent='در حال دریافت…';
- try{
-  const response=await fetch('/api/discussion/booking-report',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',cache:'no-store',signal:AbortSignal.timeout(12000)});
-  if(!response.ok)throw Error();
-  const {rows,articles}=await response.json();
-  const providers={snapp:'اسنپ‌دکتر',drnext:'دکترنکست',paziresh24:'پذیرش۲۴'};
-  const list=document.createElement('ul');
-  for(const row of rows){
-   const item=document.createElement('li');
-   item.textContent=providers[row.provider]+' · '+(row.surface==='home'?'صفحه اول':'راهنمای نوبت‌گیری')+' · '+Number(row.clicks).toLocaleString('fa-IR')+' کلیک';
-   list.append(item);
-  }
-  if(list.children.length)results.replaceChildren(list);
-  else results.textContent='در این بازه هنوز کلیکی با اجازه بازدیدکننده ثبت نشده است.';
-  if(articles?.length){
-   const titles=new Map((store.documents['content/articles.json']?.articles||[]).map(a=>[a.slug,a.title_fa||a.title_en]));
-   const heading=document.createElement('h3');heading.textContent='مقاله پیش از ورود به راهنمای نوبت‌گیری';
-   const ranking=document.createElement('ol');
-   for(const article of articles){
-    const item=document.createElement('li');item.textContent=(titles.get(article.slug)||article.slug)+' · '+Number(article.clicks).toLocaleString('fa-IR');
-    ranking.append(item);
-   }
-   results.append(heading,ranking);
-  }
- }catch{results.textContent='دریافت آمار ممکن نشد. برای تلاش دوباره این بخش را ببندید و باز کنید.';}
-});

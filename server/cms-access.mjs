@@ -29,9 +29,14 @@ export async function verifyCMSOwner(token){
  const headers={Authorization:'Bearer '+token,Accept:'application/vnd.github+json','User-Agent':'Gerami-CMS'};
  let replies,data;
  try{
-  replies=await Promise.all(['/user','/repos/4mirgr/gerami-website'].map(path=>fetch('https://api.github.com'+path,{headers,redirect:'manual',signal:AbortSignal.timeout(15000)})));
-  if(replies.some(r=>!r.ok))throw new CMSAccessError(replies.some(r=>r.status>=500)?502:403,'github_owner_required');
+  const signal=AbortSignal.timeout(8000);
+  replies=await Promise.all(['/user','/repos/4mirgr/gerami-website'].map(path=>fetch('https://api.github.com'+path,{headers,redirect:'manual',signal})));
+  if(replies.some(r=>r.status===401))throw new CMSAccessError(401,'github_sign_in_required');
+  if(replies.some(r=>r.status===429||r.status===403&&(r.headers.get('x-ratelimit-remaining')==='0'||r.headers.has('retry-after'))))throw new CMSAccessError(429,'github_rate_limited');
+  if(replies.some(r=>[403,404].includes(r.status)))throw new CMSAccessError(403,'github_owner_required');
+  if(replies.some(r=>!r.ok))throw new CMSAccessError(502,'github_unavailable');
   data=await Promise.all(replies.map(r=>r.json()));
  }catch(error){if(error instanceof CMSAccessError)throw error;throw new CMSAccessError(502,'github_unavailable');}
  if(data[0].id!==208800626||data[0].login!=='4mirgr'||data[1].permissions?.push!==true)throw new CMSAccessError(403,'github_owner_required');
+ return data[0].login;
 }
