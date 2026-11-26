@@ -24,13 +24,26 @@ export async function hasCMSAccess(request,env){
   return claims.sub===208800626&&claims.login==='4mirgr'&&claims.aud===new URL(request.url).origin&&Number.isInteger(claims.iat)&&claims.iat<=now+30&&claims.exp===claims.iat+lifetime&&claims.exp>now;
  }catch{return false;}
 }
-export async function verifyCMSOwner(token){
+// Both calls are read-only. A callback may retry a transient failure without
+// exchanging its one-time authorization code again. Share one deadline.
+async function ownerLookup(path,headers,signal,retryTransient){
+ const get=()=>fetch('https://api.github.com'+path,{headers,redirect:'manual',signal});
+ let first;
+ try{first=await get();}catch(error){
+  if(!retryTransient||signal.aborted)throw error;
+  return get();
+ }
+ if(!retryTransient||signal.aborted||![500,502,503,504].includes(first.status)||first.headers.has('retry-after'))return first;
+ await first.body?.cancel();
+ return get();
+}
+export async function verifyCMSOwner(token,{retryTransient=false}={}){
  if(typeof token!=='string'||!/^\S{1,512}$/.test(token))throw new CMSAccessError(401,'github_sign_in_required');
  const headers={Authorization:'Bearer '+token,Accept:'application/vnd.github+json','User-Agent':'Gerami-CMS'};
  let replies,data;
  try{
   const signal=AbortSignal.timeout(8000);
-  replies=await Promise.all(['/user','/repos/4mirgr/gerami-website'].map(path=>fetch('https://api.github.com'+path,{headers,redirect:'manual',signal})));
+  replies=await Promise.all(['/user','/repos/4mirgr/gerami-website'].map(path=>ownerLookup(path,headers,signal,retryTransient)));
   if(replies.some(r=>r.status===401))throw new CMSAccessError(401,'github_sign_in_required');
   if(replies.some(r=>r.status===429||r.status===403&&(r.headers.get('x-ratelimit-remaining')==='0'||r.headers.has('retry-after'))))throw new CMSAccessError(429,'github_rate_limited');
   if(replies.some(r=>[403,404].includes(r.status)))throw new CMSAccessError(403,'github_owner_required');
