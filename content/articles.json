@@ -278,6 +278,45 @@
       "author_en": "Dr. Amir Houshang Gerami",
       "category_en": "Nephrology / Azotemia and urinary abnormalities",
       "url": "/articles/nephrology/azotemia/clinical-20261123-nephro-azotemia/"
+    },
+    {
+      "slug": "clinical-20261126-cardio-ecg-m63e87a740fe3b3121d9c0b74",
+      "status": "published",
+      "audience": "professional",
+      "title_fa": "چند نکته مروری از ECG",
+      "title_en": "A Few ECG Review Points",
+      "body_fa": "در کنار درد ایسکمیک، بالا رفتن منطقه‌ای ST در لیدهای تحتانی و تغییر متقابل در aVL از آسیب ایسکمیک تحتانی حمایت می‌کند. این تصویر به‌تنهایی برای تعیین قطعی شریان مسئول یا اثبات درگیری بطن راست کافی نیست.\n\nدر STEMI تحتانی همراه این یافته‌های بالینی باید درگیری بطن راست را بررسی کرد؛ V4R کمک‌کننده است. ثبت لید تکمیلی نباید Reperfusion را عقب بیندازد.\n\nTهای نوک‌تیز منتشر، به‌خصوص در لیدهای پره‌کوردیال، با زمینه نارسایی کلیه به نفع هیپرکالمی‌اند. مقدار پتاسیم را نمی‌توان از ارتفاع T تخمین زد و ECG طبیعی نیز هیپرکالمی شدید را رد نمی‌کند.\n\nکلسیم وریدی برای حفاظت قلب در هیپرکالمی همراه تغییر ECG استفاده می‌شود و پتاسیم را پایین نمی‌آورد؛ درمان انتقال داخل‌سلولی و حذف پتاسیم باید هم‌زمان برنامه‌ریزی شود. به فاز refractory بازگشت پتاسیم نیز دقت کنید که بعد از قطع انسولین ممکنه اتفاق بیوفته اما انسولین گلوکز  برای موارد اورژانس هایپرکالمی است. شربت های لاکتولوز و سوربیتول و کی‌اگزالات با چندین ساعت تاخیر شروع به کاهش پتاسیم میکنند و دفع از طریق روده برای پتاسیم اتفاق خواهد افتاد . انتخاب نمک، دوز و سرعت تزریق به پروتکل و وضعیت بیمار وابسته است.\nاگر با مورد خاصی در بالین مواجه شدید یا سوالی در این زمینه دارید در کادر زیر دیدگاه خود را مطرح نمایید.",
+      "body_en": "Alongside ischemic pain, regional ST elevation in the inferior leads and reciprocal changes in aVL support inferior ischemic injury. This finding alone is not sufficient to definitively determine the culprit artery or prove right ventricular involvement.\n\nIn inferior STEMI with these clinical findings, right ventricular involvement must be evaluated; V4R is helpful. Recording the supplementary lead should not delay reperfusion.\n\nDiffuse peaked T waves, especially in the precordial leads, in the setting of renal failure favor hyperkalemia. The potassium level cannot be estimated from the height of the T wave, and a normal ECG does not rule out severe hyperkalemia.\n\nIntravenous calcium is used for cardiac protection in hyperkalemia associated with ECG changes and does not lower potassium; treatment with intracellular shifting and potassium elimination must be planned simultaneously. Also pay attention to the rebound phase of potassium return which may occur after stopping insulin, but insulin-glucose is for emergency hyperkalemia cases. Lactulose, sorbitol, and Kayexalate syrups begin to reduce potassium with a delay of several hours, and intestinal elimination of potassium will occur. The choice of salt, dose, and infusion rate depends on the protocol and the patient's condition. If you encounter a specific case at the bedside or have a question in this regard, state your opinion in the box below.",
+      "author": "دکتر امیرهوشنگ گرامی",
+      "category": "قلب و عروق / خواندن و تفسیر ECG",
+      "topic": "cardio-ecg",
+      "image": "/assets/uploads/editorial-b7edff8555ee75b90f45ff172c44fe59082f7d0ca4e1db32ddf0423d5529592e.jpg",
+      "published_at": "2026-11-26",
+      "updated_at": "2026-11-26",
+      "sources": [
+        {
+          "title": "Harrison 2025",
+          "url": "https://accessmedicine.mhmedical.com/"
+        }
+      ],
+      "hashtags": [
+        "#قلب_و_عروق",
+        "#خواندن_و_تفسیر_ECG",
+        "#آموزش_پزشکی"
+      ],
+      "editorial_hash": "fe2af1e9f283fa2f5d207b338e454fc2c154a8b7149f2c26fa25dca610980723",
+      "source_topic_id": "cardio-ecg",
+      "topic_root": "cardiology",
+      "image_alt": "تصویر انتخابی پزشک",
+      "image_alt_en": "Physician's selected image",
+      "hashtags_en": [
+        "#Cardiovascular_Medicine",
+        "#ECG_Interpretation",
+        "#Medical_Education"
+      ],
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Cardiology / Reading and interpreting the electrocardiogram (ECG)",
+      "url": "/articles/cardiology/cardio-ecg/clinical-20261126-cardio-ecg-m63e87a740fe3b3121d9c0b74/"
     }
   ]
 }

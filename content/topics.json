@@ -34,6 +34,15 @@
           "description_fa": "",
           "description_en": "",
           "children": []
+        },
+        {
+          "id": "cardio-ecg",
+          "fa": "خواندن و تفسیر ECG",
+          "en": "Reading and interpreting the electrocardiogram (ECG)",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
         }
       ]
     },
