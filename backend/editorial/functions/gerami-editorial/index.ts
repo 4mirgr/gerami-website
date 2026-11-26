@@ -68,14 +68,8 @@ async function generate(job){
  const history=previous.filter(row=>(row.source?.audience??'patients')===audience);
  const ranked=await trends.ranked(eligible,history,job.day);
  if(!ranked.length)throw Error('no_topic');
- await jobPhase(job,'selecting_images');
- const library=await db('gerami_editorial_cover_library?active=eq.true&select=source_topic,ordinal');
- const ready=new Map();
- for(const row of library){if(!ready.has(row.source_topic))ready.set(row.source_topic,new Set());ready.get(row.source_topic).add(row.ordinal);}
- // Try the top-ranked new topic; if discovery is unavailable, use a known illustrated topic.
- const order=[...new Set([ranked[0],...ranked.filter(item=>ready.get(item.id)?.size===2),...ranked.slice(1,3)])];
- let hasSource=false;
- for(const choice of order){
+ // Cover availability must never disqualify an otherwise eligible source.
+ for(const choice of ranked){
   const {category,topic,m}=choice,destination=sourceTopic(topic.id);
   const bytes=new Uint8Array(await(await remote(SITE+'/intmed/'+m.path)).arrayBuffer());
   if(bytes.length!==m.bytes||await sha(bytes)!==m.sha256)throw Error('source_changed');
@@ -84,8 +78,6 @@ async function generate(job){
   if(audience==='professional'&&!clinical)continue;
   let input;
   if(audience==='patients'){try{input=sourceText(topicData);}catch(e){if(e.message==='insufficient_source')continue;throw e;}}
-  hasSource=true;
-  if((await rpc('unused_pair',{p_topic:topic.id})).length!==2){try{await media.discover(topic.id,clinical?.copy||{title:destination.child.fa,paragraphs:[input]});if((await rpc('unused_pair',{p_topic:topic.id})).length!==2)continue;}catch{continue;}}
   const canonical=await(await remote(base+'content/'+category.id+'/'+topic.id+'/data.json')).json();
   await jobPhase(job,'writing');
   const generated=clinical?{copy:clinical.copy,model:'intmed-verbatim'}:await patientEdition(topic,canonical,input,history);
@@ -101,7 +93,7 @@ async function generate(job){
   await jobPhase(job,'saving');
   return (await db('gerami_editorial_drafts',d))[0];
  }
- throw Error(hasSource?'image_options_pending':'insufficient_source');
+ throw Error('insufficient_source');
 }
 function providerModel(){return Deno.env.get('INTMED_GEMINI_MODEL')||'gemini-3.1-flash-lite';}
 async function generateJSON(prompt,material,temperature){
@@ -143,7 +135,12 @@ async function jobRun(job){
   await reconcile().catch(()=>{});
   await controls.wake().catch(()=>{});
   if(job.day!=='2000-01-01'){
-   const existing=await db('gerami_editorial_drafts?job_id=eq.'+job.id+'&select=id');if(!existing.length)await generate(job);
+   const existing=await db('gerami_editorial_drafts?job_id=eq.'+job.id+'&select=*');
+   const draft=existing[0]||await generate(job);
+   if(draft.status==='draft'&&!draft.cover_pack&&!draft.media_path){
+    await jobPhase(job,'selecting_images');
+    try{await media.ensure(draft);}catch(e){console.warn('Editorial draft saved; cover preparation unavailable',safeError(e));}
+   }
   }
   await jobPhase(job,'notifying');
   const pending=await db('gerami_editorial_drafts?status=eq.draft&notified_revision=is.null&notification_attempts=lt.3&next_notification_at=lte.'+encodeURIComponent(new Date().toISOString())+'&select=*&order=created_at.asc&limit=10');for(const d of pending)try{await notify(d);}catch(e){await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{error_code:safeError(e),next_notification_at:new Date(Date.now()+(e.message==='image_options_pending'?21600000:900000)).toISOString()},'PATCH');}
@@ -151,7 +148,7 @@ async function jobRun(job){
  }catch(e){await db(jobPath(job),{status:e.message==='provider_quota'?'waiting_provider':'error',phase:null,error_code:safeError(e),next_attempt_at:new Date(Date.now()+900000).toISOString(),updated_at:new Date().toISOString()},'PATCH');}
 }
 async function draftCovers(d){
- const options=d.cover_pack?await media.options(d,{includeBoth:true}):[];
+ const options=await media.options(d,{includeBoth:true});
  const signed=await Promise.all(options.map(async o=>({
   id:o.id,label:o.label,selected:d.cover_selected&&o.id===d.selected_cover_id,preview:await preview(o)
  })));
@@ -274,10 +271,12 @@ Deno.serve(async req=>{
    return reply(result);
   }
   if(action==='covers'){
-   const current=d.status==='draft'?await media.ensure(d):d;
+   // Older drafts used a site illustration until their first pair was prepared.
+   const legacyCover=d.status==='draft'&&!d.cover_pack&&d.image&&!d.cover_selected;
+   const current=legacyCover?await media.ensure(d):d;
    return reply({...await draftCovers(current),revision:current.revision});
   }
-  if(action==='choose'){const option=(await media.options(d,{includeBoth:true})).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
+  if(action==='choose'){if(!uuid(body.candidate_id))return reply({error:'invalid_image'},400);const option=(await media.options(d,{includeBoth:true})).find(o=>o.id===body.candidate_id);if(!option)return reply({error:'invalid_image'},400);await media.choose(d,option,actor);return reply({ok:true});}
   if(action==='retry'){await mutate(d,'retry');EdgeRuntime.waitUntil(controls.wake().catch(()=>{}));return reply({ok:true});}
   if(action==='notify'){if(d.status!=='draft')throw Error('draft_locked');await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notification_attempts:0,next_notification_at:new Date().toISOString()},'PATCH');await notify({...d,notified_revision:null,notification_attempts:0,next_notification_at:new Date().toISOString()});return reply({ok:true});}
   if(action==='edit'||action==='image'){
@@ -285,11 +284,11 @@ Deno.serve(async req=>{
    if(action==='edit')next.content=validateCopy(body.content);
    else{
     if(!['draft','approved','rejected'].includes(d.status))throw Error('draft_locked');
-    if(body.reset){const option=(await media.options(d))[0];next.media_path=null;next.image=option.image;next.cover_selected=false;next.selected_cover_id=null;next.cover_sha256=null;next.source={...d.source};delete next.source.cover;}
+    if(body.reset){const option=(await media.options(d,{includeBoth:true})).find(candidate=>candidate.id);next.media_path=null;next.image=option?.image||'';next.cover_selected=false;next.selected_cover_id=null;next.cover_sha256=null;next.source={...d.source};delete next.source.cover;}
     else{const bytes=Uint8Array.from(atob(body.base64||''),c=>c.charCodeAt(0));if(!validImage(bytes,body.mime))throw Error('invalid_image');const hash=await sha(bytes),ext=body.mime==='image/jpeg'?'jpg':'webp',path=d.id+'/'+hash+'.'+ext;
      await storage('object/gerami-editorial/'+path,{method:'POST',headers:{'Content-Type':body.mime,'x-upsert':'true'},body:bytes});next.media_path=path;next.image='/assets/uploads/editorial-'+hash+'.'+ext;next.cover_selected=true;next.selected_cover_id=null;next.cover_sha256=hash;next.source={...d.source,cover:{provider:'owner-upload',sha256:hash,label:'تصویر انتخابی پزشک'}};}
    }
-   next.snapshot_hash=await snapshot(next);const result=await mutate(d,'edit',{content:next.content,image:next.image,media_path:next.media_path||null,snapshot_hash:next.snapshot_hash,...(action==='image'?{cover_reset:!!body.reset,cover_custom:!body.reset,cover_sha256:next.cover_sha256}:{})});return reply({draft:result});
+   next.snapshot_hash=await snapshot(next);const result=await mutate(d,'edit',{content:next.content,image:next.image,media_path:next.media_path||null,snapshot_hash:next.snapshot_hash,...(action==='image'?{cover_reset:true,cover_custom:!body.reset,cover_sha256:next.cover_sha256}:{})});return reply({draft:result});
   }
   return reply({error:'not_found'},404);
  }catch(e){const code=e.message;return reply({error:['sign_in_required','admin_required'].includes(code)?code:safeError(e)},code==='sign_in_required'?401:['admin_required','telegram_sender_denied'].includes(code)?403:['stale_revision','draft_locked','stale_approval'].includes(code)?409:400);}

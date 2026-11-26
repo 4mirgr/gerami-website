@@ -1,6 +1,7 @@
 import {ENGLISH_PROMPT,englishMaterial,validateEnglish} from '../backend/editorial/functions/gerami-editorial/english.mjs';
 import {clinicalEdition} from '../backend/editorial/functions/gerami-editorial/clinical.mjs';
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {verifyPublicDelivery} from '../backend/editorial/functions/gerami-editorial/publication.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
+let imagesAvailable=true,discoveries=0,lastCoverEdit;
 let claimed,claimReceipt,englishAnswer,translationCalls=0,translationStatus=200,translationFinish='STOP';
 let audience,handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus,jobPhase,jobKind,slotIndex;
 const topic={lesson:[{id:'bp',heading:'ارزیابی فشار خون',paragraphs:[1,2,3].map(n=>({id:'bp-'+n,text:'اندازه‌گیری فشار خون در شرایط استاندارد و مقایسه با ثبت‌های پیشین در ارزیابی اهمیت دارد. '.repeat(3)+n}))}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
@@ -32,12 +33,24 @@ const fakeFetch=async(url,options={})=>{
   if(path.startsWith('gerami_editorial_trend_snapshots'))return Response.json([{signals:[]}]);
   if(path.startsWith('gerami_editorial_cover_library'))return Response.json(covers);
   if(path.startsWith('gerami_editorial_cover_options'))return Response.json(coverOptions);
-  if(['rpc/gerami_editorial_unused_pair','rpc/gerami_editorial_unused_candidates'].includes(path))return Response.json(covers);
+  if(path==='rpc/gerami_editorial_unused_candidates')return Response.json(imagesAvailable?covers:[]);
   if(path==='rpc/gerami_editorial_prepare_unique'){const d=drafts.find(d=>d.id===body.p_id);Object.assign(d,{source:body.p_source,topic:body.p_topic,category:body.p_category,cover_pack:body.p_pack,cover_selected:false,cover_required:true,selected_cover_id:null,cover_sha256:null,image:body.p_options[0].image,media_path:null,snapshot_hash:body.p_snapshot,revision:d.revision+1});coverOptions=body.p_options;return Response.json(d);}
+  if(path==='rpc/gerami_editorial_register_manual_preview'){
+   const d=drafts.find(d=>d.id===body.p_id);
+   assert.equal(d.snapshot_hash,body.p_snapshot);
+   assert.equal(body.p_photo_hash,null);
+   d.notified_revision=d.revision;
+   d.telegram_message_id=body.p_message;
+   d.approval_hash=null;
+   return Response.json(true);
+  }
   if(path==='rpc/gerami_editorial_register_choices'){const d=drafts.find(d=>d.id===body.p_id);d.notified_revision=d.revision;d.telegram_message_id=body.p_entries[0].message_id;d.approval_hash=null;return Response.json(true);}
   if(path==='rpc/gerami_editorial_begin_preview'){const d=drafts.find(d=>d.id===body.p_id);d.notification_nonce=body.p_hash;d.approval_hash=body.p_hash;return Response.json(true);}
   if(path==='rpc/gerami_editorial_register_preview')return Response.json(true);
-  if(path==='rpc/gerami_editorial_mutate')return Response.json(drafts.find(d=>d.id===body.p_id));
+  if(path==='rpc/gerami_editorial_mutate'){
+   if(body.p_action==='edit'&&body.p_data.cover_reset)lastCoverEdit=body.p_data;
+   return Response.json(drafts.find(d=>d.id===body.p_id));
+  }
   if(path.startsWith('gerami_editorial_settings'))return Response.json([{categories:['cardio'],enabled:true,hour:9}]);
   if(path.startsWith('intmed_notification_settings'))return Response.json([{chat_id:'123'}]);
   if(path.startsWith('gerami_editorial_jobs')){if(options.method==='PATCH'){jobStatus=body.status;jobPhase=body.phase;return Response.json([{id:'claimed-job'}]);}return Response.json([]);}
@@ -47,10 +60,15 @@ const fakeFetch=async(url,options={})=>{
    if(path.includes('status=eq.draft')){assert(path.includes('notified_revision=is.null')&&path.includes('notification_attempts=lt.3')&&path.includes('next_notification_at=lte.'),'Three older notified drafts would starve the next notification');return Response.json(drafts);}
    if(path.includes('status=in.')||path.includes('or=(')){if(receiptFailure)return new Response('{}',{status:503});return Response.json([]);}
    if(path.includes('select=source'))return Response.json(drafts.map(d=>({source:d.source})));
-   if(path.includes('job_id=eq.'))return Response.json(drafts.map(d=>({id:d.id})));
+   if(path.includes('job_id=eq.'))return Response.json(drafts.filter(d=>path.includes('job_id=eq.'+d.job_id)));
    return Response.json(drafts);
   }
   throw Error('Unexpected REST '+path);
+ }
+ if(url.startsWith('https://commons.wikimedia.org/w/api.php?')){
+  discoveries++;
+  assert(drafts.some(d=>d.job_id===payload.id&&d.content.paragraphs.length),'Image search must run after durable draft insertion');
+  return new Response('',{status:503});
  }
  if(url.includes('/gerami-website/main/deploy/projects.json'))return Response.json({intmed:{commit:'c'.repeat(40)}});
  if(url.includes('manifest.json')&&url.includes('/intMed-study-plan/'))return Response.json(manifest);
@@ -158,3 +176,41 @@ for(const request of [{mode:'auto'},{mode:'manual',local_time:'2040-01-02T00:15'
  assert.equal(pending.length-before,request.mode?0:1,'Only an immediately due version wakes dispatch');
 }
 console.log('PASS exact-version dashboard scheduling, Tehran timestamp contract, future dispatch suppression and immediate release.');
+
+// A temporary image-provider outage must not suppress either edition or recreate
+// a durable draft when the same worker is resumed.
+imagesAvailable=false;
+for(audience of ['patients','professional']){
+ drafts=[];pending=[];
+ const before=inserted,searches=discoveries;
+ await post('job',payload);await Promise.all(pending);
+ assert.equal(jobStatus,'complete');
+ assert.equal(inserted,before+1);
+ assert.equal(drafts[0].status,'draft');
+ assert.equal(drafts[0].source.audience,audience);
+ assert(drafts[0].content.paragraphs.length>=3);
+ assert.equal(drafts[0].image,'');
+ assert.equal(drafts[0].cover_selected,false);
+ assert.equal(drafts[0].notified_revision,drafts[0].revision);
+ assert.equal(discoveries,searches+1,'At most one bounded discovery per draft run');
+ pending=[];await post('job',payload);await Promise.all(pending);
+ assert.equal(inserted,before+1);
+}
+console.log('PASS durable public and specialist drafts during image-provider outage and no duplicates after worker retry.');
+
+const textOnly=drafts[0],editKey={id:textOnly.id,revision:textOnly.revision},searchCount=discoveries;
+assert.deepEqual(await (await post('covers',editKey)).json(),{options:[],preview:null,revision:textOnly.revision});
+assert.equal(discoveries,searchCount);
+const ownerImage={base64:Buffer.from(photo1).toString('base64'),mime:'image/jpeg'};
+assert.equal((await post('image',{...editKey,...ownerImage})).status,200);
+assert.equal(lastCoverEdit.cover_custom,true);assert.equal(lastCoverEdit.cover_reset,true);
+assert.equal(lastCoverEdit.media_path,textOnly.id+'/'+covers[0].sha256+'.jpg');
+Object.assign(textOnly,{media_path:lastCoverEdit.media_path,image:lastCoverEdit.image,cover_sha256:covers[0].sha256,
+ cover_selected:true,selected_cover_id:null,source:{...textOnly.source,cover:{provider:'owner-upload',sha256:covers[0].sha256,label:'تصویر انتخابی پزشک'}}});
+assert.equal(await core.snapshotHash(textOnly),lastCoverEdit.snapshot_hash);
+const customGallery=await (await post('covers',editKey)).json();
+assert.equal(customGallery.options.length,1);assert.equal(customGallery.options[0].selected,true);
+assert(customGallery.preview);assert.equal(customGallery.options[0].preview,customGallery.preview);
+assert.equal((await post('image',{...editKey,reset:true})).status,200);
+assert.equal(lastCoverEdit.image,'');assert.equal(lastCoverEdit.media_path,null);assert.equal(lastCoverEdit.cover_custom,false);
+console.log('PASS text-only gallery, private owner upload snapshot, selected preview and reset without automatic candidates.');

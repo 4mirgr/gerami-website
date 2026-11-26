@@ -161,7 +161,9 @@ dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
 .edition-state{background:var(--soft);border-radius:6px;padding:3px 8px;font-size:.82em}
 .edition-card h4,.edition-summary,.edition-empty,.edition-media p{margin:0}
 .edition-card h4{font-size:1.13rem;line-height:1.7}
-.edition-read>summary,.edition-tools>summary{cursor:pointer;color:var(--accent);padding-block:7px}
+.edition-read>summary,.edition-tools>summary,.edition-custom-cover>summary{cursor:pointer;color:var(--accent);padding-block:7px}
+.edition-custom-cover[open] .field{margin-block:.5rem}
+.edition-custom-cover input{max-width:100%;min-width:0}
 .edition-media{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(125px,100%),1fr));gap:8px}
 .edition-media figure{margin:0;min-width:0;display:flex;flex-direction:column;gap:5px}
 .edition-media img{display:block;width:100%;height:auto;aspect-ratio:1.2;object-fit:contain;border-radius:8px;background:var(--field)}

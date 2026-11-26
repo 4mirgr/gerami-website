@@ -9,6 +9,28 @@ const readership=value=>value==='professional'?'ویژه پزشکان':'برای
 const categories={cardio:'قلب',pulm:'ریه',nephro:'کلیه',gi:'گوارش',endo:'غدد',heme:'خون',rheum:'روماتولوژی',id:'عفونی',general:'داخلی عمومی',neuro:'اعصاب',crit:'مراقبت ویژه',poison:'مسمومیت'};
 function control(host,label,value,textarea=false){const wrap=el('label','','field'),input=el(textarea?'textarea':'input');input.value=displayText(String(value??''));if(textarea)input.rows=10;wrap.append(el('span',label),input);host.append(wrap);return input;}
 async function imageBytes(file){if(file.size>12000000||!/^image\/(jpeg|png|webp)$/.test(file.type))throw Error('تصویر JPEG، PNG یا WebP تا ۱۲ مگابایت انتخاب کنید.');const bitmap=await createImageBitmap(file);try{const scale=Math.min(1,1200/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.82));if(!blob||blob.size>650000)throw Error('تصویر را کمی کوچک‌تر انتخاب کنید.');const bytes=new Uint8Array(await blob.arrayBuffer());return Array.from({length:Math.ceil(bytes.length/16383)},(_,i)=>btoa(String.fromCharCode(...bytes.subarray(i*16383,(i+1)*16383)))).join('');}finally{bitmap.close();}}
+async function linkedImage(value){
+ let url;
+ try{url=new URL(value);}catch{}
+ if(url?.protocol!=='https:'||url.username||url.password)throw Error('لینک مستقیم تصویر را با https وارد کنید.');
+ let response;
+ try{response=await fetch(url.href,{mode:'cors',credentials:'omit',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(15000)});}
+ catch{throw Error('تصویر از این لینک دریافت نشد. فایل آن را بارگذاری کنید یا لینک مستقیم دیگری بدهید.');}
+ if(!response.ok||!response.body)throw Error('لینک تصویر در دسترس نیست. لینک دیگری وارد کنید یا فایل تصویر را بارگذاری کنید.');
+ const type=(response.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();
+ const maxBytes=12000000, reader=response.body.getReader();
+ try{
+  if(!['image/jpeg','image/png','image/webp'].includes(type))throw Error('لینک باید مستقیماً یک تصویر JPEG، PNG یا WebP را باز کند.');
+  if(Number(response.headers.get('Content-Length'))>maxBytes)throw Error('حجم تصویر باید کمتر از ۱۲ مگابایت باشد.');
+  const chunks=[];let size=0;
+  for(;;){
+   const {value,done}=await reader.read();if(done)break;
+   size+=value.byteLength;if(size>maxBytes)throw Error('حجم تصویر باید کمتر از ۱۲ مگابایت باشد.');
+   chunks.push(value);
+  }
+  return new Blob(chunks,{type});
+ }finally{await reader.cancel().catch(()=>{});}
+}
 const audienceKey=d=>d.source?.audience==='professional'?'professional':'patients';
 const stamp=new Intl.DateTimeFormat('fa-IR',{timeZone:'Asia/Tehran',day:'numeric',month:'long',year:'numeric'});
 const digits=new Intl.NumberFormat('fa-IR',{useGrouping:false});
@@ -42,8 +64,15 @@ function edition(host,d){
  const fields=[title,body,summary,tags],initial=fields.map(f=>f.value);
  const dirty=()=>fields.some((f,i)=>f.value!==initial[i]);
  const mutable=['draft','approved','rejected'].includes(d.status);
+ const custom=el('details','','edition-custom-cover');
+ custom.append(el('summary','افزودن تصویر شاخص'));
  const upload=el('input');upload.type='file';upload.accept='image/jpeg,image/png,image/webp';
  const uploadLabel=el('label','بارگذاری تصویر دلخواه','field');uploadLabel.append(upload);
+ const urlLabel=el('label','لینک مستقیم تصویر','field'),urlInput=el('input');urlInput.type='url';urlInput.dir='ltr';urlInput.placeholder='https://…';urlLabel.append(urlInput);
+ const importImage=actionButton('ذخیره تصویر از لینک',()=>run(async()=>{
+  await saveImage(await linkedImage(urlInput.value.trim()));
+ }));
+ custom.append(uploadLabel,urlLabel,importImage);
  let busy=false,loaded=false,selectedVisible=false;
  const timing=el('section','','edition-timing'),timingTitle=el('h5','زمان انتشار این نسخه');
  const modeLabel=el('label','','field'),mode=el('select');
@@ -72,14 +101,15 @@ function edition(host,d){
  const send=actionButton('فرستادن نسخه ذخیره‌شده به تلگرام',()=>run(async()=>{await api('notify',meta);message.textContent='نسخه ذخیره‌شده به تلگرام ارسال شد.';}));
  const hint=el('small','','edition-hint');
  function sync(){
-  fields.forEach(f=>f.disabled=busy||!mutable||gallery.dataset.loading==='true');
+  fields.forEach(f=>f.disabled=busy||!mutable);
   save.disabled=busy||!mutable||!dirty();
-  upload.disabled=busy||!mutable||dirty()||!loaded;
+  upload.disabled=busy||!mutable||dirty();
+  urlInput.disabled=upload.disabled;importImage.disabled=upload.disabled||!urlInput.value.trim();
   send.disabled=busy||dirty()||d.status!=='draft';
   publish.disabled=busy||!['draft','approved'].includes(d.status)||dirty()||!selectedVisible||!d.cover_selected;
   schedule.disabled=publish.disabled;mode.disabled=busy||dirty();
   timing.hidden=!['draft','approved'].includes(d.status);
-  hint.textContent=d.status!=='draft'?'':dirty()?'ابتدا ویرایش را ذخیره کنید.':!loaded?'برای انتشار، تصویر این نسخه باید بارگیری شود.':!d.cover_selected?'برای انتشار یک تصویر انتخاب کنید.':'';
+  hint.textContent=d.status!=='draft'?'':dirty()?'ابتدا ویرایش را ذخیره کنید.':!d.cover_selected?'برای انتشار، یک تصویر انتخاب یا اضافه کنید.':!selectedVisible?'برای انتشار، پیش‌نمایش تصویر انتخابی را بررسی کنید.':'';
   for(const b of gallery.querySelectorAll('[data-choice]'))b.disabled=busy||!loaded||!mutable||dirty()||b.dataset.choice!=='available';
  }
  async function run(task){if(busy)return;busy=true;message.textContent='';delete message.dataset.error;sync();
@@ -88,12 +118,18 @@ function edition(host,d){
  async function refresh(note,preserve=false){
   const {draft}=await api('detail',{id:d.id});
   const editing=preserve&&dirty()?fields.map(f=>f.value):null;
+  const pendingUrl=preserve?urlInput.value:'';
   const load=edition(host,draft);
+  if(pendingUrl){
+   const input=host.querySelector('.edition-custom-cover input[type=url]');
+   if(input){input.value=pendingUrl;input.dispatchEvent(new Event('input'));input.closest('details').open=true;}
+  }
   if(editing){host.querySelector('.edition-tools').open=true;host.querySelectorAll('.edition-tools .field :is(input:not([type=file]),textarea)').forEach((f,i)=>{f.value=editing[i];f.dispatchEvent(new Event('input'));});}
   host.querySelector('.edition-message').textContent=note;await load();
  }
  async function covers(){
   if(loaded||gallery.dataset.loading)return;
+  selectedVisible=false;
   gallery.dataset.loading='true';sync();gallery.replaceChildren(el('small','در حال دریافت تصاویر…'));
   try{
    const v=await api('covers',meta);
@@ -108,22 +144,37 @@ function edition(host,d){
     figure.append(img,el('figcaption',o.label),select);gallery.append(figure);
    }
    if(!options.length){if(v.preview){const img=el('img');img.src=v.preview;img.alt='تصویر ذخیره‌شده';gallery.append(img);}
-    else gallery.append(el('p','تصویر تازه برای این موضوع هنوز آماده نشده است.'));}
-   await Promise.all([...gallery.querySelectorAll('img')].map(img=>img.decode()));
+    else {gallery.append(el('p','متن پیش‌نویس ذخیره شده است. تصویر پیشنهادی در دسترس نیست.'));custom.open=true;}}
+   const images=[...gallery.querySelectorAll('img')];
+   const previews=await Promise.allSettled(images.map(img=>img.decode()));
+   if(host.editorialToken!==token)return;
+   for(const [i,result] of previews.entries()){
+    if(result.status==='rejected')(images[i].closest('figure')||images[i]).remove();
+   }
+   if(previews.some(result=>result.status==='rejected')){
+    custom.open=true;
+    gallery.append(el('p','بعضی از پیش‌نمایش‌ها در دسترس نیستند.'),actionButton('تلاش دوباره برای تصاویر',()=>{loaded=false;return covers();}));
+   }
    selectedVisible=d.cover_selected&&!!gallery.querySelector('figure:has([data-choice=selected]) img, :scope > img');
    loaded=true;
   }catch(e){
+   custom.open=true;
    const problem=e.message===messages.image_options_pending?'هنوز دو تصویر بالینی تازه برای این مطلب آماده نشده است.':'تصاویر بارگیری نشدند.';
    gallery.replaceChildren(el('p',problem),actionButton('تلاش دوباره برای تصاویر',covers));
   }
   finally{delete gallery.dataset.loading;sync();}
  }
  fields.forEach(f=>f.addEventListener('input',sync));
+ async function saveImage(file){
+  await api('image',{...meta,mime:'image/jpeg',base64:await imageBytes(file)});
+  await refresh('تصویر شاخص ذخیره شد.');
+ }
+ urlInput.addEventListener('input',sync);
  upload.onchange=()=>run(async()=>{const file=upload.files[0];if(!file)return;
-  await api('image',{...meta,mime:'image/jpeg',base64:await imageBytes(file)});await refresh('تصویر تازه ذخیره شد.');});
- tools.append(save,uploadLabel,send);
+  try{await saveImage(file);}finally{upload.value='';}});
+ tools.append(save,send);
  host.replaceChildren(info,heading,el('p',d.content.summary,'edition-summary'),read,gallery);
- if(mutable)host.append(tools);
+ if(mutable)host.append(custom,tools);
  if(d.error_code)host.append(el('p',d.error_code==='publication_checks_failed'?'بررسی پیش از انتشار ناموفق بود. متن و تصویر تاییدشده محفوظ است.':({translation_quota:'سهمیه ترجمه انگلیسی در دسترس نیست. پس از آزاد شدن سهمیه، انتشار را دوباره امتحان کنید.',translation_failed:'ترجمه کامل انگلیسی آماده نشد. متن تاییدشده محفوظ است و می‌توانید انتشار را دوباره امتحان کنید.'}[d.error_code]||'وضعیت سرویس · '+d.error_code)));
  if(d.status==='published'){
   const taxonomy=d.source?.taxonomy;
@@ -134,10 +185,10 @@ function edition(host,d){
  }
  if(d.status==='publish_error')host.append(actionButton('تلاش دوباره انتشار',()=>run(async()=>{await api('retry',meta);await refresh('درخواست دوباره ثبت شد.');})));
  host.append(message,hint,timing,publish);
- host.editorialDirty=()=>dirty()||busy;
+ host.editorialDirty=()=>dirty()||busy||!!urlInput.value;
  host.editorialUpdate=next=>{
   if(host.editorialVersion===JSON.stringify(next))return;
-  if(dirty()||busy){state.textContent=labels[next.status]||next.status;if(next.revision!==d.revision)message.textContent='نسخه تازه‌ای در سرور موجود است. ویرایش باز شما حفظ شده است؛ پیش از ذخیره نسخه تازه را بررسی کنید.';return;}
+  if(host.editorialDirty()){state.textContent=labels[next.status]||next.status;if(next.revision!==d.revision)message.textContent='نسخه تازه‌ای در سرور موجود است. ویرایش باز شما حفظ شده است؛ پیش از ذخیره نسخه تازه را بررسی کنید.';return;}
   const expanded=tools.open,reading=read.open,scheduleValue=mode.value,pickerValue=picker.value;
   edition(host,next);host.querySelector('.edition-tools')?.toggleAttribute('open',expanded);host.querySelector('.edition-read')?.toggleAttribute('open',reading);
   const nextMode=host.querySelector('.edition-timing select');if(nextMode&&d.status===next.status){nextMode.value=scheduleValue;nextMode.dispatchEvent(new Event('change'));host.editorialPicker.value=pickerValue;}

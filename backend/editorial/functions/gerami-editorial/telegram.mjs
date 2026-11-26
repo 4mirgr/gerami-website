@@ -24,7 +24,12 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   await verifiedOwner();
   const sessions=await db('gerami_editorial_telegram_sessions?draft_id=eq.'+d.id+'&revision=eq.'+d.revision+'&select=expires_at');
   if(sessions.some(s=>Date.parse(s.expires_at)>Date.now()))return false;
-  if(media||d.cover_required){const prepared=await media.ensure(d);if(prepared.revision!==d.revision)await retire(d);return notifyChoices(prepared);}
+  if(media||d.cover_required){
+   const manual=d.cover_required&&!d.cover_pack&&(!d.image||d.cover_selected&&!d.selected_cover_id&&d.source?.cover?.provider==='owner-upload');
+   const prepared=manual?d:await media.ensure(d);
+   if(prepared.revision!==d.revision)await retire(d);
+   return notifyChoices(prepared);
+  }
   const selected=await cover(d);await retire(d);
   const capability=crypto.randomUUID().replaceAll('-',''),hash=await sha(capability),target=await chat();
   await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:hash});
@@ -43,26 +48,41 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
  async function notifyChoices(d){
   const candidates=await media.options(d),loaded=[];for(const o of candidates)loaded.push(await media.load(o));
   const variants=await Promise.all(candidates.map(async(o,i)=>{const capability=crypto.randomUUID().replaceAll('-','');return {o,capability,hash:await sha(capability),loaded:loaded[i],selected:!!d.cover_selected&&o.id===d.selected_cover_id};}));
+  const textOnly=variants.length===0;
+  if(textOnly){
+   const capability=crypto.randomUUID().replaceAll('-','');
+   variants.push({capability,hash:await sha(capability),selected:false});
+  }
   const attempt=(variants.find(v=>v.selected)||variants[0]).hash;await retire(d);await rpc('begin_preview',{p_id:d.id,p_revision:d.revision,p_hash:attempt});
   const target=await chat();for(let i=0;i<variants.length;i++){
-   const v=variants[i],form=new FormData();form.append('chat_id',target);form.append('photo',new Blob([v.loaded.bytes],{type:v.loaded.mime}),'cover.'+(v.loaded.mime==='image/webp'?'webp':'jpg'));
+   const v=variants[i];
+   if(textOnly){
+    v.control=await say('📝 پیش‌نویس سایت · '+readership(d)+' · نسخه '+d.revision+'\n'+d.content.title+'\n'+d.content.summary+'\n\nمتن آماده است. برای افزودن تصویر، «تصویر دلخواه» را بزنید یا لینک عکس را در پنل مدیریت وارد کنید.');
+    continue;
+   }
+   const form=new FormData();form.append('chat_id',target);form.append('photo',new Blob([v.loaded.bytes],{type:v.loaded.mime}),'cover.'+(v.loaded.mime==='image/webp'?'webp':'jpg'));
    form.append('caption','📝 پیش‌نویس سایت · '+readership(d)+' · نسخه '+d.revision+'\nگزینهٔ '+(i+1)+(v.selected?' · ✅ تصویر انتخاب‌شده':'')+'\n'+v.o.label+'\n\n'+d.content.title+'\n'+d.content.summary+'\n\n'+d.category+'\nمنبع: Harrison 2025');
-   v.photo=await telegram('sendPhoto',form);
+   v.control=await telegram('sendPhoto',form);
   }
-  const text=d.content.title+'\n\n'+d.content.paragraphs.join('\n\n')+'\n\n'+d.content.hashtags.join(' ')+'\n\nمسیر موضوع: '+d.category+'\nمنبع: Harrison 2025\nیکی از دو تصویر را انتخاب کنید؛ انتشار فقط با تأیید نسخهٔ انتخاب‌شده انجام می‌شود.';
-  const messages=[];for(let offset=0;offset<text.length;offset+=3500){const m=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل · '+readership(d)+'\n'+text.slice(offset,offset+3500),reply_parameters:{message_id:variants[0].photo.message_id},link_preview_options:{is_disabled:true}});messages.push(m.message_id);}
-  try{await rpc('register_choices',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_entries:variants.map(v=>({message_id:v.photo.message_id,hash:v.hash,candidate_id:v.o.id,photo_hash:v.loaded.hash})),p_text:messages,p_attempt:attempt});
+  const text=d.content.title+'\n\n'+d.content.paragraphs.join('\n\n')+'\n\n'+d.content.hashtags.join(' ')+'\n\nمسیر موضوع: '+d.category+'\nمنبع: Harrison 2025\n'+(candidates.length===2?'یکی از دو تصویر را انتخاب کنید.':textOnly?'تصویر شاخص را پیش از انتشار اضافه کنید.':'تصویر دلخواه شما به همین نسخه پیوست شده است.');
+  const messages=[];for(let offset=0;offset<text.length;offset+=3500){const m=await telegram('sendMessage',{chat_id:target,text:'📝 متن کامل · '+readership(d)+'\n'+text.slice(offset,offset+3500),reply_parameters:{message_id:variants[0].control.message_id},link_preview_options:{is_disabled:true}});messages.push(m.message_id);}
+  try{
+   if(variants.length===1){
+    const v=variants[0];
+    await rpc('register_manual_preview',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_attempt:attempt,p_message:v.control.message_id,p_text:messages,p_photo_hash:v.loaded?.hash??null});
+   }else await rpc('register_choices',{p_id:d.id,p_revision:d.revision,p_snapshot:d.snapshot_hash,p_entries:variants.map(v=>({message_id:v.control.message_id,hash:v.hash,candidate_id:v.o.id,photo_hash:v.loaded.hash})),p_text:messages,p_attempt:attempt});
   for(const v of variants){const rows=[];
    if(v.selected)rows.push([{text:'✅ انتشار با همین تصویر و متن',callback_data:'webpost:a:'+v.capability}]);
-   else rows.push([{text:'انتخاب این تصویر',callback_data:'webpost:i:'+v.capability}]);
+   else if(!textOnly)rows.push([{text:'انتخاب این تصویر',callback_data:'webpost:i:'+v.capability}]);
    rows.push([{text:'✏️ ویرایش متن',callback_data:'webpost:e:'+v.capability},{text:'ویرایش عنوان',callback_data:'webpost:t:'+v.capability}],[{text:'🖼 تصویر دلخواه',callback_data:'webpost:c:'+v.capability},{text:'کنار گذاشتن',callback_data:'webpost:r:'+v.capability}]);
-   await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:rows}});
+   if(textOnly)rows.push([{text:'افزودن عکس یا لینک در پنل',url:SITE+'/admin/#auto-posts'}]);
+   await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.control.message_id,reply_markup:{inline_keyboard:rows}});
   }}catch(e){
-   for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});
+   for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.control.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});
    if(['stale_approval','stale_revision','draft_locked'].includes(e.message))return false;
    await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision+'&notification_nonce=eq.'+attempt,{notified_revision:null},'PATCH');await retire({...d,notification_nonce:attempt});throw e;
   }
-  const updated=await current(d.id);if(updated.revision!==d.revision||updated.status!=='draft'||updated.notification_nonce!==attempt){for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.photo.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});return false;}
+  const updated=await current(d.id);if(updated.revision!==d.revision||updated.status!=='draft'||updated.notification_nonce!==attempt){for(const v of variants)await telegram('editMessageReplyMarkup',{chat_id:target,message_id:v.control.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});return false;}
   return true;
  }
  async function wake(force=false){
@@ -78,7 +98,7 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   if(d.status==='publish_error')markup.inline_keyboard.unshift([{text:'تلاش دوبارهٔ انتشار نسخهٔ تأییدشده',callback_data:'webpost:retry:'+d.id}]);
   await say('وضعیت پست «'+d.content.title+'»\n'+(stateLabels[d.status]||d.status)+(d.status==='published'?'\n'+SITE+publicArticle(d).url:''),markup);
  }
- async function listing(){await rpc('request_operation',{p_kind:'resend_previews',p_payload:{}});await say('ارسال پیشنهادهای قابل بازبینی با دو تصویر آغاز شد. برای هر پست از آخرین نسخه استفاده کنید.');}
+ async function listing(){await rpc('request_operation',{p_kind:'resend_previews',p_payload:{}});await say('ارسال پیش‌نویس‌های آماده برای بازبینی آغاز شد. برای هر پست از آخرین نسخه استفاده کنید.');}
  async function callback(c,actor){
   if(c.data==='webpost:list'){await listing();return {outcome:'previews_sent'};}
   if(/^webpost:(status|retry):[a-f0-9-]{36}$/.test(c.data||'')){
@@ -88,7 +108,7 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
   }
   if(!/^webpost:[aertci]:[a-f0-9]{32}$/.test(c.data||''))return {outcome:'unsupported'};
   const hash=await sha(c.data.slice(10)),p=(await db('gerami_editorial_previews?approval_hash=eq.'+hash+'&control_message_id=eq.'+c.message.message_id+'&select=*'))[0];
-  if(!p||p.retired_at){await say('این دکمه مربوط به پیام قدیمی است. برای بازبینی، پیشنهاد فعلی را با تصویر و دکمه‌های تازه می‌فرستم.');await listing();return {outcome:'stale_preview'};}
+  if(!p||p.retired_at){await say('این دکمه مربوط به پیام قدیمی است. برای بازبینی، پیشنهاد فعلی را با دکمه‌های تازه می‌فرستم.');await listing();return {outcome:'stale_preview'};}
   let d=await current(p.draft_id);if(!d||d.revision!==p.revision||d.snapshot_hash!==p.snapshot_hash){await say('این نسخه ویرایش شده است؛ دکمهٔ قبلی اجازهٔ انتشار متن جدید را ندارد.');if(d?.status==='draft')await notify(d,{force:true});return {outcome:'stale_revision',draft_id:p.draft_id,revision:p.revision};}
   if(c.data[8]==='i'){
    const option=(await media.options(d)).find(o=>o.id===p.candidate_id);if(!option)throw Error('stale_approval');
@@ -108,7 +128,7 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
  async function message(m,actor){
   const target=await chat(),s=(await db('gerami_editorial_telegram_sessions?chat_id=eq.'+target+'&select=*'))[0];
   if(String(m.text||'').trim()==='/cancel'){const id=await rpc('cancel_telegram',{p_chat:target,p_owner:actor,p_session:s?.session_id||null});await say('ویرایش لغو شد؛ متن ذخیره‌شده تغییر نکرد.');if(id)await notify(await current(id),{force:true});return {outcome:'edit_cancelled'};}
-  if(!s){await say('برای تغییر پست، ابتدا «ویرایش متن» یا «تغییر تصویر» زیر تصویر پیشنهادی را بزنید.',{inline_keyboard:[[{text:'پیشنهادهای آماده',callback_data:'webpost:list'}]]});return {outcome:'no_edit_session'};}
+  if(!s){await say('برای تغییر پست، ابتدا «ویرایش متن» یا «تصویر دلخواه» در پیام پیش‌نویس را بزنید.',{inline_keyboard:[[{text:'پیشنهادهای آماده',callback_data:'webpost:list'}]]});return {outcome:'no_edit_session'};}
   const d=await current(s.draft_id);if(Date.parse(s.expires_at)<=Date.now()||d.revision!==s.revision){await rpc('cancel_telegram',{p_chat:target,p_owner:actor,p_session:s?.session_id||null});await say('این ویرایش منقضی یا با نسخهٔ تازه جایگزین شده است. متن شما وارد منابع IntMed نشد.');if(d.status==='draft')await notify(d,{force:true});return {outcome:'edit_expired'};}
   if(!s.prompt_message_id||m.reply_to_message?.message_id!==s.prompt_message_id){await say('برای ذخیرهٔ ویرایش، روی پیام «ویرایش پست سایت» مربوط به همین نسخه پاسخ (Reply) بدهید. می‌توانید با /cancel ویرایش را لغو کنید.');return {outcome:'wrong_edit_prompt'};}
   let next={...d,content:{...d.content}};
@@ -123,8 +143,8 @@ export function createTelegramEditorial({db,rpc,mutate,telegram,chat,owner,stora
    try{next.content=validateCopy(next.content);}catch{await say(s.field==='body'?'متن ذخیره نشد. لطفاً متن کامل را در ۳ تا ۵ پاراگراف مفید با یک خط خالی بینشان بفرستید. برای لغو /cancel بزنید.':'عنوان ذخیره نشد؛ یک عنوان کوتاه و ساده بفرستید.');return {outcome:'edit_validation_failed'};}
   }
   next.snapshot_hash=await snapshot(next);
-  const saved=await rpc('save_telegram',{p_chat:target,p_owner:actor,p_session:s.session_id,p_reply:m.reply_to_message?.message_id||null,p_data:{content:next.content,image:next.image,media_path:next.media_path||null,snapshot_hash:next.snapshot_hash,...(s.field==='image'?{cover_custom:true,cover_sha256:next.cover_sha256}:{})}});
-  await say('✅ ویرایش ذخیره شد. نسخهٔ '+saved.revision+' را با تصویر و متن کامل می‌فرستم؛ برای انتشار، همین نسخه را تأیید کنید.');await notify(await current(d.id),{force:true});return {outcome:'edit_saved',draft_id:d.id,revision:saved.revision};
+  const saved=await rpc('save_telegram',{p_chat:target,p_owner:actor,p_session:s.session_id,p_reply:m.reply_to_message?.message_id||null,p_data:{content:next.content,image:next.image,media_path:next.media_path||null,snapshot_hash:next.snapshot_hash,...(s.field==='image'?{cover_reset:true,cover_custom:true,cover_sha256:next.cover_sha256}:{})}});
+  await say('✅ ویرایش ذخیره شد. نسخهٔ '+saved.revision+' را با متن کامل می‌فرستم؛ برای انتشار، همین نسخه را تأیید کنید.');await notify(await current(d.id),{force:true});return {outcome:'edit_saved',draft_id:d.id,revision:saved.revision};
  }
  async function handle(body){
   const c=body.callback_query,m=body.message||c?.message,target=await chat(),sender=c?.from||body.message?.from;
