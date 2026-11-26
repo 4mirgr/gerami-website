@@ -15,11 +15,10 @@ try{
  await context.route('**/content/articles.json',route=>route.fulfill({json:published||{articles:[]}}));
  await context.route('**/assets/uploads/**',route=>route.fulfill({contentType:'image/webp',body:mediaBytes||testImage}));
  await context.route('https://images.example.test/**',route=>route.fulfill({contentType:'image/webp',body:testImage}));
+ await context.route('**/api/cms/session',route=>route.fulfill({json:{authenticated:true,login:'4mirgr'}}));
  await context.route('https://api.github.com/**',async route=>{
   const path=new URL(route.request().url()).pathname;let json;
-  if(path==='/user')json={id:208800626,login:'4mirgr'};
-  else if(path==='/repos/4mirgr/gerami-website')json={permissions:{push:true}};
-  else if(path.endsWith('/commits') && route.request().method()==='GET')json=[{sha:'f'.repeat(40),commit:{author:{date:'2026-03-20T21:15:00Z'},message:'Snapshot 2026-03-20'}}];
+  if(path.endsWith('/commits') && route.request().method()==='GET')json=[{sha:'f'.repeat(40),commit:{author:{date:'2026-03-20T21:15:00Z'},message:'Snapshot 2026-03-20'}}];
   else if(path.endsWith('/git/ref/heads/main'))json={object:{sha:'base-head'}};
   else if(path.includes('/contents/')){const file=path.split('/contents/')[1];if(holdSavedRead&&file==='content/articles.json'){savedReadStarted();await savedReadGate;}json={sha:'base-'+file,content:Buffer.from(JSON.stringify(documents[file])).toString('base64')};}
   else if(path.endsWith('/git/commits/base-head'))json={tree:{sha:'base-tree'}};

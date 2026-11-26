@@ -69,6 +69,48 @@ def copy_public(source, target, extra_extensions=()):
             shutil.copy2(file, destination)
 
 
+def inline_admin_styles(admin):
+    """Deliver the render-blocking CSS with the already-authorized shell."""
+    from rcssmin import cssmin
+
+    shell = admin / 'index.html'
+    html = shell.read_text(encoding='utf-8')
+
+    def inline(match):
+        source = admin / match['name']
+        css = source.read_text(encoding='utf-8')
+        # Check the original input, including comments removed by minification.
+        if re.search(r'</style|@import\b', css, re.I):
+            raise ValueError(f'Unsafe inline admin stylesheet: {source.name}')
+        # Source CSS and the document have the same directory, so all relative
+        # font/image URLs keep their original base.
+        return f'<style data-admin-stylesheet="{source.name}">{cssmin(css, keep_bang_comments=True)}</style>'
+
+    # Keep other links and any future alternate/media-specific styles untouched.
+    links = r'<link rel="stylesheet" href="(?P<name>dompet\.css|studio\.css|settings\.css)(?:\?[^"]*)?">'
+    shell.write_text(re.sub(links, inline, html), encoding='utf-8')
+
+
+def fill_admin_counts(admin, content):
+    """Use the same release feeds the dashboard refreshes from after startup."""
+    articles = json.loads((content / 'articles.json').read_text())['articles']
+    profile = json.loads((content / 'site.json').read_text())
+    published = sum(article.get('status') == 'published' for article in articles)
+    counts = {'total': len(articles), 'published': published,
+              'drafts': len(articles) - published, 'cv-count': len(profile['cv']),
+              'donut-total': len(articles)}
+    shell = admin / 'index.html'
+    html = shell.read_text(encoding='utf-8')
+    persian = str.maketrans('0123456789,', '۰۱۲۳۴۵۶۷۸۹٬')
+    for field, count in counts.items():
+        marker = f'id="{field}">—<'
+        if html.count(marker) != 1:
+            raise ValueError(f'Missing or repeated admin count placeholder: {field}')
+        value = f'{count:,}'.translate(persian)
+        html = html.replace(marker, f'id="{field}">{value}<')
+    shell.write_text(html, encoding='utf-8')
+
+
 def scoped_worker(source):
     # The original worker compares some content paths to /content/... . At /intmed/
     # those must stay network-first, not silently become stale-while-revalidate.
@@ -198,8 +240,10 @@ def assemble(sources, output):
         for name in SITE_DIRS:
             copy_public(ROOT / name, stage / name, {'.mjs'} if name in ('js', 'admin') else ())
         shutil.copy2(ROOT / 'admin/config.yml', stage / 'admin/config.yml')
+        inline_admin_styles(stage / 'admin')
         from site_studio import generate, write_public_feeds
         write_public_feeds(ROOT, stage)
+        fill_admin_counts(stage / 'admin', stage / 'content')
         generate(ROOT, stage)
         from search_index import search_bytes
         (stage / 'content/search-index.json').write_bytes(search_bytes(ROOT))

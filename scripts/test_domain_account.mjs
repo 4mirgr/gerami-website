@@ -55,6 +55,30 @@ try{
  assert.equal(googleNext,undefined);
  googleEnabled=true;await page.locator('#account-retry').click();
  await page.locator('#google-signin').click();await page.waitForFunction(()=>document.querySelector('#account-status').dataset.kind==='error');assert.equal(googleNext,'/');
+ // Slow Google settings must not hold the session lock while the user submits a password.
+ const entry=await browser.newPage(),adminTarget=origin+'/admin/#auto-posts';
+ let releaseSettings,knownAdmin=false;
+ const waitingSettings=new Promise(resolve=>releaseSettings=resolve);
+ const manager={id:'synthetic-admin',role:'admin',name:'Staff',username:'staff',email:'staff@example.test'};
+ await entry.route('**/api/account/*',async route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path.endsWith('/providers')){await waitingSettings;return route.fulfill({json:{google:true}}).catch(()=>{});}
+  if(path.endsWith('/login'))knownAdmin=true;
+  return route.fulfill({json:{authenticated:knownAdmin,account:knownAdmin?manager:null}});
+ });
+ await entry.route('**/admin/',route=>route.fulfill({contentType:'text/html',body:'<h1>Dashboard</h1>'}));
+ const settingsRequested=entry.waitForRequest('**/api/account/providers');
+ const entryUrl=origin+'/pages/account.html?next='+encodeURIComponent('/admin/#auto-posts');
+ try{
+  await entry.goto(entryUrl);await settingsRequested;
+  await entry.locator('[data-account-form=login] [name=identity]').fill('staff');
+  await entry.locator('[data-account-form=login] [name=password]').fill('synthetic-password');
+  await entry.locator('[data-account-form=login] button').click();
+  await entry.waitForURL(adminTarget,{timeout:3500});
+ }finally{releaseSettings();}
+ await entry.goto(entryUrl);await entry.waitForURL(adminTarget);
+ await entry.goto(entryUrl+'&reset=1');await entry.locator('#account-profile').waitFor({state:'visible'});
+ assert.equal(await entry.locator('#password-settings').getAttribute('open'),'');await entry.close();
  const slow=await browser.newPage();let release;const held=new Promise(resolve=>release=resolve);
  await slow.route('**/api/account/*',async route=>{await held;await route.fulfill({json:{authenticated:false}}).catch(()=>{});});
  await slow.goto(origin+'/pages/account.html',{waitUntil:'load',timeout:4000});assert.equal(await slow.locator('h1').isVisible(),true);release();await slow.close();

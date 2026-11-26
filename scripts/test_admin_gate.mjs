@@ -63,6 +63,16 @@ try{
  identity={id:208800626,login:'4mirgr'};permission=false;
  assert.equal((await post({request:signedRequest(),env})).status,403);
  permission=true;
+ const readOnlyCheck=await post({request:signedRequest({'X-CMS-Check':'verify'}),env});
+ assert.deepEqual(await readOnlyCheck.json(),{authenticated:true,login:'4mirgr'});
+ assert.equal(readOnlyCheck.headers.get('Set-Cookie'),null,'a background connection check must never reissue a cookie after logout');
+ const ownerFetch=globalThis.fetch;
+ for(const [status,headers,expected] of [[401,{},401],[403,{'X-RateLimit-Remaining':'0'},429],[503,{},502]]){
+  globalThis.fetch=async()=>new Response('{}',{status,headers});
+  const result=await post({request:signedRequest({'X-CMS-Check':'verify'}),env});
+  assert.equal(result.status,expected);assert.equal(result.headers.get('Set-Cookie'),null);
+ }
+ globalThis.fetch=ownerFetch;
  const accepted=await post({request:signedRequest(),env});assert.equal(accepted.status,200);
  const cookie=accepted.headers.get('Set-Cookie');assert.match(cookie,/Path=\/; HttpOnly; Secure; SameSite=Lax/);
  assert.equal(cookie.includes('synthetic-owner-proof'),false);

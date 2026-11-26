@@ -7,6 +7,8 @@ async function transport(path,body){
  return data;
 }
 export function accountAPI(path,body){
+ // Provider settings are public and never read or update the session cookies.
+ if(path==='providers'&&body===undefined)return transport(path);
  const task=()=>globalThis.navigator?.locks?navigator.locks.request('gerami-account-session',()=>transport(path,body)):transport(path,body);
  const result=queue.then(task);queue=result.catch(()=>{});return result;
 }

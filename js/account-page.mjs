@@ -6,6 +6,7 @@ const t=(fa,en)=>root.lang==='en'?en:fa;
 const rawNext=new URLSearchParams(location.search).get('next');
 const adminSections=/^#(?:dashboard|pages|auto-posts)$/;
 const nextDestination=rawNext==='/admin/'&&adminSections.test(location.hash)?rawNext+location.hash:rawNext;
+const adminEntry=/^\/admin\/(?:#(?:dashboard|pages|auto-posts))?$/.test(nextDestination||'');
 const ventilatorEntry=['/ventilator/','/respiratory/ventilator/'].includes(nextDestination);
 if(ventilatorEntry){
  const badge=document.querySelector('#ventilator-identity');
@@ -72,7 +73,7 @@ for(const form of document.querySelectorAll('form[data-account-form]'))form.addE
   const data=Object.fromEntries(new FormData(form)),result=await accountAPI(form.dataset.accountForm,form.dataset.accountForm==='signup'&&ventilatorEntry?{...data,next:'/respiratory/ventilator/'}:data);
   form.querySelectorAll('input[type=password]').forEach(el=>el.value='');
   if(result.authenticated){account=result.account;changed(account);setStatus();render();
-   const next=nextDestination;if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if(ventilatorEntry)location.assign('/respiratory/ventilator/');else if((account.role==='admin'&&/^\/admin\/(?:#(?:dashboard|pages|auto-posts))?$/.test(next||''))||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
+   const next=nextDestination;if(/^\/clinic\/(?:portal\/)?$/.test(next||''))location.assign(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');else if(ventilatorEntry)location.assign('/respiratory/ventilator/');else if((account.role==='admin'&&adminEntry)||/^\/dash\/(?:portal\/)?$/.test(next||'')||/^\/articles\/(?:[a-z0-9-]+\/){1,3}#discussion$/.test(next||''))location.assign(next);else location.assign('/');
   }else{setStatus('ایمیل و پوشه اسپم را بررسی کنید. لینک تأیید را در همین مرورگر و ظرف ۱۰ دقیقه باز کنید؛ سپس وارد شوید.','Check your email and spam folder. Open the confirmation link in this browser within 10 minutes, then sign in.');status.dataset.kind='success';}
  });
 });
@@ -86,16 +87,19 @@ document.querySelector('#password-form').addEventListener('submit',event=>{event
 document.querySelector('#account-retry').addEventListener('click',()=>action(async()=>{account=await getSession();sessionUnavailable=false;setStatus();render();await checkProviders();}));
 new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
 addEventListener('account:changed',event=>{account=event.detail;render();});
-async function initialize(){try{
+async function initialize(){
+ const providerCheck=checkProviders();
+ try{
  account=await getSession();render();
  const params=new URLSearchParams(location.search);
  if(params.has('logout')&&account)setStatus('برای خروج، دکمه خروج از حساب را بزنید.','Use Sign out to end your session.');
  if(params.has('reauth')&&account)setStatus('برای ادامه، از حساب خارج شوید و دوباره وارد شوید.','To continue, sign out and sign in again.');
  if(['invalid_callback','account_unavailable'].includes(params.get('error')))message({message:params.get('error')});
+ if(account?.role==='admin'&&adminEntry&&!['reset','error','reauth','logout'].some(key=>params.has(key))){location.replace(nextDestination);return;}
  if(account&&ventilatorEntry&&!['reset','error','reauth','logout'].some(key=>params.has(key)))location.replace('/respiratory/ventilator/');
  if(account&&/^\/clinic\/(?:portal\/)?$/.test(params.get('next')||'')&&!['error','reauth','logout'].some(key=>params.has(key)))location.replace(['admin','secretary'].includes(account.role)?'/clinic/':'/clinic/portal/');
 }catch(error){sessionUnavailable=true;message(error);}
-await checkProviders();
+await providerCheck;
 }
 async function checkProviders(){
  const providers=await accountAPI('providers').catch(()=>null);

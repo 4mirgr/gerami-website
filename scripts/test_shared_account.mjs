@@ -76,7 +76,15 @@ try{
  assert.equal((await enter()).status,302);role='user';assert.equal((await enter()).status,302);
  role='admin';assert.equal((await enter()).status,200);
  role='user';assert.equal((await enter()).status,302); // A live role change takes effect without trusting the old token.
- revoked=true;assert.equal((await invoke('session',undefined,{Cookie:cookie})).status,401);revoked=false;
+ // Direct asset URLs must enforce the live gate even when the shell embeds their content.
+ const stylesheet=()=>gate({request:new Request(origin+'/admin/dompet.css',{headers:{Cookie:cookie}}),env:{},next:()=>new Response('private stylesheet')});
+ role='admin';
+ const allowedStyle=await stylesheet();
+ assert.equal(await allowedStyle.text(),'private stylesheet');
+ assert.match(allowedStyle.headers.get('Cache-Control'),/private, no-store/);
+ role='user';assert.equal((await stylesheet()).status,401);
+ role='admin';revoked=true;assert.equal((await stylesheet()).status,401);
+ assert.equal((await invoke('session',undefined,{Cookie:cookie})).status,401);revoked=false;role='user';
  fail=true;assert.equal((await invoke('logout',{}, {Cookie:cookie})).status,503);fail=false;
  const logout=await invoke('logout',{}, {Cookie:cookie});assert.equal(logout.status,200);assert(logout.headers.getSetCookie().every(c=>c.includes('Max-Age=0')));
  const cmsOut=await cmsLogout({request:new Request(origin+'/api/cms/session',{method:'DELETE',headers:{Origin:origin,Cookie:cookie}})});assert.equal(cmsOut.status,200);assert(cmsOut.headers.getSetCookie().some(c=>c.startsWith('__Host-gerami-access=;')));
