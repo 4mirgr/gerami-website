@@ -1,5 +1,15 @@
 # Editorial backend deployment and operations
 
+## Current cadence and publication schedule
+
+On an existing installation with the English-edition migration, apply `publication-schedule.sql` followed by `generation-schedule.sql`, then deploy the complete `functions/gerami-editorial/` bundle and the dashboard. The incremental migrations retain existing job IDs, drafts, approvals and preferences. The existing cron job is updated in place to poll once per minute. For a fresh installation, apply the historical migrations in order first and register the scheduler with `schedule.sql`.
+
+Daily count is the total across both audiences, from 1 to 96. The first slot starts at the configured Tehran hour. Each next slot is one twenty-four-hour period divided by that count. Changing settings applies to future generation slots. A manual generation is independent of the daily quota and uses a request UUID so repeating the request retrieves the same job.
+
+Only a reviewed revision and its chosen cover can enter the publisher. Dashboard approval supports an immediate release, the next free automatic slot, or a specific Tehran civil date and time. The private queue stores the instant and rechecks it at claim time. The GitHub workflow and public-site verification may finish after that time. Use the private dashboard to check the job phase, scheduling state and verified publication status.
+
+## Original installation and earlier releases
+
 Canonical private schema: `schema.sql`. Inspect existing project first; apply as
 migration `gerami_editorial_private_drafts_20261120` to existing
 `upwbktvnybsjugdegjji`. No new project or billing upgrade. Run local SQL/Edge/API

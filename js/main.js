@@ -93,6 +93,10 @@
       if (kind === 'phone') return /^tel:\+?[0-9 -]{7,20}$/.test(value) ? value : null;
       const sameOrigin = url.origin === window.location.origin;
       if (url.protocol !== 'https:' && !(sameOrigin && url.protocol === 'http:')) return null;
+      if (kind === 'appointment' && (sameOrigin || url.origin === 'https://drgerami-md.ir')) {
+        const appointmentPage = /^\/pages\/appointments(?:\.html)?\/?$/;
+        if (appointmentPage.test(location.pathname) && appointmentPage.test(url.pathname) && !url.hash && !url.search) return null;
+      }
       if (kind === 'linkedin' && !(url.protocol === 'https:' && /^(www\.)?linkedin\.com$/.test(url.hostname) && url.pathname.startsWith('/in/'))) return null;
       if (kind === 'intmed' || kind === 'aus') {
         const projectOrigin = sameOrigin || url.origin === 'https://drgerami-md.ir';

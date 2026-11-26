@@ -10,7 +10,7 @@ const publishedPaths=[],testImage=await readFile(new URL('../assets/identity/wal
 const remoteCover='https://images.example.test/cover?format=webp&width=960';
 const savedReadGate=new Promise(resolve=>releaseSavedRead=resolve),savedReadObserved=new Promise(resolve=>savedReadStarted=resolve);
 try{
- const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage();
+ const context=await browser.newContext({timezoneId:'America/Los_Angeles',viewport:{width:1440,height:1000}}),page=await context.newPage();
  await context.addInitScript(()=>localStorage.setItem('decap-cms-user',JSON.stringify({backendName:'github',token:'synthetic-publish-test'})));
  await context.route('**/content/articles.json',route=>route.fulfill({json:published||{articles:[]}}));
  await context.route('**/assets/uploads/**',route=>route.fulfill({contentType:'image/webp',body:mediaBytes||testImage}));
@@ -19,6 +19,7 @@ try{
   const path=new URL(route.request().url()).pathname;let json;
   if(path==='/user')json={id:208800626,login:'4mirgr'};
   else if(path==='/repos/4mirgr/gerami-website')json={permissions:{push:true}};
+  else if(path.endsWith('/commits') && route.request().method()==='GET')json=[{sha:'f'.repeat(40),commit:{author:{date:'2026-03-20T21:15:00Z'},message:'Snapshot 2026-03-20'}}];
   else if(path.endsWith('/git/ref/heads/main'))json={object:{sha:'base-head'}};
   else if(path.includes('/contents/')){const file=path.split('/contents/')[1];if(holdSavedRead&&file==='content/articles.json'){savedReadStarted();await savedReadGate;}json={sha:'base-'+file,content:Buffer.from(JSON.stringify(documents[file])).toString('base64')};}
   else if(path.endsWith('/git/commits/base-head'))json={tree:{sha:'base-tree'}};
@@ -51,8 +52,19 @@ try{
  await page.locator('a[data-nav=media]').click();await page.locator('.studio-gallery').waitFor({state:'visible'});assert.equal(await page.locator('.media-card').count(),9,'Cancelled Save must not leave an orphan public image');
  await page.reload();await page.waitForFunction(()=>document.getElementById('studio-notice')?.textContent.includes('آخرین نسخه مخزن دریافت شد'));assert.equal(await page.locator('.media-card').count(),9);await page.locator('a[data-nav=articles]').click();assert.equal(await page.getByLabel('تصویر مقاله',{exact:true}).inputValue(),uploadedCover);
 
- assert.equal(await page.getByLabel('تاریخ انتشار',{exact:true}).inputValue(),'');
- assert.equal(await page.getByLabel('تاریخ بازبینی',{exact:true}).inputValue(),'');
+ const publicationDate=page.getByRole('button',{name:/^تاریخ انتشار،/});
+ const reviewDate=page.getByRole('button',{name:/^تاریخ بازبینی،/});
+ const reviewDialog=page.getByRole('dialog',{name:'تاریخ بازبینی',exact:true});
+ assert.equal(await publicationDate.textContent(),'انتخاب تاریخ');
+ assert.equal(await reviewDate.textContent(),'انتخاب تاریخ');
+ await reviewDate.click();
+ await reviewDialog.getByRole('button',{name:'ماه بعد'}).click();
+ await reviewDialog.locator('[data-day]').first().click();
+ await reviewDialog.getByRole('button',{name:'ثبت تاریخ',exact:true}).click();
+ assert.notEqual(await reviewDate.textContent(),'انتخاب تاریخ');
+ await reviewDate.click();
+ await reviewDialog.getByRole('button',{name:'پاک کردن تاریخ'}).click();
+ assert.equal(await reviewDate.textContent(),'انتخاب تاریخ');
  const publish=page.getByRole('button',{name:'انتشار مقاله',exact:true});await publish.waitFor();
  const color=await publish.evaluate(button=>getComputedStyle(button).backgroundColor);assert.equal(color,'rgb(33, 136, 74)');
  await publish.click();await page.waitForFunction(()=>document.getElementById('studio-notice')?.textContent.includes('تغییرات ذخیره شد'));
@@ -73,7 +85,15 @@ try{
  const savedDraft=page.getByRole('button',{name:'انتشار مقاله',exact:true});await savedDraft.waitFor();assert.equal(await page.locator('#publish').isDisabled(),true);assert.equal(await savedDraft.isEnabled(),true,'A saved clean draft must still be publishable');
  await page.getByLabel('تصویر مقاله',{exact:true}).fill(remoteCover);await page.locator('.article-cover img').waitFor();
  await page.setViewportSize({width:390,height:844});await page.locator('#theme').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('.article-cover').screenshot({path:'/tmp/gerami-article-cover-mobile.png'});
+ await reviewDate.click();
+ const selectedDay=reviewDialog.locator('[data-day][aria-current=date]');
+ const expectedDate=new Date(Number(await selectedDay.getAttribute('data-day'))*86400000).toISOString().slice(0,10);
+ await selectedDay.click();await reviewDialog.getByRole('button',{name:'ثبت تاریخ',exact:true}).click();
  await savedDraft.click();await page.waitForFunction(()=>document.getElementById('studio-notice')?.textContent.includes('تغییرات ذخیره شد'));assert.equal(writes,2);assert.equal(published.articles[0].slug,'saved-draft');assert.equal(published.articles[0].status,'published');
+ assert.equal(published.articles[0].reviewed_at,expectedDate);
+ await page.goto(origin+'/admin/#history');await page.getByRole('button',{name:'دریافت تاریخچه'}).click();
+ assert.equal(await page.locator('.history-row strong').textContent(),'Snapshot 2026-03-20');
+ assert.match(await page.locator('.history-row small').textContent(),/(?=.*فروردین)(?=.*۱۴۰۵)(?=.*۰۰:۴۵)/);
  assert.equal(published.articles[0].image,remoteCover);await page.goto(origin+'/pages/blog.html');await page.locator('.cms-article summary').click();const remote=page.locator('.post-card .post-cover');await remote.waitFor();assert.equal(await remote.getAttribute('src'),remoteCover);assert.equal(await remote.getAttribute('referrerpolicy'),'no-referrer');await page.waitForFunction(()=>document.querySelector('.post-card .post-cover')?.naturalWidth>0);
  console.log('PASS one-click article publication: new/saved drafts, inline cover upload/crop/cancel/reload, HTTPS cover, green button, empty dates, atomic media/content commit and English and Persian editions.');
 }finally{await browser.close();}

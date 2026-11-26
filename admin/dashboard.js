@@ -1,3 +1,4 @@
+import {formatTehranDate} from './tehran-calendar.mjs';
 (() => {
  'use strict';
  const root=document.documentElement;
@@ -8,7 +9,7 @@
  try{const value=localStorage.getItem('ahg-admin-theme');if(['light','dark'].includes(value))theme=value;}catch(_){}
  function setTheme(){root.dataset.theme=theme;document.querySelectorAll('img[data-theme-light][data-theme-dark]').forEach(img=>{img.src=theme==='dark'?img.dataset.themeDark:img.dataset.themeLight;});$('theme').textContent=theme==='dark'?'☀':'☾';$('theme').setAttribute('aria-pressed',String(theme==='dark'));}
  setTheme();$('theme').addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';setTheme();try{localStorage.setItem('ahg-admin-theme',theme);}catch(_){}});
- $('today').textContent=new Intl.DateTimeFormat('fa-IR',{dateStyle:'long'}).format(new Date());
+ $('today').textContent=formatTehranDate(new Date());
  const sidebar=$('sidebar');
  const mobileMenu=matchMedia('(max-width:900px)');
  function menu(open){
@@ -65,7 +66,7 @@
   const list=$('recent-list');
   if(!articles.length){const empty=text('p','هنوز مقاله‌ای ثبت نشده است.');empty.className='empty';list.append(empty);}
   [...articles].sort((a,b)=>String(b.published_at||'').localeCompare(String(a.published_at||''))).slice(0,5).forEach(article=>{
-   const row=document.createElement('a');row.href='#articles';row.className='recent';const details=document.createElement('div');details.append(text('h3',article.title_fa||article.title_en||'بدون عنوان'),text('small',article.published_at||'تاریخ انتشار تعیین نشده'));const badge=text('span',article.status==='published'?'منتشرشده':'پیش‌نویس');badge.className='tag';row.append(details,badge);list.append(row);
+   const row=document.createElement('a');row.href='#articles';row.className='recent';const details=document.createElement('div');details.append(text('h3',article.title_fa||article.title_en||'بدون عنوان'),text('small',formatTehranDate(article.published_at)||'تاریخ انتشار تعیین نشده'));const badge=text('span',article.status==='published'?'منتشرشده':'پیش‌نویس');badge.className='tag';row.append(details,badge);list.append(row);
   });
   const images=new Map();articles.forEach(article=>{if(typeof article.image==='string'&&article.image.startsWith('/assets/uploads/')&&!article.image.includes('..'))images.set(article.image,article.title_fa||'تصویر مقاله');});
   if(!images.size){const empty=text('p','هنوز تصویری در مقاله‌ها استفاده نشده است.');empty.className='empty';$('media-grid').append(empty);}
