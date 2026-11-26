@@ -21,10 +21,16 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH ||
  assert.equal(await connect.innerText(),'لغو اتصال');
  assert(await dashboard.locator('#connection-fallback').isVisible());
  // A failed callback must immediately unlock the parent, even while the window is open.
- const failure=await mod.onRequestGet({request:new Request(origin+'/api/cms/callback?error=access_denied&state='+state,{headers:{Cookie:'__Host-cms-state='+state+'.dashboard'}}),env:{CMS_ORIGIN:origin,CMS_GITHUB_CLIENT_ID:'test',CMS_GITHUB_CLIENT_SECRET:'synthetic-secret-for-cms-tests'}});
- const errorHtml=await failure.text();
- await popupContext.route('**/api/cms/auth?return=dashboard',route=>route.fulfill({status:failure.status,headers:Object.fromEntries(failure.headers),body:errorHtml}));
- await githubLink.click();await firstPopup.getByText('شروع دوباره اتصال').waitFor();
+ const env={CMS_ORIGIN:origin,CMS_GITHUB_CLIENT_ID:'test',CMS_GITHUB_CLIENT_SECRET:'synthetic-secret-for-cms-tests'};
+ globalThis.fetch=async()=>Response.json({error:'temporary_failure'},{status:502});
+ const failure=await mod.onRequestGet({request:new Request(origin+'/api/cms/callback?state='+state+'&code=test',{headers:{Cookie:'__Host-cms-state='+state+'.dashboard'}}),env});
+ globalThis.fetch=realFetch;
+ const landing=new URL(failure.headers.get('location'),origin);
+ const recovery=await import('../functions/api/cms/recovery.js');
+ const errorPage=recovery.onRequestGet({request:new Request(landing),env});const errorHtml=await errorPage.text();
+ assert.equal(failure.status,303);
+ await popupContext.route(landing.href,route=>route.fulfill({status:errorPage.status,headers:Object.fromEntries(errorPage.headers),body:errorHtml}));
+ await firstPopup.goto(landing.href);await firstPopup.getByText('شروع دوباره اتصال').waitFor();
  await dashboard.waitForFunction(()=>document.getElementById('github-state').dataset.state==='error');
  assert(await connect.isEnabled());assert(await dashboard.locator('#connection-message').innerText());
  await firstPopup.close();

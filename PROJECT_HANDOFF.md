@@ -4,6 +4,10 @@ Updated 2026-11-26 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## OAuth callback gateway recovery · 2026-11-26
+
+Cloudflare recorded an origin and edge 502 for the London callback at 10:36:05 UTC. On temporary provider failure, the callback redirects to a first-party recovery document. Reloading that document never exchanges an authorization code. The posted error returns control to the dashboard and the recovery links support either a fresh OAuth flow or the existing repository-token entry. During a callback only, an interrupted read of the GitHub account or repository permissions can be retried once within the shared deadline. Callback failure logs record the stage and exchange HTTP status without including provider payloads or authorization codes.
+
 ## GitHub connection recovery · 2026-11-26
 
 The protected dashboard starts GitHub login from a local page with a visible consent link. The callback distinguishes an expired code, provider rejection of the OAuth app credentials, a redirect mismatch and lack of repository access. Dashboard and Decap retain their respective return destinations. The alternate connection accepts an existing fine-grained owner token for the website repository in the protected dashboard. That credential lives in the current tab's memory and expires locally on reload. Site Studio sends its operations through the website for that connection. The advanced Decap editor uses its own OAuth session.

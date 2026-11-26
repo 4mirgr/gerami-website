@@ -2,6 +2,7 @@ import {readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const load=async file => import(new URL('../functions/api/cms/'+file,import.meta.url));
 const auth=await load('auth.js');const callback=await load('callback.js');
+const recovery=await load('recovery.js');
 const origin='https://drgerami-md.ir';const env={CMS_GITHUB_CLIENT_ID:'id',CMS_GITHUB_CLIENT_SECRET:'synthetic-secret-for-cms-tests'};
 assert.equal((await auth.onRequestGet({request:new Request(origin+'/api/cms/auth'),env:{}})).status,503);
 assert.equal((await auth.onRequestGet({request:new Request('https://evil.test/api/cms/auth'),env})).status,403);
@@ -28,7 +29,7 @@ assert.equal(otherFlow.status,403);assert.equal(otherFlow.headers.get('set-cooki
 const denied=await callback.onRequestGet({request:dashboardRequest({error:'access_denied',state:dashboardState}),env});
 assert.match(await denied.text(),/oauth_denied/);
 for(const [error,status,expected] of [
- ['bad_verification_code',400,'oauth_expired'],['incorrect_client_credentials',503,'oauth_config'],['redirect_uri_mismatch',503,'oauth_redirect'],['provider_private_string',502,'github_unavailable']
+ ['bad_verification_code',400,'oauth_expired'],['incorrect_client_credentials',503,'oauth_config'],['redirect_uri_mismatch',503,'oauth_redirect'],['provider_private_string',303,'github_unavailable']
 ]){
  globalThis.fetch=async (url,options)=>{
   assert.equal(url,'https://github.com/login/oauth/access_token');
@@ -39,15 +40,51 @@ for(const [error,status,expected] of [
  };
  const rejected=await callback.onRequestGet({request:dashboardRequest({state:dashboardState,code:'private-auth-code'}),env});
  assert.equal(rejected.status,status);
- const body=await rejected.text();
+ let body=await rejected.text();
+ if(status===303){
+  assert.equal(body,'');
+  assert.equal(rejected.headers.get('location'),'/api/cms/recovery?return=dashboard');
+  assert.ok(rejected.headers.getSetCookie().some(cookie=>cookie.startsWith('__Host-cms-state=;')));
+  const document=recovery.onRequestGet({request:new Request(new URL(rejected.headers.get('location'),origin)),env});
+  assert.equal(document.status,200);assert.equal(document.headers.get('set-cookie'),null);
+  body=await document.text();assert.match(body,/href="\/admin\/#github-token-connect"/);
+ }
  assert.match(body,new RegExp(expected));assert.match(body,/authorization:github:error:/);
  assert.match(body,/href="\/api\/cms\/auth\?return=dashboard"/);
  assert.doesNotMatch(body,/private-auth-code|private-upstream-details|provider_private_string|synthetic-secret/);
  assert.ok(!rejected.headers.getSetCookie().some(value=>value.startsWith('__Host-gerami-cms=')));
 }
+let exchangeCalls=0;
+globalThis.fetch=async()=>{exchangeCalls++;throw Error('synthetic upstream failure');};
+const outage=await callback.onRequestGet({request:req(state),env});
+assert.equal(outage.status,303);assert.equal(outage.headers.get('location'),'/api/cms/recovery');
+const clean=new Request(new URL(outage.headers.get('location'),origin));
+for(let attempt=0;attempt<2;attempt++){
+ const page=recovery.onRequestGet({request:clean,env});
+ assert.equal(page.status,200);assert.equal(page.headers.get('cache-control'),'private, no-store');
+ const body=await page.text();
+ assert.match(body,/href="\/api\/cms\/auth"/);assert.doesNotMatch(body,/authorization:github:success/);
+}
+assert.equal(exchangeCalls,1,'Reloading the failure document never exchanges the one-time code again');
 globalThis.fetch=async url=>Response.json(String(url).includes('access_token')?{access_token:'test-token'}:String(url).endsWith('/user')?{id:208800626,login:'4mirgr'}:{permissions:{push:true}});
 const panel=await callback.onRequestGet({request:dashboardRequest({code:'test',state:dashboardState}),env});
 assert.match(await panel.text(),/location.replace\("https:\/\/drgerami-md\.ir\/admin\/"\)/);
+// A transient API read can recover with the credential already issued by the exchange.
+const counts={exchange:0,user:0,repo:0};
+globalThis.fetch=async url=>{
+ if(url==='https://github.com/login/oauth/access_token'){
+  counts.exchange++;
+  return new Response(new URLSearchParams({access_token:'mock-token',token_type:'bearer'}));
+ }
+ if(url==='https://api.github.com/user'){
+  counts.user++;
+  return counts.user===1?new Response(null,{status:502}):Response.json({id:208800626,login:'4mirgr'});
+ }
+ counts.repo++;return Response.json({permissions:{push:true}});
+};
+const restored=await callback.onRequestGet({request:req(state),env});
+assert.equal(restored.status,200);assert.match(await restored.text(),/authorization:github:success:/);
+assert.deepEqual(counts,{exchange:1,user:2,repo:1});
 globalThis.fetch=realFetch;console.log('PASS CMS OAuth: config, origin, state, owner restriction, success, CSP');
 
 // A slow owner check must never consume a newer token, race logout or grant writes.
