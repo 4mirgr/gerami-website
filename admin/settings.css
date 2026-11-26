@@ -154,6 +154,7 @@ dialog::backdrop{background:#0006;backdrop-filter:blur(3px)}
 .editorial-topic-meta small{white-space:nowrap;color:var(--muted)}
 .editorial-topic-meta [data-state]{padding-inline:.6em;border-radius:6px;background:var(--soft)}
 .editorial-topic-meta [data-state=publish_error],.edition-problem{color:var(--alert-ink);background:var(--alert-bg)}
+.edition-problem[data-waiting=true]{color:var(--text);background:var(--soft);border-color:var(--accent)}
 .edition-problem{padding:8px 12px;border-inline-start:3px solid currentColor;border-radius:6px;margin:0}
 @media(max-width:550px){.editorial-topic-meta{display:flex;margin-inline-start:1em;margin-block-start:3px}}
 .editorial-topic[open]>summary{background:var(--soft);border-bottom:1px solid var(--line)}

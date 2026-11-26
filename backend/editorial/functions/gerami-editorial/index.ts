@@ -96,39 +96,80 @@ async function generate(job){
  throw Error('insufficient_source');
 }
 function providerModel(){return Deno.env.get('INTMED_GEMINI_MODEL')||'gemini-3.1-flash-lite';}
-async function generateJSON(prompt,material,temperature,{schema,signal=AbortSignal.timeout(55000)}={}){
- const apiKey=Deno.env.get('GEMINI_API_KEY'),model=providerModel();
+async function generateJSON(prompt,material,temperature,{schema,signal=AbortSignal.timeout(55000),model=providerModel()}={}){
+ const apiKey=Deno.env.get('GEMINI_API_KEY');
  if(!apiKey||!/^[a-z0-9.-]{1,80}$/.test(model))throw Error('provider_unavailable');
  const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify({systemInstruction:{parts:[{text:prompt}]},contents:[{role:'user',parts:[{text:JSON.stringify(material)}]}],generationConfig:{temperature,maxOutputTokens:5000,responseMimeType:'application/json',...(schema?{responseSchema:schema}:{})}}),signal});
- if(!response.ok)throw Error(response.status===429?'provider_quota':'provider_unavailable');
+ if(!response.ok){
+  if(schema&&[401,403].includes(response.status))throw Error('translation_access_denied');
+  throw Error(response.status===429?'provider_quota':'provider_unavailable');
+ }
  const output=await response.json(),candidate=output.candidates?.[0];
+ if(schema&&(output.promptFeedback?.blockReason||(candidate?.finishReason&& !['STOP','MAX_TOKENS'].includes(candidate.finishReason))))throw Error('translation_review_required');
  if(candidate?.finishReason!=='STOP')throw Error('provider_incomplete');
  return JSON.parse((candidate.content?.parts||[]).filter(p=>!p.thought).map(p=>p.text||'').join(''));
 }
+// Discover only stable, general-purpose Flash text models on the existing account.
+let translationCatalog={models:[],expiresAt:0};
+async function alternateModel(primary,signal){
+ const key=Deno.env.get('GEMINI_API_KEY');
+ if(!key)return;
+ if(Date.now()>=translationCatalog.expiresAt){
+  const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000',{
+   headers:{'x-goog-api-key':key},redirect:'error',signal:AbortSignal.any([signal,AbortSignal.timeout(4000)])
+  });
+  if(!response.ok)return;
+  const data=await response.json();
+  const models=(data.models||[]).filter(row=>row.supportedGenerationMethods?.includes('generateContent')&&
+   /^models\/gemini-\d+(?:\.\d+)?-flash(?:-lite)?$/.test(row.name)).map(row=>row.name.slice(7));
+  translationCatalog={models,expiresAt:Date.now()+3600000};
+ }
+ const primaryFamily=primary.replace(/-(?:latest|\d{3}|preview.*|exp.*)$/,'');
+ const available=translationCatalog.models.filter(name=>name!==primaryFamily);
+ const configured=Deno.env.get('GERAMI_EDITORIAL_TRANSLATION_FALLBACKS');
+ if(configured)return configured.split(',').map(value=>value.trim()).find(name=>available.includes(name));
+ // Prefer Flash-Lite, then the most recent stable version within the same tier.
+ return available.sort((a,b)=>Number(b.endsWith('-lite'))-Number(a.endsWith('-lite'))||
+  b.localeCompare(a,'en',{numeric:true}))[0];
+}
+
+async function translateApproved(source){
+ const deadline=AbortSignal.timeout(55000);
+ let model=providerModel(),prompt=ENGLISH_PROMPT;
+ let usedCorrection=false,usedAlternate=false;
+ for(;;){
+  try{
+   const signal=AbortSignal.any([deadline,AbortSignal.timeout(usedAlternate||usedCorrection?18000:22000)]);
+   const response=await generateJSON(prompt,source,0,{schema:ENGLISH_SCHEMA,signal,model});
+   return {fields:validateEnglish(source,response),model};
+  }catch(e){
+   if(e.message==='translation_review_required')throw e;
+   if(e.message==='translation_access_denied')throw Error('translation_unavailable');
+   let code='translation_unavailable';
+   if(e.message==='provider_quota')code='translation_quota';
+   else if(e.message==='translation_invalid'||e instanceof SyntaxError)code='translation_invalid';
+   else if(e.message==='provider_incomplete'||e.message==='translation_incomplete')code='translation_incomplete';
+   if(deadline.aborted)throw Error(code);
+   if(code==='translation_invalid'||code==='translation_incomplete'){
+    const feedback=e.feedback||'Return a complete JSON response in the required shape.';
+    prompt=ENGLISH_PROMPT+'\nCorrect the following issue from the previous attempt: '+feedback;
+    if(!usedCorrection){usedCorrection=true;continue;}
+   }
+   if(usedAlternate)throw Error(code);
+   const alternate=await alternateModel(model,deadline).catch(()=>undefined);
+   if(!alternate)throw Error(code);
+   model=alternate;
+   usedAlternate=true;
+  }
+ }
+}
+
 async function claimArticle(d,leaseHash){
  let article;
  try{article=publicArticle(d);}catch(e){throw Error(e.message==='cover_required'?'invalid_image':'invalid_article');}
  if(d.english_edition?.snapshot_hash===d.snapshot_hash&&d.english_edition.fields)return article;
- const source=englishMaterial(article);
- // Share one deadline with the correction so the publisher still has time to
- // persist the result and load the approved media before its request expires.
- const signal=AbortSignal.timeout(55000);
- let prompt=ENGLISH_PROMPT,fields;
- for(let attempt=0;attempt<2;attempt++){
-  try{
-   const response=await generateJSON(prompt,source,0,{schema:ENGLISH_SCHEMA,signal});
-   fields=validateEnglish(source,response);
-   break;
-  }catch(e){
-   if(e.message==='provider_quota')throw Error('translation_quota');
-   const code=e instanceof SyntaxError?'translation_invalid':e.message==='provider_incomplete'?'translation_incomplete':e.message;
-   if(!['translation_invalid','translation_incomplete'].includes(code))throw Error('translation_unavailable');
-   if(attempt===1||signal.aborted)throw Error(code);
-   const feedback=e.feedback||'Return a complete JSON response in the required shape.';
-   prompt=ENGLISH_PROMPT+'\nCorrect the following issue from the previous attempt: '+feedback;
-  }
- }
- const english_edition={snapshot_hash:d.snapshot_hash,fields};
+ const edition=await translateApproved(englishMaterial(article));
+ const english_edition={snapshot_hash:d.snapshot_hash,...edition};
  const matched=await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision+'&snapshot_hash=eq.'+d.snapshot_hash+'&lease_hash=eq.'+leaseHash+'&status=eq.publishing&select=id',{english_edition},'PATCH').catch(()=>{throw Error('translation_save_failed');});
  if(!matched.length)throw Error('stale_approval');
  return publicArticle({...d,english_edition});
@@ -205,7 +246,12 @@ Deno.serve(async req=>{
    const op=await rpc('claim_operation',{p_id:body.id,p_hash:await sha(body.capability)});if(!op)return reply({error:'denied'},403);
    EdgeRuntime.waitUntil((async()=>{try{
     let result;
-    if(op.kind==='telegram_health'){
+    if(op.kind==='translation_health'){
+     // Exercise the live provider and medical-field validator without touching a draft.
+     const sample={audience:'professional',title:'خواندن ECG',paragraphs:['مدت QRS در این مثال ۹۰ میلی‌ثانیه است.'],image_alt:'نوار قلب',hashtags:['#قلب']};
+     const edition=await translateApproved(sample);
+     result={validated:true,model:edition.model};
+    }else if(op.kind==='telegram_health'){
      const hook=await telegram('getWebhookInfo',{});
      result={webhook_active:hook.url===PROJECT+'/functions/v1/intmed-telegram-bot',has_webhook:!!hook.url,callbacks_enabled:!hook.allowed_updates||hook.allowed_updates.includes('callback_query'),messages_enabled:!hook.allowed_updates||hook.allowed_updates.includes('message'),pending_updates:Number(hook.pending_update_count||0),last_error_date:hook.last_error_date||null,webhook_error:!!hook.last_error_message,webhook_secret_configured:!!Deno.env.get('TELEGRAM_WEBHOOK_SECRET'),publisher_wake_configured:!!Deno.env.get('INTMED_GITHUB_ACTIONS_TOKEN')};
     }else if(op.kind==='resend_previews'){
@@ -219,7 +265,10 @@ Deno.serve(async req=>{
     }else if(op.kind==='publisher_wake')result=await controls.wake(true);
     else throw Error('operation_not_ready');
     await db('gerami_editorial_operations?id=eq.'+op.id,{status:'complete',payload:{},result,updated_at:new Date().toISOString()},'PATCH');
-   }catch{await db('gerami_editorial_operations?id=eq.'+op.id,{status:'error',payload:{},result:{error:'operation_failed'}},'PATCH');}})());return reply({queued:true});
+   }catch(e){
+    const code=op.kind==='translation_health'&&['translation_quota','translation_unavailable','translation_invalid','translation_incomplete','translation_review_required'].includes(e.message)?e.message:'operation_failed';
+    await db('gerami_editorial_operations?id=eq.'+op.id,{status:'error',payload:{},result:{error:code},updated_at:new Date().toISOString()},'PATCH');
+   }})());return reply({queued:true});
   }
   if(action==='callback'){
    if(req.headers.get('Authorization')!=='Bearer '+service)return reply({error:'denied'},403);
@@ -243,7 +292,7 @@ Deno.serve(async req=>{
      return reply({draft:{id:d.id,revision:d.revision,article,media},capability});
     }catch(e){
      if(e.message==='stale_approval')return reply({error:'stale_approval'},409);
-     const known=['translation_quota','translation_unavailable','translation_invalid','translation_incomplete','translation_save_failed','invalid_article','media_failed','invalid_image'];
+     const known=['translation_quota','translation_unavailable','translation_invalid','translation_incomplete','translation_save_failed','translation_review_required','invalid_article','media_failed','invalid_image'];
      const error=known.includes(e.message)?e.message:'publication_checks_failed';
      await mutate(d,'receipt',{lease_hash:leaseHash,run:String(claims.run_id),error});
      return reply({error},503);

@@ -2,6 +2,7 @@ import {ENGLISH_PROMPT,ENGLISH_SCHEMA,englishMaterial,validateEnglish} from '../
 import {clinicalEdition} from '../backend/editorial/functions/gerami-editorial/clinical.mjs';
 import fs from 'node:fs/promises';import assert from 'node:assert/strict';import * as core from '../backend/editorial/functions/gerami-editorial/core.mjs';import {createTelegramEditorial} from '../backend/editorial/functions/gerami-editorial/telegram.mjs';import {createEditorialMedia} from '../backend/editorial/functions/gerami-editorial/media.mjs';import {sourceTopic,sourceCategories} from '../backend/editorial/functions/gerami-editorial/catalog.mjs';import {verifyPublicDelivery} from '../backend/editorial/functions/gerami-editorial/publication.mjs';import {createTrendSelector} from '../backend/editorial/functions/gerami-editorial/trends.mjs';
 let imagesAvailable=true,discoveries=0,lastCoverEdit;
+let listedModels=null,modelLists=0,alternateStatus=200,primaryAnswer,attemptedModels=[];
 let claimed,claimReceipt,englishAnswer,firstAnswer,prompts=[],translationCalls=0,translationStatus=200,translationFinish='STOP';
 let audience,handler,pending=[],drafts=[],sent=[],inserted=0,modelCalls=0,enabledRole='admin',hashMismatch=false,receiptFailure=false,clinicalRemaining=0,jobStatus,jobPhase,jobKind,slotIndex;
 const topic={lesson:[{id:'bp',heading:'ارزیابی فشار خون',paragraphs:[1,2,3].map(n=>({id:'bp-'+n,text:'اندازه‌گیری فشار خون در شرایط استاندارد و مقایسه با ثبت‌های پیشین در ارزیابی اهمیت دارد. '.repeat(3)+n}))}],flashcards:[]},bytes=new TextEncoder().encode(JSON.stringify(topic)),digest=await core.sha(bytes),art=new Uint8Array(200).fill(2),manifest={buildId:'published-build',topics:{'cardio-htn':{path:'content/topics/cardio-htn.json',sha256:digest,bytes:bytes.length,counts:{lesson:5,flashcards:8}}}};
@@ -77,12 +78,18 @@ const fakeFetch=async(url,options={})=>{
  if(url.endsWith('assets/optimized/manifest.json'))return Response.json({images:{'/assets/topics/heart.webp':'/assets/optimized/heart.012d14fb0e841a4f.webp'}});
  if(url.endsWith('/intmed/content/topics/cardio-htn.json'))return new Response(bytes);
  if(url.endsWith('/cardio/cardio-htn/data.json'))return Response.json({sourceNote:'بر پایهٔ بانک سؤال؛ بررسی مستقل هاریسون ادعا نمی‌شود.'});
+ if(url==='https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000'){
+  modelLists++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert.equal(options.body,undefined);
+  return listedModels?Response.json({models:listedModels}):new Response(null,{status:503});
+ }
  if(url.includes('generativelanguage.googleapis.com')&&JSON.parse(options.body).systemInstruction.parts[0].text.startsWith(ENGLISH_PROMPT)){
   translationCalls++;const request=JSON.parse(options.body);
   assert.deepEqual(request.generationConfig.responseSchema,ENGLISH_SCHEMA);prompts.push(request.systemInstruction.parts[0].text);
   assert.equal(options.headers['x-goog-api-key'],'private-gemini');const sent=JSON.parse(JSON.parse(options.body).contents[0].parts[0].text);
   assert.deepEqual(Object.keys(sent).sort(),['audience','hashtags','image_alt','paragraphs','title']);
-  const answer=firstAnswer??englishAnswer;firstAnswer=null;return Response.json({candidates:[{finishReason:translationFinish,content:{parts:[{text:JSON.stringify(answer)}]}}]},{status:translationStatus});
+  const model=url.split('/').at(-1).split(':')[0],primary=model===(env.INTMED_GEMINI_MODEL||'gemini-3.1-flash-lite');
+  attemptedModels.push(model);
+  const answer=firstAnswer??(primary?primaryAnswer:null)??englishAnswer;firstAnswer=null;return Response.json({candidates:[{finishReason:translationFinish,content:{parts:[{text:JSON.stringify(answer)}]}}]},{status:primary?translationStatus:alternateStatus});
  }
  if(url.includes('generativelanguage.googleapis.com')){modelCalls++;assert.equal(options.headers['x-goog-api-key'],'private-gemini');assert(!options.body.includes('private-service'));const candidate=clinicalRemaining-->0?{...copy,paragraphs:[copy.paragraphs[0]+' درمان با کورتیکواستروئید.',...copy.paragraphs.slice(1)]}:copy;return Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(candidate)}]}}]});}
  if(url.endsWith('/assets/optimized/heart.012d14fb0e841a4f.webp'))return new Response(art);
@@ -169,6 +176,23 @@ assert.throws(()=>validateEnglish(ecg,ecgResponse),/translation_invalid/);
 ecgResponse.paragraphs=['Both aVL and V4R were discussed in detail in this text.'];assert.doesNotThrow(()=>validateEnglish(ecg,ecgResponse));
 const goodPath=claimed.media_path;claimed.media_path='bad-digest.jpg';assert.equal((await claim()).status,503);
 assert.equal(claimReceipt.p_data.error,'invalid_image');claimed.media_path=goodPath;
+const primaryModel='gemini-3.1-flash-lite',backup='gemini-2.5-flash-lite';
+listedModels=[primaryModel,'gemini-3-flash','gemini-2.5-flash-image',backup,'gemini-3.5-pro','gemini-9-flash-lite']
+ .map(name=>({name:'models/'+name,supportedGenerationMethods:name==='gemini-9-flash-lite'?['embedContent']:['generateContent']}));
+claimed.snapshot_hash='1'.repeat(64);translationStatus=429;attemptedModels=[];
+const beforeDiscovery=modelLists;
+assert.equal((await claim()).status,200);assert.deepEqual(attemptedModels,[primaryModel,backup]);assert.equal(modelLists,beforeDiscovery+1);
+assert.equal(claimed.english_edition.model,backup);assert.equal(claimed.english_edition.snapshot_hash,claimed.snapshot_hash);
+assert.equal((await claim()).status,200);assert.equal(attemptedModels.length,2,'cached alternate is reused');
+claimed.snapshot_hash='2'.repeat(64);translationStatus=200;attemptedModels=[];primaryAnswer={...englishAnswer,paragraphs:[]};
+assert.equal((await claim()).status,200);assert.deepEqual(attemptedModels,[primaryModel,primaryModel,backup]);assert.equal(modelLists,beforeDiscovery+1,'catalogue cached');
+primaryAnswer=null;env.GERAMI_EDITORIAL_TRANSLATION_FALLBACKS='not-advertised,gemini-3-flash';
+claimed.snapshot_hash='3'.repeat(64);translationStatus=503;alternateStatus=429;attemptedModels=[];
+assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_quota');assert.deepEqual(attemptedModels,[primaryModel,'gemini-3-flash']);
+translationStatus=200;alternateStatus=200;translationFinish='SAFETY';attemptedModels=[];
+assert.equal((await claim()).status,503);assert.equal(claimReceipt.p_data.error,'translation_review_required');assert.deepEqual(attemptedModels,[primaryModel]);
+assert.equal(claimed.english_edition.snapshot_hash,'2'.repeat(64));
+translationStatus=200;translationFinish='STOP';delete env.GERAMI_EDITORIAL_TRANSLATION_FALLBACKS;
 console.log('PASS English snapshot reuse, constrained response and guided correction, clinical fidelity, provider errors and media failure receipts.');
 
 enabledRole='admin';

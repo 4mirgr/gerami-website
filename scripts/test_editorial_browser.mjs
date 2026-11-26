@@ -12,7 +12,7 @@ try{
  await page.route('**/api/editorial/*',async r=>{const action=r.request().url().split('/').pop(),body=r.request().postDataJSON();calls.push({action,body});
   if(action==='detail')return r.fulfill({json:{draft:body.id==='00000000-0000-4000-8000-000000000003'?{...structuredClone(draft),id:body.id,job_id:manualId,status:'draft',content:{...draft.content,title:'پیشنهاد تازه آماده شد'}}:draft}});
   if(action==='retry'){draft.status='approved';draft.error_code=null;draft.publication_retry_at=null;return r.fulfill({json:{ok:true}});}
-  if(action==='reopen'){draft.status='draft';draft.error_code=null;draft.revision++;return r.fulfill({json:{ok:true}});}
+  if(action==='reopen'){draft.status='draft';draft.error_code=null;draft.publication_retry_at=null;draft.revision++;return r.fulfill({json:{ok:true}});}
   if(action==='publish'){draft.status='approved';draft.publication_mode=body.mode||'now';draft.scheduled_for=body.mode==='manual'?body.local_time+':00+03:30':body.mode==='auto'?'2026-11-27T05:30:00Z':null;return r.fulfill({json:{status:draft.status,publication_mode:draft.publication_mode,scheduled_for:draft.scheduled_for}});}
   if(action==='review-groups')return r.fulfill({json:{drafts:body.view==='history'?[]:[draft,clinician],next:false}});
   if(action==='schedule')return r.fulfill({json:{next_generation_at:'2026-11-26T05:30:00Z',jobs:manualPhase?[{id:manualId,draft_id:manualReady?'00000000-0000-4000-8000-000000000003':null,day:'2026-11-26',audience:'patients',kind:'manual',status:manualPhase==='complete'?'complete':'processing',phase:manualPhase,scheduled_at:'2026-11-25T21:30:00Z'}]:[],settings:{enabled:true,hour:9,daily_count:dailyCount,categories:['cardio']}}});
@@ -169,13 +169,18 @@ try{
  draft.error_code='translation_unavailable';draft.publication_retry_at='2026-11-27T05:30:00Z';
  await page.clock.fastForward(6200);
  await topicHeader.getByText('در صف تلاش دوباره',{exact:true}).waitFor();
- assert.match(await card.locator('.edition-problem').innerText(),/۰۹:۰۰.*تهران/);
+ assert.match(await card.locator('.edition-problem[data-waiting=true]').innerText(),/۰۹:۰۰.*تهران.*خودکار/);
  assert.equal(await card.getByRole('button',{name:'انتشار همین حالا برای عموم'}).count(),0);
- draft.status='publish_error';draft.publication_retry_at=null;draft.commit_sha='a'.repeat(40);
- await page.clock.fastForward(6200);await tryAgain.waitFor();
  const reopen=card.getByRole('button',{name:'بازگشت به پیش‌نویس برای ویرایش'});
+ assert(await reopen.isEnabled());
+ await reopen.click();
+ await card.getByText('نسخه برای ویرایش باز شد.',{exact:false}).waitFor();
+ assert.equal(await tryAgain.count(),0);
+ draft.status='publish_error';draft.error_code='translation_invalid';draft.publication_retry_at=null;draft.commit_sha='a'.repeat(40);
+ await page.clock.fastForward(6200);await tryAgain.waitFor();
  assert.equal(await reopen.count(),0);
- draft.commit_sha=null;await page.clock.fastForward(6200);
+ draft.commit_sha=null;draft.error_code='translation_review_required';await page.clock.fastForward(6200);
+ await topicHeader.getByText('توقف در بازبینی متن پزشکی',{exact:true}).waitFor();
  await reopen.click();
  await card.getByText('نسخه برای ویرایش باز شد.',{exact:false}).waitFor();
  assert(await card.getByLabel('عنوان',{exact:true}).isEnabled());

@@ -2,7 +2,7 @@
 
 ## Translation retries and failed publications
 
-Apply `translation-retry.sql` after the scheduling and manual-cover migrations, then deploy the Edge function and dashboard. The publisher can request a corrected English response within its claim deadline. The queue retries eligible translation failures with a delay and retains the approval and selected image. For a terminal pre-commit translation or media failure, the original approver can reopen the post, edit it and approve the new revision. Previously failed posts retain their recorded status until an editor acts on them.
+After the scheduling and manual-cover migrations, apply `translation-retry.sql`, `translation-outage.sql` and `translation-health.sql` in order, then deploy the Edge function and dashboard. The publisher can request a corrected English response within its claim deadline. The queue retries eligible translation failures with a delay and retains the approval and selected image. For a terminal pre-commit translation or media failure, the original approver can reopen the post, edit it and approve the new revision. For transient provider, quota or cache outages, an eligible approved revision retries automatically with intervals increasing to 24 hours. An owner may withdraw a waiting approval. Invalid clinical output has bounded retries and explicit review blocks stop for the editor. The translation worker tries an available alternate Flash model using the same provider account. The service-only translation_health operation checks a fixed sample against the live provider and validator; it creates no draft.
 
 ## Drafts without suggested artwork
 

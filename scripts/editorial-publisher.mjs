@@ -11,7 +11,7 @@ async function api(body){
  const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await oidc()},body:JSON.stringify(body),signal:AbortSignal.timeout(body.action==='claim'?125000:20000)});
  if(!r.ok){
   const result=await r.json().catch(()=>null);
-  const known=['translation_failed','translation_invalid','translation_incomplete','translation_quota','translation_unavailable','translation_save_failed','invalid_article','invalid_image','media_failed','publication_checks_failed','stale_revision','draft_locked'];
+  const known=['translation_failed','translation_invalid','translation_incomplete','translation_quota','translation_unavailable','translation_save_failed','translation_review_required','invalid_article','invalid_image','media_failed','publication_checks_failed','stale_revision','draft_locked'];
   const reason=known.includes(result?.error)?' ('+result.error+')':'';
   throw Error('Editorial '+body.action+' failed with HTTP '+r.status+reason);
  }

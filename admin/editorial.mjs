@@ -8,6 +8,7 @@ const labels={draft:'منتظر بازبینی',approved:'تأییدشده؛ د�
 const publicationErrors={
  translation_quota:['سهمیه ترجمه', 'سهمیه سرویس ترجمه انگلیسی تکمیل شده است.'],
  translation_unavailable:['سرویس ترجمه', 'سرویس ترجمه انگلیسی پاسخ نداد.'],
+ translation_review_required:['بازبینی متن پزشکی', 'برای تکمیل نسخه انگلیسی، متن پزشکی به بازبینی شما نیاز دارد. نسخه را برای ویرایش باز کنید و پس از بررسی دوباره تایید کنید.'],
  translation_invalid:['بررسی ترجمه', 'ترجمه انگلیسی با متن تاییدشده مطابقت نداشت.'],
  translation_incomplete:['ترجمه ناقص', 'نسخه انگلیسی تمام بخش‌های متن را نداشت.'],
  translation_save_failed:['ذخیره ترجمه', 'ذخیره ترجمه انگلیسی این نسخه کامل نشد.'],
@@ -116,9 +117,10 @@ function edition(host,d){
   host.dispatchEvent(new Event('editorial-state-change',{bubbles:true}));
   await host.loadCovers();
  }), 'edition-publish'):null;
- const canReopen=retry&&d.commit_sha===null&&(
-  Object.hasOwn(publicationErrors,d.error_code)&&d.error_code.startsWith('translation_')||
-  ['media_failed','invalid_image'].includes(d.error_code)
+ const translationIssue=Object.hasOwn(publicationErrors,d.error_code)&&d.error_code.startsWith('translation_');
+ const canReopen=d.commit_sha===null&&(
+  (d.status==='publish_error'||awaitingRetry)&&translationIssue||
+  d.status==='publish_error'&&['media_failed','invalid_image'].includes(d.error_code)
  );
  const reopen=canReopen?actionButton('بازگشت به پیش‌نویس برای ویرایش',()=>run(async()=>{
   await api('reopen',{...meta,snapshot_hash:d.snapshot_hash});
@@ -217,8 +219,10 @@ function edition(host,d){
  if(d.error_code){
   const reason=publicationErrors[d.error_code]?.[1]||'وضعیت سرویس · '+d.error_code;
   const followup=d.status==='publish_error'?' متن و تصویر تاییدشده برای تلاش دوباره محفوظ است.':
-   awaitingRetry?' بررسی خودکار بعدی از '+timeStamp(d.publication_retry_at)+' به وقت تهران انجام می‌شود.':'';
-  host.append(el('p',reason+followup,'edition-problem'));
+   awaitingRetry?' تأیید شما محفوظ است. سامانه از '+timeStamp(d.publication_retry_at)+' به وقت تهران دوباره به‌صورت خودکار تلاش می‌کند.':'';
+  const problem=el('p',reason+followup,'edition-problem');
+  if(awaitingRetry)problem.dataset.waiting='true';
+  host.append(problem);
  }
  if(retry)host.append(retry);
  if(reopen)host.append(reopen);
