@@ -1,7 +1,7 @@
 import {readFile} from 'node:fs/promises';import {createRequire} from 'node:module';import assert from 'node:assert/strict';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const mod=await import('../functions/api/cms/callback.js');
-const state='a'.repeat(64),origin='http://127.0.0.1:4173';const realFetch=globalThis.fetch;
+const state='a'.repeat(64),origin=process.env.ADMIN_TEST_ORIGIN||'http://127.0.0.1:4173';const realFetch=globalThis.fetch;
 globalThis.fetch=async url=>new Response(JSON.stringify(String(url).includes('access_token')?{access_token:'test-completion-token'}:String(url).endsWith('/user')?{id:208800626,login:'4mirgr'}:{permissions:{push:true}}));
 const response=await mod.onRequestGet({request:new Request(origin+'/api/cms/callback?state='+state+'&code=test',{headers:{Cookie:'__Host-cms-state='+state}}),env:{CMS_ORIGIN:origin,CMS_GITHUB_CLIENT_ID:'test',CMS_GITHUB_CLIENT_SECRET:'synthetic-secret-for-cms-tests'}});const html=await response.text();globalThis.fetch=realFetch;
 const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',args:['--no-sandbox']});try{
@@ -9,5 +9,36 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH ||
  const page=await context.newPage();await page.goto(origin+'/api/cms/callback');assert.equal(await page.evaluate(()=>window.opener),null);
  await page.waitForURL('**/admin/editor.html',{timeout:5000});
  const user=await page.evaluate(()=>JSON.parse(localStorage.getItem('decap-cms-user')));assert.equal(user.backendName,'github');assert.equal(user.token,'test-completion-token');
+ const popupContext=await browser.newContext({viewport:{width:390,height:844}});
+ const dashboard=await popupContext.newPage();
+ await dashboard.goto(origin+'/admin/');
+ const connect=dashboard.locator('#github-connect');
+ const firstOpened=dashboard.waitForEvent('popup');await connect.click();
+ const firstPopup=await firstOpened;
+ await firstPopup.getByRole('heading',{name:'اتصال به GitHub'}).waitFor();
+ const githubLink=firstPopup.getByRole('link',{name:'ادامه در GitHub'});
+ assert.equal(await githubLink.getAttribute('href'),'/api/cms/auth?return=dashboard');
+ assert.equal(await connect.innerText(),'لغو اتصال');
+ assert(await dashboard.locator('#connection-fallback').isVisible());
+ // A failed callback must immediately unlock the parent, even while the window is open.
+ const failure=await mod.onRequestGet({request:new Request(origin+'/api/cms/callback?error=access_denied&state='+state,{headers:{Cookie:'__Host-cms-state='+state+'.dashboard'}}),env:{CMS_ORIGIN:origin,CMS_GITHUB_CLIENT_ID:'test',CMS_GITHUB_CLIENT_SECRET:'synthetic-secret-for-cms-tests'}});
+ const errorHtml=await failure.text();
+ await popupContext.route('**/api/cms/auth?return=dashboard',route=>route.fulfill({status:failure.status,headers:Object.fromEntries(failure.headers),body:errorHtml}));
+ await githubLink.click();await firstPopup.getByText('شروع دوباره اتصال').waitFor();
+ await dashboard.waitForFunction(()=>document.getElementById('github-state').dataset.state==='error');
+ assert(await connect.isEnabled());assert(await dashboard.locator('#connection-message').innerText());
+ await firstPopup.close();
+ const secondOpened=dashboard.waitForEvent('popup');await connect.click();const secondPopup=await secondOpened;
+ await secondPopup.locator('#use-token').click();
+ await dashboard.locator('#github-token-connect[open]').waitFor();
+ await dashboard.waitForFunction(()=>document.activeElement.id==='github-repo-token');
+ await dashboard.evaluate(()=>{window.open=()=>null;});
+ await connect.click();assert(await dashboard.locator('#connection-fallback').isVisible());
+ await dashboard.locator('#connection-fallback').click();
+ await dashboard.getByRole('heading',{name:'اتصال به GitHub'}).waitFor();
+ await dashboard.locator('#use-token').click();
+ await dashboard.locator('#github-token-connect[open]').waitFor();
+ await popupContext.close();
+ console.log('PASS: first-party connection choice, actionable callback errors, token alternative in the existing panel, and blocked-popup same-tab recovery.');
  console.log('PASS: validated GitHub callback completes without an opener and restores the pinned Decap GitHub session.');
 }finally{await browser.close();}

@@ -4,6 +4,10 @@ Updated 2026-11-26 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## GitHub connection recovery · 2026-11-26
+
+The protected dashboard starts GitHub login from a local page with a visible consent link. The callback distinguishes an expired code, provider rejection of the OAuth app credentials, a redirect mismatch and lack of repository access. Dashboard and Decap retain their respective return destinations. The alternate connection accepts an existing fine-grained owner token for the website repository in the protected dashboard. That credential lives in the current tab's memory and expires locally on reload. Site Studio sends its operations through the website for that connection. The advanced Decap editor uses its own OAuth session.
+
 ## Admin startup · 2026-11-26
 
 The account form can submit a password while the separate Google provider settings request is pending. An already signed-in administrator visiting an explicit dashboard sign-in destination continues to the requested section after live session verification. The protected dashboard ships its styles in the HTML and loads the content editor on navigation. The four numeric cards arrive in the HTML from the same release feeds. Dashboard counts and editorial reviews load independently of GitHub verification. The browser verifies a saved GitHub credential through one same-origin request. The server checks GitHub owner identity and repository write permission in parallel. Keep the live user and application-role checks for protected requests.

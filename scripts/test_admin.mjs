@@ -2,6 +2,26 @@ import {createRequire} from 'node:module';import assert from 'node:assert/strict
 const require=createRequire(import.meta.url);const {chromium}=require('playwright');const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || '/usr/bin/chromium',args:['--no-sandbox']});
 const origin=process.env.ADMIN_TEST_ORIGIN||'http://127.0.0.1:4173';
 try{
+const alternate=await browser.newPage({viewport:{width:390,height:844}});
+const candidate='github_pat_'+'fixture'.repeat(5);
+let accepted=false,attempts=0;
+await alternate.route('**/api/cms/session',async route=>{
+ assert.equal(route.request().method(),'POST');
+ assert.equal(route.request().headers().authorization,'Bearer '+candidate);
+ assert.equal(route.request().headers()['x-cms-check'],'verify');
+ attempts++;
+ return route.fulfill(accepted?{json:{authenticated:true,login:'4mirgr'}}:{status:403,json:{error:'github_owner_required'}});
+});
+await alternate.route('https://api.github.com/**',route=>route.abort());
+await alternate.goto(origin+'/admin/#github-token-connect');
+const input=alternate.locator('#github-repo-token'), submit=alternate.locator('#github-token-form button');
+await input.fill(candidate);await submit.click();await alternate.waitForFunction(()=>document.querySelector('#github-state').dataset.state==='forbidden');
+accepted=true;
+await input.fill(candidate);await submit.click();await alternate.waitForFunction(()=>document.querySelector('#github-state').dataset.state==='connected');
+assert.equal(await input.inputValue(),'');assert.equal(attempts,2);
+assert.equal(await alternate.evaluate(()=>JSON.stringify([localStorage,sessionStorage]).includes('github_pat_')),false);
+await alternate.reload();await alternate.waitForFunction(()=>document.querySelector('#github-state').dataset.state==='disconnected');
+await alternate.close();
 const page=await browser.newPage({viewport:{width:1440,height:1000},colorScheme:'light',timezoneId:'America/Los_Angeles'});
 await page.clock.setFixedTime(new Date('2026-03-20T21:15:00Z')); // Nowruz in Tehran; still March 20 in LA.
 await page.route('**/api/cms/status',r=>r.fulfill({json:{configured:false}}));

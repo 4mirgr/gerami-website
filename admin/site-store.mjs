@@ -70,9 +70,15 @@ export class SiteStore extends EventTarget{
    const changes=[];
    for(const path of dirty){const blob=await this.session.api(prefix+'/git/blobs',{method:'POST',body:JSON.stringify({content:JSON.stringify(snapshot[path],null,2)+'\n',encoding:'utf-8'})});changes.push({path,mode:'100644',type:'blob',sha:blob.sha});}
    for(const [path,file] of media){if(!/^assets\/uploads\/[a-z0-9-]+\.webp$/.test(path)||tree.tree.some(entry=>entry.path===path))throw Error('مسیر رسانه تکراری یا غیرمجاز است.');const blob=await this.session.api(prefix+'/git/blobs',{method:'POST',body:JSON.stringify({content:file.base64,encoding:'base64'})});changes.push({path,mode:'100644',type:'blob',sha:blob.sha});}
-   const nextTree=await this.session.api(prefix+'/git/trees',{method:'POST',body:JSON.stringify({base_tree:commit.tree.sha,tree:changes})});
-   const nextCommit=await this.session.api(prefix+'/git/commits',{method:'POST',body:JSON.stringify({message:'content: '+(message.trim().slice(0,160)||'publish Site Studio changes'),tree:nextTree.sha,parents:[ref.object.sha]})});
-   await this.session.api(prefix+'/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:nextCommit.sha,force:false})});
+   const commitMessage='content: '+(message.trim().slice(0,160)||'publish Site Studio changes');
+   let nextCommit;
+   if(this.session.sessionToken){
+    nextCommit=await this.session.api(prefix+'/studio/commit',{method:'POST',body:JSON.stringify({parent:ref.object.sha,message:commitMessage,changes})});
+   }else{
+    const nextTree=await this.session.api(prefix+'/git/trees',{method:'POST',body:JSON.stringify({base_tree:commit.tree.sha,tree:changes})});
+    nextCommit=await this.session.api(prefix+'/git/commits',{method:'POST',body:JSON.stringify({message:commitMessage,tree:nextTree.sha,parents:[ref.object.sha]})});
+    await this.session.api(prefix+'/git/refs/heads/main',{method:'PATCH',body:JSON.stringify({sha:nextCommit.sha,force:false})});
+   }
    for(const path of dirty){
     this.base[path]=snapshot[path];this.shas[path]=changes.find(item=>item.path===path).sha;
     if(JSON.stringify(this.documents[path])===JSON.stringify(sourceSnapshot[path])){this.documents[path]=clone(snapshot[path]);delete this.drafts[path];}
