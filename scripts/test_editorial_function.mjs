@@ -238,6 +238,17 @@ console.log('PASS durable public and specialist drafts during image-provider out
 const textOnly=drafts[0],editKey={id:textOnly.id,revision:textOnly.revision},searchCount=discoveries;
 assert.deepEqual(await (await post('covers',editKey)).json(),{options:[],preview:null,revision:textOnly.revision});
 assert.equal(discoveries,searchCount);
+// An invalid edit must identify the field while leaving the approved inputs alone.
+for(const [patch,code] of [
+ [{title:''},'invalid_text_title'],[{summary:'x'.repeat(241)},'invalid_text_summary'],
+ [{paragraphs:[paragraph]},'paragraph_count'],[{paragraphs:['x',paragraph,paragraph]},'body_length'],
+ [{paragraphs:['x'.repeat(851),paragraph,paragraph]},'invalid_text_paragraph'],
+ [{hashtags:['#OK','#invalid/tag']},'invalid_tag']
+]){
+ const response=await post('edit',{...editKey,content:{...copy,...patch}});
+ assert.equal(response.status,422);
+ assert.deepEqual(await response.json(),{error:code});
+}
 const ownerImage={base64:Buffer.from(photo1).toString('base64'),mime:'image/jpeg'};
 assert.equal((await post('image',{...editKey,...ownerImage})).status,200);
 assert.equal(lastCoverEdit.cover_custom,true);assert.equal(lastCoverEdit.cover_reset,true);

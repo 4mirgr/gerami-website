@@ -1,4 +1,4 @@
-import {SITE,PROJECT,PROMPT,sha,stable,validateCopy,publicStyleIssues,sourceText,validImage,publicArticle,verifyOIDC,snapshotHash} from './core.mjs';
+import {SITE,PROJECT,PROMPT,sha,stable,DraftCopyError,validateCopy,publicStyleIssues,sourceText,validImage,publicArticle,verifyOIDC,snapshotHash} from './core.mjs';
 import {clinicalEdition} from './clinical.mjs';
 import {createTelegramEditorial} from './telegram.mjs';
 import {createEditorialMedia} from './media.mjs';
@@ -362,7 +362,15 @@ Deno.serve(async req=>{
   if(action==='notify'){if(d.status!=='draft')throw Error('draft_locked');await db('gerami_editorial_drafts?id=eq.'+d.id+'&revision=eq.'+d.revision,{notification_attempts:0,next_notification_at:new Date().toISOString()},'PATCH');await notify({...d,notified_revision:null,notification_attempts:0,next_notification_at:new Date().toISOString()});return reply({ok:true});}
   if(action==='edit'||action==='image'){
    let next={...d};
-   if(action==='edit')next.content=validateCopy(body.content);
+   if(action==='edit'){
+    try{next.content=validateCopy(body.content);}catch(error){
+     if(error instanceof DraftCopyError){
+      console.info('editorial_edit_validation',error.message);
+      return reply({error:error.message},422);
+     }
+     throw error;
+    }
+   }
    else{
     if(!['draft','approved','rejected'].includes(d.status))throw Error('draft_locked');
     if(body.reset){const option=(await media.options(d,{includeBoth:true})).find(candidate=>candidate.id);next.media_path=null;next.image=option?.image||'';next.cover_selected=false;next.selected_cover_id=null;next.cover_sha256=null;next.source={...d.source};delete next.source.cover;}

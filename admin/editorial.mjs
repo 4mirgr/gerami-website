@@ -2,7 +2,29 @@ import {displayText} from '../js/site-model.mjs';
 import {createTehranPicker} from './tehran-calendar.mjs';
 /* Private server-backed drafts. Never copy this inbox into public SiteStore documents. */
 const messages={invalid_schedule:'تاریخ و ساعت آینده را به وقت تهران انتخاب کنید.',invalid_settings:'تعداد، ساعت و موضوعات برنامه را بررسی کنید.',cover_required:'یک تصویر برای همین نسخه انتخاب کنید.',image_options_pending:'تصویر تازه آماده نشده است. دوباره بررسی کنید.',stale_revision:'نسخه تغییر کرده است؛ فهرست را تازه کنید.',draft_locked:'این نسخه در حال انتشار است و فعلاً قابل ویرایش نیست.',provider_quota:'سهمیه سرویس تولید متن کافی نیست؛ پیش‌نویس‌های قبلی محفوظ‌اند.',sign_in_required:'دوباره با حساب مدیر وارد شوید.'};
-async function api(action,data={}){const r=await fetch('/api/editorial/'+action,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',referrerPolicy:'same-origin',signal:AbortSignal.timeout(24000),body:JSON.stringify(data)});const v=await r.json();if(!r.ok)throw Error(messages[v.error]||'درخواست کامل نشد ('+(v.error||r.status)+').');return v;}
+const copyErrors={
+ invalid_text_title:['title','عنوان باید ۱ تا ۱۴۰ نویسه باشد و علامت‌های < و > نداشته باشد.'],
+ invalid_text_summary:['summary','خلاصه باید ۱ تا ۲۴۰ نویسه باشد و علامت‌های < و > نداشته باشد.'],
+ invalid_text_paragraph:['body','هر پاراگراف باید ۷۰ تا ۸۵۰ نویسه باشد و علامت‌های < و > نداشته باشد.'],
+ paragraph_count:['body','متن را در ۳ تا ۵ پاراگراف بنویسید و بین پاراگراف‌ها یک خط خالی بگذارید.'],
+ body_length:['body','هر پاراگراف باید ۷۰ تا ۸۵۰ نویسه و کل متن حداکثر ۲۹۰۰ نویسه باشد.'],
+ inline_image_not_allowed:['body','تصویر را از بخش «افزودن تصویر شاخص» انتخاب کنید و نشانه تصویر را از متن بردارید.'],
+ persian_required:['body','عنوان یا متن مطلب باید به فارسی نوشته شود.'],
+ robotic_copy:['body','عبارت‌های کلیشه‌ای متن را با توضیح مستقیم موضوع جایگزین کنید.'],
+ invalid_tags:['tags','۲ تا ۸ هشتگ متفاوت وارد کنید و آن‌ها را با ویرگول جدا کنید.'],
+ invalid_tag:['tags','هر هشتگ باید حداکثر ۴۵ نویسه باشد. از حروف، عدد، فاصله، زیرخط یا خط تیره استفاده کنید.']
+};
+async function api(action,data={}){
+ const r=await fetch('/api/editorial/'+action,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',referrerPolicy:'same-origin',signal:AbortSignal.timeout(24000),body:JSON.stringify(data)});
+ const v=await r.json();
+ if(!r.ok){
+  const issue=copyErrors[v.error];
+  const error=new Error(issue?'ویرایش ذخیره نشد. '+issue[1]:messages[v.error]||'درخواست کامل نشد ('+(v.error||r.status)+').');
+  if(issue)error.field=issue[0];
+  throw error;
+ }
+ return v;
+}
 const el=(tag,text='',cls='')=>{const n=document.createElement(tag);n.textContent=displayText(String(text));if(cls)n.className=cls;return n;};
 const labels={draft:'منتظر بازبینی',approved:'تأییدشده؛ در صف انتشار',publishing:'در حال بررسی و ثبت',verifying:'در انتظار نسخه زنده',published:'منتشرشده',rejected:'کنار گذاشته‌شده',publish_error:'خطای انتشار',queued:'در صف',processing:'تولید در حال انجام',complete:'انجام‌شده',error:'خطا',waiting_provider:'منتظر سرویس تولید متن'};
 const publicationErrors={
@@ -69,10 +91,11 @@ function edition(host,d){
  host.dataset.draftId=d.id;
  host.editorialVersion=JSON.stringify(d);
  const meta={id:d.id,revision:d.revision};
- const message=el('p','','edition-message');message.setAttribute('role','status');
+ const message=el('p','','edition-message');message.setAttribute('role','status');message.id='edition-message-'+d.id;
  const state=el('span',publicationLabel(d),'edition-state');
  const heading=el('h4',d.content.title);
  const date=d.created_at?stamp.format(new Date(d.created_at)):'';
+ const summaryText=el('p',d.content.summary,'edition-summary');
  const copy=el('div','','edition-copy');
  for(const paragraph of d.content.paragraphs)copy.append(el('p',paragraph));
  const info=el('div','','edition-meta');info.append(state,el('small',[date,'نسخه '+d.revision].filter(Boolean).join(' · ')));
@@ -134,9 +157,9 @@ function edition(host,d){
  }),'edition-publish');
  const save=actionButton('ذخیره ویرایش',()=>run(async()=>{
   const hashtags=tags.value.split(/[,،\n]/).map(t=>t.trim()).filter(Boolean);
-  await api('edit',{...meta,content:{title:title.value,paragraphs:body.value.split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean),summary:summary.value,hashtags,
+  const {draft}=await api('edit',{...meta,content:{title:title.value,paragraphs:body.value===initial[1]?d.content.paragraphs:body.value.split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean),summary:summary.value,hashtags,
    tags:tags.value===initial[3]&&Array.isArray(d.content.tags)?d.content.tags:hashtags.map(t=>t.replace(/^#/,'').replace(/_/g,' '))}});
-  await refresh('ویرایش ذخیره شد.');
+  await refresh('ویرایش ذخیره شد.',{draft});
  }));
  const send=actionButton('فرستادن نسخه ذخیره‌شده به تلگرام',()=>run(async()=>{await api('notify',meta);message.textContent='نسخه ذخیره‌شده به تلگرام ارسال شد.';}));
  const hint=el('small','','edition-hint');
@@ -154,11 +177,24 @@ function edition(host,d){
   hint.textContent=d.status!=='draft'?'':dirty()?'ابتدا ویرایش را ذخیره کنید.':!d.cover_selected?'برای انتشار، یک تصویر انتخاب یا اضافه کنید.':!selectedVisible?'برای انتشار، پیش‌نمایش تصویر انتخابی را بررسی کنید.':'';
   for(const b of gallery.querySelectorAll('[data-choice]'))b.disabled=busy||!loaded||!mutable||dirty()||b.dataset.choice!=='available';
  }
- async function run(task){if(busy)return;busy=true;message.textContent='';delete message.dataset.error;sync();
-  try{await task();}catch(e){message.textContent=e.message;message.dataset.error='true';}finally{busy=false;sync();}
+ function clearMessage(){
+  for(const field of fields){field.removeAttribute('aria-invalid');field.removeAttribute('aria-describedby');}
+  message.textContent='';delete message.dataset.error;summaryText.before(message);
  }
- async function refresh(note,preserve=false){
-  const {draft}=await api('detail',{id:d.id});
+ async function run(task){if(busy)return;busy=true;clearMessage();sync();
+  let invalid;
+  try{await task();}catch(e){
+   message.textContent=e.message;message.dataset.error='true';
+   invalid=({title,body,summary,tags})[e.field];
+  }finally{busy=false;sync();}
+  if(invalid){
+   invalid.closest('label').after(message);
+   invalid.setAttribute('aria-invalid','true');invalid.setAttribute('aria-describedby',message.id);invalid.focus();
+   message.scrollIntoView({block:'nearest'});
+  }
+ }
+ async function refresh(note,{draft,preserve=false}={}){
+  if(!draft)({draft}=await api('detail',{id:d.id}));
   const editing=preserve&&dirty()?fields.map(f=>f.value):null;
   const pendingUrl=preserve?urlInput.value:'';
   const load=edition(host,draft);
@@ -176,7 +212,7 @@ function edition(host,d){
   try{
    const v=await api('covers',meta);
    if(host.editorialToken!==token)return;
-   if(v.revision&&v.revision!==d.revision){await refresh('تصاویر این نسخه آماده شدند.',true);return;}
+   if(v.revision&&v.revision!==d.revision){await refresh('تصاویر این نسخه آماده شدند.',{preserve:true});return;}
    const options=v.options||[];gallery.replaceChildren();
    for(const o of options){
     const figure=el('figure'),img=el('img');img.src=o.preview;img.alt=o.label;
@@ -206,10 +242,13 @@ function edition(host,d){
   }
   finally{delete gallery.dataset.loading;sync();}
  }
- fields.forEach(f=>f.addEventListener('input',sync));
+ fields.forEach(f=>f.addEventListener('input',()=>{
+  if(f.hasAttribute('aria-invalid'))clearMessage();
+  sync();
+ }));
  async function saveImage(file){
-  await api('image',{...meta,mime:'image/jpeg',base64:await imageBytes(file)});
-  await refresh('تصویر شاخص ذخیره شد.');
+  const {draft}=await api('image',{...meta,mime:'image/jpeg',base64:await imageBytes(file)});
+  await refresh('تصویر شاخص ذخیره شد.',{draft});
  }
  urlInput.addEventListener('input',sync);
  upload.onchange=()=>run(async()=>{const file=upload.files[0];if(!file)return;
@@ -226,7 +265,7 @@ function edition(host,d){
  }
  if(retry)host.append(retry);
  if(reopen)host.append(reopen);
- host.append(message,el('p',d.content.summary,'edition-summary'),read,gallery);
+ host.append(message,summaryText,read,gallery);
  if(mutable)host.append(custom,tools);
  if(d.status==='published'){
   const taxonomy=d.source?.taxonomy;
@@ -239,7 +278,7 @@ function edition(host,d){
  if(['draft','approved'].includes(d.status)&&!awaitingRetry)host.append(publish);
  host.editorialDirty=()=>dirty()||busy||!!urlInput.value;
  host.editorialUpdate=next=>{
-  if(host.editorialVersion===JSON.stringify(next))return;
+  if(next.revision<d.revision||host.editorialVersion===JSON.stringify(next))return;
   if(host.editorialDirty()){state.textContent=publicationLabel(next);if(next.revision!==d.revision)message.textContent='نسخه تازه‌ای در سرور موجود است. ویرایش باز شما حفظ شده است؛ پیش از ذخیره نسخه تازه را بررسی کنید.';return;}
   const expanded=tools.open,reading=read.open,scheduleValue=mode.value,pickerValue=picker.value;
   edition(host,next);host.querySelector('.edition-tools')?.toggleAttribute('open',expanded);host.querySelector('.edition-read')?.toggleAttribute('open',reading);

@@ -5,16 +5,28 @@ export const AUDIENCE='gerami-editorial-publisher';
 export const sha=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',typeof value==='string'?new TextEncoder().encode(value):value)),b=>b.toString(16).padStart(2,'0')).join('');
 export const stable=value=>JSON.stringify(value&&typeof value==='object'?(Array.isArray(value)?value.map(v=>JSON.parse(stable(v))):Object.fromEntries(Object.keys(value).sort().map(k=>[k,JSON.parse(stable(value[k]))]))):value);
 export const snapshotHash=d=>sha(stable({content:d.content,topic:d.topic,category:d.category,image:d.image,media_path:d.media_path||null,source:d.source,selected_cover_id:d.selected_cover_id||null,cover_sha256:d.cover_sha256||null,cover_selected:!!d.cover_selected}));
-export const clean=(v,max=1000)=>{if(typeof v!=='string'||!v.trim()||v.length>max||/[<>\u0000-\u0008]/.test(v))throw Error('invalid_text');return v.trim();};
+export class DraftCopyError extends Error {}
+export const clean=(v,max=1000,error='invalid_text')=>{if(typeof v!=='string'||!v.trim()||v.length>max||/[<>\u0000-\u0008]/.test(v))throw new DraftCopyError(error);return v.trim();};
 export function validateCopy(value){
- const title=clean(value.title,140),paragraphs=value.paragraphs;
- if(!Array.isArray(paragraphs)||paragraphs.length<3||paragraphs.length>5)throw Error('paragraph_count');
- const body=paragraphs.map(p=>clean(p,850));if(body.join('\n\n').length>2900||body.some(p=>p.length<70))throw Error('body_length');
- if(body.some(p=>/!\[/.test(p)))throw Error('inline_image_not_allowed');
- if(!/[\u0600-\u06ff]/.test(title+body.join('')))throw Error('persian_required');
- if(/به عنوان (?:یک )?(?:مدل|هوش مصنوعی)|در دنیای (?:امروز|پرتلاطم)|در این مقاله (?:قصد داریم|خواهیم پرداخت)/.test(body.join(' ')))throw Error('robotic_copy');
- const list=(items,hash=false)=>{if(!Array.isArray(items)||items.length<2||items.length>8)throw Error('invalid_tags');return [...new Set(items.map(t=>{t=clean(t,45).replace(/^#/,'');if(!/^[\p{L}\p{N} _‌-]+$/u.test(t))throw Error('invalid_tag');return hash?'#'+t.replace(/[ -]+/g,'_'):t;}))];};
- return {title,paragraphs:body,summary:clean(value.summary,240),tags:list(value.tags),hashtags:list(value.hashtags,true)};
+ const title=clean(value?.title,140,'invalid_text_title'),paragraphs=value.paragraphs;
+ if(!Array.isArray(paragraphs)||paragraphs.length<3||paragraphs.length>5)throw new DraftCopyError('paragraph_count');
+ const body=paragraphs.map(p=>clean(p,850,'invalid_text_paragraph'));if(body.join('\n\n').length>2900||body.some(p=>p.length<70))throw new DraftCopyError('body_length');
+ if(body.some(p=>/!\[/.test(p)))throw new DraftCopyError('inline_image_not_allowed');
+ if(!/[\u0600-\u06ff]/.test(title+body.join('')))throw new DraftCopyError('persian_required');
+ if(/به عنوان (?:یک )?(?:مدل|هوش مصنوعی)|در دنیای (?:امروز|پرتلاطم)|در این مقاله (?:قصد داریم|خواهیم پرداخت)/.test(body.join(' ')))throw new DraftCopyError('robotic_copy');
+ const list=(items,hash=false)=>{
+  if(!Array.isArray(items)||items.length<2||items.length>8)throw new DraftCopyError('invalid_tags');
+  const tags=items.map(item=>{
+   const text=typeof item==='string'?item.trim().replace(/^#/,''):item;
+   const tag=clean(text,45,'invalid_tag');
+   if(!/^[\p{L}\p{N} _‌-]+$/u.test(tag))throw new DraftCopyError('invalid_tag');
+   return hash?'#'+tag.replace(/[ -]+/g,'_'):tag;
+  });
+  const unique=[...new Set(tags)];
+  if(unique.length<2)throw new DraftCopyError('invalid_tags');
+  return unique;
+ };
+ return {title,paragraphs:body,summary:clean(value.summary,240,'invalid_text_summary'),tags:list(value.tags),hashtags:list(value.hashtags,true)};
 }
 export function publicArticle(draft){
  if(draft.cover_required&&(!draft.cover_selected||!draft.media_path||!draft.cover_sha256||!draft.image.includes(draft.cover_sha256)))throw Error('cover_required');

@@ -1,8 +1,12 @@
 # Canonical project handoff / راهنمای ادامهٔ پروژه
 
-Updated 2026-11-26 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
+Updated 2026-11-27 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
+
+## Saving an editorial draft · 2026-11-27
+
+On a successful text or cover edit the private panel uses the revision returned by the save request. Older polling results cannot replace it. When the server rejects an edit, the panel keeps the entered text and identifies the field to correct. Publication still requires a saved revision, its matching snapshot and its reviewed cover. The public site and the private editorial function are deployed separately.
 
 ## Account and repository login on Cloudflare · 2026-11-26
 
