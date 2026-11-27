@@ -3,6 +3,9 @@ import {validateCopy,sourceText,validImage,oidcClaims,stable,sha} from '../backe
 const paragraph='فشار خون گاهی بدون نشانه بالا می‌رود. اندازه‌گیری درست و پیگیری منظم کمک می‌کند وضعیت بدن را بهتر بشناسیم و برای مراقبت تصمیم بگیریم.';
 const value={title:'فشار خون را جدی بگیریم',summary:'اندازه‌گیری منظم برای شناخت فشار خون کمک‌کننده است.',paragraphs:[paragraph,paragraph,paragraph],tags:['فشار خون','قلب'],hashtags:['فشار خون','سلامت']};
 assert.equal(validateCopy(value).hashtags[0],'#فشار_خون');
+const longestTag=validateCopy({...value,hashtags:['a'.repeat(45),'سلامت']});
+assert.deepEqual(validateCopy(longestTag),longestTag);
+assert.throws(()=>validateCopy({...value,hashtags:['فشار خون','#فشار_خون']}),/invalid_tags/);
 assert.throws(()=>validateCopy({...value,paragraphs:[paragraph]}),/paragraph/);
 assert.throws(()=>validateCopy({...value,title:'<script>'}),/text/);
 assert.throws(()=>validateCopy({...value,paragraphs:[...value.paragraphs,'در دنیای امروز '+paragraph]}),/robotic/);

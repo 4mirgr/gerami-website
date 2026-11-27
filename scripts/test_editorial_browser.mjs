@@ -6,7 +6,7 @@ try{
  await page.clock.install({time:new Date('2026-11-25T21:30:00Z')});
  let dailyCount=2,manualPhase='queued',manualReady=false;const manualId='00000000-0000-4000-8000-000000000099';
  await page.route('**/api/cms/status',r=>r.fulfill({json:{configured:true}}));
- const draft={id:'00000000-0000-4000-8000-000000000001',revision:1,status:'draft',content:{title:'فشار خون را بهتر بشناسیم',paragraphs:['متن اول','متن دوم','متن سوم'],summary:'خلاصه',tags:['فشار خون','قلب'],hashtags:['#قلب','#سلامت']},category:'قلب',source:{topic_id:'cardio-htn',source_note:'بازنویسی آموزشی از بانک پرسش'},preview:null,options:[{id:'00000000-0000-4000-8000-000000000004',label:'گزینه بالینی',preview:'/assets/uploads/editorial-144aec866a6e19ae1a9d002dee8cbc9d6eb19b258befc1723476194e17ba488d.jpg',selected:false},{id:'00000000-0000-4000-8000-000000000005',label:'گزینه توضیحی',preview:'/assets/uploads/editorial-1888e783e172b7ff7bee50e3232fe83a178de02c0ba3cee7e5fca825c1a0ee61.jpg',selected:false}]};
+ const draft={id:'00000000-0000-4000-8000-000000000001',revision:1,status:'draft',content:{title:'فشار خون را بهتر بشناسیم',paragraphs:['متن اول\n\nادامه همان پاراگراف','متن دوم','متن سوم'],summary:'خلاصه',tags:['فشار خون','قلب'],hashtags:['#قلب','#سلامت']},category:'قلب',source:{topic_id:'cardio-htn',source_note:'بازنویسی آموزشی از بانک پرسش'},preview:null,options:[{id:'00000000-0000-4000-8000-000000000004',label:'گزینه بالینی',preview:'/assets/uploads/editorial-144aec866a6e19ae1a9d002dee8cbc9d6eb19b258befc1723476194e17ba488d.jpg',selected:false},{id:'00000000-0000-4000-8000-000000000005',label:'گزینه توضیحی',preview:'/assets/uploads/editorial-1888e783e172b7ff7bee50e3232fe83a178de02c0ba3cee7e5fca825c1a0ee61.jpg',selected:false}]};
  draft.snapshot_hash='a'.repeat(64);
  const clinician={...structuredClone(draft),id:'00000000-0000-4000-8000-000000000002',source:{...draft.source,audience:'professional'},options:[{id:'other1',preview:'/assets/uploads/editorial-1e627847ddb98c2030419de7b4e14f5854d1dfccc53bd5e37ff9ecb67d9e1b0e.jpg',label:'تصویر سوم'},{id:'other2',preview:'/assets/uploads/editorial-fed07c41362974017a2fba3a67a7aa9a93ebd3c0f7a45278451cd3113cc9b9b3.jpg',label:'تصویر چهارم'}]};
  await page.route('**/api/editorial/*',async r=>{const action=r.request().url().split('/').pop(),body=r.request().postDataJSON();calls.push({action,body});
@@ -21,10 +21,14 @@ try{
   if(action==='covers')return r.fulfill({json:{options:body.id===clinician.id?clinician.options:draft.options}});
   if(action==='image'){
    draft.options=[{id:null,label:'تصویر انتخابی پزشک',selected:true,preview:'data:image/jpeg;base64,'+body.base64},{id:'unavailable',label:'تصویر پیشنهادشده',preview:'data:image/jpeg;base64,AAAA'}];
-   draft.cover_selected=true;draft.revision++;return r.fulfill({json:{ok:true}});
+   draft.cover_selected=true;draft.revision++;return r.fulfill({json:{draft}});
   }
   if(action==='choose'){draft.options.forEach(o=>o.selected=o.id===body.candidate_id);draft.cover_selected=true;draft.revision++;}
-  if(action==='edit'){draft.content=body.content;draft.cover_selected=true;draft.revision++;}return r.fulfill({json:{ok:true}});
+  if(action==='edit'){
+   if(body.content.title.length>140)return r.fulfill({status:422,json:{error:'invalid_text_title'}});
+   draft.content=body.content;draft.revision++;draft.snapshot_hash='b'.repeat(64);return r.fulfill({json:{draft}});
+  }
+  return r.fulfill({json:{ok:true}});
  });
  // The private inbox has its own API. It must work if a Studio document or the first list request fails.
  await page.route('**/content/appearance.json',r=>r.fulfill({status:503,body:'temporarily offline'}));
@@ -58,11 +62,32 @@ try{
  await card.getByRole('button',{name:'تصویر انتخاب‌شده'}).waitFor();
  assert.equal(await sibling.getByLabel('عنوان',{exact:true}).inputValue(),'ویرایش ذخیره نشده پزشک');
  await card.getByText('ویرایش متن و تصویر').click();
- await card.getByLabel('عنوان',{exact:true}).fill('عنوان ویرایش‌شده');
+ const staleDraft=structuredClone(draft);
+ const title=card.getByLabel('عنوان',{exact:true}),tooLong='الف'.repeat(48);
+ await title.fill(tooLong);
+ await card.getByRole('button',{name:'ذخیره ویرایش',exact:true}).click();
+ await card.locator('.edition-message[data-error=true]').filter({hasText:'عنوان باید ۱ تا ۱۴۰ نویسه باشد'}).waitFor();
+ assert.equal(await title.inputValue(),tooLong);
+ assert.equal(await title.getAttribute('aria-invalid'),'true');
+ assert(await title.evaluate(field=>field.closest('label').nextElementSibling.id===field.getAttribute('aria-describedby')));
+ assert(await card.locator('.edition-tools .edition-message').isVisible());
+ assert(await card.locator('.edition-publish').isDisabled());
+ const detailReads=calls.filter(c=>c.action==='detail').length;
+ await title.fill('عنوان ویرایش‌شده');
+ assert.equal(await title.getAttribute('aria-invalid'),null);
+ assert.equal(await card.locator('.edition-tools .edition-message').count(),0);
  assert.equal(await card.locator('.edition-publish').isDisabled(),true);
  await card.getByRole('button',{name:'ذخیره ویرایش',exact:true}).click();
  await card.getByText('نسخه 3',{exact:false}).waitFor();
- assert.deepEqual(calls.find(c=>c.action==='edit').body.content.tags,['فشار خون','قلب']);
+ await page.waitForFunction(id=>document.querySelector('[data-draft-id="'+id+'"] .edition-publish')?.disabled===false,draft.id);
+ assert.equal(calls.filter(c=>c.action==='detail').length,detailReads,'The saved revision is already in the edit receipt');
+ const saved=calls.filter(c=>c.action==='edit').at(-1).body.content;
+ assert.deepEqual(saved.tags,['فشار خون','قلب']);
+ assert.deepEqual(saved.paragraphs,staleDraft.content.paragraphs,'A title edit must retain the stored paragraph boundaries');
+ await page.route('**/api/editorial/review-groups',r=>r.fulfill({json:{drafts:[staleDraft,clinician],next:false}}),{times:1});
+ await page.getByRole('button',{name:'تازه‌سازی',exact:true}).click();
+ await page.getByRole('button',{name:'تازه‌سازی',exact:true,disabled:false}).waitFor();
+ assert.match(await card.locator('.edition-meta').innerText(),/نسخه 3/);
  await card.getByText('ویرایش متن و تصویر').click();
  await card.getByRole('button',{name:'فرستادن نسخه ذخیره‌شده به تلگرام'}).click();
  await card.getByText('نسخه ذخیره‌شده به تلگرام ارسال شد.',{exact:true}).waitFor();
