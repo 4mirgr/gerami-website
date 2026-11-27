@@ -317,6 +317,47 @@
       "author_en": "Dr. Amir Houshang Gerami",
       "category_en": "Cardiology / Reading and interpreting the electrocardiogram (ECG)",
       "url": "/articles/cardiology/cardio-ecg/clinical-20261126-cardio-ecg-m63e87a740fe3b3121d9c0b74/"
+    },
+    {
+      "slug": "health-20261127-cardio-afib",
+      "status": "published",
+      "audience": "patients",
+      "title_fa": "آشنایی با فیبریلاسیون دهلیزی (AFib)",
+      "title_en": "Getting to Know Atrial Fibrillation (AFib)",
+      "body_fa": "فیبریلاسیون دهلیزی یا همان AFib، وضعیتی است که در آن سیگنال‌های الکتریکی قلب دچار اختلال شده و باعث می‌شوند دهلیزها (حفره‌های بالایی قلب) به جای انقباض منظم، به شکلی سریع و لرزشی فعالیت کنند. این بی‌نظمی باعث می‌شود ضربان بطن‌ها نیز نامنظم و گاهی بسیار سریع شود. عواملی مانند افزایش سن، فشار خون بالا، دیابت، بیماری‌های تیروئید و حتی سبک زندگی مثل مصرف الکل یا چاقی می‌توانند احتمال بروز این آریتمی را افزایش دهند.\n\nبسیاری از افراد با این مشکل دچار تپش قلب، تنگی نفس، خستگی زودرس یا ضعف می‌شوند. با این حال، گاهی بیمار متوجه ضربان نامنظم نمی‌شود. مهم‌ترین نگرانی در این بیماری، تجمع خون در دهلیزها به دلیل انقباض ناقص و خطر تشکیل لخته است که می‌تواند به سکته مغزی منجر شود. به همین دلیل، تشخیص به‌موقع و پیشگیری از لخته شدن خون با داروهای ضدانعقاد، از ارکان اصلی مدیریت این بیماری توسط پزشک است.\n\nدرمان این وضعیت معمولاً شامل سه هدف اصلی است: کنترل ضربان قلب برای کاهش علائم، پیشگیری از سکته مغزی با داروهای مناسب، و در صورت لزوم، تلاش برای بازگرداندن ریتم طبیعی قلب. در برخی موارد، پزشک ممکن است برای اصلاح مسیرهای الکتریکی قلب، روش‌های تخصصی‌تری مانند ابلیشن را پیشنهاد دهد. اگر علائمی مانند درد قفسه سینه، تپش قلب ناگهانی و شدید، سرگیجه یا غش دارید، باید فوراً به اورژانس مراجعه کنید.",
+      "body_en": "Atrial fibrillation, or AFib, is a condition in which the heart's electrical signals are disrupted, causing the atria (the upper chambers of the heart) to beat in a rapid, quivering manner instead of contracting regularly. This irregularity also causes the ventricles to beat irregularly and sometimes very rapidly. Factors such as aging, high blood pressure, diabetes, thyroid diseases, and even lifestyle factors like alcohol consumption or obesity can increase the likelihood of this arrhythmia.\n\nMany people with this condition experience heart palpitations, shortness of breath, premature fatigue, or weakness. However, sometimes the patient does not notice the irregular heartbeat. The most significant concern with this disease is the pooling of blood in the atria due to incomplete contraction and the risk of clot formation, which can lead to a stroke. For this reason, timely diagnosis and the prevention of blood clots with anticoagulant medications are the main pillars of managing this disease by a physician.\n\nTreatment for this condition usually involves three main goals: controlling the heart rate to reduce symptoms, preventing stroke with appropriate medications, and, if necessary, attempting to restore the heart's normal rhythm. In some cases, the physician may suggest more specialized procedures, such as ablation, to correct the heart's electrical pathways. If you have symptoms such as chest pain, sudden and severe heart palpitations, dizziness, or fainting, you should go to the emergency room immediately.",
+      "author": "دکتر امیرهوشنگ گرامی",
+      "category": "قلب و عروق / فیبریلاسیون دهلیزی (AFib)",
+      "topic": "cardio-afib",
+      "image": "/assets/uploads/editorial-be1e5910419eaec418a5519b50fd2ce516bafc876eb76763fa6d9834fd656ae3.jpg",
+      "published_at": "2026-11-27",
+      "updated_at": "2026-11-27",
+      "sources": [
+        {
+          "title": "Harrison 2025",
+          "url": "https://accessmedicine.mhmedical.com/"
+        }
+      ],
+      "hashtags": [
+        "#سلامت_قلب",
+        "#آریتمی",
+        "#فیبریلاسیون_دهلیزی",
+        "#تپش_قلب"
+      ],
+      "editorial_hash": "48103c6236cef5284947eb7fa960ab78401bbb52e7ea8ae6f6eb27039106d8ac",
+      "source_topic_id": "cardio-afib",
+      "topic_root": "cardiology",
+      "image_alt": "تصویر انتخابی پزشک",
+      "image_alt_en": "The physician's selected image",
+      "hashtags_en": [
+        "#Heart_Health",
+        "#Arrhythmia",
+        "#Atrial_Fibrillation",
+        "#Heart_Palpitations"
+      ],
+      "author_en": "Dr. Amir Houshang Gerami",
+      "category_en": "Cardiology / Atrial fibrillation (AFib)",
+      "url": "/articles/cardiology/cardio-afib/health-20261127-cardio-afib/"
     }
   ]
 }

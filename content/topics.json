@@ -43,6 +43,15 @@
           "description_fa": "",
           "description_en": "",
           "children": []
+        },
+        {
+          "id": "cardio-afib",
+          "fa": "فیبریلاسیون دهلیزی (AFib)",
+          "en": "Atrial fibrillation (AFib)",
+          "icon": "heart",
+          "description_fa": "",
+          "description_en": "",
+          "children": []
         }
       ]
     },
