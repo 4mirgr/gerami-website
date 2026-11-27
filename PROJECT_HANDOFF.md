@@ -4,6 +4,10 @@ Updated 2026-11-27 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
 
+## AUS GP search and local sourcing · 2026-11-27 UTC
+
+AUS separates LinkedIn Jobs from public posts and flags explicit Level 1 refusals, advertisements hiring the supervisor, and pre-application PESCI requirements. The Queen Street GP training enquiry and relocated Ausdocs International Interest page have scoped contact extraction. The independent Worker release also repairs reading the registered GPAP page. The AUS repository records public evidence and the host release tag records live checks.
+
 ## Saving an editorial draft · 2026-11-27
 
 On a successful text or cover edit the private panel uses the revision returned by the save request. Older polling results cannot replace it. When the server rejects an edit, the panel keeps the entered text and identifies the field to correct. Publication still requires a saved revision, its matching snapshot and its reviewed cover. The public site and the private editorial function are deployed separately.

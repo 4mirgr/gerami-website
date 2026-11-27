@@ -7,7 +7,7 @@
   },
   "aus": {
     "repository": "https://github.com/4mirgr/immi-arash-amir.git",
-    "commit": "c605ba6642bbb928d10f0fdae154b517cf8ee30b",
+    "commit": "500e19a4465ac58199059fa3d6ab654871b5f792",
     "public_directory": "dist",
     "mount": "aus"
   },
