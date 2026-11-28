@@ -84,6 +84,10 @@ The simulator identifies itself as «ونتیلاتور» in Persian and `Ventil
 
 The owner moved the simulator from `/ventilator/` to `/respiratory/ventilator/`. The old address and its old launcher assets redirect through the Pages middleware to the new path. The new mount keeps the same website account gate. Signup, password login, OAuth return, public portfolio links and the scoped install manifest use the new path. The new path is the reviewed public mount in the combined build.
 
+## Ventilator compact lesson pages · 2026-11-28
+
+The simulator pin 742efc4 splits each ventilation mode description, clinical use and monitor cues into separate reader pages. This keeps the BPAP lesson within a 320 × 568 viewport in Persian and English. Source tests and targeted browser checks passed before release. The user requested a full review; physiology and route audits found no other reproducible regression.
+
 ## Home reading and profile links · 2026-11-25
 
 Both the live cards and the built homepage links group recent articles by audience, public first, with up to seven per row. Each row scrolls independently with touch, keyboard or its two directional buttons. Cards show a thumbnail and the opening excerpt before expansion, including in the baked home listing. Approved covers use the existing bounded previews. Missing or unreadable covers leave the article title and excerpt visible. The archive keeps its audience filters and pagination. Home introduction blocks text-103 and text-127 restore the owner's original bilingual copy from dfdb695, split at the first sentence. The administrator account menu links directly to the dashboard. The About page uses the supplied IntMed emblem and Ventilator lung badge and links to the native IntMed sign-in and the website account flow for Ventilator.
