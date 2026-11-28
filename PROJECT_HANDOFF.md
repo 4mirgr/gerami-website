@@ -1,8 +1,12 @@
 # Canonical project handoff / راهنمای ادامهٔ پروژه
 
-Updated 2026-11-27 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
+Updated 2026-11-28 (Asia/Tehran). Read this file, `AGENTS.md`, then the relevant source before editing. Final live release receipts are stored in annotated Git tags under `release/`; fetch tags and read the newest relevant tag message for the actual merge SHA, deployment ID and verification. A tag is created only after live checks succeed. This is current state; dated documents and old chat summaries are historical evidence, not authority over later owner decisions. Keep this file updated alongside each meaningful change, with actual tests and remote/deployment results. Never equate local edits, a commit, a push, CI, and live deployment.
 
 Use plain Persian ه in site copy, including words like «درباره من» and «ادامه مطلب». Apply the same spelling to visible CMS and Telegram article text at render time. Preserve approved editorial snapshots, link destinations and letters such as تأیید and مسئول.
+
+## AUS application emails and PDF attachments · 2026-11-28 UTC
+
+Arash’s application editor supports changes to all four cover-letter paragraphs. The preview distinguishes the brief email from the practice-specific cover letter and displays the two reviewed PDFs. Individual, batch and scheduled application approvals bind both files. The AUS source repository documents the private writing profile and the independent Worker contract. The host release tag records the frontend and Worker verification.
 
 ## AUS GP search and local sourcing · 2026-11-27 UTC
 
